@@ -12,24 +12,19 @@ export default async function AdminDashboard() {
 
   const [
     { count: totalJobs },
-    { count: pendingJobs },
-    { count: approvedJobs },
-    { count: rejectedJobs },
+    { count: activeJobs },
+    { count: inactiveJobs },
     { count: recentErrors },
   ] = await Promise.all([
     supabase.from('Job').select('*', { count: 'exact', head: true }),
     supabase
       .from('Job')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending'),
+      .eq('isActive', true),
     supabase
       .from('Job')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'approved'),
-    supabase
-      .from('Job')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'rejected'),
+      .eq('isActive', false),
     supabase
       .from('CrawlLog')
       .select('*', { count: 'exact', head: true })
@@ -51,18 +46,13 @@ export default async function AdminDashboard() {
           description="All jobs in database"
         />
         <StatCard
-          title="Pending Review"
-          value={pendingJobs ?? 0}
-          description="Awaiting approval"
-        />
-        <StatCard
-          title="Approved"
-          value={approvedJobs ?? 0}
+          title="Active"
+          value={activeJobs ?? 0}
           description="Published jobs"
         />
         <StatCard
-          title="Rejected"
-          value={rejectedJobs ?? 0}
+          title="Inactive"
+          value={inactiveJobs ?? 0}
           description="Hidden jobs"
         />
       </div>

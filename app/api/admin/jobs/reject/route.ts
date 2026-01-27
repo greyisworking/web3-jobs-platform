@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
   const { error } = await supabase
     .from('Job')
     .update({
-      status: 'rejected',
+      isActive: false,
       reviewed_by: adminUser.user.id,
       reviewed_at: new Date().toISOString(),
     })

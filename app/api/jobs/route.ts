@@ -17,7 +17,7 @@ export async function GET(request: Request) {
       .limit(500)
 
     if (statusParam !== 'all') {
-      query = query.eq('status', statusParam || 'active')
+      query = query.eq('isActive', true)
     }
 
     const { data: jobs, error } = await query
@@ -27,17 +27,17 @@ export async function GET(request: Request) {
       return NextResponse.json({ jobs: [], stats: { total: 0, global: 0, korea: 0, sources: [] } })
     }
 
-    // Stats: count by status='active' (or matching filter)
-    const statusFilter = statusParam === 'all' ? undefined : (statusParam || 'active')
+    // Stats: count active jobs (or all if status=all)
+    const filterActive = statusParam !== 'all'
 
     let totalQuery = supabase.from('Job').select('*', { count: 'exact', head: true })
     let globalQuery = supabase.from('Job').select('*', { count: 'exact', head: true }).eq('region', 'Global')
     let koreaQuery = supabase.from('Job').select('*', { count: 'exact', head: true }).eq('region', 'Korea')
 
-    if (statusFilter) {
-      totalQuery = totalQuery.eq('status', statusFilter)
-      globalQuery = globalQuery.eq('status', statusFilter)
-      koreaQuery = koreaQuery.eq('status', statusFilter)
+    if (filterActive) {
+      totalQuery = totalQuery.eq('isActive', true)
+      globalQuery = globalQuery.eq('isActive', true)
+      koreaQuery = koreaQuery.eq('isActive', true)
     }
 
     const [totalResult, globalResult, koreaResult] = await Promise.all([

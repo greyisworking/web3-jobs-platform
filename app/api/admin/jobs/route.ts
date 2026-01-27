@@ -26,7 +26,10 @@ export async function GET(request: NextRequest) {
     .range(offset, offset + pageSize - 1)
 
   if (status) {
-    query = query.eq('status', status)
+    const isActive = status === 'active' ? true : status === 'inactive' ? false : undefined
+    if (isActive !== undefined) {
+      query = query.eq('isActive', isActive)
+    }
   }
 
   const { data: jobs, count, error } = await query
