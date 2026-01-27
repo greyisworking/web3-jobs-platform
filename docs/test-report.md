@@ -1,6 +1,6 @@
 # Test Report
 
-**Generated**: 2026-01-27T13:13:56.396Z
+**Generated**: 2026-01-27T13:15:18.046Z
 
 ## Overall Summary
 
@@ -9,16 +9,16 @@
 | Suites Run | 4 |
 | Suites Passed | 4 |
 | Suites Failed | 0 |
-| Total Duration | 19543ms |
+| Total Duration | 23434ms |
 
 ## Suite Results
 
 | Suite | Status | Duration |
 |-------|--------|----------|
-| Unit Tests | ✅ PASS | 442ms |
-| API Tests | ✅ PASS | 2081ms |
-| E2E Tests | ✅ PASS | 16316ms |
-| Data Quality Tests | ✅ PASS | 704ms |
+| Unit Tests | ✅ PASS | 463ms |
+| API Tests | ✅ PASS | 3263ms |
+| E2E Tests | ✅ PASS | 19015ms |
+| Data Quality Tests | ✅ PASS | 693ms |
 
 ## Unit Tests
 
@@ -26,7 +26,7 @@
 
 🧪 Unit Tests
 
-  [32m✓[0m Verified badge with Hashed backer (1ms)
+  [32m✓[0m Verified badge with Hashed backer (0ms)
   [32m✓[0m Verified badge with a16z backer (case-insensitive) (0ms)
   [32m✓[0m Verified badge with Paradigm backer (0ms)
   [32m✓[0m No Verified badge for non-matching backer (Kakao) (0ms)
@@ -57,7 +57,7 @@
   [32m✓[0m Missing url fails (0ms)
   [32m✓[0m Missing source fails (0ms)
   [32m✓[0m Short title (1 char) fails (0ms)
-  [32m✓[0m Invalid URL fails (0ms)
+  [32m✓[0m Invalid URL fails (1ms)
 
 [1mResults: 32 passed, 0 failed, 0 skipped out of 32[0m
 
@@ -69,28 +69,28 @@
 
 🌐 API Tests
 
-  [32m✓[0m GET /api/jobs returns 200 with jobs[] and stats{} (211ms)
-  [32m✓[0m Response time < 2000ms (172ms)
-  [32m✓[0m Jobs have required fields (id, title, company, url, source, region) (266ms)
-  [32m✓[0m Jobs limited to ≤500 (156ms)
-  [32m✓[0m ?badge=Verified returns only Verified jobs (or empty) (141ms)
-  [32m✓[0m ?backer=Hashed returns only Hashed-backed jobs (or empty) (119ms)
-  [32m✓[0m ?badge=NonExistent returns 200 (no crash) (94ms)
-  [32m✓[0m stats.sources is a non-empty array (bug fix #2) (139ms)
-  [32m✓[0m ?status=all no longer exposes inactive jobs (bug fix #1) (145ms)
-  [32m✓[0m 10 concurrent requests all succeed (245ms)
-  [32m✓[0m GET /api/admin/jobs returns 401 without auth (4ms)
-  [32m✓[0m POST /api/admin/jobs/approve returns 401 without auth (6ms)
-  [32m✓[0m POST /api/admin/jobs/reject returns 401 without auth (3ms)
-  [32m✓[0m POST /api/admin/jobs/delete returns 401 without auth (4ms)
-  [32m✓[0m POST /api/admin/jobs/merge returns 401 without auth (4ms)
-  [32m✓[0m POST /api/admin/jobs/badges returns 401 without auth (4ms)
-  [32m✓[0m GET /api/admin/jobs/duplicates returns 401 without auth (5ms)
-  [32m✓[0m GET /api/admin/monitoring/crawl-history returns 401 without auth (5ms)
-  [32m✓[0m GET /api/admin/monitoring/proxies returns 401 without auth (3ms)
-  [32m✓[0m GET /api/admin/monitoring/errors returns 401 without auth (4ms)
-  [32m✓[0m GET /api/admin/monitoring/stats returns 401 without auth (3ms)
-  [32m✓[0m GET /api/admin/analytics/searches returns 401 without auth (4ms)
+  [32m✓[0m GET /api/jobs returns 200 with jobs[] and stats{} (253ms)
+  [32m✓[0m Response time < 2000ms (167ms)
+  [32m✓[0m Jobs have required fields (id, title, company, url, source, region) (165ms)
+  [32m✓[0m Jobs limited to ≤500 (255ms)
+  [32m✓[0m ?badge=Verified returns only Verified jobs (or empty) (143ms)
+  [32m✓[0m ?backer=Hashed returns only Hashed-backed jobs (or empty) (102ms)
+  [32m✓[0m ?badge=NonExistent returns 200 (no crash) (104ms)
+  [32m✓[0m stats.sources is a non-empty array (bug fix #2) (123ms)
+  [32m✓[0m ?status=all no longer exposes inactive jobs (bug fix #1) (142ms)
+  [32m✓[0m 10 concurrent requests all succeed (231ms)
+  [32m✓[0m GET /api/admin/jobs returns 401 without auth (244ms)
+  [32m✓[0m POST /api/admin/jobs/approve returns 401 without auth (69ms)
+  [32m✓[0m POST /api/admin/jobs/reject returns 401 without auth (75ms)
+  [32m✓[0m POST /api/admin/jobs/delete returns 401 without auth (70ms)
+  [32m✓[0m POST /api/admin/jobs/merge returns 401 without auth (70ms)
+  [32m✓[0m POST /api/admin/jobs/badges returns 401 without auth (98ms)
+  [32m✓[0m GET /api/admin/jobs/duplicates returns 401 without auth (97ms)
+  [32m✓[0m GET /api/admin/monitoring/crawl-history returns 401 without auth (100ms)
+  [32m✓[0m GET /api/admin/monitoring/proxies returns 401 without auth (100ms)
+  [32m✓[0m GET /api/admin/monitoring/errors returns 401 without auth (107ms)
+  [32m✓[0m GET /api/admin/monitoring/stats returns 401 without auth (105ms)
+  [32m✓[0m GET /api/admin/analytics/searches returns 401 without auth (107ms)
 
 [1mResults: 22 passed, 0 failed, 0 skipped out of 22[0m
 
@@ -102,23 +102,23 @@
 
 🖥️  E2E Tests
 
-  [32m✓[0m Homepage loads, shows "Web3 Jobs Platform" heading (1081ms)
+  [32m✓[0m Homepage loads, shows "Web3 Jobs Platform" heading (2567ms)
   [32m✓[0m Stats cards render (Total Jobs, Global, Korea) (86ms)
-  [32m✓[0m All 7 filter dropdowns/inputs present (5ms)
-  [32m✓[0m Search filter: type "developer", job count changes (1469ms)
-  [32m✓[0m Region filter: select Korea, jobs show Korea (877ms)
-  [32m✓[0m Job Type filter: select Full-time, count changes (1048ms)
-  [32m✓[0m Location filter: select Remote, count changes (963ms)
+  [32m✓[0m All 7 filter dropdowns/inputs present (4ms)
+  [32m✓[0m Search filter: type "developer", job count changes (1477ms)
+  [32m✓[0m Region filter: select Korea, jobs show Korea (864ms)
+  [32m✓[0m Job Type filter: select Full-time, count changes (1057ms)
+  [32m✓[0m Location filter: select Remote, count changes (956ms)
   [32m✓[0m Source filter: select web3.career, all jobs show that source (842ms)
-  [32m✓[0m Badge filter: select Active, jobs have Active badge (947ms)
-  [32m✓[0m Clear all resets filters (860ms)
-  [32m✓[0m Filter combination: Search + Region (1063ms)
-  [32m✓[0m Active filter pills appear and are removable (656ms)
-  [32m✓[0m Zero results shows empty message (1361ms)
-  [32m✓[0m Job card has Apply button with valid href (63ms)
-  [32m✓[0m Responsive: mobile (375px) — filters stack vertically (1029ms)
-  [32m✓[0m Responsive: tablet (768px) — layout adapts (1013ms)
-  [32m✓[0m Admin login page loads with form (847ms)
+  [32m✓[0m Badge filter: select Active, jobs have Active badge (977ms)
+  [32m✓[0m Clear all resets filters (863ms)
+  [32m✓[0m Filter combination: Search + Region (1062ms)
+  [32m✓[0m Active filter pills appear and are removable (654ms)
+  [32m✓[0m Zero results shows empty message (1364ms)
+  [32m✓[0m Job card has Apply button with valid href (67ms)
+  [32m✓[0m Responsive: mobile (375px) — filters stack vertically (986ms)
+  [32m✓[0m Responsive: tablet (768px) — layout adapts (1031ms)
+  [32m✓[0m Admin login page loads with form (2028ms)
 
 [1mResults: 17 passed, 0 failed, 0 skipped out of 17[0m
 
