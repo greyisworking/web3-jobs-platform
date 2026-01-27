@@ -7,6 +7,7 @@ import JobCard from './components/JobCard'
 import GlassContainer from './components/GlassContainer'
 import VCBackersDashboard from './components/VCBackersDashboard'
 import { JobCardSkeletonGrid } from './components/JobCardSkeleton'
+import ThemeToggle from './components/ThemeToggle'
 
 interface Job {
   id: string
@@ -147,9 +148,12 @@ export default function Home() {
       <div className="min-h-screen bg-gradient-to-br from-web3-ice-white to-web3-frost dark:from-web3-deep-navy dark:to-web3-midnight">
         {/* 로딩 헤더 */}
         <header className="sticky top-0 z-50 backdrop-blur-md bg-white/50 dark:bg-white/5 border-b border-hairline border-white/20 shadow-glass">
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="h-10 w-64 rounded-lg bg-gradient-to-r from-gray-200/50 via-gray-100/50 to-gray-200/50 dark:from-white/5 dark:via-white/10 dark:to-white/5 animate-pulse" />
-            <div className="h-4 w-48 mt-2 rounded bg-gray-200/50 dark:bg-white/5 animate-pulse" />
+          <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-start">
+            <div>
+              <div className="h-10 w-64 rounded-lg bg-gradient-to-r from-gray-200/50 via-gray-100/50 to-gray-200/50 dark:from-white/5 dark:via-white/10 dark:to-white/5 animate-pulse" />
+              <div className="h-4 w-48 mt-2 rounded bg-gray-200/50 dark:bg-white/5 animate-pulse" />
+            </div>
+            <ThemeToggle />
           </div>
         </header>
 
@@ -177,13 +181,16 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-web3-ice-white to-web3-frost dark:from-web3-deep-navy dark:to-web3-midnight">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-white/50 dark:bg-white/5 border-b border-hairline border-white/20 shadow-glass">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-web3-electric-blue to-web3-neon-cyan bg-clip-text text-transparent">
-            Web3 Jobs Platform
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">
-            Find Web3 jobs from global and Korean sources
-          </p>
+        <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-web3-electric-blue to-web3-neon-cyan bg-clip-text text-transparent">
+              Web3 Jobs Platform
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-2">
+              Find Web3 jobs from global and Korean sources
+            </p>
+          </div>
+          <ThemeToggle />
         </div>
       </header>
 
