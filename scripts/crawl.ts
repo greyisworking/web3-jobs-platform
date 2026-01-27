@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import { crawlPriorityCompanies } from './crawlers/priority-companies'
 import { crawlWeb3Career } from './crawlers/web3career'
 import { crawlWeb3Jobs } from './crawlers/web3jobs'
 import { crawlWeb3KRJobs } from './crawlers/web3krjobs'
@@ -56,7 +57,7 @@ async function main() {
   // 시작 알림
   await sendDiscordNotification(
     '🚀 Starting Crawl',
-    'GitHub Actions crawler started - collecting jobs from 11 sources',
+    'GitHub Actions crawler started - collecting jobs from 12 sources',
     0x3498db
   )
 
@@ -64,6 +65,7 @@ async function main() {
   console.log('\n📌 Tier 1 Crawlers\n')
   
   const crawlers = [
+    { name: 'priority-companies', fn: crawlPriorityCompanies },
     { name: 'web3.career', fn: crawlWeb3Career },
     { name: 'web3jobs.cc', fn: crawlWeb3Jobs },
     { name: 'web3kr.jobs', fn: crawlWeb3KRJobs },

@@ -3,6 +3,8 @@
  * Korean Web3 companies with VC backing and metadata
  */
 
+export type CareerPlatform = 'lever' | 'greenhouse' | 'ashby' | 'wanted' | 'notion' | null
+
 export interface PriorityCompany {
   name: string;
   aliases: string[];
@@ -12,6 +14,8 @@ export interface PriorityCompany {
   office_location: string;
   hasToken: boolean;
   stage: string;
+  careerUrl: string | null;
+  careerPlatform: CareerPlatform;
 }
 
 export const PRIORITY_COMPANIES: PriorityCompany[] = [
@@ -25,6 +29,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: 'https://jobs.lever.co/hashed',
+    careerPlatform: 'lever',
   },
   {
     name: 'DSRV',
@@ -35,6 +41,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Series A',
+    careerUrl: 'https://boards.greenhouse.io/dsrv',
+    careerPlatform: 'greenhouse',
   },
   {
     name: 'CryptoQuant',
@@ -45,6 +53,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Series B',
+    careerUrl: 'https://jobs.lever.co/cryptoquant',
+    careerPlatform: 'lever',
   },
   {
     name: 'Klaytn',
@@ -55,6 +65,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: true,
     stage: 'Established',
+    careerUrl: 'https://boards.greenhouse.io/kaiafoundation',
+    careerPlatform: 'greenhouse',
   },
   {
     name: 'Wemade',
@@ -65,6 +77,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: true,
     stage: 'Public',
+    careerUrl: 'https://www.wanted.co.kr/company/4137',
+    careerPlatform: 'wanted',
   },
   {
     name: 'LINE NEXT',
@@ -75,6 +89,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: true,
     stage: 'Established',
+    careerUrl: 'https://boards.greenhouse.io/linenext',
+    careerPlatform: 'greenhouse',
   },
   {
     name: 'Dunamu',
@@ -85,6 +101,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: 'https://www.wanted.co.kr/company/79',
+    careerPlatform: 'wanted',
   },
 
   // ── P1: Strong Korean Web3 companies ──
@@ -97,6 +115,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: 'https://www.wanted.co.kr/company/203',
+    careerPlatform: 'wanted',
   },
   {
     name: 'Korbit',
@@ -107,6 +127,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: 'https://www.wanted.co.kr/company/1017',
+    careerPlatform: 'wanted',
   },
   {
     name: 'Ozys',
@@ -117,6 +139,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: true,
     stage: 'Established',
+    careerUrl: 'https://www.wanted.co.kr/company/9498',
+    careerPlatform: 'wanted',
   },
   {
     name: 'Planetarium',
@@ -127,6 +151,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: true,
     stage: 'Series A',
+    careerUrl: 'https://boards.greenhouse.io/planetarium',
+    careerPlatform: 'greenhouse',
   },
   {
     name: 'NFTBank',
@@ -137,6 +163,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Series A',
+    careerUrl: 'https://jobs.lever.co/nftbank',
+    careerPlatform: 'lever',
   },
   {
     name: 'Lambda256',
@@ -147,6 +175,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: 'https://www.wanted.co.kr/company/8052',
+    careerPlatform: 'wanted',
   },
   {
     name: 'Ground X',
@@ -157,6 +187,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: 'https://www.wanted.co.kr/company/5091',
+    careerPlatform: 'wanted',
   },
   {
     name: 'ICONLOOP',
@@ -167,6 +199,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: true,
     stage: 'Established',
+    careerUrl: 'https://www.wanted.co.kr/company/5380',
+    careerPlatform: 'wanted',
   },
   {
     name: 'Cosmostation',
@@ -177,6 +211,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: 'https://cosmostation.notion.site/careers',
+    careerPlatform: 'notion',
   },
   {
     name: 'Xangle',
@@ -187,6 +223,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Series A',
+    careerUrl: 'https://www.wanted.co.kr/company/5827',
+    careerPlatform: 'wanted',
   },
   {
     name: 'DeSpread',
@@ -197,6 +235,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: 'https://despread.notion.site/careers',
+    careerPlatform: 'notion',
   },
   {
     name: 'ChainPartners',
@@ -207,6 +247,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: null,
+    careerPlatform: null,
   },
   {
     name: 'Superblock',
@@ -217,6 +259,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: null,
+    careerPlatform: null,
   },
 
   // ── P2: Growing Korean Web3 companies ──
@@ -229,6 +273,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Seed',
+    careerUrl: 'https://yooldo.notion.site/careers',
+    careerPlatform: 'notion',
   },
   {
     name: 'Presto Labs',
@@ -239,6 +285,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: 'https://jobs.lever.co/presto',
+    careerPlatform: 'lever',
   },
   {
     name: 'Streami',
@@ -249,6 +297,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: 'https://www.wanted.co.kr/company/7854',
+    careerPlatform: 'wanted',
   },
   {
     name: 'Crescendo',
@@ -259,6 +309,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Seed',
+    careerUrl: null,
+    careerPlatform: null,
   },
   {
     name: 'Standard Protocol',
@@ -269,6 +321,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: true,
     stage: 'Seed',
+    careerUrl: null,
+    careerPlatform: null,
   },
   {
     name: 'Somesing',
@@ -279,6 +333,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: true,
     stage: 'Established',
+    careerUrl: null,
+    careerPlatform: null,
   },
   {
     name: 'Sandbox Network',
@@ -289,6 +345,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: 'https://www.wanted.co.kr/company/3508',
+    careerPlatform: 'wanted',
   },
   {
     name: 'Gopax',
@@ -299,6 +357,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seoul, South Korea',
     hasToken: false,
     stage: 'Established',
+    careerUrl: 'https://www.wanted.co.kr/company/7854',
+    careerPlatform: 'wanted',
   },
   {
     name: 'Kakao Games',
@@ -309,6 +369,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Seongnam, South Korea',
     hasToken: true,
     stage: 'Public',
+    careerUrl: 'https://www.wanted.co.kr/company/284',
+    careerPlatform: 'wanted',
   },
 ];
 
