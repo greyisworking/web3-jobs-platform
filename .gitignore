@@ -39,3 +39,6 @@ prisma/*.db-journal
 
 # crawl logs
 logs/
+
+# k6 load test results
+results/

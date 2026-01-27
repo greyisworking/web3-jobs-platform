@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { crawlWeb3Career } from './crawlers/web3career'
 import { crawlWeb3Jobs } from './crawlers/web3jobs'
 import { crawlWeb3KRJobs } from './crawlers/web3krjobs'

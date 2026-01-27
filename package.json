@@ -11,7 +11,13 @@
     "schedule": "tsx scripts/scheduler.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run schedule\"",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "test:load": "k6 run tests/load/api-jobs.js",
+    "test:load:search": "k6 run tests/load/api-search.js",
+    "test:load:detail": "k6 run tests/load/api-jobs-detail.js",
+    "test:load:spike": "k6 run tests/load/concurrent-users.js",
+    "test:load:all": "npm run test:load && npm run test:load:search && npm run test:load:spike",
+    "test:load:report": "node tests/load/report-generator.js"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",
@@ -30,6 +36,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
     "lucide-react": "^0.563.0",
     "next": "15.1.4",
     "node-cron": "^3.0.3",
