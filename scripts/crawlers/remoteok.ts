@@ -1,66 +1,77 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchHTML, delay, cleanText } from '../utils'
+import { fetchJSON, delay } from '../utils'
+
+interface RemoteOKJob {
+  slug?: string
+  id?: string
+  epoch?: number
+  date?: string
+  company?: string
+  company_logo?: string
+  position?: string
+  tags?: string[]
+  logo?: string
+  description?: string
+  location?: string
+  salary_min?: number
+  salary_max?: number
+  url?: string
+}
 
 export async function crawlRemoteOK(): Promise<number> {
   console.log('🚀 Starting RemoteOK crawler...')
 
-  const baseUrl = 'https://remoteok.com'
-  const $ = await fetchHTML(baseUrl + '/remote-web3-jobs')
+  const data = await fetchJSON<RemoteOKJob[]>(
+    'https://remoteok.com/remote-web3-jobs.json',
+    { 'User-Agent': 'Mozilla/5.0 (compatible; Web3JobsBot/1.0)' }
+  )
 
-  if (!$) {
-    console.error('❌ Failed to fetch RemoteOK')
+  if (!data || !Array.isArray(data)) {
+    console.error('❌ Failed to fetch RemoteOK JSON')
     return 0
   }
 
-  const jobs: any[] = []
+  // First element is metadata/legal notice — skip it
+  const jobEntries = data.slice(1)
 
-  $('tr.job, [class*="job"]').each((_, element) => {
-    try {
-      const $el = $(element)
-
-      const title = cleanText($el.find('.job-title, h2, [itemprop="title"]').first().text())
-      const company = cleanText($el.find('.company, h3, [itemprop="name"]').first().text())
-      const location = 'Remote'
-      const type = 'Full-time'
-      const salary = cleanText($el.find('.salary, [class*="salary"]').first().text())
-
-      let url = $el.find('a').first().attr('href') || ''
-      if (url && url.startsWith('/')) {
-        url = baseUrl + url
-      }
-
-      if (title && company && url && url.includes('http')) {
-        jobs.push({
-          title,
-          company,
-          location,
-          type,
-          category: 'Engineering',
-          url,
-          salary: salary || undefined,
-          tags: [],
-          postedDate: new Date(),
-        })
-      }
-    } catch (error) {
-      console.error('Error parsing job:', error)
-    }
-  })
-
-  console.log(`📦 Found ${jobs.length} jobs from RemoteOK`)
+  console.log(`📦 Found ${jobEntries.length} jobs from RemoteOK`)
 
   let savedCount = 0
-  for (const job of jobs) {
+  for (const job of jobEntries) {
     try {
+      if (!job.position || !job.company) continue
+
+      const jobUrl = job.url || (job.slug ? `https://remoteok.com/remote-jobs/${job.slug}` : '')
+      if (!jobUrl) continue
+
+      let salary: string | undefined
+      if (job.salary_min && job.salary_max) {
+        salary = `$${job.salary_min.toLocaleString()} - $${job.salary_max.toLocaleString()}`
+      } else if (job.salary_min) {
+        salary = `$${job.salary_min.toLocaleString()}+`
+      }
+
       const saved = await validateAndSaveJob(
-        { title: job.title, company: job.company, url: job.url, location: job.location, type: job.type, category: job.category, salary: job.salary, tags: job.tags, source: 'remoteok.com', region: 'Global', postedDate: job.postedDate },
+        {
+          title: job.position,
+          company: job.company,
+          url: jobUrl,
+          location: job.location || 'Remote',
+          type: 'Full-time',
+          category: 'Engineering',
+          salary,
+          tags: job.tags || [],
+          source: 'remoteok.com',
+          region: 'Global',
+          postedDate: job.date ? new Date(job.date) : new Date(),
+        },
         'remoteok.com'
       )
       if (saved) savedCount++
       await delay(100)
     } catch (error) {
-      console.error(`Error saving job:`, error)
+      console.error('Error saving RemoteOK job:', error)
     }
   }
 

@@ -1,74 +1,124 @@
+import puppeteer from 'puppeteer'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchHTML, delay, cleanText } from '../utils'
+import { delay } from '../utils'
 
 export async function crawlRocketPunch(): Promise<number> {
   console.log('🚀 Starting 로켓펀치 crawler...')
 
-  const baseUrl = 'https://www.rocketpunch.com'
-  const $ = await fetchHTML(baseUrl + '/jobs?keywords=블록체인,web3,암호화폐')
+  let browser
+  try {
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    })
 
-  if (!$) {
-    console.error('❌ Failed to fetch 로켓펀치')
-    return 0
-  }
+    const page = await browser.newPage()
+    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36')
 
-  const jobs: any[] = []
+    await page.goto('https://www.rocketpunch.com/jobs?keywords=블록체인+web3', {
+      waitUntil: 'networkidle2',
+      timeout: 30000,
+    })
 
-  $('.job-listing, .job-card, [class*="job"]').each((_, element) => {
-    try {
-      const $el = $(element)
+    // Wait for job cards to render
+    await page.waitForSelector('.company-name, .job-title, [class*="job-card"]', { timeout: 10000 }).catch(() => {
+      console.log('⚠️  Selector timeout, proceeding with available content')
+    })
 
-      const title = cleanText($el.find('.job-title, h4, [class*="title"]').first().text())
-      const company = cleanText($el.find('.company-name, [class*="company"]').first().text())
-      const location = cleanText($el.find('.location, [class*="location"]').first().text()) || '서울'
-      const type = cleanText($el.find('.type, [class*="type"]').first().text()) || '정규직'
+    // Extract job data from the rendered DOM
+    const jobs = await page.evaluate(() => {
+      const results: { title: string; company: string; location: string; type: string; url: string }[] = []
 
-      let url = $el.find('a').first().attr('href') || ''
-      if (url && !url.startsWith('http')) {
-        url = baseUrl + url
-      }
+      // RocketPunch job card structure
+      const jobCards = document.querySelectorAll('.job-card-container, .job-item, [class*="content-item"]')
 
-      if (title && company && url) {
-        jobs.push({
-          title,
-          company,
-          location,
-          type,
-          category: 'Engineering',
-          url,
-          tags: ['블록체인', 'Web3'],
-          postedDate: new Date(),
+      jobCards.forEach((card) => {
+        const titleEl = card.querySelector('.job-title a, h4 a, .position a')
+        const companyEl = card.querySelector('.company-name a, .company a, .name a')
+        const locationEl = card.querySelector('.location, .job-stat-info .location, [class*="location"]')
+        const typeEl = card.querySelector('.job-stat-info .type, [class*="employment"]')
+
+        const title = titleEl?.textContent?.trim() || ''
+        const company = companyEl?.textContent?.trim() || ''
+        const location = locationEl?.textContent?.trim() || '서울'
+        const type = typeEl?.textContent?.trim() || '정규직'
+
+        let url = (titleEl as HTMLAnchorElement)?.href || (card.querySelector('a') as HTMLAnchorElement)?.href || ''
+
+        if (title && company && url) {
+          results.push({ title, company, location, type, url })
+        }
+      })
+
+      // Fallback: try alternate selectors if above yields nothing
+      if (results.length === 0) {
+        const rows = document.querySelectorAll('.company-jobs-item, .job-list-item, [data-job-id]')
+        rows.forEach((row) => {
+          const title = row.querySelector('h4, .title, .job-title')?.textContent?.trim() || ''
+          const company = row.querySelector('.company-name, .corp-name')?.textContent?.trim() || ''
+          const link = row.querySelector('a')
+          const url = (link as HTMLAnchorElement)?.href || ''
+
+          if (title && url) {
+            results.push({ title, company: company || 'Unknown', location: '서울', type: '정규직', url })
+          }
         })
       }
-    } catch (error) {
-      console.error('Error parsing job:', error)
+
+      return results
+    })
+
+    console.log(`📦 Found ${jobs.length} jobs from 로켓펀치`)
+
+    let savedCount = 0
+    for (const job of jobs) {
+      try {
+        const saved = await validateAndSaveJob(
+          {
+            title: job.title,
+            company: job.company,
+            url: job.url,
+            location: job.location,
+            type: job.type,
+            category: 'Engineering',
+            tags: ['블록체인', 'Web3'],
+            source: 'rocketpunch.com',
+            region: 'Korea',
+            postedDate: new Date(),
+          },
+          'rocketpunch.com'
+        )
+        if (saved) savedCount++
+        await delay(100)
+      } catch (error) {
+        console.error('Error saving 로켓펀치 job:', error)
+      }
     }
-  })
 
-  console.log(`📦 Found ${jobs.length} jobs from 로켓펀치`)
+    await supabase.from('CrawlLog').insert({
+      source: 'rocketpunch.com',
+      status: 'success',
+      jobCount: savedCount,
+      createdAt: new Date().toISOString(),
+    })
 
-  let savedCount = 0
-  for (const job of jobs) {
-    try {
-      const saved = await validateAndSaveJob(
-        { title: job.title, company: job.company, url: job.url, location: job.location, type: job.type, category: job.category, tags: job.tags, source: 'rocketpunch.com', region: 'Korea', postedDate: job.postedDate },
-        'rocketpunch.com'
-      )
-      if (saved) savedCount++
-      await delay(100)
-    } catch (error) {
-      console.error(`Error saving job:`, error)
+    console.log(`✅ Saved ${savedCount} jobs from 로켓펀치`)
+    return savedCount
+  } catch (error) {
+    console.error('❌ RocketPunch crawler error:', error)
+
+    await supabase.from('CrawlLog').insert({
+      source: 'rocketpunch.com',
+      status: 'failed',
+      jobCount: 0,
+      createdAt: new Date().toISOString(),
+    })
+
+    return 0
+  } finally {
+    if (browser) {
+      await browser.close()
     }
   }
-
-  await supabase.from('CrawlLog').insert({
-    source: 'rocketpunch.com',
-    status: 'success',
-    jobCount: savedCount,
-    createdAt: new Date().toISOString(),
-  })
-
-  console.log(`✅ Saved ${savedCount} jobs from 로켓펀치`)
-  return savedCount
 }

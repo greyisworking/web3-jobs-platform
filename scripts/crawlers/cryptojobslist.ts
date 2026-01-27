@@ -13,55 +13,76 @@ export async function crawlCryptoJobsList(): Promise<number> {
     return 0
   }
 
-  const jobs: any[] = []
+  // Extract __NEXT_DATA__ JSON from the page
+  const nextDataScript = $('script#__NEXT_DATA__').html()
+  if (!nextDataScript) {
+    console.error('❌ Could not find __NEXT_DATA__ script tag on CryptoJobsList')
+    return 0
+  }
 
-  // CryptoJobsList 구조 파싱
-  $('.job-tile, .job-listing, [class*="JobTile"]').each((_, element) => {
-    try {
-      const $el = $(element)
+  let pageProps: any
+  try {
+    const nextData = JSON.parse(nextDataScript)
+    pageProps = nextData?.props?.pageProps
+  } catch (error) {
+    console.error('❌ Failed to parse __NEXT_DATA__ JSON:', error)
+    return 0
+  }
 
-      const title = cleanText($el.find('.job-title, h2, h3, [class*="title"]').first().text())
-      const company = cleanText($el.find('.company, [class*="company"]').first().text())
-      const location = cleanText($el.find('.location, [class*="location"]').first().text()) || 'Remote'
-      const type = cleanText($el.find('.type, [class*="type"]').first().text()) || 'Full-time'
-      const salary = cleanText($el.find('.salary, [class*="salary"]').first().text())
+  if (!pageProps) {
+    console.error('❌ No pageProps found in __NEXT_DATA__')
+    return 0
+  }
 
-      let url = $el.find('a').first().attr('href') || ''
-      if (url && !url.startsWith('http')) {
-        url = baseUrl + url
-      }
+  // Jobs may be at pageProps.jobs, pageProps.initialJobs, or similar
+  const jobsArray: any[] = pageProps.jobs || pageProps.initialJobs || pageProps.data?.jobs || []
 
-      if (title && company && url) {
-        jobs.push({
-          title,
-          company,
-          location,
-          type,
-          category: 'Engineering',
-          url,
-          salary: salary || undefined,
-          tags: [],
-          postedDate: new Date(),
-        })
-      }
-    } catch (error) {
-      console.error('Error parsing job:', error)
-    }
-  })
-
-  console.log(`📦 Found ${jobs.length} jobs from CryptoJobsList`)
+  console.log(`📦 Found ${jobsArray.length} jobs from CryptoJobsList`)
 
   let savedCount = 0
-  for (const job of jobs) {
+  for (const job of jobsArray) {
     try {
+      const title = job.title || job.name
+      if (!title) continue
+
+      const companyName = job.company?.name || job.companyName || job.company || 'Unknown'
+
+      let jobUrl: string
+      if (job.url && job.url.startsWith('http')) {
+        jobUrl = job.url
+      } else if (job.slug) {
+        jobUrl = `${baseUrl}/jobs/${job.slug}`
+      } else if (job.id) {
+        jobUrl = `${baseUrl}/jobs/${job.id}`
+      } else {
+        continue
+      }
+
+      const location = job.location || job.locationName || 'Remote'
+      const tags: string[] = Array.isArray(job.tags)
+        ? job.tags.map((t: any) => typeof t === 'string' ? t : t.name || t.label || '').filter(Boolean)
+        : []
+
       const saved = await validateAndSaveJob(
-        { title: job.title, company: job.company, url: job.url, location: job.location, type: job.type, category: job.category, salary: job.salary, tags: job.tags, source: 'cryptojobslist.com', region: 'Global', postedDate: job.postedDate },
+        {
+          title,
+          company: companyName,
+          url: jobUrl,
+          location: typeof location === 'string' ? location : 'Remote',
+          type: job.type || job.employmentType || 'Full-time',
+          category: job.category || 'Engineering',
+          salary: job.salary || undefined,
+          tags,
+          source: 'cryptojobslist.com',
+          region: 'Global',
+          postedDate: job.createdAt ? new Date(job.createdAt) : new Date(),
+        },
         'cryptojobslist.com'
       )
       if (saved) savedCount++
       await delay(100)
     } catch (error) {
-      console.error(`Error saving job:`, error)
+      console.error('Error saving CryptoJobsList job:', error)
     }
   }
 

@@ -18,66 +18,108 @@ export async function crawlWeb3Career(): Promise<number> {
   console.log('🚀 Starting Web3.career crawler...')
 
   const baseUrl = 'https://web3.career'
-  const $ = await fetchHTML(baseUrl)
+  let allJobs: JobData[] = []
 
-  if (!$ ) {
-    console.error('❌ Failed to fetch Web3.career')
-    return 0
-  }
+  // Crawl first 3 pages
+  for (let page = 1; page <= 3; page++) {
+    const pageUrl = page === 1 ? `${baseUrl}/web3-jobs` : `${baseUrl}/web3-jobs?page=${page}`
+    const $ = await fetchHTML(pageUrl)
 
-  const jobs: JobData[] = []
+    if (!$) {
+      console.error(`❌ Failed to fetch Web3.career page ${page}`)
+      continue
+    }
 
-  // Web3.career의 구조를 파싱
-  // 실제 구조는 사이트를 확인해야 하지만, 일반적인 패턴으로 작성
-  $('.job-listing, .job-item, [class*="job"]').each((_, element) => {
-    try {
-      const $el = $(element)
+    // web3.career uses a <table> with tr.table_row for each job
+    // Structure per row: 6 <td> cells
+    //   td[0]: title (h2) + company (h3) + logo
+    //   td[1]: company name (td.job-location-mobile)
+    //   td[2]: posted time
+    //   td[3]: location (td.job-location-mobile)
+    //   td[4]: salary
+    //   td[5]: tag text
+    // Some rows are ads (no data-jobid) — skip those
+    $('tr.table_row').each((_, element) => {
+      try {
+        const $row = $(element)
 
-      const title = cleanText($el.find('.job-title, h2, h3').first().text())
-      const company = cleanText($el.find('.company-name, .company').first().text())
-      const location = cleanText($el.find('.location, [class*="location"]').first().text()) || 'Remote'
-      const type = cleanText($el.find('.job-type, [class*="type"]').first().text()) || 'Full-time'
+        // Skip ad/promo rows that have no job ID
+        const jobId = $row.attr('data-jobid')
+        if (!jobId) return
 
-      let url = $el.find('a').first().attr('href') || ''
-      if (url && !url.startsWith('http')) {
-        url = baseUrl + url
-      }
+        const title = cleanText($row.find('h2').first().text())
+        const company = cleanText($row.find('h3').first().text())
 
-      if (title && company && url) {
-        jobs.push({
+        let href = $row.find('a[data-jobid]').first().attr('href') || ''
+        if (href && !href.startsWith('http')) {
+          href = baseUrl + href
+        }
+
+        if (!title || !href) return
+
+        // Location is in the second td.job-location-mobile
+        const locationTds = $row.find('td.job-location-mobile')
+        const location = cleanText(locationTds.eq(1).text()) || 'Remote'
+
+        // Salary is in td[4] (5th cell)
+        const allTds = $row.find('td')
+        const salaryText = cleanText(allTds.eq(4).text())
+        const salary = salaryText && salaryText.includes('$') ? salaryText : undefined
+
+        // Tags from span.my-badge
+        const tags: string[] = []
+        $row.find('span.my-badge').each((_, badge) => {
+          const tag = cleanText($(badge).text())
+          if (tag) tags.push(tag)
+        })
+
+        allJobs.push({
           title,
-          company,
+          company: company || 'Unknown',
           location,
-          type,
-          category: 'Engineering', // 기본값, 나중에 개선
-          url,
-          tags: [],
+          type: 'Full-time',
+          category: 'Engineering',
+          url: href,
+          salary,
+          tags,
           postedDate: new Date(),
         })
+      } catch (error) {
+        console.error('Error parsing Web3.career job:', error)
       }
-    } catch (error) {
-      console.error('Error parsing job:', error)
-    }
-  })
+    })
 
-  console.log(`📦 Found ${jobs.length} jobs from Web3.career`)
+    await delay(500) // Rate limit between pages
+  }
 
-  // 데이터베이스에 저장
+  console.log(`📦 Found ${allJobs.length} jobs from Web3.career`)
+
   let savedCount = 0
-  for (const job of jobs) {
+  for (const job of allJobs) {
     try {
       const saved = await validateAndSaveJob(
-        { title: job.title, company: job.company, url: job.url, location: job.location, type: job.type, category: job.category, salary: job.salary, tags: job.tags, source: 'web3.career', region: 'Global', postedDate: job.postedDate },
+        {
+          title: job.title,
+          company: job.company,
+          url: job.url,
+          location: job.location,
+          type: job.type,
+          category: job.category,
+          salary: job.salary,
+          tags: job.tags,
+          source: 'web3.career',
+          region: 'Global',
+          postedDate: job.postedDate,
+        },
         'web3.career'
       )
       if (saved) savedCount++
-      await delay(100) // Rate limiting
+      await delay(100)
     } catch (error) {
       console.error(`Error saving job ${job.url}:`, error)
     }
   }
 
-  // 크롤링 로그 저장
   await supabase.from('CrawlLog').insert({
     source: 'web3.career',
     status: 'success',
