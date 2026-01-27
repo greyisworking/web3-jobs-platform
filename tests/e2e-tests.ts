@@ -7,6 +7,7 @@
 import {
   test,
   assert,
+  assertEqual,
   skip,
   setCategory,
   printSummary,
