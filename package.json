@@ -18,7 +18,12 @@
     "test:load:spike": "k6 run tests/load/concurrent-users.js",
     "test:load:all": "npm run test:load && npm run test:load:search && npm run test:load:spike",
     "test:load:report": "node tests/load/report-generator.js",
-    "seed:jobs": "tsx scripts/seed-jobs.ts"
+    "seed:jobs": "tsx scripts/seed-jobs.ts",
+    "test:unit": "tsx tests/unit-tests.ts",
+    "test:api": "tsx tests/api-tests.ts",
+    "test:e2e": "tsx tests/e2e-tests.ts",
+    "test:data": "tsx tests/data-quality-tests.ts",
+    "test:all": "tsx tests/run-all-tests.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",

@@ -1,51 +1,52 @@
+/**
+ * Dry-run test for the web3kr.jobs crawler extraction logic.
+ * Tests that the Puppeteer selectors correctly extract job title + company.
+ * Does NOT save to database — just prints what would be extracted.
+ *
+ * Run: npx tsx tests/crawl-web3kr-dryrun.ts
+ */
+
 import puppeteer from 'puppeteer'
-import { supabase } from '../../lib/supabase-script'
-import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { delay } from '../utils'
 
-export async function crawlWeb3KRJobs(): Promise<number> {
-  console.log('🚀 Starting Web3 KR Jobs crawler...')
+function delay(ms: number) {
+  return new Promise((r) => setTimeout(r, ms))
+}
 
-  let browser
+async function main() {
+  console.log('🧪 Dry-run: web3kr.jobs crawler extraction\n')
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  })
+
   try {
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    })
-
     const page = await browser.newPage()
-    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36')
+    await page.setUserAgent(
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+    )
 
+    console.log('Loading https://www.web3kr.jobs ...')
     await page.goto('https://www.web3kr.jobs', {
       waitUntil: 'networkidle2',
       timeout: 30000,
     })
 
-    // Oopy/Notion sites need extra time to render the database view
     await delay(5000)
+    console.log('Page loaded. Extracting jobs...\n')
 
-    // Wait for content to appear — Oopy renders Notion databases as div-based tables
-    await page.waitForSelector('a[href]', { timeout: 15000 }).catch(() => {
-      console.log('⚠️  Content selector timeout, proceeding with available content')
-    })
-
-    const jobs = await page.evaluate(() => {
+    const { jobs, strategy } = await page.evaluate(() => {
       const results: { title: string; company: string; url: string }[] = []
       const seen = new Set<string>()
+      let strategyUsed = 'none'
 
       // ── Strategy 1: Header-based column mapping ──
-      // The Oopy-rendered Notion table uses div-based rows.
-      // Find the header row by searching for known Korean column headers.
-      // Columns: 회사, 회사 타입, 코인&NFT 발행, 개발 직군 여부, 직군 유형, 경력, 포지션, 링크, 등록 시점, 상태
       try {
         let headerRow: Element | null = null
 
-        // Walk all text nodes to find one containing "회사" as a standalone header
         const allElements = Array.from(document.querySelectorAll('*'))
         for (const el of allElements) {
-          // A header cell: its own text (not children) is exactly "회사"
           if (el.children.length === 0 && el.textContent?.trim() === '회사') {
-            // Walk up to the row (container with many sibling cells)
             let candidate = el.parentElement
             let depth = 0
             while (candidate && candidate.children.length < 5 && depth < 8) {
@@ -60,7 +61,6 @@ export async function crawlWeb3KRJobs(): Promise<number> {
         }
 
         if (headerRow) {
-          // Map column indices from header text
           const headerCells = Array.from(headerRow.children)
           const colMap: Record<string, number> = {}
 
@@ -71,7 +71,6 @@ export async function crawlWeb3KRJobs(): Promise<number> {
             if (text === '링크' || text.includes('링크')) colMap.link = index
           })
 
-          // Find data rows — siblings of the header row in the same container
           const container = headerRow.parentElement
           if (container && colMap.company != null && colMap.title != null) {
             const allRows = Array.from(container.children)
@@ -81,27 +80,22 @@ export async function crawlWeb3KRJobs(): Promise<number> {
               const cells = Array.from(row.children)
               if (cells.length < 3) continue
 
-              // Extract company from the company column
               const companyCell = cells[colMap.company]
               const company = companyCell?.textContent?.trim() || ''
 
-              // Extract title from the title/position column
               const titleCell = cells[colMap.title]
               let title = ''
               if (titleCell) {
-                // Prefer link text within the cell (Notion page link)
                 const titleLink = titleCell.querySelector('a')
                 title = titleLink?.textContent?.trim() || titleCell.textContent?.trim() || ''
               }
 
-              // Extract apply URL from the link column
               let applyUrl = ''
               if (colMap.link != null) {
                 const linkCell = cells[colMap.link]
                 if (linkCell) {
                   const linkAnchor = linkCell.querySelector('a[href]') as HTMLAnchorElement | null
                   applyUrl = linkAnchor?.href || ''
-                  // If no anchor, try cell text as URL
                   if (!applyUrl) {
                     const cellText = linkCell.textContent?.trim() || ''
                     if (cellText.startsWith('http')) applyUrl = cellText
@@ -109,7 +103,6 @@ export async function crawlWeb3KRJobs(): Promise<number> {
                 }
               }
 
-              // Also check for Notion page link in the title cell as fallback URL
               if (!applyUrl && titleCell) {
                 const pageLink = titleCell.querySelector('a[href]') as HTMLAnchorElement | null
                 if (pageLink?.href) {
@@ -126,30 +119,28 @@ export async function crawlWeb3KRJobs(): Promise<number> {
                 })
               }
             }
+
+            if (results.length > 0) strategyUsed = 'strategy1-header-columns'
           }
         }
       } catch (e) {
-        // Strategy 1 failed, continue to fallback
+        // continue
       }
 
-      // ── Strategy 2: Notion page links as job title anchors ──
-      // In Oopy-rendered Notion, titles link to /uuid pages
+      // ── Strategy 2: Notion page links ──
       if (results.length === 0) {
         try {
           const allAnchors = Array.from(document.querySelectorAll('a[href]'))
 
           for (const anchor of allAnchors) {
             const href = anchor.getAttribute('href') || ''
-            // Match Notion page UUID paths (32 hex chars with optional dashes)
             if (!/^\/[0-9a-f-]{20,}$/i.test(href)) continue
 
             const title = anchor.textContent?.trim() || ''
             if (!title || title.length < 3 || seen.has(title)) continue
-            // Skip if the text looks like a URL
             if (title.startsWith('http')) continue
             seen.add(title)
 
-            // Walk up to find the row container
             let row = anchor.parentElement
             let depth = 0
             while (row && row.children.length < 3 && depth < 10) {
@@ -161,13 +152,10 @@ export async function crawlWeb3KRJobs(): Promise<number> {
             let applyUrl = ''
 
             if (row && row.children.length >= 3) {
-              // First cell is typically company
               const firstCellText = row.children[0]?.textContent?.trim() || ''
               if (firstCellText && firstCellText !== title) {
                 company = firstCellText
               }
-
-              // Find external link (apply URL) in the same row
               const externalLinks = Array.from(row.querySelectorAll('a[href^="http"]'))
               for (const extLink of externalLinks) {
                 const extHref = (extLink as HTMLAnchorElement).href
@@ -184,96 +172,90 @@ export async function crawlWeb3KRJobs(): Promise<number> {
               url: applyUrl || `https://www.web3kr.jobs${href}`,
             })
           }
+
+          if (results.length > 0) strategyUsed = 'strategy2-notion-links'
         } catch (e) {
-          // Strategy 2 failed, continue to fallback
+          // continue
         }
       }
 
-      // ── Strategy 3: Improved fallback — scan links but skip URL-text links ──
+      // ── Strategy 3: Fallback ──
       if (results.length === 0) {
         const allLinks = document.querySelectorAll('a[href]')
         allLinks.forEach((el) => {
           const anchor = el as HTMLAnchorElement
           const text = anchor.textContent?.trim() || ''
           const href = anchor.href
-
-          // Skip empty text, very short text, URL-like text, and duplicates
           if (!text || text.length < 5 || seen.has(href)) return
           if (text.startsWith('http://') || text.startsWith('https://')) return
           if (href.includes('#') && !href.startsWith('http')) return
-          // Skip navigation-like links
           if (['home', 'about', 'contact', 'login'].some((w) => text.toLowerCase() === w)) return
           seen.add(href)
-
           results.push({ title: text, company: 'Unknown', url: href })
         })
+        if (results.length > 0) strategyUsed = 'strategy3-fallback-links'
       }
 
-      return results
+      return { jobs: results, strategy: strategyUsed }
     })
 
-    console.log(`📦 Found ${jobs.length} jobs from Web3 KR Jobs`)
+    console.log(`Strategy used: ${strategy}`)
+    console.log(`Jobs found: ${jobs.length}\n`)
 
-    // Log first few for debugging
-    for (const j of jobs.slice(0, 3)) {
-      console.log(`   → "${j.title}" at ${j.company} (${j.url.substring(0, 60)}...)`)
-    }
+    if (jobs.length === 0) {
+      console.log('⚠️  No jobs extracted. The page structure may have changed.')
+      // Dump page info for debugging
+      const debugInfo = await page.evaluate(() => {
+        return {
+          title: document.title,
+          bodyLength: document.body.innerHTML.length,
+          linkCount: document.querySelectorAll('a').length,
+          hasOopy: !!(window as any).__OOPY__,
+          allTextSnippet: document.body.innerText.substring(0, 500),
+        }
+      })
+      console.log('Debug info:', JSON.stringify(debugInfo, null, 2))
+    } else {
+      // Print results
+      let titleUrlCount = 0
+      let unknownCompanyCount = 0
 
-    let savedCount = 0
-    for (const job of jobs) {
-      try {
-        // Skip jobs with no real title, title is a URL, or is the site header
-        if (!job.title || job.title.startsWith('http')) continue
-        if (job.company === 'Unknown' && job.url.includes('web3kr.jobs')) continue
-        // Skip status values and noise that aren't real job titles
-        const SKIP_TITLES = ['open', 'closed', 'draft', 'expired']
-        if (SKIP_TITLES.includes(job.title.toLowerCase())) continue
+      for (const job of jobs) {
+        const isTitleUrl = job.title.startsWith('http')
+        const isUnknown = job.company === 'Unknown'
+        if (isTitleUrl) titleUrlCount++
+        if (isUnknown) unknownCompanyCount++
 
-        const saved = await validateAndSaveJob(
-          {
-            title: job.title,
-            company: job.company,
-            url: job.url,
-            location: '서울',
-            type: '정규직',
-            category: 'Engineering',
-            tags: ['Web3', '블록체인'],
-            source: 'web3kr.jobs',
-            region: 'Korea',
-            postedDate: new Date(),
-          },
-          'web3kr.jobs'
+        const statusIcon = isTitleUrl || isUnknown ? '⚠️ ' : '✅'
+        console.log(
+          `  ${statusIcon} "${job.title}" @ ${job.company}\n     URL: ${job.url.substring(0, 80)}${job.url.length > 80 ? '...' : ''}`
         )
-        if (saved) savedCount++
-        await delay(100)
-      } catch (error) {
-        console.error('Error saving Web3 KR job:', error)
+      }
+
+      console.log(`\n${'─'.repeat(50)}`)
+      console.log(`Total: ${jobs.length} jobs`)
+      console.log(`Title is URL (bug): ${titleUrlCount}`)
+      console.log(`Company is Unknown (bug): ${unknownCompanyCount}`)
+      console.log(
+        `Clean jobs: ${jobs.length - Math.max(titleUrlCount, unknownCompanyCount)}`
+      )
+
+      if (titleUrlCount === 0 && unknownCompanyCount === 0) {
+        console.log('\n✅ All jobs have proper titles and company names!')
+      } else if (titleUrlCount === 0) {
+        console.log(
+          `\n✅ No URL-as-title bugs! (${unknownCompanyCount} jobs still have Unknown company)`
+        )
+      } else {
+        console.log('\n❌ Some bugs remain — check output above')
       }
     }
-
-    await supabase.from('CrawlLog').insert({
-      source: 'web3kr.jobs',
-      status: 'success',
-      jobCount: savedCount,
-      createdAt: new Date().toISOString(),
-    })
-
-    console.log(`✅ Saved ${savedCount} jobs from Web3 KR Jobs`)
-    return savedCount
-  } catch (error) {
-    console.error('❌ Web3 KR Jobs crawler error:', error)
-
-    await supabase.from('CrawlLog').insert({
-      source: 'web3kr.jobs',
-      status: 'failed',
-      jobCount: 0,
-      createdAt: new Date().toISOString(),
-    })
-
-    return 0
   } finally {
-    if (browser) {
-      await browser.close()
-    }
+    await browser.close()
   }
 }
+
+main().catch((err) => {
+  console.error('Fatal:', err)
+  process.exit(1)
+})

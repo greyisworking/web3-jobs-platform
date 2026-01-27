@@ -66,8 +66,8 @@ export default function Home() {
       const searchLower = filters.search.toLowerCase()
       filtered = filtered.filter(
         (job) =>
-          job.title.toLowerCase().includes(searchLower) ||
-          job.company.toLowerCase().includes(searchLower)
+          (job.title ?? '').toLowerCase().includes(searchLower) ||
+          (job.company ?? '').toLowerCase().includes(searchLower)
       )
     }
 
@@ -76,12 +76,12 @@ export default function Home() {
     }
 
     if (filters.type) {
-      filtered = filtered.filter((job) => job.type.includes(filters.type))
+      filtered = filtered.filter((job) => (job.type ?? '').includes(filters.type))
     }
 
     if (filters.location) {
       filtered = filtered.filter((job) =>
-        job.location.toLowerCase().includes(filters.location.toLowerCase())
+        (job.location ?? '').toLowerCase().includes(filters.location.toLowerCase())
       )
     }
 
@@ -222,22 +222,27 @@ export default function Home() {
                           Backed by {job.backers.join(', ')}
                         </p>
                       )}
-                      {/* Badges */}
-                      {job.badges && job.badges.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mb-2">
-                          {job.badges.map((b) => {
-                            const config = BADGE_CONFIG[b as BadgeValue]
-                            return (
-                              <span
-                                key={b}
-                                className={`px-2 py-0.5 text-xs font-medium rounded-full ${config?.bg ?? 'bg-gray-100 dark:bg-gray-700'} ${config?.text ?? 'text-gray-800 dark:text-gray-200'}`}
-                              >
-                                {b}
-                              </span>
-                            )
-                          })}
-                        </div>
-                      )}
+                      {/* Badges — hide status badges (Active, English) from display */}
+                      {job.badges && job.badges.length > 0 && (() => {
+                        const HIDDEN_BADGES = ['Active', 'English']
+                        const visible = job.badges.filter((b) => !HIDDEN_BADGES.includes(b))
+                        if (visible.length === 0) return null
+                        return (
+                          <div className="flex flex-wrap gap-1.5 mb-2">
+                            {visible.map((b) => {
+                              const config = BADGE_CONFIG[b as BadgeValue]
+                              return (
+                                <span
+                                  key={b}
+                                  className={`px-2 py-0.5 text-xs font-medium rounded-full ${config?.bg ?? 'bg-gray-100 dark:bg-gray-700'} ${config?.text ?? 'text-gray-800 dark:text-gray-200'}`}
+                                >
+                                  {b}
+                                </span>
+                              )
+                            })}
+                          </div>
+                        )
+                      })()}
                       <div className="flex flex-wrap gap-2 text-sm">
                         <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full">
                           {job.location}

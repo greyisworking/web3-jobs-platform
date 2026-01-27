@@ -3,7 +3,7 @@
 import { useState } from 'react'
 
 const BADGE_OPTIONS = ['Verified', 'Web3 Perks', 'Pre-IPO', 'Remote', 'Active', 'English'] as const
-const BACKER_OPTIONS = ['Hashed', 'a16z', 'Paradigm'] as const
+const BACKER_OPTIONS = ['Hashed', 'a16z', 'Paradigm', 'Kakao', 'Kakao Ventures', 'Dunamu', 'Animoca Brands', 'SoftBank', 'Binance', 'LINE Corporation', 'Mirae Asset', 'KB Investment', 'Wemade'] as const
 
 interface FilterProps {
   onFilterChange: (filters: Filters) => void
@@ -154,6 +154,9 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
             <option value="jobs.sui.io">sui jobs</option>
             <option value="jobs.solana.com">solana jobs</option>
             <option value="ethereum.foundation">ethereum foundation</option>
+            <option value="priority:wanted">priority:wanted</option>
+            <option value="priority:lever">priority:lever</option>
+            <option value="priority:greenhouse">priority:greenhouse</option>
           </select>
         </div>
 
