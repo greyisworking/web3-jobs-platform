@@ -7,6 +7,9 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const statusParam = searchParams.get('status')
+    const badge = searchParams.get('badge')
+    const backer = searchParams.get('backer')
+    const sector = searchParams.get('sector')
 
     const supabase = await createSupabaseServerClient()
 
@@ -18,6 +21,16 @@ export async function GET(request: Request) {
 
     if (statusParam !== 'all') {
       query = query.eq('isActive', true)
+    }
+
+    if (badge) {
+      query = query.contains('badges', [badge])
+    }
+    if (backer) {
+      query = query.contains('backers', [backer])
+    }
+    if (sector) {
+      query = query.eq('sector', sector)
     }
 
     const { data: jobs, error } = await query

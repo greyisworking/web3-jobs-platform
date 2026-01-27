@@ -5,6 +5,7 @@ import { DataTable, type Column } from '@/components/admin/data-table'
 import { ConfirmDialog } from '@/components/admin/confirm-dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { BADGE_VALUES, BADGE_CONFIG, type BadgeValue } from '@/lib/badges'
 import type { JobWithStatus } from '@/types/admin'
 
 export default function PendingJobsPage() {
@@ -19,6 +20,9 @@ export default function PendingJobsPage() {
     ids: string[]
   }>({ open: false, action: 'approve', ids: [] })
   const [actionLoading, setActionLoading] = useState(false)
+  const [showBadgeDialog, setShowBadgeDialog] = useState(false)
+  const [selectedBadges, setSelectedBadges] = useState<Set<string>>(new Set())
+  const [badgeAssigning, setBadgeAssigning] = useState(false)
   const pageSize = 20
 
   const fetchJobs = useCallback(async () => {
@@ -57,10 +61,79 @@ export default function PendingJobsPage() {
     setDialog({ open: true, action, ids })
   }
 
+  const toggleBadge = (badge: string) => {
+    setSelectedBadges((prev) => {
+      const next = new Set(prev)
+      if (next.has(badge)) {
+        next.delete(badge)
+      } else {
+        next.add(badge)
+      }
+      return next
+    })
+  }
+
+  const assignBadges = async () => {
+    setBadgeAssigning(true)
+    try {
+      await fetch('/api/admin/jobs/badges', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ids: Array.from(selectedIds),
+          badges: Array.from(selectedBadges),
+        }),
+      })
+      setShowBadgeDialog(false)
+      setSelectedIds(new Set())
+      setSelectedBadges(new Set())
+      fetchJobs()
+    } catch (err) {
+      console.error('Failed to assign badges:', err)
+    } finally {
+      setBadgeAssigning(false)
+    }
+  }
+
   const columns: Column<JobWithStatus>[] = [
     { key: 'title', header: 'Title', sortable: true },
     { key: 'company', header: 'Company', sortable: true },
     { key: 'location', header: 'Location' },
+    {
+      key: 'sector',
+      header: 'Sector',
+      render: (job) => job.sector || '-',
+    },
+    {
+      key: 'backers',
+      header: 'Backers',
+      render: (job) =>
+        job.backers && job.backers.length > 0
+          ? job.backers.join(', ')
+          : '-',
+    },
+    {
+      key: 'badges',
+      header: 'Badges',
+      render: (job) =>
+        job.badges && job.badges.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {job.badges.map((b) => {
+              const config = BADGE_CONFIG[b as BadgeValue]
+              return (
+                <span
+                  key={b}
+                  className={`px-1.5 py-0.5 text-xs rounded-full ${config?.bg ?? 'bg-gray-100'} ${config?.text ?? 'text-gray-800'}`}
+                >
+                  {b}
+                </span>
+              )
+            })}
+          </div>
+        ) : (
+          '-'
+        ),
+    },
     {
       key: 'salary',
       header: 'Salary',
@@ -85,6 +158,13 @@ export default function PendingJobsPage() {
         <h1 className="text-2xl font-bold">Pending Jobs</h1>
         {selectedIds.size > 0 && (
           <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowBadgeDialog(true)}
+            >
+              Assign Badges ({selectedIds.size})
+            </Button>
             <Button
               size="sm"
               onClick={() =>
@@ -170,6 +250,58 @@ export default function PendingJobsPage() {
         onConfirm={handleAction}
         loading={actionLoading}
       />
+
+      {/* Badge Assignment Dialog */}
+      {showBadgeDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+              Assign Badges
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Assigning to {selectedIds.size} job{selectedIds.size !== 1 ? 's' : ''}
+            </p>
+            <div className="space-y-3">
+              {BADGE_VALUES.map((badge) => {
+                const config = BADGE_CONFIG[badge]
+                return (
+                  <label
+                    key={badge}
+                    className="flex items-center gap-3 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedBadges.has(badge)}
+                      onChange={() => toggleBadge(badge)}
+                      className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span
+                      className={`px-2 py-0.5 text-xs font-medium rounded-full ${config.bg} ${config.text}`}
+                    >
+                      {badge}
+                    </span>
+                  </label>
+                )
+              })}
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowBadgeDialog(false)}
+                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={assignBadges}
+                disabled={badgeAssigning}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg transition"
+              >
+                {badgeAssigning ? 'Assigning...' : 'Assign'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

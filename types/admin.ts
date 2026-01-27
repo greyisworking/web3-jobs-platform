@@ -33,6 +33,10 @@ export interface JobWithStatus {
   status: string
   reviewed_by: string | null
   reviewed_at: string | null
+  backers: string[] | null
+  sector: string | null
+  office_location: string | null
+  badges: string[] | null
 }
 
 export interface DuplicateGroup {

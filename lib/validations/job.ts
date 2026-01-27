@@ -13,6 +13,10 @@ export const jobSchema = z.object({
   source: z.string().min(1, '소스는 필수입니다'),
   region: z.string().optional().default('Global'),
   postedDate: z.date().optional(),
+  backers: z.array(z.string()).nullable().optional(),
+  sector: z.string().nullable().optional(),
+  office_location: z.string().nullable().optional(),
+  badges: z.array(z.string()).nullable().optional(),
 })
 
 export type JobInput = z.infer<typeof jobSchema>

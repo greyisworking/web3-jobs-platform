@@ -13,6 +13,9 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url)
   const status = searchParams.get('status') || undefined
+  const badge = searchParams.get('badge') || undefined
+  const backer = searchParams.get('backer') || undefined
+  const sector = searchParams.get('sector') || undefined
   const page = parseInt(searchParams.get('page') || '1', 10)
   const pageSize = parseInt(searchParams.get('pageSize') || '20', 10)
   const offset = (page - 1) * pageSize
@@ -30,6 +33,16 @@ export async function GET(request: NextRequest) {
     if (isActive !== undefined) {
       query = query.eq('isActive', isActive)
     }
+  }
+
+  if (badge) {
+    query = query.contains('badges', [badge])
+  }
+  if (backer) {
+    query = query.contains('backers', [backer])
+  }
+  if (sector) {
+    query = query.eq('sector', sector)
   }
 
   const { data: jobs, count, error } = await query
