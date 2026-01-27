@@ -1,0 +1,6 @@
+export { default as VerifiedBadge } from './VerifiedBadge'
+export { default as PreIPOBadge } from './PreIPOBadge'
+export { default as RemoteBadge } from './RemoteBadge'
+export { default as ActiveBadge } from './ActiveBadge'
+export { default as Web3PerksBadge } from './Web3PerksBadge'
+export { default as EnglishBadge } from './EnglishBadge'

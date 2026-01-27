@@ -1,9 +1,12 @@
 'use client'
 
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import JobFilters, { Filters } from './components/JobFilters'
-import { BADGE_CONFIG, type BadgeValue } from '@/lib/badges'
+import JobCard from './components/JobCard'
+import GlassContainer from './components/GlassContainer'
+import VCBackersDashboard from './components/VCBackersDashboard'
+import { JobCardSkeletonGrid } from './components/JobCardSkeleton'
 
 interface Job {
   id: string
@@ -40,6 +43,16 @@ export default function Home() {
     sources: [],
   })
   const [loading, setLoading] = useState(true)
+  const [selectedVC, setSelectedVC] = useState('')
+  const [filters, setFilters] = useState<Filters>({
+    search: '',
+    region: '',
+    type: '',
+    location: '',
+    source: '',
+    badge: '',
+    backer: '',
+  })
 
   useEffect(() => {
     fetchJobs()
@@ -59,11 +72,25 @@ export default function Home() {
     }
   }
 
-  const handleFilterChange = (filters: Filters) => {
+  /** 각 VC별 공고 수 계산 — jobs가 변경될 때만 재계산 */
+  const vcCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const job of jobs) {
+      if (job.backers) {
+        for (const backer of job.backers) {
+          counts[backer] = (counts[backer] ?? 0) + 1
+        }
+      }
+    }
+    return counts
+  }, [jobs])
+
+  /** 필터 + VC 선택 모두 적용 */
+  const applyAllFilters = (f: Filters, vc: string) => {
     let filtered = [...jobs]
 
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase()
+    if (f.search) {
+      const searchLower = f.search.toLowerCase()
       filtered = filtered.filter(
         (job) =>
           (job.title ?? '').toLowerCase().includes(searchLower) ||
@@ -71,52 +98,87 @@ export default function Home() {
       )
     }
 
-    if (filters.region) {
-      filtered = filtered.filter((job) => job.region === filters.region)
+    if (f.region) {
+      filtered = filtered.filter((job) => job.region === f.region)
     }
 
-    if (filters.type) {
-      filtered = filtered.filter((job) => (job.type ?? '').includes(filters.type))
+    if (f.type) {
+      filtered = filtered.filter((job) => (job.type ?? '').includes(f.type))
     }
 
-    if (filters.location) {
+    if (f.location) {
       filtered = filtered.filter((job) =>
-        (job.location ?? '').toLowerCase().includes(filters.location.toLowerCase())
+        (job.location ?? '').toLowerCase().includes(f.location.toLowerCase())
       )
     }
 
-    if (filters.source) {
-      filtered = filtered.filter((job) => job.source === filters.source)
+    if (f.source) {
+      filtered = filtered.filter((job) => job.source === f.source)
     }
 
-    if (filters.badge) {
-      filtered = filtered.filter((job) => job.badges?.includes(filters.badge))
+    if (f.badge) {
+      filtered = filtered.filter((job) => job.badges?.includes(f.badge))
     }
 
-    if (filters.backer) {
-      filtered = filtered.filter((job) => job.backers?.includes(filters.backer))
+    if (f.backer) {
+      filtered = filtered.filter((job) => job.backers?.includes(f.backer))
+    }
+
+    // VC 대시보드 필터 적용
+    if (vc) {
+      filtered = filtered.filter((job) => job.backers?.includes(vc))
     }
 
     setFilteredJobs(filtered)
   }
 
+  const handleFilterChange = (newFilters: Filters) => {
+    setFilters(newFilters)
+    applyAllFilters(newFilters, selectedVC)
+  }
+
+  const handleVCSelect = (vc: string) => {
+    setSelectedVC(vc)
+    applyAllFilters(filters, vc)
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-web3-ice-white to-web3-frost dark:from-web3-deep-navy dark:to-web3-midnight">
+        {/* 로딩 헤더 */}
+        <header className="sticky top-0 z-50 backdrop-blur-md bg-white/50 dark:bg-white/5 border-b border-hairline border-white/20 shadow-glass">
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="h-10 w-64 rounded-lg bg-gradient-to-r from-gray-200/50 via-gray-100/50 to-gray-200/50 dark:from-white/5 dark:via-white/10 dark:to-white/5 animate-pulse" />
+            <div className="h-4 w-48 mt-2 rounded bg-gray-200/50 dark:bg-white/5 animate-pulse" />
+          </div>
+        </header>
+
+        <main className="max-w-7xl mx-auto px-4 py-8">
+          {/* 스탯 스켈레톤 */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="backdrop-blur-md bg-white/70 dark:bg-white/10 border-hairline border-white/20 rounded-xl shadow-glass p-6">
+                <div className="h-4 w-20 rounded bg-gray-200/50 dark:bg-white/10 animate-pulse" />
+                <div className="h-8 w-24 mt-2 rounded bg-gray-200/50 dark:bg-white/10 animate-pulse" />
+              </div>
+            ))}
+          </div>
+
+          {/* 카드 스켈레톤 */}
+          <GlassContainer className="overflow-hidden p-4">
+            <JobCardSkeletonGrid count={6} />
+          </GlassContainer>
+        </main>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-web3-ice-white to-web3-frost dark:from-web3-deep-navy dark:to-web3-midnight">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-md">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/50 dark:bg-white/5 border-b border-hairline border-white/20 shadow-glass">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-web3-electric-blue to-web3-neon-cyan bg-clip-text text-transparent">
             Web3 Jobs Platform
           </h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
@@ -129,36 +191,43 @@ export default function Home() {
         {/* Filters */}
         <JobFilters onFilterChange={handleFilterChange} />
 
+        {/* VC Backers Dashboard */}
+        <VCBackersDashboard
+          vcCounts={vcCounts}
+          selectedVC={selectedVC}
+          onSelectVC={handleVCSelect}
+        />
+
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <GlassContainer hover className="p-6">
             <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">
               Total Jobs
             </h3>
-            <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">
+            <p className="text-3xl font-bold text-web3-electric-blue dark:text-web3-ice-blue mt-2">
               {stats.total}
             </p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          </GlassContainer>
+          <GlassContainer hover className="p-6">
             <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">
               Global
             </h3>
-            <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">
+            <p className="text-3xl font-bold text-web3-neon-cyan dark:text-web3-neon-cyan mt-2">
               {stats.global}
             </p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          </GlassContainer>
+          <GlassContainer hover className="p-6">
             <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">
               Korea
             </h3>
             <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">
               {stats.korea}
             </p>
-          </div>
+          </GlassContainer>
         </div>
 
         {/* Source Stats */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
+        <GlassContainer className="p-6 mb-8">
           <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
             Jobs by Source
           </h2>
@@ -168,17 +237,17 @@ export default function Home() {
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {source.source}
                 </p>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                <p className="text-2xl font-bold text-web3-electric-blue dark:text-web3-ice-blue">
                   {source._count}
                 </p>
               </div>
             ))}
           </div>
-        </div>
+        </GlassContainer>
 
         {/* Jobs List */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <GlassContainer className="overflow-hidden">
+          <div className="p-6 border-b border-white/20 dark:border-white/10">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Latest Jobs
@@ -188,13 +257,13 @@ export default function Home() {
               </span>
             </div>
           </div>
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          <div className="p-4 space-y-4">
             {filteredJobs.length === 0 ? (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                 {jobs.length === 0 ? (
                   <>
                     No jobs found yet. <br />
-                    <code className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded mt-2 inline-block">
+                    <code className="bg-gray-100/50 dark:bg-gray-700/50 px-2 py-1 rounded mt-2 inline-block">
                       npm run crawl
                     </code>{' '}
                     to collect job data.
@@ -204,78 +273,19 @@ export default function Home() {
                 )}
               </div>
             ) : (
-              filteredJobs.map((job) => (
-                <div
-                  key={job.id}
-                  className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                        {job.title}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">
-                        {job.company}
-                      </p>
-                      {job.backers && job.backers.length > 0 && (
-                        <p className="text-xs text-gray-500 dark:text-gray-500 mb-2">
-                          Backed by {job.backers.join(', ')}
-                        </p>
-                      )}
-                      {/* Badges — hide status badges (Active, English) from display */}
-                      {job.badges && job.badges.length > 0 && (() => {
-                        const HIDDEN_BADGES = ['Active', 'English']
-                        const visible = job.badges.filter((b) => !HIDDEN_BADGES.includes(b))
-                        if (visible.length === 0) return null
-                        return (
-                          <div className="flex flex-wrap gap-1.5 mb-2">
-                            {visible.map((b) => {
-                              const config = BADGE_CONFIG[b as BadgeValue]
-                              return (
-                                <span
-                                  key={b}
-                                  className={`px-2 py-0.5 text-xs font-medium rounded-full ${config?.bg ?? 'bg-gray-100 dark:bg-gray-700'} ${config?.text ?? 'text-gray-800 dark:text-gray-200'}`}
-                                >
-                                  {b}
-                                </span>
-                              )
-                            })}
-                          </div>
-                        )
-                      })()}
-                      <div className="flex flex-wrap gap-2 text-sm">
-                        <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full">
-                          {job.location}
-                        </span>
-                        <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full">
-                          {job.type}
-                        </span>
-                        <span className="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-3 py-1 rounded-full">
-                          {job.region}
-                        </span>
-                        <span className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-3 py-1 rounded-full">
-                          {job.source}
-                        </span>
-                      </div>
-                    </div>
-                    <Link
-                      href={job.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
-                    >
-                      Apply
-                    </Link>
-                  </div>
-                </div>
-              ))
+              /* AnimatePresence로 리스트 전환 애니메이션 적용 */
+              <AnimatePresence mode="popLayout">
+                {filteredJobs.map((job) => (
+                  <JobCard key={job.id} job={job} />
+                ))}
+              </AnimatePresence>
             )}
           </div>
-        </div>
+        </GlassContainer>
       </main>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800 mt-12 py-6">
+      <footer className="mt-12 py-6 backdrop-blur-md bg-white/50 dark:bg-white/5 border-t border-hairline border-white/20">
         <div className="max-w-7xl mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
           <p>Aggregating jobs from 40+ sources | Updated every 3 hours</p>
         </div>

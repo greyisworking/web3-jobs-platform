@@ -51,7 +51,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+    <div className="backdrop-blur-md bg-white/70 dark:bg-white/10 rounded-xl border-hairline border-white/20 shadow-glass p-6 mb-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           Filter Jobs
@@ -75,7 +75,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
             placeholder="Job title or company..."
             value={filters.search}
             onChange={(e) => handleChange('search', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
           />
         </div>
 
@@ -87,7 +87,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
           <select
             value={filters.region}
             onChange={(e) => handleChange('region', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
           >
             <option value="">All</option>
             <option value="Global">Global</option>
@@ -103,7 +103,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
           <select
             value={filters.type}
             onChange={(e) => handleChange('type', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
           >
             <option value="">All</option>
             <option value="Full-time">Full-time</option>
@@ -121,7 +121,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
           <select
             value={filters.location}
             onChange={(e) => handleChange('location', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
           >
             <option value="">All</option>
             <option value="Remote">Remote</option>
@@ -139,7 +139,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
           <select
             value={filters.source}
             onChange={(e) => handleChange('source', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
           >
             <option value="">All</option>
             <option value="web3.career">web3.career</option>
@@ -168,7 +168,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
           <select
             value={filters.badge}
             onChange={(e) => handleChange('badge', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
           >
             <option value="">All Badges</option>
             {BADGE_OPTIONS.map((badge) => (
@@ -187,7 +187,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
           <select
             value={filters.backer}
             onChange={(e) => handleChange('backer', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
           >
             <option value="">All Backers</option>
             {BACKER_OPTIONS.map((backer) => (
