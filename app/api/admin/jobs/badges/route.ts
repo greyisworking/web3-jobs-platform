@@ -5,30 +5,29 @@
  * Body: { ids: string[], badges: string[] }
  */
 
-import { NextRequest } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import {
-  applyMiddleware,
-  successResponse,
-  errors,
-} from '@/lib/api-utils';
+import { NextRequest, NextResponse } from 'next/server';
+import { getAdminUser } from '@/lib/admin-auth';
+import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { BADGE_VALUES } from '@/lib/badges';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
-  const { error: middlewareError, headers } = applyMiddleware(request);
-  if (middlewareError) return middlewareError;
+  try {
+    await getAdminUser();
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     const body = await request.json();
     const { ids, badges } = body as { ids?: string[]; badges?: string[] };
 
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
-      return errors.badRequest('ids must be a non-empty array', undefined, headers);
+      return NextResponse.json({ error: 'ids must be a non-empty array' }, { status: 400 });
     }
     if (!badges || !Array.isArray(badges)) {
-      return errors.badRequest('badges must be an array', undefined, headers);
+      return NextResponse.json({ error: 'badges must be an array' }, { status: 400 });
     }
 
     // Validate badge values
@@ -36,11 +35,13 @@ export async function POST(request: NextRequest) {
       (BADGE_VALUES as readonly string[]).includes(b),
     );
 
+    const supabase = await createSupabaseServerClient();
+
     const results: { id: string; success: boolean; error?: string }[] = [];
 
     for (const id of ids) {
       const { error: updateErr } = await supabase
-        .from('jobs')
+        .from('Job')
         .update({ badges: validBadges })
         .eq('id', id);
 
@@ -51,9 +52,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return successResponse({ updated: results.filter((r) => r.success).length, results }, 200, headers);
+    return NextResponse.json({
+      success: true,
+      updated: results.filter((r) => r.success).length,
+      results,
+    });
   } catch (err: any) {
     console.error('POST /api/admin/jobs/badges error:', err);
-    return errors.databaseError(err.message, headers);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
