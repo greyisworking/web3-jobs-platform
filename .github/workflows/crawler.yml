@@ -1,0 +1,72 @@
+name: Web3 Jobs Crawler
+
+on:
+  schedule:
+    # 3시간마다 실행 (UTC 기준)
+    - cron: '0 */3 * * *'
+  
+  # 수동 실행 가능
+  workflow_dispatch:
+  
+  # Push 시에도 실행 (테스트용)
+  push:
+    branches:
+      - main
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📦 Install dependencies
+        run: npm ci
+      
+      - name: 🗄️ Setup database
+        run: npx prisma db push
+      
+      - name: 🕷️ Run crawler
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: npm run crawl
+      
+      - name: 📊 Upload database artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: crawl-database-${{ github.run_number }}
+          path: prisma/dev.db
+          retention-days: 7
+      
+      - name: 🔔 Notify on failure
+        if: failure()
+        run: |
+          curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "username": "Web3 Jobs Bot",
+              "avatar_url": "https://cdn-icons-png.flaticon.com/512/2111/2111370.png",
+              "embeds": [{
+                "title": "❌ GitHub Actions Crawl Failed",
+                "description": "The scheduled crawl encountered an error",
+                "color": 16711680,
+                "fields": [{
+                  "name": "Run Number",
+                  "value": "#${{ github.run_number }}",
+                  "inline": true
+                }, {
+                  "name": "Repository",
+                  "value": "${{ github.repository }}",
+                  "inline": true
+                }],
+                "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'"
+              }]
+            }'

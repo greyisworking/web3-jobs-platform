@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Job {
+  id          String   @id @default(uuid())
+  title       String
+  company     String
+  location    String
+  type        String   // Full-time, Part-time, Contract, Remote
+  category    String   // Engineering, Design, Marketing, etc.
+  description String?  @db.Text
+  url         String   @unique
+  salary      String?
+  tags        String?  // JSON string array
+  source      String   // web3.career, wellfound, etc.
+  region      String   // Global or Korea
+  postedDate  DateTime?
+  crawledAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  @@index([company])
+  @@index([source])
+  @@index([region])
+  @@index([isActive])
+  @@index([postedDate])
+}
+
+model CrawlLog {
+  id        String   @id @default(uuid())
+  source    String
+  status    String   // success, failed
+  jobCount  Int      @default(0)
+  error     String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([source])
+  @@index([createdAt])
+}
