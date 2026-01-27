@@ -1,12 +1,15 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, Suspense } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import JobFilters, { Filters } from './components/JobFilters'
+import { Bookmark } from 'lucide-react'
+import SmartFilterBar, { SmartFilters } from './components/SmartFilterBar'
+import SearchWithSuggestions from './components/SearchWithSuggestions'
 import JobCard from './components/JobCard'
 import GlassContainer from './components/GlassContainer'
 import VCBackersDashboard from './components/VCBackersDashboard'
 import { JobCardSkeletonGrid } from './components/JobCardSkeleton'
+import BookmarksPanel from './components/BookmarksPanel'
 import ThemeToggle from './components/ThemeToggle'
 
 interface Job {
@@ -34,7 +37,7 @@ interface Stats {
   sources: { source: string; _count: number }[]
 }
 
-export default function Home() {
+function HomeContent() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([])
   const [stats, setStats] = useState<Stats>({
@@ -45,15 +48,15 @@ export default function Home() {
   })
   const [loading, setLoading] = useState(true)
   const [selectedVC, setSelectedVC] = useState('')
-  const [filters, setFilters] = useState<Filters>({
-    search: '',
+  const [searchQuery, setSearchQuery] = useState('')
+  const [smartFilters, setSmartFilters] = useState<SmartFilters>({
     region: '',
     type: '',
-    location: '',
-    source: '',
-    badge: '',
+    sector: '',
     backer: '',
+    techStack: '',
   })
+  const [bookmarksPanelOpen, setBookmarksPanelOpen] = useState(false)
 
   useEffect(() => {
     fetchJobs()
@@ -86,12 +89,17 @@ export default function Home() {
     return counts
   }, [jobs])
 
-  /** 필터 + VC 선택 모두 적용 */
-  const applyAllFilters = (f: Filters, vc: string) => {
+  /** 필터 + VC 선택 + 검색어 모두 적용 */
+  const applyAllFilters = (
+    f: SmartFilters,
+    vc: string,
+    search: string
+  ) => {
     let filtered = [...jobs]
 
-    if (f.search) {
-      const searchLower = f.search.toLowerCase()
+    // 검색어 필터
+    if (search) {
+      const searchLower = search.toLowerCase()
       filtered = filtered.filter(
         (job) =>
           (job.title ?? '').toLowerCase().includes(searchLower) ||
@@ -99,30 +107,36 @@ export default function Home() {
       )
     }
 
+    // 지역 필터
     if (f.region) {
       filtered = filtered.filter((job) => job.region === f.region)
     }
 
+    // 고용 형태 필터
     if (f.type) {
       filtered = filtered.filter((job) => (job.type ?? '').includes(f.type))
     }
 
-    if (f.location) {
+    // 섹터 필터
+    if (f.sector) {
       filtered = filtered.filter((job) =>
-        (job.location ?? '').toLowerCase().includes(f.location.toLowerCase())
+        (job.sector ?? '').toLowerCase().includes(f.sector.toLowerCase())
       )
     }
 
-    if (f.source) {
-      filtered = filtered.filter((job) => job.source === f.source)
-    }
-
-    if (f.badge) {
-      filtered = filtered.filter((job) => job.badges?.includes(f.badge))
-    }
-
+    // 투자사 필터 (SmartFilter)
     if (f.backer) {
       filtered = filtered.filter((job) => job.backers?.includes(f.backer))
+    }
+
+    // 기술 스택 필터 (title/category에서 매칭)
+    if (f.techStack) {
+      const tech = f.techStack.toLowerCase()
+      filtered = filtered.filter(
+        (job) =>
+          (job.title ?? '').toLowerCase().includes(tech) ||
+          (job.category ?? '').toLowerCase().includes(tech)
+      )
     }
 
     // VC 대시보드 필터 적용
@@ -133,14 +147,19 @@ export default function Home() {
     setFilteredJobs(filtered)
   }
 
-  const handleFilterChange = (newFilters: Filters) => {
-    setFilters(newFilters)
-    applyAllFilters(newFilters, selectedVC)
+  const handleSmartFilterChange = (newFilters: SmartFilters) => {
+    setSmartFilters(newFilters)
+    applyAllFilters(newFilters, selectedVC, searchQuery)
+  }
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+    applyAllFilters(smartFilters, selectedVC, query)
   }
 
   const handleVCSelect = (vc: string) => {
     setSelectedVC(vc)
-    applyAllFilters(filters, vc)
+    applyAllFilters(smartFilters, vc, searchQuery)
   }
 
   if (loading) {
@@ -181,22 +200,35 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-web3-ice-white to-web3-frost dark:from-web3-deep-navy dark:to-web3-midnight">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-white/50 dark:bg-white/5 border-b border-hairline border-white/20 shadow-glass">
-        <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-web3-electric-blue to-web3-neon-cyan bg-clip-text text-transparent">
-              Web3 Jobs Platform
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-2">
-              Find Web3 jobs from global and Korean sources
-            </p>
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-web3-electric-blue to-web3-neon-cyan bg-clip-text text-transparent">
+                Web3 Jobs Platform
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">
+                Find Web3 jobs from global and Korean sources
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setBookmarksPanelOpen(true)}
+                className="p-2.5 rounded-xl bg-white/60 dark:bg-white/10 border border-gray-200 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/15 transition-colors"
+                aria-label="저장된 공고 보기"
+              >
+                <Bookmark className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              </button>
+              <ThemeToggle />
+            </div>
           </div>
-          <ThemeToggle />
+          {/* 검색 바 */}
+          <SearchWithSuggestions onSearch={handleSearch} jobs={jobs} />
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Filters */}
-        <JobFilters onFilterChange={handleFilterChange} />
+        {/* Smart Filters */}
+        <SmartFilterBar onFilterChange={handleSmartFilterChange} />
 
         {/* VC Backers Dashboard */}
         <VCBackersDashboard
@@ -297,6 +329,24 @@ export default function Home() {
           <p>Aggregating jobs from 40+ sources | Updated every 3 hours</p>
         </div>
       </footer>
+
+      {/* Bookmarks Panel */}
+      <BookmarksPanel
+        open={bookmarksPanelOpen}
+        onClose={() => setBookmarksPanelOpen(false)}
+      />
     </div>
+  )
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-web3-ice-white to-web3-frost dark:from-web3-deep-navy dark:to-web3-midnight flex items-center justify-center">
+        <div className="animate-pulse text-gray-400">Loading...</div>
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   )
 }

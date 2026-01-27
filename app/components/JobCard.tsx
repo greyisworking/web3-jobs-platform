@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { getDecayStyles } from '@/lib/decay'
+import { useDecayEffect } from '@/hooks/useDecayEffect'
 import GlowBadge from './GlowBadge'
+import BookmarkButton from './BookmarkButton'
 import {
   VerifiedBadge,
   PreIPOBadge,
@@ -57,10 +59,22 @@ const cardVariants = {
 }
 
 export default function JobCard({ job }: JobCardProps) {
-  const { opacity, grayscale, decayLevel } = getDecayStyles(job.postedDate)
+  const { opacity, blur, grayscale, isFading, freshness, hoverResetStyles, tooltipText } =
+    useDecayEffect(job.postedDate)
+  const [hovered, setHovered] = useState(false)
   const companyInitial = (job.company ?? '?')[0]?.toUpperCase() ?? '?'
 
   const allBadges = job.badges ?? []
+
+  const decayStyle: React.CSSProperties = hovered
+    ? hoverResetStyles
+    : {
+        opacity,
+        filter:
+          blur > 0 || grayscale > 0
+            ? `blur(${blur}px) grayscale(${grayscale})`
+            : undefined,
+      }
 
   return (
     <motion.div
@@ -71,12 +85,19 @@ export default function JobCard({ job }: JobCardProps) {
       transition={{ duration: 0.3, ease: 'easeOut' }}
       // 호버 시 미세 확대 + 글로우
       whileHover={{ scale: 1.015 }}
-      className="p-6 backdrop-blur-md bg-white/70 dark:bg-white/10 border-hairline border-white/20 rounded-xl hover:bg-white/80 dark:hover:bg-white/15 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 ease-out cursor-default"
-      style={{
-        opacity,
-        filter: grayscale > 0 ? `grayscale(${grayscale})` : undefined,
-      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="relative p-6 backdrop-blur-md bg-white/70 dark:bg-white/10 border-hairline border-white/20 rounded-xl hover:bg-white/80 dark:hover:bg-white/15 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 ease-out cursor-default"
+      style={decayStyle}
     >
+      {/* 마감 임박 툴팁 */}
+      {isFading && tooltipText && hovered && (
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-3 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg whitespace-nowrap z-10">
+          {tooltipText}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
+        </div>
+      )}
+
       <div className="flex justify-between items-start">
         <div className="flex gap-4 flex-1">
           {/* 회사 이니셜 아바타 — 그래디언트 배경 */}
@@ -140,10 +161,15 @@ export default function JobCard({ job }: JobCardProps) {
               <span className="bg-gray-100/50 dark:bg-gray-700/50 text-gray-800 dark:text-gray-300 px-3 py-1 rounded-full">
                 {job.source}
               </span>
+              {isFading && (
+                <span className="bg-amber-100/50 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 px-3 py-1 rounded-full text-xs">
+                  {freshness}
+                </span>
+              )}
             </div>
 
             {/* 높은 감쇄 경고 — 오래된 공고 표시 */}
-            {decayLevel >= 0.8 && (
+            {(freshness === 'Stale' || freshness === 'Expired') && (
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 italic">
                 This listing may be outdated
               </p>
@@ -151,17 +177,20 @@ export default function JobCard({ job }: JobCardProps) {
           </div>
         </div>
 
-        {/* 지원 버튼 */}
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Link
-            href={job.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-4 flex-shrink-0 inline-block bg-web3-electric-blue/90 hover:bg-web3-electric-blue text-white px-4 py-2 rounded-lg transition-all duration-300 hover:shadow-glow text-sm font-medium"
-          >
-            Apply
-          </Link>
-        </motion.div>
+        {/* 우측 액션: 북마크 + 지원 버튼 */}
+        <div className="flex items-start gap-2 ml-4 flex-shrink-0">
+          <BookmarkButton job={{ id: job.id, title: job.title, company: job.company }} />
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link
+              href={job.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-web3-electric-blue/90 hover:bg-web3-electric-blue text-white px-4 py-2 rounded-lg transition-all duration-300 hover:shadow-glow text-sm font-medium"
+            >
+              Apply
+            </Link>
+          </motion.div>
+        </div>
       </div>
     </motion.div>
   )
