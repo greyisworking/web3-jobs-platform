@@ -1,25 +1,38 @@
+'use client'
+
 import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 import Pixelbara from './components/Pixelbara'
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg flex items-center justify-center px-4">
-      <div className="text-center max-w-lg">
-        <Pixelbara pose="smoking" size={220} className="mx-auto mb-8" />
+    <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg flex flex-col items-center justify-center px-6">
+      <div className="text-center max-w-md">
+        {/* Pixelbara with confused/lost expression */}
+        <div className="mb-8">
+          <Pixelbara pose="dejected" size={180} className="mx-auto" />
+        </div>
 
-        <p className="text-[100px] md:text-[140px] font-extralight leading-none tracking-[0.15em] text-a24-text dark:text-a24-dark-text select-none mb-4">
+        {/* 404 text */}
+        <h1 className="font-pixel text-6xl md:text-8xl text-a24-text dark:text-a24-dark-text mb-4 tracking-wider">
           404
+        </h1>
+
+        {/* Meme text */}
+        <p className="text-lg md:text-xl text-a24-muted dark:text-a24-dark-muted mb-2">
+          you&apos;re lost anon...
+        </p>
+        <p className="text-sm text-a24-muted/60 dark:text-a24-dark-muted/60 mb-10">
+          this page doesn&apos;t exist. probably rugged.
         </p>
 
-        <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted mb-8 tracking-wide">
-          gm... this page doesn&apos;t exist ser.
-        </p>
-
+        {/* Go home button */}
         <Link
           href="/"
-          className="group inline-flex items-center gap-2 text-[11px] font-light uppercase tracking-[0.4em] text-a24-text dark:text-a24-dark-text border border-a24-text dark:border-a24-dark-text px-8 py-3 hover:bg-a24-text hover:text-a24-surface dark:hover:bg-a24-dark-text dark:hover:text-a24-dark-bg transition-colors"
+          className="group inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.4em] font-light text-a24-text dark:text-a24-dark-text border border-a24-text dark:border-a24-dark-text px-8 py-4 hover:bg-a24-text hover:text-white dark:hover:bg-a24-dark-text dark:hover:text-a24-dark-bg transition-all duration-300"
         >
-          Back to Home
+          <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
+          go back home
         </Link>
       </div>
     </div>

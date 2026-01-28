@@ -78,7 +78,7 @@ export default function JobCard({ job, index }: JobCardProps) {
       >
         {/* NEW badge */}
         {isNewJob(job.postedDate) && (
-          <span className="absolute top-2 left-2 font-pixel text-[8px] text-neun-success uppercase tracking-wider animate-blink">
+          <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-neun-success/20 border border-neun-success text-neun-success font-pixel text-[8px] uppercase tracking-wider">
             NEW
           </span>
         )}

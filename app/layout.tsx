@@ -14,14 +14,56 @@ const vt323 = VT323({ subsets: ['latin'], weight: '400', display: 'swap', variab
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.io'),
-  title: 'Neun — Web3 Careers',
-  description: 'Web3 jobs aggregated from 40+ global and Korean sources',
+  title: {
+    default: 'NEUN — Web3 Careers from Top VC Portfolios',
+    template: '%s | NEUN',
+  },
+  description: 'Find Web3 jobs from a16z, Paradigm, Hashed portfolio companies. Curated blockchain, DeFi, and crypto careers from 40+ global and Korean sources.',
+  keywords: [
+    'Web3 jobs', 'crypto jobs', 'blockchain careers', 'DeFi jobs',
+    'a16z portfolio', 'Paradigm portfolio', 'Hashed portfolio',
+    'Web3 careers Korea', 'blockchain developer jobs', 'crypto startup jobs',
+    'NFT jobs', 'smart contract developer', 'Web3 remote jobs',
+  ],
+  authors: [{ name: 'NEUN' }],
+  creator: 'NEUN',
+  publisher: 'NEUN',
   openGraph: {
-    siteName: 'Neun',
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://neun.io',
+    siteName: 'NEUN',
+    title: 'NEUN — Web3 Careers from Top VC Portfolios',
+    description: 'Find Web3 jobs from a16z, Paradigm, Hashed portfolio companies. Curated blockchain, DeFi, and crypto careers.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'NEUN - Web3 Careers',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'NEUN — Web3 Careers from Top VC Portfolios',
+    description: 'Find Web3 jobs from a16z, Paradigm, Hashed portfolio companies.',
+    images: ['/og-image.png'],
+    creator: '@neun_io',
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
   },
 }
 

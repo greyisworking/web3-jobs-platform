@@ -23,8 +23,11 @@ export default function JobCardSkeleton() {
 export function JobCardSkeletonGrid({ count = 6 }: { count?: number }) {
   return (
     <div>
-      <div className="flex justify-center mb-6">
+      <div className="flex flex-col items-center mb-6">
         <Pixelbara pose="loading" size={80} />
+        <p className="mt-2 text-xs text-a24-muted dark:text-a24-dark-muted tracking-wide">
+          loading... plz wait ser
+        </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: count }, (_, i) => (
