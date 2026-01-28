@@ -18,16 +18,16 @@ import { PixelSend } from '../components/PixelIcons'
 const POSES: { id: PoseId; label: string; emoji: string }[] = [
   { id: 'blank', label: 'Basic', emoji: 'ㅡ_ㅡ' },
   { id: 'heroLaptop', label: 'Laptop', emoji: '💻' },
-  { id: 'bling', label: 'Sunglasses', emoji: '😎' },
+  { id: 'bling', label: 'Gold Chain', emoji: '⛓️' },
   { id: 'coffee', label: 'Coffee', emoji: '☕' },
   { id: 'sweating', label: 'Sweating', emoji: '😰' },
   { id: 'dejected', label: 'Sad', emoji: '😢' },
   { id: 'sleepy', label: 'Sleepy', emoji: '😴' },
   { id: 'eating', label: 'Eating', emoji: '🌿' },
   { id: 'ecosystem', label: 'On Alligator', emoji: '🐊' },
-  { id: 'smoking', label: 'Smoking', emoji: '🚬' },
-  { id: 'sparkle', label: 'Sparkle', emoji: '✨' },
+  { id: 'heart', label: 'Heart', emoji: '❤️' },
   { id: 'search', label: 'Search', emoji: '🔍' },
+  { id: 'coin', label: 'Coins', emoji: '🪙' },
 ]
 
 // ══════════════════════════════════════════════════════════
@@ -98,7 +98,7 @@ const TEXT_COLORS = [
 // ══════════════════════════════════════════════════════════
 
 export default function MemePage() {
-  const [selectedPose, setSelectedPose] = useState<PoseId>('bling')
+  const [selectedPose, setSelectedPose] = useState<PoseId>('blank')
   const [selectedBg, setSelectedBg] = useState('dark')
   const [topText, setTopText] = useState('')
   const [bottomText, setBottomText] = useState('')

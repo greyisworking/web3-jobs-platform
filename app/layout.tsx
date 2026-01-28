@@ -6,6 +6,7 @@ import Navigation from './components/Navigation'
 import PageTransition from './components/PageTransition'
 import KonamiEasterEgg from './components/KonamiEasterEgg'
 import TouchGrassReminder from './components/TouchGrassReminder'
+import { Web3Provider } from './components/Web3Provider'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], weight: ['200', '300', '400', '500', '700'], display: 'swap', variable: '--font-body' })
@@ -92,20 +93,22 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={`${inter.variable} ${caveat.variable} ${spaceGrotesk.variable} ${inter.className}`}>
-        <WebVitals />
-        <PageTransition />
-        <Navigation />
-        {children}
-        <KonamiEasterEgg />
-        <TouchGrassReminder />
-        <Toaster
-          position="bottom-right"
-          theme="system"
-          duration={3000}
-          toastOptions={{
-            className: 'bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text !rounded-none',
-          }}
-        />
+        <Web3Provider>
+          <WebVitals />
+          <PageTransition />
+          <Navigation />
+          {children}
+          <KonamiEasterEgg />
+          <TouchGrassReminder />
+          <Toaster
+            position="bottom-right"
+            theme="system"
+            duration={3000}
+            toastOptions={{
+              className: 'bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text !rounded-none',
+            }}
+          />
+        </Web3Provider>
       </body>
     </html>
   )

@@ -7,6 +7,7 @@ import { Menu, X, ChevronDown, Plus } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import ThemeToggle from './ThemeToggle'
 import NeunLogo from './NeunLogo'
+import { WalletConnect } from './WalletConnect'
 
 const ABOUT_SUBMENU = [
   { href: '/about/story', label: 'Our Story' },
@@ -78,6 +79,7 @@ export default function Navigation() {
             <Link href="/companies" className={linkClass(isActive('/companies'))}>Companies</Link>
             <Link href="/investors" className={linkClass(isActive('/investors'))}>Investors</Link>
             <Link href="/ecosystems" className={linkClass(isActive('/ecosystems'))}>Ecosystems</Link>
+            <Link href="/bounties" className={`${linkClass(isActive('/bounties'))} !text-amber-500 dark:!text-amber-400`}>Bounties</Link>
             <Link href="/meme" className={`${linkClass(isActive('/meme'))} !text-pink-500 dark:!text-pink-400`}>Meme</Link>
 
             {/* About with dropdown */}
@@ -122,7 +124,7 @@ export default function Navigation() {
           {/* Mobile: Logo */}
           <NeunLogo className="md:hidden" />
 
-          {/* Right: Post Job CTA + Auth + Theme */}
+          {/* Right: Post Job CTA + Wallet + Auth + Theme */}
           <div className="hidden md:flex items-center gap-4">
             {/* Post a Job CTA */}
             <Link
@@ -132,6 +134,9 @@ export default function Navigation() {
               <Plus className="w-3 h-3" />
               Post Job
             </Link>
+
+            {/* Wallet Connect */}
+            <WalletConnect />
 
             {isLoggedIn ? (
               <Link href="/account" className={linkClass(isActive('/account'))}>Account</Link>
@@ -162,6 +167,7 @@ export default function Navigation() {
               <Link href="/companies" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/companies'))} py-2`}>Companies</Link>
               <Link href="/investors" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/investors'))} py-2`}>Investors</Link>
               <Link href="/ecosystems" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/ecosystems'))} py-2`}>Ecosystems</Link>
+              <Link href="/bounties" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/bounties'))} py-2 !text-amber-500`}>Bounties</Link>
               <Link href="/meme" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/meme'))} py-2 !text-pink-500`}>Meme</Link>
               <Link href="/articles" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/articles'))} py-2`}>Articles</Link>
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-2 mt-1">
