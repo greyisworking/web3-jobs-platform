@@ -98,7 +98,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
   const tags = parseTags(job.tags)
 
   return (
-    <div className="min-h-screen bg-[#FDFCF9] dark:bg-a24-dark-bg">
+    <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-8">
         {/* Back link */}
         <Link
@@ -111,7 +111,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
 
         {/* Company & Title */}
         <div>
-          <p className="text-2xl font-extralight uppercase tracking-[0.25em] text-a24-text dark:text-a24-dark-text mb-3">
+          <p className="text-2xl font-light uppercase tracking-[0.25em] text-a24-text dark:text-a24-dark-text mb-3">
             {cleanCompanyName(job.company)}
           </p>
           <h1 className="text-base font-light text-a24-text dark:text-a24-dark-text mb-4">

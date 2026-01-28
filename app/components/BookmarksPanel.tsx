@@ -35,7 +35,7 @@ export default function BookmarksPanel({ open, onClose }: BookmarksPanelProps) {
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-a24-border dark:border-a24-dark-border">
-              <h2 className="text-sm font-extralight uppercase tracking-[0.35em] text-a24-text dark:text-a24-dark-text">
+              <h2 className="text-sm font-light uppercase tracking-[0.35em] text-a24-text dark:text-a24-dark-text">
                 Saved
               </h2>
               <button

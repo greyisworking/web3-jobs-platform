@@ -3,7 +3,7 @@ export default function Footer() {
     <footer className="border-t border-a24-border dark:border-a24-dark-border">
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="flex flex-col items-center text-center space-y-4">
-          <span className="text-sm font-extralight uppercase tracking-[0.5em] text-a24-text dark:text-a24-dark-text">
+          <span className="text-sm font-light uppercase tracking-[0.5em] text-a24-text dark:text-a24-dark-text">
             N E U N
           </span>
           <div className="space-y-1">

@@ -9,7 +9,7 @@ export default function Error({
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg flex items-center justify-center px-4">
       <div className="text-center max-w-lg">
-        <p className="text-4xl font-extralight uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text mb-8">
+        <p className="text-4xl font-light uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text mb-8">
           ERROR
         </p>
 

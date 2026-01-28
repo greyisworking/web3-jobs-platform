@@ -49,19 +49,19 @@ module.exports = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
-  			// ── Warm cream (LAVEREE-style) ──
-  			'a24-bg': '#FDFCF9',
+  			// ── Cool neutral (LAVEREE × Krafton) ──
+  			'a24-bg': '#F9FAFB',
   			'a24-surface': '#FFFFFF',
-  			'a24-text': '#1a1a1a',
-  			'a24-muted': '#999999',
-  			'a24-border': '#e5e7eb',
-  			'a24-accent': '#1a1a1a',
-  			// ── Dark mode ──
-  			'a24-dark-bg': '#111111',
-  			'a24-dark-surface': '#1a1a1a',
-  			'a24-dark-text': '#e5e5e5',
-  			'a24-dark-muted': '#666666',
-  			'a24-dark-border': '#2a2a2a',
+  			'a24-text': '#111827',
+  			'a24-muted': '#6B7280',
+  			'a24-border': '#E5E7EB',
+  			'a24-accent': '#111827',
+  			// ── Dark mode (navy-black) ──
+  			'a24-dark-bg': '#0B0F19',
+  			'a24-dark-surface': '#151921',
+  			'a24-dark-text': '#E2E8F0',
+  			'a24-dark-muted': '#64748B',
+  			'a24-dark-border': '#1E293B',
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

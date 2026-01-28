@@ -131,7 +131,7 @@ function CareersContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFCF9] dark:bg-a24-dark-bg">
+      <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
         <div className="max-w-6xl mx-auto px-6">
           <SubpageHeader title="C A R E E R S" />
         </div>
@@ -143,7 +143,7 @@ function CareersContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFCF9] dark:bg-a24-dark-bg">
+    <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
       <div className="max-w-6xl mx-auto px-6">
         <SubpageHeader title="C A R E E R S" />
       </div>
@@ -179,15 +179,15 @@ function CareersContent() {
         <ScrollReveal delay={200}>
           <div className="flex items-baseline gap-8 mb-10 pb-6 border-b border-a24-border dark:border-a24-dark-border">
             <div>
-              <span className="text-3xl font-extralight text-a24-text dark:text-a24-dark-text">{stats.total}</span>
+              <span className="text-3xl font-light text-a24-text dark:text-a24-dark-text">{stats.total}</span>
               <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">positions</span>
             </div>
             <div>
-              <span className="text-3xl font-extralight text-a24-text dark:text-a24-dark-text">{stats.global}</span>
+              <span className="text-3xl font-light text-a24-text dark:text-a24-dark-text">{stats.global}</span>
               <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">global</span>
             </div>
             <div>
-              <span className="text-3xl font-extralight text-a24-text dark:text-a24-dark-text">{stats.korea}</span>
+              <span className="text-3xl font-light text-a24-text dark:text-a24-dark-text">{stats.korea}</span>
               <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">korea</span>
             </div>
           </div>
@@ -213,7 +213,7 @@ function CareersContent() {
         {/* Jobs Grid */}
         <div className="mb-16">
           <div className="flex justify-between items-baseline mb-2">
-            <h2 className="text-lg font-extralight uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">
+            <h2 className="text-lg font-light uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">
               Open Positions
             </h2>
             <span className="text-xs text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider">
@@ -273,7 +273,7 @@ function CareersContent() {
 export default function CareersPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#FDFCF9] dark:bg-a24-dark-bg">
+      <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
         <main className="max-w-6xl mx-auto px-6 py-12">
           <JobCardSkeletonGrid count={9} />
         </main>

@@ -40,7 +40,7 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#FDFCF9] dark:bg-a24-dark-bg">
+    <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
       <IntroAnimation />
 
       {/* Hero Section */}
@@ -64,7 +64,7 @@ export default function Home() {
           )}
 
           {/* Hero headline - always one line */}
-          <h1 className="whitespace-nowrap text-[clamp(1.2rem,4.2vw,4.5rem)] font-extralight uppercase tracking-[0.1em] sm:tracking-[0.15em] md:tracking-[0.2em] lg:tracking-[0.25em] leading-[1.1] text-a24-text dark:text-a24-dark-text mb-12">
+          <h1 className="whitespace-nowrap text-[clamp(1.2rem,4.2vw,4.5rem)] font-light uppercase tracking-[0.1em] sm:tracking-[0.15em] md:tracking-[0.2em] lg:tracking-[0.25em] leading-[1.1] text-a24-text dark:text-a24-dark-text mb-12">
             FIND YOUR{' '}
             <em className="font-script not-italic normal-case text-[1.4em] tracking-[0.02em] leading-none">
               Next
@@ -86,7 +86,7 @@ export default function Home() {
       <ScrollReveal>
         <section className="max-w-6xl mx-auto px-6 pb-28">
           <div className="flex justify-between items-baseline mb-2">
-            <h2 className="text-lg md:text-xl font-extralight uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">
+            <h2 className="text-lg md:text-xl font-light uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">
               Featured Positions
             </h2>
             <Link

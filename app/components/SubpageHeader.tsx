@@ -19,7 +19,7 @@ export default function SubpageHeader({ title, tabs }: SubpageHeaderProps) {
   return (
     <div className="pt-16 pb-10 md:pt-20 md:pb-12">
       {/* 1-depth: Large centered title */}
-      <h1 className="text-center text-2xl md:text-3xl lg:text-4xl font-extralight uppercase tracking-[0.4em] text-a24-muted/70 dark:text-a24-dark-muted/70 mb-8">
+      <h1 className="text-center text-2xl md:text-3xl lg:text-4xl font-light uppercase tracking-[0.4em] text-a24-muted/70 dark:text-a24-dark-muted/70 mb-8">
         {title}
       </h1>
 

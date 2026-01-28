@@ -33,7 +33,7 @@ export default function PageTransition() {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[9998] bg-[#FDFCF9] dark:bg-[#111111] pointer-events-none"
+      className="fixed inset-0 z-[9998] bg-a24-bg dark:bg-a24-dark-bg pointer-events-none"
       initial={{ y: '-100%' }}
       animate={controls}
     />

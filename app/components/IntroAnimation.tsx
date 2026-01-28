@@ -59,7 +59,7 @@ export default function IntroAnimation() {
     <AnimatePresence>
       <motion.div
         key="intro-overlay"
-        className="fixed inset-0 z-[9999] bg-[#FDFCF9] dark:bg-a24-dark-bg flex items-center justify-center overflow-hidden"
+        className="fixed inset-0 z-[9999] bg-a24-bg dark:bg-a24-dark-bg flex items-center justify-center overflow-hidden"
         animate={{ opacity: phase === 'fadeout' ? 0 : 1 }}
         transition={{ duration: 0.5, ease: 'easeInOut' }}
       >

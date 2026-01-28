@@ -38,7 +38,7 @@ export default function JobCard({ job, index }: JobCardProps) {
         onClick={() => {
           trackEvent('job_card_click', { job_id: job.id, title: job.title, company: job.company })
         }}
-        className="block p-6 h-[180px] bg-white dark:bg-a24-dark-surface border border-[#e5e7eb] dark:border-a24-dark-border -mt-px -ml-px transition-all duration-300 ease-out hover:-translate-y-1 group flex flex-col"
+        className="block p-6 h-[180px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border -mt-px -ml-px transition-all duration-300 ease-out hover:-translate-y-1 group flex flex-col"
       >
         {/* Number + Company */}
         <div className="flex items-start justify-between mb-2">

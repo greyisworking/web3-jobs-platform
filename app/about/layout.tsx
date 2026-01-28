@@ -15,7 +15,7 @@ const ABOUT_TABS = [
 
 export default function AboutLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#FDFCF9] dark:bg-a24-dark-bg">
+    <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
       <div className="max-w-3xl mx-auto px-6">
         <SubpageHeader title="A B O U T" tabs={ABOUT_TABS} />
       </div>

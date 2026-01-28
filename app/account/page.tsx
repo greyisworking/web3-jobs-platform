@@ -83,7 +83,7 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFCF9] dark:bg-a24-dark-bg">
+      <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
         <main className="max-w-2xl mx-auto px-6 py-20 md:py-32">
           <div className="text-center">
             <div className="w-6 h-6 border border-a24-muted dark:border-a24-dark-muted border-t-a24-text dark:border-t-a24-dark-text rounded-full animate-spin mx-auto" />
@@ -94,10 +94,10 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFCF9] dark:bg-a24-dark-bg">
+    <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
       <main className="max-w-2xl mx-auto px-6 py-20 md:py-32">
         <div className="text-center mb-12">
-          <h1 className="text-2xl font-extralight uppercase tracking-[0.4em] text-a24-text dark:text-a24-dark-text mb-3">
+          <h1 className="text-2xl font-light uppercase tracking-[0.4em] text-a24-text dark:text-a24-dark-text mb-3">
             Account
           </h1>
           <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mx-auto" />

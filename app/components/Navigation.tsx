@@ -65,7 +65,7 @@ export default function Navigation() {
 
   return (
     <>
-      <header className={`sticky top-0 z-50 bg-[#FDFCF9]/95 dark:bg-a24-dark-surface/95 backdrop-blur-sm transition-all duration-300 ${scrolled ? 'border-b border-a24-border dark:border-a24-dark-border' : 'border-b border-transparent'}`}>
+      <header className={`sticky top-0 z-50 bg-a24-bg/95 dark:bg-a24-dark-surface/95 backdrop-blur-sm transition-all duration-300 ${scrolled ? 'border-b border-a24-border dark:border-a24-dark-border' : 'border-b border-transparent'}`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           {/* Left: Logo + Nav */}
           <div className="hidden md:flex items-center gap-8">
@@ -101,7 +101,7 @@ export default function Navigation() {
               {/* Dropdown */}
               {aboutOpen && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3">
-                  <div className="bg-white dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border py-2 min-w-[140px]">
+                  <div className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border py-2 min-w-[140px]">
                     {ABOUT_SUBMENU.map(({ href, label }) => (
                       <Link
                         key={href}
