@@ -1,3 +1,7 @@
+'use client'
+
+import { WalkingPixelbara } from './Pixelbara'
+
 function ShimmerBlock({ className }: { className?: string }) {
   return (
     <div
@@ -18,10 +22,15 @@ export default function JobCardSkeleton() {
 
 export function JobCardSkeletonGrid({ count = 6 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: count }, (_, i) => (
-        <JobCardSkeleton key={i} />
-      ))}
+    <div>
+      <div className="flex justify-center mb-6">
+        <WalkingPixelbara size={80} />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: count }, (_, i) => (
+          <JobCardSkeleton key={i} />
+        ))}
+      </div>
     </div>
   )
 }

@@ -77,10 +77,15 @@ module.exports = {
   			shimmer: {
   				'0%': { backgroundPosition: '-200% 0' },
   				'100%': { backgroundPosition: '200% 0' }
+  			},
+  			'scroll-left': {
+  				'0%': { transform: 'translateX(0)' },
+  				'100%': { transform: 'translateX(-50%)' }
   			}
   		},
   		animation: {
-  			shimmer: 'shimmer 3s ease-in-out infinite'
+  			shimmer: 'shimmer 3s ease-in-out infinite',
+  			'scroll-left': 'scroll-left 30s linear infinite'
   		}
   	}
   },

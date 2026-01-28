@@ -1,15 +1,17 @@
+'use client'
+
+import Pixelbara from './Pixelbara'
+
 export default function Footer() {
   return (
     <footer className="border-t border-a24-border dark:border-a24-dark-border">
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="flex flex-col items-center text-center space-y-4">
-          <span className="text-sm font-light uppercase tracking-[0.5em] text-a24-text dark:text-a24-dark-text">
+          <Pixelbara pose="main" size={60} clickable />
+          <span className="text-sm font-bold uppercase tracking-[0.5em] text-a24-text dark:text-a24-dark-text">
             N E U N
           </span>
           <div className="space-y-1">
-            <p className="text-[11px] font-light text-a24-muted dark:text-a24-dark-muted tracking-wide">
-              대표 김다혜
-            </p>
             <p className="text-[11px] font-light text-a24-muted dark:text-a24-dark-muted tracking-wide">
               neun@neun.io
             </p>

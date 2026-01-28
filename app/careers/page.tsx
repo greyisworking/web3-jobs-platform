@@ -9,7 +9,7 @@ import SearchWithSuggestions from '../components/SearchWithSuggestions'
 import JobCard from '../components/JobCard'
 import VCBackersDashboard from '../components/VCBackersDashboard'
 import { JobCardSkeletonGrid } from '../components/JobCardSkeleton'
-import SubpageHeader from '../components/SubpageHeader'
+import Pixelbara from '../components/Pixelbara'
 import ScrollReveal from '../components/ScrollReveal'
 import Footer from '../components/Footer'
 
@@ -40,6 +40,7 @@ function CareersContent() {
     sector: '',
     backer: '',
     techStack: '',
+    tier1VCOnly: false,
   })
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
@@ -103,6 +104,7 @@ function CareersContent() {
       filtered = filtered.filter((job) => (job.title ?? '').toLowerCase().includes(tech) || (job.category ?? '').toLowerCase().includes(tech))
     }
     if (vc) filtered = filtered.filter((job) => job.backers?.includes(vc))
+    if (f.tier1VCOnly) filtered = filtered.filter((job) => job.backers && job.backers.length > 0)
 
     setFilteredJobs(filtered)
   }
@@ -132,10 +134,13 @@ function CareersContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-        <div className="max-w-6xl mx-auto px-6">
-          <SubpageHeader title="C A R E E R S" />
-        </div>
-        <main className="max-w-6xl mx-auto px-6 pb-12">
+        <main className="max-w-6xl mx-auto px-6 pt-24 pb-12">
+          <div className="flex flex-col items-center justify-center py-16">
+            <Pixelbara pose="loading" size={160} />
+            <p className="mt-4 text-sm font-light text-a24-muted dark:text-a24-dark-muted tracking-wide">
+              brewing jobs...
+            </p>
+          </div>
           <JobCardSkeletonGrid count={9} />
         </main>
       </div>
@@ -144,17 +149,21 @@ function CareersContent() {
 
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <div className="max-w-6xl mx-auto px-6">
-        <SubpageHeader title="C A R E E R S" />
-      </div>
+      <main className="max-w-6xl mx-auto px-6 pt-24">
+        {/* Compact inline stats */}
+        <div className="mb-6">
+          <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted tracking-wide">
+            <span className="text-a24-text dark:text-a24-dark-text font-medium">{stats.total}</span> positions
+            {' | '}
+            <span className="text-a24-text dark:text-a24-dark-text font-medium">{stats.global}</span> global
+            {' | '}
+            <span className="text-a24-text dark:text-a24-dark-text font-medium">{stats.korea}</span> korea
+          </p>
+        </div>
 
-      <main className="max-w-6xl mx-auto px-6">
         {/* Search */}
         <ScrollReveal>
-          <div className="mb-10">
-            <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted mb-6">
-              Web3 업계의 모든 채용 공고를 한곳에서 찾아보세요.
-            </p>
+          <div className="mb-8">
             <div className="max-w-lg">
               <SearchWithSuggestions onSearch={handleSearch} jobs={jobs} />
             </div>
@@ -175,41 +184,6 @@ function CareersContent() {
           />
         </ScrollReveal>
 
-        {/* Stats line */}
-        <ScrollReveal delay={200}>
-          <div className="flex items-baseline gap-8 mb-10 pb-6 border-b border-a24-border dark:border-a24-dark-border">
-            <div>
-              <span className="text-3xl font-light text-a24-text dark:text-a24-dark-text">{stats.total}</span>
-              <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">positions</span>
-            </div>
-            <div>
-              <span className="text-3xl font-light text-a24-text dark:text-a24-dark-text">{stats.global}</span>
-              <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">global</span>
-            </div>
-            <div>
-              <span className="text-3xl font-light text-a24-text dark:text-a24-dark-text">{stats.korea}</span>
-              <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">korea</span>
-            </div>
-          </div>
-        </ScrollReveal>
-
-        {/* Source stats */}
-        <ScrollReveal delay={250}>
-          <div className="mb-12">
-            <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
-              Sources
-            </h2>
-            <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
-            <div className="flex flex-wrap gap-x-6 gap-y-1">
-              {stats.sources.map((source) => (
-                <span key={source.source} className="text-xs text-a24-muted dark:text-a24-dark-muted">
-                  {source.source} <span className="text-a24-text dark:text-a24-dark-text font-medium">{source._count}</span>
-                </span>
-              ))}
-            </div>
-          </div>
-        </ScrollReveal>
-
         {/* Jobs Grid */}
         <div className="mb-16">
           <div className="flex justify-between items-baseline mb-2">
@@ -224,12 +198,11 @@ function CareersContent() {
 
           {filteredJobs.length === 0 ? (
             <div className="py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
+              <Pixelbara pose="empty" size={140} className="mx-auto mb-4" />
               <p className="text-a24-muted dark:text-a24-dark-muted text-sm">
-                {jobs.length === 0 ? (
-                  <>No jobs found yet. <code className="text-a24-text dark:text-a24-dark-text">npm run crawl</code> to collect job data.</>
-                ) : (
-                  'No jobs match your filters.'
-                )}
+                {jobs.length === 0
+                  ? 'No jobs found yet. ngmi.'
+                  : 'No jobs match your filters. probably ngmi.'}
               </p>
             </div>
           ) : (

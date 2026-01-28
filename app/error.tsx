@@ -1,5 +1,7 @@
 'use client'
 
+import Pixelbara from './components/Pixelbara'
+
 export default function Error({
   reset,
 }: {
@@ -9,12 +11,14 @@ export default function Error({
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg flex items-center justify-center px-4">
       <div className="text-center max-w-lg">
-        <p className="text-4xl font-light uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text mb-8">
+        <Pixelbara pose="empty" size={200} className="mx-auto mb-8" />
+
+        <p className="text-4xl font-light uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text mb-4">
           ERROR
         </p>
 
         <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted mb-8 tracking-wide">
-          Something went wrong. Please try again.
+          ngmi... but you can try again.
         </p>
 
         <button

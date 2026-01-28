@@ -12,6 +12,7 @@ export interface SmartFilters {
   sector: string
   backer: string
   techStack: string
+  tier1VCOnly: boolean
 }
 
 interface SmartFilterBarProps {
@@ -56,6 +57,7 @@ const emptyFilters: SmartFilters = {
   sector: '',
   backer: '',
   techStack: '',
+  tier1VCOnly: false,
 }
 
 export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) {
@@ -69,6 +71,7 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
     sector: searchParams.get('sector') ?? '',
     backer: searchParams.get('backer') ?? '',
     techStack: searchParams.get('techStack') ?? '',
+    tier1VCOnly: searchParams.get('tier1vc') === 'true',
   }))
 
   useEffect(() => {
@@ -83,7 +86,11 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
     (next: SmartFilters) => {
       const params = new URLSearchParams()
       for (const [key, value] of Object.entries(next)) {
-        if (value) params.set(key, value)
+        if (key === 'tier1VCOnly') {
+          if (value) params.set('tier1vc', 'true')
+        } else if (value) {
+          params.set(key, value as string)
+        }
       }
       const qs = params.toString()
       router.replace(qs ? `?${qs}` : '/careers', { scroll: false })
@@ -91,7 +98,7 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
     [router]
   )
 
-  const handleChange = (key: keyof SmartFilters, value: string) => {
+  const handleChange = (key: keyof Omit<SmartFilters, 'tier1VCOnly'>, value: string) => {
     const next = { ...filters, [key]: filters[key] === value ? '' : value }
     setFilters(next)
     syncToURL(next)
@@ -99,11 +106,19 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
     trackEvent('filter_use', { filter_key: key, filter_value: next[key] || '(cleared)' })
   }
 
-  const clearFilter = (key: keyof SmartFilters) => {
-    const next = { ...filters, [key]: '' }
+  const handleTier1Toggle = () => {
+    const next = { ...filters, tier1VCOnly: !filters.tier1VCOnly }
     setFilters(next)
     syncToURL(next)
     onFilterChange(next)
+    trackEvent('filter_use', { filter_key: 'tier1VCOnly', filter_value: String(next.tier1VCOnly) })
+  }
+
+  const clearFilter = (key: keyof SmartFilters) => {
+    const next = { ...filters, [key]: key === 'tier1VCOnly' ? false : '' }
+    setFilters(next as SmartFilters)
+    syncToURL(next as SmartFilters)
+    onFilterChange(next as SmartFilters)
   }
 
   const clearAll = () => {
@@ -112,12 +127,42 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
     onFilterChange(emptyFilters)
   }
 
-  const activeCount = Object.values(filters).filter(Boolean).length
+  const activeCount = Object.entries(filters).filter(([k, v]) => {
+    if (k === 'tier1VCOnly') return v === true
+    return Boolean(v)
+  }).length
 
   return (
-    <div className="mb-10 pb-6 border-b border-a24-border dark:border-a24-dark-border">
+    <div className="mb-8 pb-4 border-b border-a24-border dark:border-a24-dark-border">
+      {/* Tier 1 VC Toggle */}
+      <div className="flex items-center justify-between mb-4 py-3 px-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
+        <div>
+          <span className="text-xs font-medium uppercase tracking-[0.2em] text-a24-text dark:text-a24-dark-text">
+            Tier 1 VC Only
+          </span>
+          <span className="ml-2 text-[10px] text-a24-muted dark:text-a24-dark-muted">
+            Show only VC-backed roles
+          </span>
+        </div>
+        <button
+          onClick={handleTier1Toggle}
+          className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
+            filters.tier1VCOnly
+              ? 'bg-a24-text dark:bg-a24-dark-text'
+              : 'bg-a24-border dark:bg-a24-dark-border'
+          }`}
+          aria-label="Toggle Tier 1 VC filter"
+        >
+          <span
+            className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white dark:bg-a24-dark-bg transition-transform duration-200 ${
+              filters.tier1VCOnly ? 'translate-x-5' : 'translate-x-0'
+            }`}
+          />
+        </button>
+      </div>
+
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-3">
         <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted">
           Filter
           {activeCount > 0 && (
@@ -156,16 +201,16 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
               {FILTER_CONFIGS.map(({ key, label, options }) => (
                 <div key={key}>
-                  <label className="block text-[11px] uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted mb-1.5">
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted mb-1">
                     {label}
                   </label>
                   <select
                     value={filters[key]}
                     onChange={(e) => handleChange(key, e.target.value)}
-                    className="w-full px-3 py-2 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface text-a24-text dark:text-a24-dark-text text-sm focus:ring-1 focus:ring-a24-text dark:focus:ring-a24-dark-text outline-none"
+                    className="w-full px-2 py-1.5 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface text-a24-text dark:text-a24-dark-text text-sm focus:ring-1 focus:ring-a24-text dark:focus:ring-a24-dark-text outline-none"
                   >
                     <option value="">All</option>
                     {options.map((opt) => (
@@ -188,8 +233,25 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-4 flex flex-wrap gap-2"
+            className="mt-3 flex flex-wrap gap-2"
           >
+            {filters.tier1VCOnly && (
+              <motion.span
+                layout
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs text-a24-text dark:text-a24-dark-text border border-a24-border dark:border-a24-dark-border"
+              >
+                Tier 1 VC Only
+                <button
+                  onClick={() => clearFilter('tier1VCOnly')}
+                  className="hover:text-a24-accent transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </motion.span>
+            )}
             {FILTER_CONFIGS.map(({ key, label }) => {
               const value = filters[key]
               if (!value) return null
