@@ -9,6 +9,11 @@ import { trackEvent } from '@/lib/analytics'
 import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import BookmarkButton from '@/app/components/BookmarkButton'
 import GlowBadge from '@/app/components/GlowBadge'
+import LinkedInButton from '@/app/components/LinkedInButton'
+import { TrustCheckList } from '@/app/components/TrustBadge'
+import { TokenInfoSection, useTokenData } from '@/app/components/TokenInfo'
+import { calculateTrustScore } from '@/lib/trust-check'
+import { findPriorityCompany } from '@/lib/priority-companies'
 import {
   VerifiedBadge,
   PreIPOBadge,
@@ -70,6 +75,25 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
   useEffect(() => {
     trackEvent('job_view', { job_id: job.id, title: job.title, company: job.company, source: 'page' })
   }, [job.id, job.title, job.company])
+
+  // Get priority company data for trust check
+  const priorityCompany = findPriorityCompany(job.company)
+
+  // Calculate trust score
+  const trustScore = calculateTrustScore({
+    name: job.company,
+    backers: job.backers,
+    hasToken: priorityCompany?.hasToken,
+    isDoxxed: true, // Assume doxxed if in priority list
+    isAudited: undefined, // Unknown
+  })
+
+  // Fetch token/TVL data
+  const { tokenInfo, tvlInfo, loading: tokenLoading } = useTokenData({
+    company: job.company,
+    hasToken: priorityCompany?.hasToken,
+    sector: priorityCompany?.sector || job.sector || undefined,
+  })
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
@@ -273,6 +297,30 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
               </span>
               <BookmarkButton job={{ id: job.id, title: job.title, company: job.company }} />
             </div>
+
+            {/* LinkedIn search */}
+            <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
+              <LinkedInButton
+                company={job.company}
+                title={job.title}
+                location={job.location}
+                variant="outline"
+                className="w-full justify-center"
+              />
+            </div>
+
+            {/* Trust Check */}
+            <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
+              <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-3">
+                Trust Check
+              </h3>
+              <TrustCheckList score={trustScore} />
+            </div>
+
+            {/* Token/TVL Info */}
+            {!tokenLoading && (tokenInfo || tvlInfo) && (
+              <TokenInfoSection tokenInfo={tokenInfo} tvlInfo={tvlInfo} />
+            )}
 
             {/* VC Backers in sidebar */}
             {job.backers && job.backers.length > 0 && (

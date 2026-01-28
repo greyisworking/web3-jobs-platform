@@ -69,14 +69,9 @@ export default function Navigation() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           {/* Left: Logo + Nav */}
           <div className="hidden md:flex items-center gap-8">
-            {/* Logo with Korean hover crossfade */}
-            <Link href="/" className="relative group text-xs font-extralight uppercase tracking-[0.5em] text-a24-text dark:text-a24-dark-text select-none mr-2 overflow-hidden">
-              <span className="inline-block transition-all duration-300 ease-out group-hover:opacity-0 group-hover:-translate-y-1">
-                N E U N
-              </span>
-              <span className="absolute inset-0 flex items-center justify-center font-script text-lg tracking-normal opacity-0 translate-y-1 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-y-0">
-                는
-              </span>
+            {/* Logo */}
+            <Link href="/" className="text-xs font-extralight uppercase tracking-[0.5em] text-a24-text dark:text-a24-dark-text select-none mr-2">
+              N E U N
             </Link>
 
             <Link href="/" className={linkClass(isActive('/'))}>Home</Link>

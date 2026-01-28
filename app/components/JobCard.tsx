@@ -10,6 +10,7 @@ import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import BookmarkButton from './BookmarkButton'
 import { MiniPixelbara } from './Pixelbara'
 import { PixelStar } from './PixelIcons'
+import { MiniTrustBadge } from './TrustBadge'
 
 function isNewJob(postedDate: Date | string | null | undefined): boolean {
   if (!postedDate) return false
@@ -83,11 +84,14 @@ export default function JobCard({ job, index }: JobCardProps) {
           </span>
         )}
 
-        {/* Mini pixelbara + meme tooltip on hover */}
+        {/* Trust badge + Mini pixelbara on hover */}
         {hovered && (
           <>
-            <div className="absolute bottom-2 right-2 opacity-30 transition-opacity">
-              <MiniPixelbara />
+            <div className="absolute bottom-2 right-2 flex items-center gap-2">
+              <MiniTrustBadge backers={job.backers} />
+              <div className="opacity-30">
+                <MiniPixelbara />
+              </div>
             </div>
             <span className="absolute top-1 right-10 text-[9px] text-a24-muted/50 dark:text-a24-dark-muted/50 italic pointer-events-none">
               it&apos;s giving... job
