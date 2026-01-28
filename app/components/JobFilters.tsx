@@ -51,7 +51,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
   }
 
   return (
-    <div className="backdrop-blur-md bg-white/70 dark:bg-white/10 rounded-xl border-hairline border-white/20 shadow-glass p-6 mb-8">
+    <div className="bg-white dark:bg-sub-dark-surface border border-sub-border dark:border-sub-border-dark p-6 mb-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           Filter Jobs

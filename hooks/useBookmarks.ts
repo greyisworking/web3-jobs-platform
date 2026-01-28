@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback, useSyncExternalStore } from 'react'
-import { toast } from '@/hooks/use-toast'
+import { useEffect, useCallback, useSyncExternalStore } from 'react'
+import { toast } from 'sonner'
 
 const STORAGE_KEY = 'web3-bookmarks'
 
@@ -103,8 +103,7 @@ export function useBookmarks(): UseBookmarksReturn {
 
       if (exists) {
         next = prev.filter((b) => b.jobId !== job.id)
-        toast({
-          title: '북마크 제거',
+        toast.success('북마크 제거', {
           description: `${job.title} 북마크가 해제되었습니다`,
         })
       } else {
@@ -117,8 +116,7 @@ export function useBookmarks(): UseBookmarksReturn {
             company: job.company,
           },
         ]
-        toast({
-          title: '북마크 추가',
+        toast.success('북마크 추가', {
           description: `${job.title} 북마크에 저장되었습니다`,
         })
       }

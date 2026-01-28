@@ -49,41 +49,44 @@ module.exports = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
-  			// Web3 색상 팔레트
-  			web3: {
-  				'deep-navy': '#0a0f1e',
-  				midnight: '#111827',
-  				charcoal: '#1f2937',
-  				'ice-white': '#f8fafc',
-  				frost: '#e2e8f0',
-  				'ice-blue': '#38bdf8',
-  				'electric-blue': '#3b82f6',
-  				'neon-cyan': '#22d3ee',
-  			}
+  			// ── THE SUBSTANCE — exact movie colors ──
+  			'sub-sky': '#89CFF0',        // egg poster sky blue
+  			'sub-hotpink': '#FF5DA2',    // pink studio scenes
+  			'sub-cream': '#FFFEF0',      // locker room cream
+  			'sub-offwhite': '#F5F5F5',   // tile walls off-white
+  			'sub-coral': '#F4A4A4',      // lips coral pink
+  			'sub-red': '#E63B2E',        // red doors/floors
+  			'sub-deepred': '#8B0A1A',    // red poster deep red
+  			'sub-vial': '#BFFF00',       // neon vial yellow-green
+  			'sub-charcoal': '#2D2D2D',   // clinical dark
+  			'sub-muted': '#6B7280',      // gray muted text
+  			'sub-border': '#E0E0E0',     // clinical border
+  			'sub-border-dark': '#3a3a3a',
+  			// ── Tile card backgrounds (direct movie colors) ──
+  			'tile-1': '#89CFF0',         // sky blue
+  			'tile-2': '#FF5DA2',         // hot pink
+  			'tile-3': '#FFFEF0',         // cream
+  			'tile-4': '#F4A4A4',         // coral
+  			'tile-5': '#F5F5F5',         // off white
+  			// ── Tile card backgrounds (dark mode — deep muted versions) ──
+  			'tile-1-dark': '#1a2e3d',
+  			'tile-2-dark': '#3d1a2a',
+  			'tile-3-dark': '#2a2a1e',
+  			'tile-4-dark': '#3d2424',
+  			'tile-5-dark': '#252525',
+  			// ── Dark mode surfaces ──
+  			'sub-dark-bg': '#0f0f0f',
+  			'sub-dark-surface': '#1a1a1a',
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
-  		// 극세선 테두리 (0.5px)
-  		borderWidth: {
-  			hairline: '0.5px'
+  		fontFamily: {
+  			heading: ['var(--font-heading)', 'sans-serif'],
+  			body: ['var(--font-body)', 'sans-serif'],
   		},
-  		// 추가 블러 단계
-  		backdropBlur: {
-  			xs: '2px',
-  			'2xl': '40px'
-  		},
-  		// 글로우/그림자 효과
-  		boxShadow: {
-  			glow: '0 0 15px rgba(59, 130, 246, 0.3)',
-  			'glow-lg': '0 0 30px rgba(59, 130, 246, 0.4)',
-  			'glow-cyan': '0 0 15px rgba(34, 211, 238, 0.3)',
-  			'glow-purple': '0 0 15px rgba(168, 85, 247, 0.3)',
-  			glass: '0 8px 32px rgba(0, 0, 0, 0.1)',
-  		},
-  		// 쉬머 애니메이션
   		keyframes: {
   			shimmer: {
   				'0%': { backgroundPosition: '-200% 0' },

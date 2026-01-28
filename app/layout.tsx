@@ -1,16 +1,29 @@
-import type { Metadata } from 'next'
-import { Toaster } from '@/components/ui/toaster'
+import type { Metadata, Viewport } from 'next'
+import { Inter, Bebas_Neue } from 'next/font/google'
+import { Toaster } from 'sonner'
+import WebVitals from './components/WebVitals'
 import './globals.css'
 
+const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], display: 'swap', variable: '--font-body' })
+const bebasNeue = Bebas_Neue({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-heading' })
+
 export const metadata: Metadata = {
-  title: 'Web3 Jobs Platform - 글로벌 & 국내 Web3 채용 공고',
-  description: '40개 이상의 사이트에서 자동으로 수집한 최신 Web3 채용 정보',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.io'),
+  title: '는 neun — Web3 Jobs',
+  description: 'Web3 jobs aggregated from 40+ global and Korean sources',
+  openGraph: {
+    siteName: '는 neun',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
-/**
- * 테마 초기화 스크립트 — React 하이드레이션 전에 실행
- * FOUC(Flash of Unstyled Content) 방지를 위해 blocking script 사용
- */
+export const viewport: Viewport = {
+  viewportFit: 'cover',
+}
+
 const themeScript = `
 (function() {
   var stored = localStorage.getItem('theme');
@@ -31,9 +44,17 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>
+      <body className={`${inter.variable} ${bebasNeue.variable} ${inter.className}`}>
+        <WebVitals />
         {children}
-        <Toaster />
+        <Toaster
+          position="bottom-right"
+          theme="system"
+          duration={3000}
+          toastOptions={{
+            className: 'bg-white dark:bg-sub-dark-surface border border-sub-border dark:border-sub-border-dark text-sub-charcoal dark:text-gray-200 !rounded-none',
+          }}
+        />
       </body>
     </html>
   )

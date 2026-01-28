@@ -41,7 +41,6 @@ export default function SearchWithSuggestions({
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // 마운트 시 최근 검색어 로드 + 인기 검색어 fetch
   useEffect(() => {
     setRecent(loadRecent())
     fetch('/api/search-log?popular=true')
@@ -52,7 +51,6 @@ export default function SearchWithSuggestions({
       .catch(() => {})
   }, [])
 
-  // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -63,7 +61,6 @@ export default function SearchWithSuggestions({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // 자동완성 매칭
   const autocomplete = query.length >= 2
     ? Array.from(
         new Set(
@@ -74,7 +71,6 @@ export default function SearchWithSuggestions({
       ).slice(0, 5)
     : []
 
-  // 모든 제안 항목 수집
   const allSuggestions: { type: 'recent' | 'popular' | 'autocomplete'; text: string }[] = []
 
   if (!query) {
@@ -94,12 +90,10 @@ export default function SearchWithSuggestions({
       onSearch(trimmed)
       setFocused(false)
 
-      // 최근 검색어에 추가
       const updated = [trimmed, ...recent.filter((r) => r !== trimmed)].slice(0, MAX_RECENT)
       setRecent(updated)
       saveRecent(updated)
 
-      // 검색 로그 전송
       fetch('/api/search-log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -150,18 +144,18 @@ export default function SearchWithSuggestions({
 
   return (
     <div ref={containerRef} className="relative w-full max-w-xl">
-      {/* 검색 입력 */}
+      {/* Search input */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-sub-muted" />
         <input
           ref={inputRef}
           type="text"
-          placeholder="직무, 회사, 기술 검색..."
+          placeholder="Search jobs, companies, skills..."
           value={query}
           onChange={handleInputChange}
           onFocus={() => setFocused(true)}
           onKeyDown={handleKeyDown}
-          className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-web3-electric-blue focus:border-transparent outline-none transition-all text-sm"
+          className="w-full pl-10 pr-10 py-2.5 border border-sub-border dark:border-sub-border-dark bg-white dark:bg-sub-dark-surface text-sub-charcoal dark:text-gray-200 focus:ring-2 focus:ring-sub-hotpink focus:border-sub-hotpink outline-none transition-colors text-sm"
         />
         {query && (
           <button
@@ -170,16 +164,16 @@ export default function SearchWithSuggestions({
               onSearch('')
               inputRef.current?.focus()
             }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-sub-muted hover:text-sub-charcoal"
           >
             <X className="w-4 h-4" />
           </button>
         )}
       </div>
 
-      {/* 인기 태그 */}
+      {/* Trending tags */}
       <div className="flex items-center gap-2 mt-2 flex-wrap">
-        <span className="text-xs text-gray-500 dark:text-gray-400">인기:</span>
+        <span className="text-[11px] text-sub-muted dark:text-gray-400 uppercase tracking-wider">Trending:</span>
         {TRENDING_TAGS.map((tag) => (
           <button
             key={tag}
@@ -187,14 +181,14 @@ export default function SearchWithSuggestions({
               setQuery(tag)
               submitSearch(tag)
             }}
-            className="text-xs px-2.5 py-1 rounded-full bg-web3-electric-blue/10 text-web3-electric-blue hover:bg-web3-electric-blue/20 transition-colors"
+            className="text-[11px] px-2.5 py-1 border border-sub-hotpink/30 text-sub-hotpink hover:bg-sub-hotpink/10 transition-colors"
           >
             {tag}
           </button>
         ))}
       </div>
 
-      {/* 드롭다운 */}
+      {/* Dropdown */}
       <AnimatePresence>
         {showDropdown && (
           <motion.div
@@ -202,7 +196,7 @@ export default function SearchWithSuggestions({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-web3-charcoal border border-gray-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden z-50"
+            className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-sub-dark-surface border border-sub-border dark:border-sub-border-dark overflow-hidden z-50"
           >
             {allSuggestions.map((item, i) => {
               const isActive = i === activeIndex
@@ -217,11 +211,11 @@ export default function SearchWithSuggestions({
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors ${
                     isActive
-                      ? 'bg-web3-electric-blue/10 text-web3-electric-blue'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
+                      ? 'bg-sub-hotpink/10 text-sub-hotpink'
+                      : 'text-sub-charcoal dark:text-gray-300 hover:bg-sub-offwhite dark:hover:bg-sub-dark-bg'
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
+                  <Icon className="w-3.5 h-3.5 flex-shrink-0 text-sub-muted" />
                   <span className="flex-1 truncate">{item.text}</span>
                   {item.type === 'recent' && (
                     <span
@@ -229,7 +223,7 @@ export default function SearchWithSuggestions({
                         e.stopPropagation()
                         removeRecent(item.text)
                       }}
-                      className="text-gray-400 hover:text-red-400 cursor-pointer"
+                      className="text-sub-muted hover:text-sub-hotpink cursor-pointer"
                     >
                       <X className="w-3 h-3" />
                     </span>
