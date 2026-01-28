@@ -1,41 +1,32 @@
-const TILE_BG = [
-  'bg-tile-1 dark:bg-tile-1-dark',
-  'bg-tile-2 dark:bg-tile-2-dark',
-  'bg-tile-3 dark:bg-tile-3-dark',
-  'bg-tile-4 dark:bg-tile-4-dark',
-  'bg-tile-5 dark:bg-tile-5-dark',
+const CARD_TINTS = [
+  'bg-card-white dark:bg-card-white-dark',
+  'bg-card-cream dark:bg-card-cream-dark',
+  'bg-card-blue dark:bg-card-blue-dark',
+  'bg-card-pink dark:bg-card-pink-dark',
 ]
 
 function ShimmerBlock({ className }: { className?: string }) {
   return (
     <div
-      className={`bg-white/40 dark:bg-white/10 animate-pulse ${className ?? ''}`}
+      className={`bg-a24-border/50 dark:bg-a24-dark-border animate-pulse ${className ?? ''}`}
     />
   )
 }
 
 export default function JobCardSkeleton({ index = 0 }: { index?: number }) {
-  const bg = TILE_BG[index % TILE_BG.length]
+  const bg = CARD_TINTS[index % CARD_TINTS.length]
   return (
-    <div className={`p-5 ${bg}`}>
-      <div className="flex items-start justify-between mb-3">
-        <ShimmerBlock className="w-9 h-9" />
-        <ShimmerBlock className="w-5 h-5" />
-      </div>
-      <ShimmerBlock className="h-4 w-3/4 mb-1" />
-      <ShimmerBlock className="h-3 w-1/3 mb-3" />
-      <div className="flex gap-1">
-        <ShimmerBlock className="h-5 w-16" />
-        <ShimmerBlock className="h-5 w-20" />
-        <ShimmerBlock className="h-5 w-14" />
-      </div>
+    <div className={`p-6 ${bg} border border-a24-border dark:border-a24-dark-border -mt-px -ml-px`}>
+      <ShimmerBlock className="h-5 w-2/5 mb-4" />
+      <ShimmerBlock className="h-4 w-3/4 mb-2" />
+      <ShimmerBlock className="h-3 w-1/4 mt-2" />
     </div>
   )
 }
 
-export function JobCardSkeletonGrid({ count = 8 }: { count?: number }) {
+export function JobCardSkeletonGrid({ count = 6 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-px bg-sub-border dark:bg-sub-border-dark border border-sub-border dark:border-sub-border-dark">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: count }, (_, i) => (
         <JobCardSkeleton key={i} index={i} />
       ))}

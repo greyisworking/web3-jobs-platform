@@ -139,133 +139,118 @@ function HomeContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-sub-offwhite dark:bg-sub-dark-bg">
-        <header className="sticky top-0 z-50 bg-white dark:bg-sub-dark-surface border-b border-sub-border dark:border-sub-border-dark">
-          <div className="max-w-7xl mx-auto px-4 py-5 flex justify-between items-center">
-            <div className="flex items-baseline gap-3">
-              <span className="text-5xl font-black text-sub-charcoal dark:text-gray-100 leading-none">는</span>
-              <span className="text-sm font-heading uppercase tracking-[0.2em] text-sub-muted">neun</span>
-            </div>
+      <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
+        <header className="border-b border-a24-border dark:border-a24-dark-border">
+          <div className="max-w-6xl mx-auto px-6 py-8 flex justify-between items-end">
+            <span className="text-6xl font-black text-a24-text dark:text-a24-dark-text leading-none select-none">는</span>
             <ThemeToggle />
           </div>
         </header>
-        <main className="max-w-7xl mx-auto px-4 py-8">
-          <JobCardSkeletonGrid count={8} />
+        <main className="max-w-6xl mx-auto px-6 py-12">
+          <JobCardSkeletonGrid count={6} />
         </main>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-sub-offwhite dark:bg-sub-dark-bg">
+    <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white dark:bg-sub-dark-surface border-b border-sub-border dark:border-sub-border-dark">
-        <div className="max-w-7xl mx-auto px-4 py-5">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-baseline gap-3">
-              <span className="text-5xl font-black text-sub-charcoal dark:text-gray-100 leading-none">는</span>
-              <span className="text-sm font-heading uppercase tracking-[0.2em] text-sub-muted">neun</span>
+      <header className="sticky top-0 z-50 bg-a24-surface dark:bg-a24-dark-surface border-b border-a24-border dark:border-a24-dark-border">
+        <div className="max-w-6xl mx-auto px-6 py-6">
+          <div className="flex justify-between items-end">
+            <div className="flex items-baseline gap-4">
+              <span className="text-6xl font-black text-a24-text dark:text-a24-dark-text leading-none select-none">는</span>
             </div>
-            <div className="flex items-center gap-2">
+            <nav className="flex items-center gap-6">
+              <span className="text-xs font-heading uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">
+                Jobs
+              </span>
               <button
                 onClick={() => setBookmarksPanelOpen(true)}
-                className="p-2.5 border border-sub-border dark:border-sub-border-dark hover:bg-sub-offwhite dark:hover:bg-sub-dark-bg transition-colors"
-                aria-label="저장된 공고 보기"
+                className="flex items-center gap-1.5 text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
               >
-                <Bookmark className="w-5 h-5 text-sub-charcoal dark:text-gray-300" />
+                <Bookmark className="w-3.5 h-3.5" />
+                Saved
               </button>
               <ThemeToggle />
-            </div>
+            </nav>
           </div>
-          <SearchWithSuggestions onSearch={handleSearch} jobs={jobs} />
+
+          <div className="mt-8 max-w-lg">
+            <SearchWithSuggestions onSearch={handleSearch} jobs={jobs} />
+          </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Smart Filters */}
+      <main className="max-w-6xl mx-auto px-6 py-12">
+        {/* Filters */}
         <SmartFilterBar onFilterChange={handleSmartFilterChange} />
 
-        {/* VC Backers Dashboard */}
+        {/* VC Backers */}
         <VCBackersDashboard
           vcCounts={vcCounts}
           selectedVC={selectedVC}
           onSelectVC={handleVCSelect}
         />
 
-        {/* Stats — SUBSTANCE colored tiles */}
-        <div className="grid grid-cols-3 mb-8 border border-sub-border dark:border-sub-border-dark">
-          <div className="bg-tile-1 dark:bg-tile-1-dark p-6 border-r border-white/30 dark:border-white/5">
-            <h3 className="text-[#1a3a5c] dark:text-[#a8d4f0] text-xs font-heading uppercase tracking-widest opacity-70">
-              TOTAL
-            </h3>
-            <p className="text-3xl font-heading text-[#1a3a5c] dark:text-[#a8d4f0] mt-1">
-              {stats.total}
-            </p>
+        {/* Stats line */}
+        <div className="flex items-baseline gap-8 mb-10 pb-6 border-b border-a24-border dark:border-a24-dark-border">
+          <div>
+            <span className="text-4xl font-heading text-a24-text dark:text-a24-dark-text">{stats.total}</span>
+            <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">positions</span>
           </div>
-          <div className="bg-tile-2 dark:bg-tile-2-dark p-6 border-r border-white/30 dark:border-white/5">
-            <h3 className="text-[#5c1a35] dark:text-[#f0a8c4] text-xs font-heading uppercase tracking-widest opacity-70">
-              GLOBAL
-            </h3>
-            <p className="text-3xl font-heading text-[#5c1a35] dark:text-[#f0a8c4] mt-1">
-              {stats.global}
-            </p>
+          <div>
+            <span className="text-4xl font-heading text-a24-text dark:text-a24-dark-text">{stats.global}</span>
+            <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">global</span>
           </div>
-          <div className="bg-tile-4 dark:bg-tile-4-dark p-6">
-            <h3 className="text-[#5c2a2a] dark:text-[#f0c4c4] text-xs font-heading uppercase tracking-widest opacity-70">
-              KOREA
-            </h3>
-            <p className="text-3xl font-heading text-[#5c2a2a] dark:text-[#f0c4c4] mt-1">
-              {stats.korea}
-            </p>
+          <div>
+            <span className="text-4xl font-heading text-a24-text dark:text-a24-dark-text">{stats.korea}</span>
+            <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">korea</span>
           </div>
         </div>
 
-        {/* Source Stats */}
-        <div className="bg-white dark:bg-sub-dark-surface border border-sub-border dark:border-sub-border-dark p-6 mb-8">
-          <h2 className="text-sm font-heading uppercase tracking-widest text-sub-charcoal dark:text-gray-200 mb-4">
-            BY SOURCE
+        {/* Source stats */}
+        <div className="mb-12">
+          <h2 className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+            Sources
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="flex flex-wrap gap-x-6 gap-y-1">
             {stats.sources.map((source) => (
-              <div key={source.source} className="text-center">
-                <p className="text-xs text-sub-muted dark:text-gray-400">
-                  {source.source}
-                </p>
-                <p className="text-2xl font-heading text-sub-charcoal dark:text-gray-200">
-                  {source._count}
-                </p>
-              </div>
+              <span key={source.source} className="text-xs text-a24-muted dark:text-a24-dark-muted">
+                {source.source} <span className="text-a24-text dark:text-a24-dark-text font-medium">{source._count}</span>
+              </span>
             ))}
           </div>
         </div>
 
         {/* Jobs Grid */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-sm font-heading uppercase tracking-widest text-sub-charcoal dark:text-gray-200">
-              JOBS
+        <div className="mb-16">
+          <div className="flex justify-between items-baseline mb-8">
+            <h2 className="text-2xl font-heading uppercase tracking-[0.15em] text-a24-text dark:text-a24-dark-text">
+              Open Positions
             </h2>
-            <span className="text-sm text-sub-muted dark:text-gray-400">
-              {filteredJobs.length}
+            <span className="text-xs text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider">
+              {filteredJobs.length} results
             </span>
           </div>
 
           {filteredJobs.length === 0 ? (
-            <div className="p-12 text-center text-sub-muted dark:text-gray-400 border border-sub-border dark:border-sub-border-dark bg-white dark:bg-sub-dark-surface">
-              {jobs.length === 0 ? (
-                <>
-                  No jobs found yet. <br />
-                  <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 mt-2 inline-block text-sm">
-                    npm run crawl
-                  </code>{' '}
-                  to collect job data.
-                </>
-              ) : (
-                'No jobs match your filters.'
-              )}
+            <div className="py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
+              <p className="text-a24-muted dark:text-a24-dark-muted text-sm">
+                {jobs.length === 0 ? (
+                  <>
+                    No jobs found yet.{' '}
+                    <code className="text-a24-text dark:text-a24-dark-text">npm run crawl</code>{' '}
+                    to collect job data.
+                  </>
+                ) : (
+                  'No jobs match your filters.'
+                )}
+              </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-px bg-sub-border dark:bg-sub-border-dark border border-sub-border dark:border-sub-border-dark">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               <AnimatePresence mode="popLayout">
                 {filteredJobs.map((job, index) => (
                   <JobCard key={job.id} job={job} index={index} />
@@ -277,9 +262,17 @@ function HomeContent() {
       </main>
 
       {/* Footer */}
-      <footer className="py-6 bg-white dark:bg-sub-dark-surface border-t border-sub-border dark:border-sub-border-dark">
-        <div className="max-w-7xl mx-auto px-4 text-center text-sub-muted dark:text-gray-400 text-xs uppercase tracking-wider">
-          <p>는 neun — 40+ sources — updated every 3h</p>
+      <footer className="border-t border-a24-border dark:border-a24-dark-border">
+        <div className="max-w-6xl mx-auto px-6 py-10 flex justify-between items-end">
+          <div>
+            <span className="text-3xl font-black text-a24-text dark:text-a24-dark-text leading-none">는</span>
+            <p className="text-xs text-a24-muted dark:text-a24-dark-muted mt-2 uppercase tracking-[0.2em]">
+              40+ sources — updated every 3h
+            </p>
+          </div>
+          <p className="text-xs text-a24-muted dark:text-a24-dark-muted">
+            neun.io
+          </p>
         </div>
       </footer>
 
@@ -295,8 +288,8 @@ function HomeContent() {
 export default function Home() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-sub-offwhite dark:bg-sub-dark-bg flex items-center justify-center">
-        <span className="text-5xl font-black text-sub-charcoal dark:text-gray-100">는</span>
+      <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg flex items-center justify-center">
+        <span className="text-6xl font-black text-a24-text dark:text-a24-dark-text">는</span>
       </div>
     }>
       <HomeContent />

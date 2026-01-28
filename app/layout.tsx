@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Bebas_Neue } from 'next/font/google'
+import { DM_Sans, Bebas_Neue } from 'next/font/google'
 import { Toaster } from 'sonner'
 import WebVitals from './components/WebVitals'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], display: 'swap', variable: '--font-body' })
+const dmSans = DM_Sans({ subsets: ['latin'], weight: ['400', '500', '700'], display: 'swap', variable: '--font-body' })
 const bebasNeue = Bebas_Neue({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-heading' })
 
 export const metadata: Metadata = {
@@ -44,7 +44,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${inter.variable} ${bebasNeue.variable} ${inter.className}`}>
+      <body className={`${dmSans.variable} ${bebasNeue.variable} ${dmSans.className}`}>
         <WebVitals />
         {children}
         <Toaster
@@ -52,7 +52,7 @@ export default function RootLayout({
           theme="system"
           duration={3000}
           toastOptions={{
-            className: 'bg-white dark:bg-sub-dark-surface border border-sub-border dark:border-sub-border-dark text-sub-charcoal dark:text-gray-200 !rounded-none',
+            className: 'bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text !rounded-none',
           }}
         />
       </body>

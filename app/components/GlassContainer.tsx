@@ -17,10 +17,10 @@ export default function GlassContainer({
   return (
     <Tag
       className={cn(
-        'bg-white dark:bg-sub-dark-surface',
-        'border border-sub-border dark:border-sub-border-dark',
+        'bg-a24-surface dark:bg-a24-dark-surface',
+        'border border-a24-border dark:border-a24-dark-border',
         'transition-colors duration-200',
-        hover && 'hover:bg-sub-offwhite dark:hover:bg-sub-dark-bg',
+        hover && 'hover:bg-a24-bg dark:hover:bg-a24-dark-bg',
         className
       )}
     >

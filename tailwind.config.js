@@ -49,34 +49,30 @@ module.exports = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
-  			// ── THE SUBSTANCE — exact movie colors ──
-  			'sub-sky': '#89CFF0',        // egg poster sky blue
-  			'sub-hotpink': '#FF5DA2',    // pink studio scenes
-  			'sub-cream': '#FFFEF0',      // locker room cream
-  			'sub-offwhite': '#F5F5F5',   // tile walls off-white
-  			'sub-coral': '#F4A4A4',      // lips coral pink
-  			'sub-red': '#E63B2E',        // red doors/floors
-  			'sub-deepred': '#8B0A1A',    // red poster deep red
-  			'sub-vial': '#BFFF00',       // neon vial yellow-green
-  			'sub-charcoal': '#2D2D2D',   // clinical dark
-  			'sub-muted': '#6B7280',      // gray muted text
-  			'sub-border': '#E0E0E0',     // clinical border
-  			'sub-border-dark': '#3a3a3a',
-  			// ── Tile card backgrounds (direct movie colors) ──
-  			'tile-1': '#89CFF0',         // sky blue
-  			'tile-2': '#FF5DA2',         // hot pink
-  			'tile-3': '#FFFEF0',         // cream
-  			'tile-4': '#F4A4A4',         // coral
-  			'tile-5': '#F5F5F5',         // off white
-  			// ── Tile card backgrounds (dark mode — deep muted versions) ──
-  			'tile-1-dark': '#1a2e3d',
-  			'tile-2-dark': '#3d1a2a',
-  			'tile-3-dark': '#2a2a1e',
-  			'tile-4-dark': '#3d2424',
-  			'tile-5-dark': '#252525',
-  			// ── Dark mode surfaces ──
-  			'sub-dark-bg': '#0f0f0f',
-  			'sub-dark-surface': '#1a1a1a',
+  			// ── A24 MINIMAL — black/white + one accent ──
+  			'a24-bg': '#FAFAFA',
+  			'a24-surface': '#FFFFFF',
+  			'a24-text': '#1a1a1a',
+  			'a24-muted': '#999999',
+  			'a24-border': '#e5e5e5',
+  			'a24-accent': '#FF5DA2',     // SUBSTANCE hot pink (used sparingly)
+  			'a24-accent-dim': '#FF5DA2',
+  			// ── Subtle card tints (A24 editorial) ──
+  			'card-white': '#FFFFFF',
+  			'card-cream': '#FFF9F2',
+  			'card-blue': '#F3F8FC',
+  			'card-pink': '#FDF3F6',
+  			// ── Dark mode ──
+  			'a24-dark-bg': '#111111',
+  			'a24-dark-surface': '#1a1a1a',
+  			'a24-dark-text': '#e5e5e5',
+  			'a24-dark-muted': '#666666',
+  			'a24-dark-border': '#2a2a2a',
+  			// Dark card tints
+  			'card-white-dark': '#1a1a1a',
+  			'card-cream-dark': '#1c1a17',
+  			'card-blue-dark': '#171a1e',
+  			'card-pink-dark': '#1c1719',
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

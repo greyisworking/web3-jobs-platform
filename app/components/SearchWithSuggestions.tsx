@@ -143,10 +143,10 @@ export default function SearchWithSuggestions({
   }
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-xl">
+    <div ref={containerRef} className="relative w-full">
       {/* Search input */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-sub-muted" />
+        <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-a24-muted" />
         <input
           ref={inputRef}
           type="text"
@@ -155,7 +155,7 @@ export default function SearchWithSuggestions({
           onChange={handleInputChange}
           onFocus={() => setFocused(true)}
           onKeyDown={handleKeyDown}
-          className="w-full pl-10 pr-10 py-2.5 border border-sub-border dark:border-sub-border-dark bg-white dark:bg-sub-dark-surface text-sub-charcoal dark:text-gray-200 focus:ring-2 focus:ring-sub-hotpink focus:border-sub-hotpink outline-none transition-colors text-sm"
+          className="w-full pl-7 pr-8 py-2 border-b border-a24-border dark:border-a24-dark-border bg-transparent text-a24-text dark:text-a24-dark-text focus:border-a24-text dark:focus:border-a24-dark-text outline-none transition-colors text-sm"
         />
         {query && (
           <button
@@ -164,7 +164,7 @@ export default function SearchWithSuggestions({
               onSearch('')
               inputRef.current?.focus()
             }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-sub-muted hover:text-sub-charcoal"
+            className="absolute right-0 top-1/2 -translate-y-1/2 text-a24-muted hover:text-a24-text"
           >
             <X className="w-4 h-4" />
           </button>
@@ -172,8 +172,8 @@ export default function SearchWithSuggestions({
       </div>
 
       {/* Trending tags */}
-      <div className="flex items-center gap-2 mt-2 flex-wrap">
-        <span className="text-[11px] text-sub-muted dark:text-gray-400 uppercase tracking-wider">Trending:</span>
+      <div className="flex items-center gap-2 mt-3 flex-wrap">
+        <span className="text-[11px] text-a24-muted dark:text-a24-dark-muted uppercase tracking-[0.2em]">Trending</span>
         {TRENDING_TAGS.map((tag) => (
           <button
             key={tag}
@@ -181,7 +181,7 @@ export default function SearchWithSuggestions({
               setQuery(tag)
               submitSearch(tag)
             }}
-            className="text-[11px] px-2.5 py-1 border border-sub-hotpink/30 text-sub-hotpink hover:bg-sub-hotpink/10 transition-colors"
+            className="text-[11px] px-2 py-0.5 text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:text-a24-text dark:hover:text-a24-dark-text hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
           >
             {tag}
           </button>
@@ -196,7 +196,7 @@ export default function SearchWithSuggestions({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-sub-dark-surface border border-sub-border dark:border-sub-border-dark overflow-hidden z-50"
+            className="absolute top-full left-0 right-0 mt-1 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border overflow-hidden z-50"
           >
             {allSuggestions.map((item, i) => {
               const isActive = i === activeIndex
@@ -211,11 +211,11 @@ export default function SearchWithSuggestions({
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors ${
                     isActive
-                      ? 'bg-sub-hotpink/10 text-sub-hotpink'
-                      : 'text-sub-charcoal dark:text-gray-300 hover:bg-sub-offwhite dark:hover:bg-sub-dark-bg'
+                      ? 'bg-a24-bg dark:bg-a24-dark-bg text-a24-text dark:text-a24-dark-text'
+                      : 'text-a24-muted dark:text-a24-dark-muted hover:bg-a24-bg dark:hover:bg-a24-dark-bg hover:text-a24-text dark:hover:text-a24-dark-text'
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5 flex-shrink-0 text-sub-muted" />
+                  <Icon className="w-3.5 h-3.5 flex-shrink-0" />
                   <span className="flex-1 truncate">{item.text}</span>
                   {item.type === 'recent' && (
                     <span
@@ -223,7 +223,7 @@ export default function SearchWithSuggestions({
                         e.stopPropagation()
                         removeRecent(item.text)
                       }}
-                      className="text-sub-muted hover:text-sub-hotpink cursor-pointer"
+                      className="text-a24-muted hover:text-a24-accent cursor-pointer"
                     >
                       <X className="w-3 h-3" />
                     </span>

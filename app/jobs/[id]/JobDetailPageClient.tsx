@@ -27,20 +27,20 @@ const BADGE_COMPONENT_MAP: Record<string, React.ComponentType<{ className?: stri
 }
 
 const VC_REASONS: Record<string, string> = {
-  'a16z': '크립토 생태계의 가장 영향력 있는 VC로, 선도적 블록체인 프로젝트에 집중 투자합니다.',
-  Paradigm: '크립토 네이티브 리서치 중심 펀드로, DeFi와 인프라 혁신을 이끕니다.',
-  Hashed: '아시아 최대 블록체인 전문 펀드로, 한국과 글로벌 Web3 프로젝트를 발굴합니다.',
-  'Samsung Next': '삼성의 전략적 투자 부문으로, 차세대 기술 스타트업을 지원합니다.',
-  Kakao: '카카오 생태계를 기반으로 블록체인과 핀테크 혁신을 추진합니다.',
-  'Kakao Ventures': '초기 단계 기술 스타트업에 투자하며, Web3 분야에 적극적입니다.',
-  'KB Investment': '금융 인프라 전문성을 바탕으로 블록체인 핀테크에 투자합니다.',
-  Dunamu: '업비트 운영사로, 블록체인 기술과 디지털 자산 생태계를 지원합니다.',
-  SoftBank: '글로벌 기술 투자의 선두주자로, 대규모 성장 단계 투자를 주도합니다.',
-  'Animoca Brands': 'GameFi와 메타버스 분야의 글로벌 리더로, NFT 생태계를 선도합니다.',
-  Binance: '세계 최대 가상자산 거래소로, 블록체인 인프라에 전략적 투자합니다.',
-  'LINE Corporation': '라인 메신저 기반 블록체인 서비스를 구축하며 Web3 채택을 가속합니다.',
-  'Mirae Asset': '한국 대표 자산운용사로, 디지털 자산과 핀테크 혁신에 투자합니다.',
-  Wemade: '위메이드 게임 생태계 기반으로 블록체인 게이밍을 선도합니다.',
+  'a16z': 'The most influential crypto VC, investing in leading blockchain projects.',
+  Paradigm: 'A crypto-native research-driven fund leading DeFi and infrastructure innovation.',
+  Hashed: 'Asia\'s largest blockchain-focused fund, discovering Web3 projects globally.',
+  'Samsung Next': 'Samsung\'s strategic investment arm supporting next-gen tech startups.',
+  Kakao: 'Driving blockchain and fintech innovation through the Kakao ecosystem.',
+  'Kakao Ventures': 'Early-stage tech startup investor active in Web3.',
+  'KB Investment': 'Investing in blockchain fintech with financial infrastructure expertise.',
+  Dunamu: 'Upbit operator supporting blockchain technology and digital asset ecosystem.',
+  SoftBank: 'Global tech investment leader driving large-scale growth investments.',
+  'Animoca Brands': 'Global leader in GameFi and metaverse, pioneering the NFT ecosystem.',
+  Binance: 'World\'s largest crypto exchange investing strategically in blockchain infrastructure.',
+  'LINE Corporation': 'Building LINE-based blockchain services to accelerate Web3 adoption.',
+  'Mirae Asset': 'Korea\'s leading asset manager investing in digital assets and fintech.',
+  Wemade: 'Leading blockchain gaming through the Wemade game ecosystem.',
 }
 
 function findPriorityBacker(backers: string[]): string | null {
@@ -66,21 +66,19 @@ interface JobDetailPageClientProps {
 }
 
 export default function JobDetailPageClient({ job }: JobDetailPageClientProps) {
-  const companyInitial = (job.company ?? '?')[0]?.toUpperCase() ?? '?'
-
   useEffect(() => {
     trackEvent('job_view', { job_id: job.id, title: job.title, company: job.company, source: 'page' })
   }, [job.id, job.title, job.company])
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
-      toast.success('링크가 복사되었습니다!')
+      toast.success('Link copied!')
     })
     trackEvent('share_click', { job_id: job.id, method: 'copy_url', source: 'page' })
   }
 
   const handleShareTwitter = () => {
-    const text = `${job.title} at ${job.company} - Web3 채용 공고`
+    const text = `${job.title} at ${job.company}`
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`,
       '_blank'
@@ -99,87 +97,80 @@ export default function JobDetailPageClient({ job }: JobDetailPageClientProps) {
   const tags = parseTags(job.tags)
 
   return (
-    <div className="min-h-screen bg-sub-offwhite dark:bg-sub-dark-bg">
+    <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white dark:bg-sub-dark-surface border-b border-sub-border dark:border-sub-border-dark">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
+      <header className="sticky top-0 z-40 bg-a24-surface dark:bg-a24-dark-surface border-b border-a24-border dark:border-a24-dark-border">
+        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center gap-4">
           <Link
             href="/"
-            className="p-2 border border-sub-border dark:border-sub-border-dark hover:bg-sub-offwhite dark:hover:bg-sub-dark-bg transition-colors"
+            className="text-a24-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-sub-charcoal dark:text-gray-400" />
+            <ArrowLeft className="w-5 h-5" />
           </Link>
-          <h1 className="text-lg font-heading uppercase tracking-widest text-sub-charcoal dark:text-gray-200 truncate">
-            JOB DETAIL
-          </h1>
+          <span className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted">
+            Job Detail
+          </span>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-        {/* Company info */}
-        <div className="bg-white dark:bg-sub-dark-surface border border-sub-border dark:border-sub-border-dark p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center bg-sub-sky/15/20 dark:bg-sub-sky/15/10 text-sub-charcoal dark:text-gray-200 font-heading text-2xl uppercase">
-              {companyInitial}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-2xl font-heading uppercase tracking-wide text-sub-charcoal dark:text-gray-200">
-                {job.title}
-              </h2>
-              <p className="text-base text-sub-muted dark:text-gray-400 mt-1">
-                {job.company}
-              </p>
-            </div>
-          </div>
+      <main className="max-w-3xl mx-auto px-6 py-12 space-y-8">
+        {/* Company & Title */}
+        <div>
+          <p className="text-3xl font-heading uppercase tracking-[0.1em] text-a24-text dark:text-a24-dark-text mb-2">
+            {job.company}
+          </p>
+          <h1 className="text-lg text-a24-text dark:text-a24-dark-text mb-4">
+            {job.title}
+          </h1>
 
           {/* Meta */}
-          <div className="grid grid-cols-2 gap-3 mt-6">
-            <div className="flex items-center gap-2 text-sm text-sub-charcoal dark:text-gray-400">
-              <MapPin className="w-4 h-4 flex-shrink-0 text-sub-muted" />
-              <span>{job.location}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-sub-charcoal dark:text-gray-400">
-              <Briefcase className="w-4 h-4 flex-shrink-0 text-sub-muted" />
-              <span>{job.type}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-sub-charcoal dark:text-gray-400">
-              <Globe className="w-4 h-4 flex-shrink-0 text-sub-muted" />
-              <span>{job.region}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-sub-charcoal dark:text-gray-400">
-              <Building2 className="w-4 h-4 flex-shrink-0 text-sub-muted" />
-              <span>{job.source}</span>
-            </div>
+          <div className="flex flex-wrap gap-4 text-xs text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider">
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5" />
+              {job.location}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Briefcase className="w-3.5 h-3.5" />
+              {job.type}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Globe className="w-3.5 h-3.5" />
+              {job.region}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Building2 className="w-3.5 h-3.5" />
+              {job.source}
+            </span>
           </div>
-
-          {/* Salary */}
-          {job.salary && (
-            <div className="mt-4 p-3 bg-sub-sky/15/10 border border-sub-sky/30">
-              <p className="text-sm font-medium text-sub-hotpink">
-                {job.salary}
-              </p>
-            </div>
-          )}
-
-          {/* Badges */}
-          {job.badges && job.badges.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {job.badges.map((b) => {
-                const BadgeComponent = BADGE_COMPONENT_MAP[b]
-                if (!BadgeComponent) return null
-                return <BadgeComponent key={b} />
-              })}
-            </div>
-          )}
         </div>
+
+        {/* Salary */}
+        {job.salary && (
+          <div className="py-4 border-t border-b border-a24-border dark:border-a24-dark-border">
+            <p className="text-sm text-a24-text dark:text-a24-dark-text font-medium">
+              {job.salary}
+            </p>
+          </div>
+        )}
+
+        {/* Badges */}
+        {job.badges && job.badges.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {job.badges.map((b) => {
+              const BadgeComponent = BADGE_COMPONENT_MAP[b]
+              if (!BadgeComponent) return null
+              return <BadgeComponent key={b} />
+            })}
+          </div>
+        )}
 
         {/* Description */}
         {job.description && (
-          <div className="bg-white dark:bg-sub-dark-surface border border-sub-border dark:border-sub-border-dark p-6">
-            <h3 className="text-sm font-heading uppercase tracking-widest text-sub-charcoal dark:text-gray-200 mb-3">
-              DESCRIPTION
+          <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+            <h3 className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+              Description
             </h3>
-            <p className="text-sm text-sub-charcoal dark:text-gray-400 whitespace-pre-line leading-relaxed">
+            <p className="text-sm text-a24-text dark:text-a24-dark-text whitespace-pre-line leading-relaxed">
               {job.description}
             </p>
           </div>
@@ -187,15 +178,15 @@ export default function JobDetailPageClient({ job }: JobDetailPageClientProps) {
 
         {/* Tech stack */}
         {tags.length > 0 && (
-          <div className="bg-white dark:bg-sub-dark-surface border border-sub-border dark:border-sub-border-dark p-6">
-            <h3 className="text-sm font-heading uppercase tracking-widest text-sub-charcoal dark:text-gray-200 mb-3">
-              TECH STACK
+          <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+            <h3 className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+              Tech Stack
             </h3>
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-3 py-1 text-xs font-medium bg-sub-sky/15/10 text-sub-hotpink border border-sub-sky/30"
+                  className="px-3 py-1 text-xs border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text"
                 >
                   {tag}
                 </span>
@@ -206,11 +197,11 @@ export default function JobDetailPageClient({ job }: JobDetailPageClientProps) {
 
         {/* VC Backers */}
         {job.backers && job.backers.length > 0 && (
-          <div className="bg-white dark:bg-sub-dark-surface border border-sub-border dark:border-sub-border-dark p-6">
-            <h3 className="text-sm font-heading uppercase tracking-widest text-sub-charcoal dark:text-gray-200 mb-3">
-              VC BACKERS
+          <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+            <h3 className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+              VC Backers
             </h3>
-            <div className="flex flex-wrap gap-1.5 mb-4">
+            <div className="flex flex-wrap gap-1.5 mb-6">
               {job.backers.map((backer) => (
                 <GlowBadge key={backer} name={backer} />
               ))}
@@ -221,11 +212,11 @@ export default function JobDetailPageClient({ job }: JobDetailPageClientProps) {
               const reason = priorityBacker ? VC_REASONS[priorityBacker] : null
               if (!reason) return null
               return (
-                <div className="p-4 bg-sub-offwhite dark:bg-sub-dark-bg border border-sub-border dark:border-sub-border-dark">
-                  <p className="text-xs font-heading uppercase tracking-widest text-sub-hotpink mb-1">
-                    WHY THIS COMPANY
+                <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
+                  <p className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-2">
+                    Why This Company
                   </p>
-                  <p className="text-sm text-sub-charcoal dark:text-gray-400 leading-relaxed">
+                  <p className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed">
                     <strong>{priorityBacker}</strong> — {reason}
                   </p>
                 </div>
@@ -236,25 +227,25 @@ export default function JobDetailPageClient({ job }: JobDetailPageClientProps) {
       </main>
 
       {/* Footer */}
-      <div className="sticky bottom-0 z-40 bg-white dark:bg-sub-dark-surface border-t border-sub-border dark:border-sub-border-dark">
-        <div className="max-w-3xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-2 mb-3">
+      <div className="sticky bottom-0 z-40 bg-a24-surface dark:bg-a24-dark-surface border-t border-a24-border dark:border-a24-dark-border">
+        <div className="max-w-3xl mx-auto px-6 py-4">
+          <div className="flex items-center gap-3 mb-3">
             <button
               onClick={handleCopyUrl}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-sub-charcoal dark:text-gray-400 border border-sub-border dark:border-sub-border-dark hover:bg-sub-offwhite dark:hover:bg-sub-dark-bg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:text-a24-text dark:hover:text-a24-dark-text hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
             >
               <Copy className="w-3.5 h-3.5" />
               URL
             </button>
             <button
               onClick={handleShareTwitter}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-sub-charcoal dark:text-gray-400 border border-sub-border dark:border-sub-border-dark hover:bg-sub-offwhite dark:hover:bg-sub-dark-bg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:text-a24-text dark:hover:text-a24-dark-text hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
             >
               Twitter
             </button>
             <button
               onClick={handleShareLinkedIn}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-sub-charcoal dark:text-gray-400 border border-sub-border dark:border-sub-border-dark hover:bg-sub-offwhite dark:hover:bg-sub-dark-bg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:text-a24-text dark:hover:text-a24-dark-text hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
             >
               LinkedIn
             </button>
@@ -267,10 +258,10 @@ export default function JobDetailPageClient({ job }: JobDetailPageClientProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'page' })}
-            className="flex items-center justify-center gap-2 w-full py-3 bg-sub-hotpink text-white font-heading uppercase tracking-widest hover:bg-sub-hotpink/80 transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-xs font-heading uppercase tracking-[0.3em] hover:opacity-80 transition-opacity"
           >
             <ExternalLink className="w-4 h-4" />
-            APPLY NOW
+            Apply Now
           </Link>
         </div>
       </div>

@@ -22,7 +22,7 @@ export default function BookmarksPanel({ open, onClose }: BookmarksPanelProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/30"
+            className="fixed inset-0 z-50 bg-black/20"
           />
 
           {/* Panel */}
@@ -31,27 +31,26 @@ export default function BookmarksPanel({ open, onClose }: BookmarksPanelProps) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-sub-offwhite dark:bg-sub-dark-bg border-l border-sub-border dark:border-sub-border-dark flex flex-col"
+            className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-a24-bg dark:bg-a24-dark-bg border-l border-a24-border dark:border-a24-dark-border flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-sub-border dark:border-sub-border-dark">
-              <h2 className="text-lg font-heading uppercase tracking-widest text-sub-charcoal dark:text-gray-200">
-                SAVED JOBS
+            <div className="flex items-center justify-between p-6 border-b border-a24-border dark:border-a24-dark-border">
+              <h2 className="text-lg font-heading uppercase tracking-[0.2em] text-a24-text dark:text-a24-dark-text">
+                Saved
               </h2>
               <button
                 onClick={onClose}
-                className="p-2 border border-sub-border dark:border-sub-border-dark hover:bg-white dark:hover:bg-sub-dark-surface transition-colors"
+                className="p-2 text-a24-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
               >
-                <X className="w-5 h-5 text-sub-charcoal dark:text-gray-400" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <div className="flex-1 overflow-y-auto p-6 space-y-3">
               {bookmarks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-sub-muted dark:text-gray-500">
-                  <p className="text-base">저장된 공고가 없습니다</p>
-                  <p className="text-sm mt-1">하트를 눌러 공고를 저장하세요</p>
+                <div className="flex flex-col items-center justify-center h-full text-a24-muted dark:text-a24-dark-muted">
+                  <p className="text-sm">No saved jobs yet.</p>
                 </div>
               ) : (
                 <AnimatePresence mode="popLayout">
@@ -62,21 +61,21 @@ export default function BookmarksPanel({ open, onClose }: BookmarksPanelProps) {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="flex items-start gap-3 p-4 bg-white dark:bg-sub-dark-surface border border-sub-border dark:border-sub-border-dark"
+                      className="flex items-start gap-3 p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface"
                     >
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sub-charcoal dark:text-gray-200 truncate text-sm">
+                        <h3 className="font-medium text-a24-text dark:text-a24-dark-text truncate text-sm">
                           {item.title}
                         </h3>
-                        <p className="text-xs text-sub-muted dark:text-gray-400 mt-0.5">
+                        <p className="text-xs text-a24-muted dark:text-a24-dark-muted mt-0.5">
                           {item.company}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[11px] text-sub-muted dark:text-gray-500">
+                          <span className="text-[11px] text-a24-muted dark:text-a24-dark-muted">
                             {new Date(item.savedAt).toLocaleDateString('ko-KR')}
                           </span>
                           {item.verified && (
-                            <span className="inline-flex items-center gap-0.5 text-[11px] text-sub-hotpink">
+                            <span className="inline-flex items-center gap-0.5 text-[11px] text-a24-muted">
                               <CheckCircle className="w-3 h-3" />
                               Verified
                             </span>
@@ -92,8 +91,8 @@ export default function BookmarksPanel({ open, onClose }: BookmarksPanelProps) {
                             company: item.company,
                           })
                         }
-                        className="flex-shrink-0 p-2 border border-sub-border dark:border-sub-border-dark text-sub-muted hover:text-sub-hotpink hover:border-sub-hotpink transition-colors"
-                        aria-label="북마크 제거"
+                        className="flex-shrink-0 p-2 text-a24-muted hover:text-a24-accent transition-colors"
+                        aria-label="Remove bookmark"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -105,8 +104,8 @@ export default function BookmarksPanel({ open, onClose }: BookmarksPanelProps) {
 
             {/* Footer */}
             {bookmarks.length > 0 && (
-              <div className="p-4 text-center text-sm text-sub-muted dark:text-gray-400 border-t border-sub-border dark:border-sub-border-dark">
-                {bookmarks.length}개 저장됨
+              <div className="p-4 text-center text-xs text-a24-muted dark:text-a24-dark-muted border-t border-a24-border dark:border-a24-dark-border uppercase tracking-wider">
+                {bookmarks.length} saved
               </div>
             )}
           </motion.div>
