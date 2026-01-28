@@ -1,14 +1,14 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { motion, useAnimationControls } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 
 export default function PageTransition() {
   const pathname = usePathname()
-  const controls = useAnimationControls()
   const isFirst = useRef(true)
   const prevPath = useRef(pathname)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   useEffect(() => {
     if (isFirst.current) {
@@ -18,24 +18,26 @@ export default function PageTransition() {
     if (prevPath.current === pathname) return
     prevPath.current = pathname
 
-    controls.start({
-      y: ['-100%', '0%', '0%', '100%'],
-      transition: {
-        duration: 0.7,
-        times: [0, 0.35, 0.5, 1],
-        ease: [0.22, 1, 0.36, 1],
-      },
-    })
-  }, [pathname, controls])
+    // Quick fade transition
+    setIsTransitioning(true)
+    const timer = setTimeout(() => setIsTransitioning(false), 200)
+    return () => clearTimeout(timer)
+  }, [pathname])
 
   // Don't show on admin pages
   if (pathname?.startsWith('/admin')) return null
 
   return (
-    <motion.div
-      className="fixed inset-0 z-[9998] bg-a24-bg dark:bg-a24-dark-bg pointer-events-none"
-      initial={{ y: '-100%' }}
-      animate={controls}
-    />
+    <AnimatePresence>
+      {isTransitioning && (
+        <motion.div
+          className="fixed inset-0 z-[9998] bg-a24-bg dark:bg-a24-dark-bg pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.5 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15, ease: 'easeOut' }}
+        />
+      )}
+    </AnimatePresence>
   )
 }

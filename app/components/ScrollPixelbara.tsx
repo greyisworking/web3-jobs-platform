@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { WalkingPixelbara } from './Pixelbara'
+import Pixelbara from './Pixelbara'
 
 export default function ScrollPixelbara() {
   const [visible, setVisible] = useState(false)
@@ -37,7 +37,7 @@ export default function ScrollPixelbara() {
         transform: `translateY(${bobY}px)`,
       }}
     >
-      <WalkingPixelbara size={48} />
+      <Pixelbara pose="blank" size={48} />
     </div>
   )
 }
