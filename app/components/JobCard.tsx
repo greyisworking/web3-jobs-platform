@@ -88,7 +88,7 @@ export default function JobCard({ job, index }: JobCardProps) {
         {hovered && (
           <>
             <div className="absolute bottom-2 right-2 flex items-center gap-2">
-              <MiniTrustBadge backers={job.backers} />
+              <MiniTrustBadge backers={job.backers} companyName={job.company} />
               <div className="opacity-30">
                 <MiniPixelbara />
               </div>

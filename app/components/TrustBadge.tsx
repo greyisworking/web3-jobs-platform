@@ -52,12 +52,13 @@ const TRUST_CONFIG: Record<TrustLevel, {
 
 interface MiniTrustBadgeProps {
   backers?: string[] | null
+  companyName?: string
   className?: string
 }
 
-export function MiniTrustBadge({ backers, className }: MiniTrustBadgeProps) {
+export function MiniTrustBadge({ backers, companyName, className }: MiniTrustBadgeProps) {
   const [showTooltip, setShowTooltip] = useState(false)
-  const level = quickTrustCheck(backers)
+  const level = quickTrustCheck(backers, companyName)
   const config = TRUST_CONFIG[level]
   const Icon = config.icon
 
@@ -130,7 +131,14 @@ export function TrustCheckList({ score, className }: TrustCheckListProps) {
     <div className={cn('space-y-4', className)}>
       {/* Header with badge and comment */}
       <div className="flex items-start justify-between gap-4">
-        <TrustBadge level={score.level} />
+        <div className="flex items-center gap-2">
+          <TrustBadge level={score.level} />
+          {score.parentCompany && (
+            <span className="text-[10px] text-a24-muted dark:text-a24-dark-muted">
+              ({score.parentCompany} subsidiary)
+            </span>
+          )}
+        </div>
         <p className={cn(
           'text-[11px] italic',
           config.textColor
