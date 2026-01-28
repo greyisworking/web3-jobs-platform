@@ -60,9 +60,11 @@ const P: Record<string, [string, string]> = {
   h: ['#6B5344', '#A88960'],    // darker fur/shadow
   b: ['#A89070', '#D4C0A0'],    // belly/lighter fur
 
-  // Eye colors
+  // Eye colors - CUTE ROUND EYES
   e: ['#3A2820', '#6A5848'],    // ears
-  x: ['#1A1008', '#F0EDE8'],    // eyes (pupils)
+  x: ['#1A1008', '#1A1008'],    // eye pupil (always dark for cuteness)
+  o: ['#FFFFFF', '#FFFFFF'],    // eye white
+  k: ['#FFFFFF', '#FFFFFF'],    // eye sparkle/highlight
 
   // Nostril - THE STAR OF THE SHOW
   N: ['#2A1810', '#4A3828'],    // nostril dark
@@ -111,18 +113,19 @@ function artSize(art: string): { w: number; h: number } {
 }
 
 // ══════════════════════════════════════════════════════════
-// ══ FACE-ONLY PIXEL ART (with PROMINENT NOSTRILS) ══
+// ══ FACE-ONLY PIXEL ART (CUTE CAPYBARA STYLE) ══
 // ══════════════════════════════════════════════════════════
 
 // Base face - 16x12 grid, focused on the adorable face
-// Key feature: BIG ROUND NOSTRILS (the cutest part of capybara!)
+// Key features: CUTE ROUND EYES with sparkle + BIG ROUND NOSTRILS
+// Eyes: 'o' = white, 'x' = pupil, 'k' = sparkle highlight
 const FACE_ART = `
 ....ee....ee....
 ...eeee..eeee...
 ..HHHHHHHHHHHH..
 .HHHHHHHHHHHHHH.
-.HHxHHHHHHxHHHH.
-.HHHHHHHHHHHHHH.
+.HHoxHHHHoxHHHH.
+.HHxxHHHHxxHHHH.
 .HHHHHHHHHHHHhh.
 ..HHHHHNNHHHHH..
 ..HHHHHNNHHHHh..
@@ -160,12 +163,12 @@ function PixelSvg({
 }
 
 // ── Helper: replace eye pixels ──
-function replaceEyes(pixels: typeof FACE_PIXELS, leftChar: string, rightChar: string) {
-  let leftDone = false
+// New eye structure: 2x2 blocks with 'o' (highlight) and 'x' (pupil)
+// For closed eyes or special effects, replace all eye pixels
+function replaceEyes(pixels: typeof FACE_PIXELS, char: string) {
   return pixels.map(p => {
-    if (p.c === 'x') {
-      if (!leftDone) { leftDone = true; return { ...p, c: leftChar } }
-      return { ...p, c: rightChar }
+    if (p.c === 'x' || p.c === 'o') {
+      return { ...p, c: char }
     }
     return p
   })
@@ -180,15 +183,15 @@ function BlankPose({ dark }: { dark: boolean }) {
   return <PixelSvg pixels={FACE_PIXELS} w={FACE_SIZE.w} h={FACE_SIZE.h} dark={dark} />
 }
 
-// dejected: half-closed eyes
+// dejected: half-closed eyes (horizontal line)
 function DejectedPose({ dark }: { dark: boolean }) {
-  const face = replaceEyes(FACE_PIXELS, 'n', 'n')
+  const face = replaceEyes(FACE_PIXELS, 'n')
   return <PixelSvg pixels={face} w={FACE_SIZE.w} h={FACE_SIZE.h} dark={dark} />
 }
 
 // sparkle: excited golden eyes
 function SparklePose({ dark }: { dark: boolean }) {
-  const face = replaceEyes(FACE_PIXELS, 'Q', 'Q')
+  const face = replaceEyes(FACE_PIXELS, 'Q')
   const sparkles = [
     { x: 2, y: 3, c: 'Q' }, { x: 13, y: 3, c: 'Q' },
   ]
@@ -197,7 +200,7 @@ function SparklePose({ dark }: { dark: boolean }) {
 
 // smoking: squinted eyes + cigarette sticking out
 function SmokingPose({ dark }: { dark: boolean }) {
-  const face = replaceEyes(FACE_PIXELS, 'n', 'n')
+  const face = replaceEyes(FACE_PIXELS, 'n')
   const cigarette = [
     { x: 14, y: 6, c: 'C' }, { x: 15, y: 6, c: 'C' },
     { x: 16, y: 6, c: 'C' }, { x: 17, y: 6, c: 'F' },
@@ -222,13 +225,14 @@ function SweatingPose({ dark }: { dark: boolean }) {
 
 // bling: THE MAIN POSE - sunglasses + gold chain
 function BlingPose({ dark }: { dark: boolean }) {
-  // Sunglasses overlay
+  // Sunglasses overlay - covers both rows of 2x2 eyes
   const GLASSES_ART = `
 ................
 ................
 ................
 ................
-.GLLGggGGLLGggg.
+.GLLLGgGLLLGggg.
+.GLLLGgGLLLGggg.
 ................
 `
   const glassesPixels = parseArt(GLASSES_ART)
@@ -247,7 +251,7 @@ function BlingPose({ dark }: { dark: boolean }) {
 
 // sleepy: closed eyes + zzz
 function SleepyPose({ dark }: { dark: boolean }) {
-  const face = replaceEyes(FACE_PIXELS, 'n', 'n')
+  const face = replaceEyes(FACE_PIXELS, 'n')
   const zzz = [
     { x: 14, y: 2, c: 'Z' },
     { x: 15, y: 1, c: 'Z' },
@@ -270,13 +274,20 @@ function EatingPose({ dark }: { dark: boolean }) {
 
 // wink: one eye open, one closed
 function WinkPose({ dark }: { dark: boolean }) {
-  const face = replaceEyes(FACE_PIXELS, 'x', 'n')
+  // Keep left eye (positions 3-4), replace right eye (positions 8-9) with closed line
+  const face = FACE_PIXELS.map(p => {
+    // Right eye area (x >= 8 and x <= 9)
+    if ((p.c === 'x' || p.c === 'o') && p.x >= 8 && p.x <= 9) {
+      return { ...p, c: 'n' }
+    }
+    return p
+  })
   return <PixelSvg pixels={face} w={FACE_SIZE.w} h={FACE_SIZE.h} dark={dark} />
 }
 
 // notfound: smoking + speech bubble
 function NotFoundPose({ dark }: { dark: boolean }) {
-  const face = replaceEyes(FACE_PIXELS, 'n', 'n')
+  const face = replaceEyes(FACE_PIXELS, 'n')
   const cigarette = [
     { x: 14, y: 8, c: 'C' }, { x: 15, y: 8, c: 'C' }, { x: 16, y: 8, c: 'F' },
   ]
@@ -312,12 +323,14 @@ function EmptyPose({ dark }: { dark: boolean }) {
   return <PixelSvg pixels={face} w={FACE_SIZE.w} h={FACE_SIZE.h + 4} dark={dark} extra={extra} />
 }
 
-// success: happy squint eyes + WAGMI
+// success: happy squint eyes (^_^) + WAGMI
 function SuccessPose({ dark }: { dark: boolean }) {
-  const face = FACE_PIXELS.map(p => (p.c === 'x' ? { ...p, c: 'H' } : p))
+  // Remove original eyes, replace with happy curved lines
+  const face = FACE_PIXELS.map(p => ((p.c === 'x' || p.c === 'o') ? { ...p, c: 'H' } : p))
+  // Happy eyes: ^ shape (curved up)
   const happyEyes = [
-    { x: 3, y: 3, c: 'x' }, { x: 4, y: 4, c: 'x' }, { x: 5, y: 3, c: 'x' },
-    { x: 10, y: 3, c: 'x' }, { x: 11, y: 4, c: 'x' }, { x: 12, y: 3, c: 'x' },
+    { x: 3, y: 4, c: 'x' }, { x: 4, y: 3, c: 'x' }, { x: 5, y: 4, c: 'x' },
+    { x: 9, y: 4, c: 'x' }, { x: 10, y: 3, c: 'x' }, { x: 11, y: 4, c: 'x' },
   ]
   const extra = (
     <>
@@ -335,21 +348,22 @@ function SuccessPose({ dark }: { dark: boolean }) {
 // ══════════════════════════════════════════════════════════
 
 // Full body capybara with sunglasses, holding laptop
+// Eyes: 'o' = white highlight, 'x' = pupil (covered by glasses anyway)
 const HERO_BODY_ART = `
 .......ee....ee...............
 ......eeee..eeee..............
 .....HHHHHHHHHHHHHH...........
 ....HHHHHHHHHHHHHHHH..........
-....HHxHHHHHHHxHHHHH.........
-....HHHHHHHHHHHHHHHHH.........
-....HHHHHHHHHHHHHHnn.........
+....HHoxHHHHoxHHHHH...........
+....HHxxHHHHxxHHHHH...........
+....HHHHHHHHHHHHHHhh..........
 .....HHHHHNNHHHHHH............
 ...HHHHHHHNNHHHHHHHHHH........
-..HHHHHHHHHHHHHHHHHHHHh......
-.HHHHHHHHbbbbbbbbHHHHHHH.....
-.HHHHHHHHbbbbbbbbHHHHHHHh....
-..HHHHHHHHHHHHHHHHHHHHHh.....
-...HHHHHHHHHHHHHHHHHHHH.......
+..HHHHHHHHHHHHHHHHHHHHh.......
+.HHHHHHHHbbbbbbbbHHHHHHH......
+.HHHHHHHHbbbbbbbbHHHHHHHh.....
+..HHHHHHHHHHHHHHHHHHHHHh......
+...HHHHHHHHHHHHHHHHHHHH........
 ....DDDD..........DDDD........
 ....DDDD..........DDDD........
 `
@@ -360,12 +374,18 @@ const HERO_BODY_SIZE = artSize(HERO_BODY_ART)
 function HeroLaptopPose({ dark }: { dark: boolean }) {
   const body = [...HERO_BODY_PIXELS]
 
-  // Sunglasses overlay
+  // Sunglasses overlay - covers 2 rows for the bigger cute eyes
   const glasses = [
-    { x: 4, y: 4, c: 'G' }, { x: 5, y: 4, c: 'L' }, { x: 6, y: 4, c: 'L' },
-    { x: 7, y: 4, c: 'G' }, { x: 8, y: 4, c: 'G' }, { x: 9, y: 4, c: 'G' },
-    { x: 10, y: 4, c: 'G' }, { x: 11, y: 4, c: 'L' }, { x: 12, y: 4, c: 'L' },
-    { x: 13, y: 4, c: 'G' }, { x: 14, y: 4, c: 'G' }, { x: 15, y: 4, c: 'G' },
+    // Top row of glasses
+    { x: 4, y: 4, c: 'G' }, { x: 5, y: 4, c: 'L' }, { x: 6, y: 4, c: 'L' }, { x: 7, y: 4, c: 'L' },
+    { x: 8, y: 4, c: 'G' }, { x: 9, y: 4, c: 'G' },
+    { x: 10, y: 4, c: 'L' }, { x: 11, y: 4, c: 'L' }, { x: 12, y: 4, c: 'L' },
+    { x: 13, y: 4, c: 'G' }, { x: 14, y: 4, c: 'G' },
+    // Bottom row of glasses
+    { x: 4, y: 5, c: 'G' }, { x: 5, y: 5, c: 'L' }, { x: 6, y: 5, c: 'L' }, { x: 7, y: 5, c: 'L' },
+    { x: 8, y: 5, c: 'G' }, { x: 9, y: 5, c: 'G' },
+    { x: 10, y: 5, c: 'L' }, { x: 11, y: 5, c: 'L' }, { x: 12, y: 5, c: 'L' },
+    { x: 13, y: 5, c: 'G' }, { x: 14, y: 5, c: 'G' },
   ]
 
   // Laptop - positioned to the right as if being held
@@ -533,11 +553,12 @@ export function TimeAwarePixelbara(props: Omit<PixelbaraProps, 'pose'>) {
 // ── MiniPixelbara (face only, compact) ──
 export function MiniPixelbara({ className = '' }: { className?: string }) {
   const dark = useIsDark()
+  // Cute eyes with highlight: o=white, x=pupil
   const miniArt = `
 ..ee..ee
 HHHHHHHH
-HxHHHxHH
-HHHHHHHH
+HoxHoxHH
+HxxHxxHH
 HHHNNHhh
 .HHHHHH.
 `
@@ -557,11 +578,12 @@ HHHNNHhh
 // ── PixelbaraToggleIcon (for theme toggle) ──
 export function PixelbaraToggleIcon({ withGlasses, className = '' }: { withGlasses: boolean; className?: string }) {
   const dark = useIsDark()
+  // Cute eyes: o=white highlight, x=pupil
   const miniArt = withGlasses
     ? `
 ..ee..ee
 HHHHHHHH
-GLLGGLGH
+GLLGLLGH
 HHHHHHHH
 HHHNNHhh
 .HHHHHH.
@@ -569,8 +591,8 @@ HHHNNHhh
     : `
 ..ee..ee
 HHHHHHHH
-HxHHHxHH
-HHHHHHHH
+HoxHoxHH
+HxxHxxHH
 HHHNNHhh
 .HHHHHH.
 `

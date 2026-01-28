@@ -40,11 +40,11 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="flex flex-col md:flex-row items-center md:items-start justify-between gap-12"
+          className="flex flex-col md:flex-row items-center justify-between gap-12"
         >
           {/* Left: Text */}
           <div className="flex-1 text-center md:text-left">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-wide text-a24-text dark:text-a24-dark-text mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-relaxed tracking-wider text-a24-text dark:text-a24-dark-text mb-6">
               Only from{' '}
               <span className="font-black">a16z</span>,{' '}
               <span className="font-black">Hashed</span>,{' '}
