@@ -78,6 +78,7 @@ export default function Navigation() {
             <Link href="/companies" className={linkClass(isActive('/companies'))}>Companies</Link>
             <Link href="/investors" className={linkClass(isActive('/investors'))}>Investors</Link>
             <Link href="/ecosystems" className={linkClass(isActive('/ecosystems'))}>Ecosystems</Link>
+            <Link href="/meme" className={`${linkClass(isActive('/meme'))} !text-pink-500 dark:!text-pink-400`}>Meme</Link>
 
             {/* About with dropdown */}
             <div
@@ -161,6 +162,7 @@ export default function Navigation() {
               <Link href="/companies" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/companies'))} py-2`}>Companies</Link>
               <Link href="/investors" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/investors'))} py-2`}>Investors</Link>
               <Link href="/ecosystems" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/ecosystems'))} py-2`}>Ecosystems</Link>
+              <Link href="/meme" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/meme'))} py-2 !text-pink-500`}>Meme</Link>
               <Link href="/articles" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/articles'))} py-2`}>Articles</Link>
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-2 mt-1">
                 <p className="text-[10px] uppercase tracking-[0.3em] font-light text-a24-muted/60 dark:text-a24-dark-muted/60 mb-2">About</p>

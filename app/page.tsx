@@ -116,6 +116,33 @@ export default function Home() {
         </section>
       </ScrollReveal>
 
+      {/* Meme Generator CTA */}
+      <ScrollReveal>
+        <section className="max-w-7xl mx-auto px-6 py-16">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 p-8 bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-lg">
+            <div className="flex items-center gap-6">
+              <Pixelbara pose="bling" size={100} clickable />
+              <div>
+                <h3 className="text-2xl md:text-3xl font-black text-white mb-2">
+                  Make Memes Not War
+                </h3>
+                <p className="text-gray-400 text-sm">
+                  Create viral pixelbara memes. fr fr.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/meme"
+              className="group flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all hover:scale-105"
+            >
+              <span className="text-xl">ㅡ_ㅡ</span>
+              Generate Meme
+              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+        </section>
+      </ScrollReveal>
+
       <Footer />
     </div>
   )
