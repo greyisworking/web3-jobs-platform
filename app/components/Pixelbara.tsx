@@ -3,11 +3,15 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
-// ── Types ──
+// ══════════════════════════════════════════════════════════
+// ══ TYPES ══
+// ══════════════════════════════════════════════════════════
+
 type PoseId =
   | 'blank' | 'dejected' | 'sparkle' | 'smoking' | 'sweating'
   | 'bling' | 'sleepy' | 'eating' | 'wink' | 'heroLaptop'
   | 'search' | 'building' | 'reading' | 'heart' | 'question' | 'coffee' | 'door'
+  | 'ecosystem'
 
 type PoseAlias = 'main' | 'loading' | 'notfound' | 'empty' | 'success'
   | 'careers' | 'investors' | 'companies' | 'articles' | 'bookmarks' | 'error' | 'login'
@@ -20,7 +24,10 @@ interface PixelbaraProps {
   suppressHover?: boolean
 }
 
-// ── Hooks ──
+// ══════════════════════════════════════════════════════════
+// ══ HOOKS ══
+// ══════════════════════════════════════════════════════════
+
 function useIsDark() {
   const [dark, setDark] = useState(false)
   useEffect(() => {
@@ -55,44 +62,57 @@ function useTimeOfDay(): TimeOfDay {
   return time
 }
 
-// ── Color palette: [light, dark] ──
-// CUTE CAPYBARA COLORS - warm orange-brown, friendly & soft
+// ══════════════════════════════════════════════════════════
+// ══ COLOR PALETTE ══
+// ══════════════════════════════════════════════════════════
+// Warm, friendly capybara colors - [light mode, dark mode]
+
 const P: Record<string, [string, string]> = {
-  // Face/fur colors - WARM ORANGE-BROWN
-  H: ['#C4956A', '#D4A87A'],    // main fur - warm caramel
-  h: ['#A67B52', '#B8956A'],    // darker fur/shadow
-  b: ['#D4B090', '#E4C8A8'],    // belly/lighter fur - creamy
+  // Main fur - warm caramel brown
+  H: ['#C8A882', '#D4B896'],
+  // Shadow fur - darker warm brown
+  h: ['#A68B6A', '#B89B7A'],
+  // Belly/lighter area - cream
+  b: ['#E0CDB8', '#EAD9C8'],
+  // Ear interior - pinkish brown
+  e: ['#D4A090', '#E0B0A0'],
+  // Ear outline - matches shadow fur
+  E: ['#A68B6A', '#B89B7A'],
 
-  // Eye colors - CUTE SPARKLY EYES (・ω・)
-  e: ['#8B7355', '#A88960'],    // ears - soft brown
-  x: ['#2D1B10', '#2D1B10'],    // eye pupil - deep brown (not pure black)
-  o: ['#FFFFFF', '#FFFFFF'],    // eye white
-  k: ['#FFFFFF', '#FFFFFF'],    // eye sparkle/highlight
+  // Eyes - SUPER SMALL for Gen Z deadpan (ㅡㅡ)
+  // Just a thin dark line
+  n: ['#3D2B1F', '#2D1B0F'],
 
-  // Nose/Nostril - cute pink-ish brown
-  N: ['#6B4A3A', '#8B6A5A'],    // nostril - softer brown
+  // Nose - BIG and prominent
+  N: ['#6B4A3A', '#7B5A4A'],
+  // Nostrils - dark
+  O: ['#3D2B1F', '#2D1B0F'],
 
-  // Blush - for extra cuteness
-  B: ['#E8A090', '#F0B8A8'],    // pink blush
+  // Blush - subtle pink
+  B: ['#E8B0A0', '#F0C0B0'],
 
   // Accessories
   G: ['#2D1B10', '#E8E4E0'],    // glasses frame
-  L: ['#60B0E0', '#90D0F0'],    // glasses lens - softer blue
-  Q: ['#F0C040', '#FFD860'],    // gold/bling - warmer gold
+  L: ['#70B8E8', '#90D0F8'],    // glasses lens
+  Q: ['#F0C040', '#FFD860'],    // gold/bling
 
-  // Misc
+  // Items
   S: ['#404858', '#A0A8B8'],    // laptop
-  s: ['#60D890', '#90F0B0'],    // laptop screen
+  s: ['#60D890', '#90F0B0'],    // screen glow
   C: ['#F8F4F0', '#E0DCD8'],    // cigarette
   F: ['#FF6030', '#FF8050'],    // fire
-  T: ['#A8A4A0', '#787470'],    // smoke
-  w: ['#80C8F0', '#60B0E0'],    // water/sweat/tears
-  Z: ['#80C8F0', '#60B0E0'],    // zzz
+  T: ['#A8A4A0', '#C8C4C0'],    // smoke
+  w: ['#80C8F0', '#A0E0FF'],    // water/sweat
+  Z: ['#80C8F0', '#A0E0FF'],    // zzz
   M: ['#70B870', '#90D090'],    // grass
-  W: ['#FFFFFF', '#404040'],    // white/speech bubble
-  R: ['#30C860', '#60E890'],    // green (wagmi sign)
-  r: ['#FFFFFF', '#103020'],    // wagmi text
-  n: ['#4A3020', '#D8C8B0'],    // thin line - closed eyes
+  W: ['#FFFFFF', '#404040'],    // white
+  R: ['#30C860', '#60E890'],    // success green
+  r: ['#FFFFFF', '#103020'],    // text on green
+
+  // Alligator (for ecosystem pose)
+  A: ['#5A8060', '#6A9070'],    // alligator body
+  a: ['#4A7050', '#5A8060'],    // alligator shadow
+  Y: ['#F8F080', '#FFE890'],    // alligator eye
 }
 
 function fill(dark: boolean, key: string): string {
@@ -101,48 +121,114 @@ function fill(dark: boolean, key: string): string {
   return dark ? pair[1] : pair[0]
 }
 
-// ── String-art engine ──
+// ══════════════════════════════════════════════════════════
+// ══ PIXEL ART ENGINE ══
+// ══════════════════════════════════════════════════════════
+
 function parseArt(art: string): { x: number; y: number; c: string }[] {
-  const rows = art.trim().split('\n').map(r => r.trim())
+  const rows = art.trim().split('\n').map(r => r.trimEnd())
   const pixels: { x: number; y: number; c: string }[] = []
   for (let y = 0; y < rows.length; y++)
     for (let x = 0; x < rows[y].length; x++) {
       const ch = rows[y][x]
-      if (ch !== '.') pixels.push({ x, y, c: ch })
+      if (ch !== '.' && ch !== ' ') pixels.push({ x, y, c: ch })
     }
   return pixels
 }
 
 function artSize(art: string): { w: number; h: number } {
-  const rows = art.trim().split('\n').map(r => r.trim())
+  const rows = art.trim().split('\n').map(r => r.trimEnd())
   return { w: Math.max(...rows.map(r => r.length)), h: rows.length }
 }
 
 // ══════════════════════════════════════════════════════════
-// ══ FACE-ONLY PIXEL ART (GEN Z DEADPAN STYLE) ══
+// ══ NEW CUTE CAPYBARA DESIGNS ══
+// More refined pixels, round body, tiny eyes (ㅡㅡ)
 // ══════════════════════════════════════════════════════════
 
-// Base face - 16x12 grid, focused on the face
-// Key features: GEN Z STARE (ㅡ_ㅡ) deadpan/judgmental eyes
-// Eyes: horizontal lines 'n' = thin line eyes (deadpan)
-// 'B' = blush, big nostrils
+// Face only - 20x16 grid, more refined
+// Key: TINY EYES as horizontal lines (n)
+// Big nose with clear nostrils (N, O)
+// Round, soft shape
 const FACE_ART = `
-....ee....ee....
-...eeee..eeee...
-..HHHHHHHHHHHH..
-.HHHHHHHHHHHHHH.
-.HHnnnHHHnnnHHH.
-.BHHHHHHHHHHHBh.
-..HHHHHNNHHHHH..
-..HHHHHNNHHHHh..
-...HHbbbbbHHH...
-....HHHHHHHH....
+......EeeeE..EeeeE......
+.....EeeeeE..EeeeeE.....
+....HHHHHHHHHHHHHHHH....
+...HHHHHHHHHHHHHHHHHH...
+..HHHHHHHHHHHHHHHHHHH...
+..HHHHHnnHHHHHHnnHHHH...
+..BHHHHHHHHHHHHHHHHHBh..
+..HHHHHHHHHHHHHHHHHHHH..
+...HHHHHHHNNNNHHHHHHH...
+...HHHHHHHNOONHHHHHHh...
+....HHHHHHNNNNHHHHHh....
+.....HHbbbbbbbbbHHH.....
+......HHHHHHHHHHH.......
 `
 
 const FACE_PIXELS = parseArt(FACE_ART)
 const FACE_SIZE = artSize(FACE_ART)
 
-// ── SVG renderer ──
+// Full body with laptop - 36x28 grid
+// Chubby body, short legs, holding laptop
+const HERO_BODY_ART = `
+.........EeeeE..EeeeE...............
+........EeeeeE..EeeeeE..............
+.......HHHHHHHHHHHHHHHH.............
+......HHHHHHHHHHHHHHHHHH............
+.....HHHHHHHHHHHHHHHHHHH............
+.....HHHHHnnHHHHHHnnHHHH............
+.....BHHHHHHHHHHHHHHHHHBh...........
+.....HHHHHHHHHHHHHHHHHHHH...........
+......HHHHHHHNNNNHHHHHHH............
+......HHHHHHHNOONHHHHHHh............
+.....HHHHHHHHHHHHHHHHHHHH...........
+....HHHHHHHHHHHHHHHHHHHHHH..........
+...HHHHHHHHHbbbbbbHHHHHHHHH.........
+..HHHHHHHHHbbbbbbbbHHHHHHHHH........
+..HHHHHHHHHbbbbbbbbHHHHHHHHH........
+...HHHHHHHHHHHHHHHHHHHHHHHHHH.......
+....HHHHHHHHHHHHHHHHHHHHHHHH........
+.....hhhh............hhhh...........
+.....hhhh............hhhh...........
+`
+
+const HERO_BODY_PIXELS = parseArt(HERO_BODY_ART)
+const HERO_BODY_SIZE = artSize(HERO_BODY_ART)
+
+// Capybara on alligator - for Ecosystems page!
+// "we chill with everyone" vibes
+const ECOSYSTEM_ART = `
+..........EeeeE..EeeeE..............
+.........EeeeeE..EeeeeE.............
+........HHHHHHHHHHHHHHHH............
+.......HHHHHHHHHHHHHHHHHH...........
+......HHHHHHHHHHHHHHHHHHH...........
+......HHHHHnnHHHHHHnnHHHH...........
+......BHHHHHHHHHHHHHHHHHBh..........
+......HHHHHHHHHHHHHHHHHHHH..........
+.......HHHHHHHNNNNHHHHHH............
+.......HHHHHHHNOONHHHHHh............
+......HHHHHHHHHHHHHHHHHHh...........
+.....HHHHHHHHHbbbbbbHHHHHH..........
+....HHHHHHHHHHbbbbbbHHHHHHH.........
+...HHHHHHHHHHHHHHHHHHHHHHHHH........
+...hhhhh..............hhhhh.........
+..AAAAAAAAAAAAAAAAAAAAAAAAAA........
+.AAAAAAYAAAAAAAAAAAAAAAAYaAAA.......
+AAAAAAAaAAAAAAAAAAAAAAAAaaAAAA......
+AAAAAAAAaaaaaaaaaaaaaaaaaAAAAA......
+.AAAAAAAAAAAAAAAAAAAAAAAAAAAA.......
+..AAAA..AAAA........AAAA..AAAA......
+`
+
+const ECOSYSTEM_PIXELS = parseArt(ECOSYSTEM_ART)
+const ECOSYSTEM_SIZE = artSize(ECOSYSTEM_ART)
+
+// ══════════════════════════════════════════════════════════
+// ══ SVG RENDERER ══
+// ══════════════════════════════════════════════════════════
+
 function PixelSvg({
   pixels, w, h, dark, extra,
 }: {
@@ -168,396 +254,336 @@ function PixelSvg({
   )
 }
 
-// ── Helper: replace eye pixels ──
-// New eye structure: 2x2 blocks with 'o' (highlight) and 'x' (pupil)
-// For closed eyes or special effects, replace all eye pixels
-function replaceEyes(pixels: typeof FACE_PIXELS, char: string) {
-  return pixels.map(p => {
-    if (p.c === 'x' || p.c === 'o') {
-      return { ...p, c: char }
-    }
-    return p
-  })
-}
-
 // ══════════════════════════════════════════════════════════
-// ══ POSE COMPONENTS (Face-only versions) ══
+// ══ POSE COMPONENTS ══
 // ══════════════════════════════════════════════════════════
 
-// blank: expressionless default - just vibing
+// blank: expressionless default
 function BlankPose({ dark }: { dark: boolean }) {
   return <PixelSvg pixels={FACE_PIXELS} w={FACE_SIZE.w} h={FACE_SIZE.h} dark={dark} />
 }
 
-// dejected: half-closed eyes (horizontal line)
+// dejected: same as blank but with a tear
 function DejectedPose({ dark }: { dark: boolean }) {
-  const face = replaceEyes(FACE_PIXELS, 'n')
-  return <PixelSvg pixels={face} w={FACE_SIZE.w} h={FACE_SIZE.h} dark={dark} />
-}
-
-// sparkle: excited golden eyes
-function SparklePose({ dark }: { dark: boolean }) {
-  const face = replaceEyes(FACE_PIXELS, 'Q')
-  const sparkles = [
-    { x: 2, y: 3, c: 'Q' }, { x: 13, y: 3, c: 'Q' },
+  const tear = [
+    { x: 19, y: 7, c: 'w' },
+    { x: 19, y: 8, c: 'w' },
   ]
-  return <PixelSvg pixels={[...face, ...sparkles]} w={FACE_SIZE.w} h={FACE_SIZE.h} dark={dark} />
+  return <PixelSvg pixels={[...FACE_PIXELS, ...tear]} w={FACE_SIZE.w + 2} h={FACE_SIZE.h} dark={dark} />
 }
 
-// smoking: squinted eyes + cigarette sticking out
+// sparkle: golden sparkles
+function SparklePose({ dark }: { dark: boolean }) {
+  const sparkles = [
+    { x: 3, y: 3, c: 'Q' }, { x: 4, y: 2, c: 'Q' },
+    { x: 19, y: 3, c: 'Q' }, { x: 20, y: 2, c: 'Q' },
+  ]
+  return <PixelSvg pixels={[...FACE_PIXELS, ...sparkles]} w={FACE_SIZE.w + 2} h={FACE_SIZE.h} dark={dark} />
+}
+
+// smoking: cigarette + smoke
 function SmokingPose({ dark }: { dark: boolean }) {
-  const face = replaceEyes(FACE_PIXELS, 'n')
   const cigarette = [
-    { x: 14, y: 6, c: 'C' }, { x: 15, y: 6, c: 'C' },
-    { x: 16, y: 6, c: 'C' }, { x: 17, y: 6, c: 'F' },
+    { x: 20, y: 9, c: 'C' }, { x: 21, y: 9, c: 'C' },
+    { x: 22, y: 9, c: 'C' }, { x: 23, y: 9, c: 'F' },
   ]
   const smoke = [
-    { x: 18, y: 5, c: 'T' }, { x: 17, y: 4, c: 'T' },
-    { x: 19, y: 3, c: 'T' },
+    { x: 24, y: 8, c: 'T' }, { x: 23, y: 7, c: 'T' },
+    { x: 25, y: 6, c: 'T' },
   ]
-  return <PixelSvg pixels={[...face, ...cigarette, ...smoke]} w={20} h={FACE_SIZE.h} dark={dark} />
+  return <PixelSvg pixels={[...FACE_PIXELS, ...cigarette, ...smoke]} w={26} h={FACE_SIZE.h} dark={dark} />
 }
 
-// sweating: worried with sweat drops
+// sweating: worried sweat drops
 function SweatingPose({ dark }: { dark: boolean }) {
-  const face = [...FACE_PIXELS]
   const sweat = [
-    { x: 15, y: 4, c: 'w' },
-    { x: 16, y: 5, c: 'w' },
-    { x: 15, y: 6, c: 'w' },
+    { x: 21, y: 5, c: 'w' },
+    { x: 22, y: 6, c: 'w' },
+    { x: 21, y: 7, c: 'w' },
   ]
-  return <PixelSvg pixels={[...face, ...sweat]} w={17} h={FACE_SIZE.h} dark={dark} />
+  return <PixelSvg pixels={[...FACE_PIXELS, ...sweat]} w={FACE_SIZE.w + 4} h={FACE_SIZE.h} dark={dark} />
 }
 
-// bling: THE MAIN POSE - sunglasses + gold chain
+// bling: sunglasses + gold chain - THE MAIN POSE
 function BlingPose({ dark }: { dark: boolean }) {
-  // Sunglasses overlay - covers both rows of 2x2 eyes
-  const GLASSES_ART = `
-................
-................
-................
-................
-.GLLLGgGLLLGggg.
-.GLLLGgGLLLGggg.
-................
-`
-  const glassesPixels = parseArt(GLASSES_ART)
-  const all = [...FACE_PIXELS, ...glassesPixels]
-
-  // Gold chain around neck area
-  const chain = [
-    { x: 4, y: 10, c: 'Q' }, { x: 5, y: 10, c: 'Q' }, { x: 6, y: 10, c: 'Q' },
-    { x: 7, y: 10, c: 'Q' }, { x: 8, y: 10, c: 'Q' }, { x: 9, y: 10, c: 'Q' },
-    { x: 10, y: 10, c: 'Q' }, { x: 11, y: 10, c: 'Q' },
-    { x: 7, y: 11, c: 'Q' }, { x: 8, y: 11, c: 'Q' },
-  ]
-
-  return <PixelSvg pixels={[...all, ...chain]} w={FACE_SIZE.w} h={12} dark={dark} />
-}
-
-// sleepy: closed eyes + zzz
-function SleepyPose({ dark }: { dark: boolean }) {
-  const face = replaceEyes(FACE_PIXELS, 'n')
-  const zzz = [
-    { x: 14, y: 2, c: 'Z' },
-    { x: 15, y: 1, c: 'Z' },
-    { x: 16, y: 0, c: 'Z' },
-  ]
-  const drool = [{ x: 13, y: 8, c: 'w' }]
-  return <PixelSvg pixels={[...face, ...zzz, ...drool]} w={17} h={FACE_SIZE.h} dark={dark} />
-}
-
-// eating: munching grass
-function EatingPose({ dark }: { dark: boolean }) {
-  const face = [...FACE_PIXELS]
-  const grass = [
-    { x: 13, y: 6, c: 'M' }, { x: 14, y: 6, c: 'M' },
-    { x: 13, y: 7, c: 'M' }, { x: 14, y: 7, c: 'M' }, { x: 15, y: 7, c: 'M' },
-    { x: 14, y: 8, c: 'M' },
-  ]
-  return <PixelSvg pixels={[...face, ...grass]} w={16} h={FACE_SIZE.h} dark={dark} />
-}
-
-// wink: one eye open, one closed
-function WinkPose({ dark }: { dark: boolean }) {
-  // Keep left eye (positions 3-4), replace right eye (positions 8-9) with closed line
-  const face = FACE_PIXELS.map(p => {
-    // Right eye area (x >= 8 and x <= 9)
-    if ((p.c === 'x' || p.c === 'o') && p.x >= 8 && p.x <= 9) {
-      return { ...p, c: 'n' }
-    }
-    return p
-  })
-  return <PixelSvg pixels={face} w={FACE_SIZE.w} h={FACE_SIZE.h} dark={dark} />
-}
-
-// notfound: smoking + speech bubble
-function NotFoundPose({ dark }: { dark: boolean }) {
-  const face = replaceEyes(FACE_PIXELS, 'n')
-  const cigarette = [
-    { x: 14, y: 8, c: 'C' }, { x: 15, y: 8, c: 'C' }, { x: 16, y: 8, c: 'F' },
-  ]
-  const smoke = [{ x: 17, y: 7, c: 'T' }, { x: 18, y: 6, c: 'T' }]
-  const extra = (
-    <>
-      <rect x={12} y={0} width={11} height={4} rx={0.5} fill={fill(dark, 'W')} />
-      <polygon points="13,4 14.5,4 12.5,5.5" fill={fill(dark, 'W')} />
-      <text x={13} y={3} fill={fill(dark, 'N')} fontSize="2.5" fontWeight="bold" fontFamily="monospace">
-        ser pls
-      </text>
-    </>
-  )
-  return (
-    <PixelSvg
-      pixels={[...face.map(p => ({ ...p, y: p.y + 2 })), ...cigarette.map(p => ({ ...p, y: p.y + 2 })), ...smoke.map(p => ({ ...p, y: p.y + 2 }))]}
-      w={20}
-      h={15}
-      dark={dark}
-      extra={extra}
-    />
-  )
-}
-
-// empty: shrugging vibes
-function EmptyPose({ dark }: { dark: boolean }) {
-  const face = [...FACE_PIXELS]
-  const extra = (
-    <text x={0} y={FACE_SIZE.h + 2} fill={fill(dark, 'n')} fontSize="3" fontFamily="monospace">
-      ¯\_(ツ)_/¯
-    </text>
-  )
-  return <PixelSvg pixels={face} w={FACE_SIZE.w} h={FACE_SIZE.h + 4} dark={dark} extra={extra} />
-}
-
-// success: happy squint eyes (^_^) + WAGMI
-function SuccessPose({ dark }: { dark: boolean }) {
-  const face = [...FACE_PIXELS]
-  // Happy eyes: ^ shape (curved up)
-  const happyEyes = [
-    { x: 3, y: 4, c: 'x' }, { x: 4, y: 3, c: 'x' }, { x: 5, y: 4, c: 'x' },
-    { x: 9, y: 4, c: 'x' }, { x: 10, y: 3, c: 'x' }, { x: 11, y: 4, c: 'x' },
-  ]
-  const extra = (
-    <>
-      <rect x={0} y={0} width={8} height={4} rx={0.5} fill={fill(dark, 'R')} />
-      <text x={0.5} y={3} fill={fill(dark, 'r')} fontSize="2.5" fontWeight="bold" fontFamily="monospace">
-        WAGMI
-      </text>
-    </>
-  )
-  return <PixelSvg pixels={[...face.map(p => ({ ...p, y: p.y + 2 })), ...happyEyes.map(p => ({ ...p, y: p.y + 2 }))]} w={FACE_SIZE.w} h={FACE_SIZE.h + 4} dark={dark} extra={extra} />
-}
-
-// ══════════════════════════════════════════════════════════
-// ══ PAGE-SPECIFIC POSES ══
-// ══════════════════════════════════════════════════════════
-
-// search: magnifying glass, deadpan stare
-function SearchPose({ dark }: { dark: boolean }) {
-  const face = [...FACE_PIXELS]
-  // Magnifying glass next to face
-  const magnifier = [
-    { x: 15, y: 3, c: 'G' }, { x: 16, y: 3, c: 'G' }, { x: 17, y: 3, c: 'G' },
-    { x: 15, y: 4, c: 'G' }, { x: 17, y: 4, c: 'G' },
-    { x: 15, y: 5, c: 'G' }, { x: 16, y: 5, c: 'G' }, { x: 17, y: 5, c: 'G' },
-    { x: 18, y: 6, c: 'G' }, { x: 19, y: 7, c: 'G' }, { x: 20, y: 8, c: 'G' },
-  ]
-  return <PixelSvg pixels={[...face, ...magnifier]} w={21} h={FACE_SIZE.h} dark={dark} />
-}
-
-// building: hard hat + wrench (for companies)
-function BuildingPose({ dark }: { dark: boolean }) {
-  const face = [...FACE_PIXELS]
-  // Hard hat on top
-  const hardHat = [
-    { x: 4, y: 0, c: 'Q' }, { x: 5, y: 0, c: 'Q' }, { x: 6, y: 0, c: 'Q' },
-    { x: 7, y: 0, c: 'Q' }, { x: 8, y: 0, c: 'Q' }, { x: 9, y: 0, c: 'Q' },
-    { x: 10, y: 0, c: 'Q' }, { x: 11, y: 0, c: 'Q' },
-    { x: 3, y: 1, c: 'Q' }, { x: 4, y: 1, c: 'Q' }, { x: 5, y: 1, c: 'Q' },
-    { x: 6, y: 1, c: 'Q' }, { x: 7, y: 1, c: 'Q' }, { x: 8, y: 1, c: 'Q' },
-    { x: 9, y: 1, c: 'Q' }, { x: 10, y: 1, c: 'Q' }, { x: 11, y: 1, c: 'Q' },
-    { x: 12, y: 1, c: 'Q' },
-  ]
-  return <PixelSvg pixels={[...face.map(p => ({ ...p, y: p.y + 2 })), ...hardHat]} w={FACE_SIZE.w} h={FACE_SIZE.h + 2} dark={dark} />
-}
-
-// reading: glasses + book/document
-function ReadingPose({ dark }: { dark: boolean }) {
-  const face = [...FACE_PIXELS]
-  // Regular glasses (not sunglasses)
+  // Sunglasses over the tiny eyes
   const glasses = [
-    { x: 2, y: 4, c: 'G' }, { x: 3, y: 4, c: 'L' }, { x: 4, y: 4, c: 'L' }, { x: 5, y: 4, c: 'G' },
-    { x: 6, y: 4, c: 'G' }, { x: 7, y: 4, c: 'G' },
-    { x: 8, y: 4, c: 'G' }, { x: 9, y: 4, c: 'L' }, { x: 10, y: 4, c: 'L' }, { x: 11, y: 4, c: 'G' },
+    // Left lens
+    { x: 5, y: 5, c: 'G' }, { x: 6, y: 5, c: 'L' }, { x: 7, y: 5, c: 'L' }, { x: 8, y: 5, c: 'L' }, { x: 9, y: 5, c: 'G' },
+    { x: 5, y: 6, c: 'G' }, { x: 6, y: 6, c: 'L' }, { x: 7, y: 6, c: 'L' }, { x: 8, y: 6, c: 'L' }, { x: 9, y: 6, c: 'G' },
+    // Bridge
+    { x: 10, y: 5, c: 'G' }, { x: 11, y: 5, c: 'G' }, { x: 12, y: 5, c: 'G' },
+    { x: 10, y: 6, c: 'G' }, { x: 11, y: 6, c: 'G' }, { x: 12, y: 6, c: 'G' },
+    // Right lens
+    { x: 13, y: 5, c: 'G' }, { x: 14, y: 5, c: 'L' }, { x: 15, y: 5, c: 'L' }, { x: 16, y: 5, c: 'L' }, { x: 17, y: 5, c: 'G' },
+    { x: 13, y: 6, c: 'G' }, { x: 14, y: 6, c: 'L' }, { x: 15, y: 6, c: 'L' }, { x: 16, y: 6, c: 'L' }, { x: 17, y: 6, c: 'G' },
   ]
-  // Document/paper below
-  const paper = [
-    { x: 12, y: 7, c: 'W' }, { x: 13, y: 7, c: 'W' }, { x: 14, y: 7, c: 'W' }, { x: 15, y: 7, c: 'W' },
-    { x: 12, y: 8, c: 'W' }, { x: 13, y: 8, c: 'n' }, { x: 14, y: 8, c: 'n' }, { x: 15, y: 8, c: 'W' },
-    { x: 12, y: 9, c: 'W' }, { x: 13, y: 9, c: 'n' }, { x: 14, y: 9, c: 'W' }, { x: 15, y: 9, c: 'W' },
-  ]
-  return <PixelSvg pixels={[...face, ...glasses, ...paper]} w={17} h={FACE_SIZE.h} dark={dark} />
-}
-
-// heart: heart eyes for investors/bookmarks
-function HeartPose({ dark }: { dark: boolean }) {
-  const face = [...FACE_PIXELS]
-  // Heart-shaped eyes
-  const hearts = [
-    { x: 2, y: 3, c: 'B' }, { x: 5, y: 3, c: 'B' },
-    { x: 2, y: 4, c: 'B' }, { x: 3, y: 4, c: 'B' }, { x: 4, y: 4, c: 'B' }, { x: 5, y: 4, c: 'B' },
-    { x: 3, y: 5, c: 'B' }, { x: 4, y: 5, c: 'B' },
-    { x: 8, y: 3, c: 'B' }, { x: 11, y: 3, c: 'B' },
-    { x: 8, y: 4, c: 'B' }, { x: 9, y: 4, c: 'B' }, { x: 10, y: 4, c: 'B' }, { x: 11, y: 4, c: 'B' },
-    { x: 9, y: 5, c: 'B' }, { x: 10, y: 5, c: 'B' },
-  ]
-  return <PixelSvg pixels={[...face, ...hearts]} w={FACE_SIZE.w} h={FACE_SIZE.h} dark={dark} />
-}
-
-// question: confused face with ? bubble
-function QuestionPose({ dark }: { dark: boolean }) {
-  const face = [...FACE_PIXELS]
-  const extra = (
-    <>
-      <circle cx={15} cy={3} r={2.5} fill={fill(dark, 'W')} />
-      <text x={14} y={4} fill={fill(dark, 'N')} fontSize="3" fontWeight="bold" fontFamily="monospace">
-        ?
-      </text>
-    </>
-  )
-  return <PixelSvg pixels={face} w={18} h={FACE_SIZE.h} dark={dark} extra={extra} />
-}
-
-// coffee: holding coffee cup (for late night grinding)
-function CoffeePose({ dark }: { dark: boolean }) {
-  const face = [...FACE_PIXELS]
-  // Coffee cup
-  const coffee = [
-    { x: 14, y: 6, c: 'W' }, { x: 15, y: 6, c: 'W' }, { x: 16, y: 6, c: 'W' },
-    { x: 14, y: 7, c: 'h' }, { x: 15, y: 7, c: 'h' }, { x: 16, y: 7, c: 'h' },
-    { x: 14, y: 8, c: 'h' }, { x: 15, y: 8, c: 'h' }, { x: 16, y: 8, c: 'h' },
-    { x: 17, y: 7, c: 'h' }, // Handle
-  ]
-  // Steam
-  const steam = [
-    { x: 14, y: 5, c: 'T' }, { x: 16, y: 4, c: 'T' },
-  ]
-  return <PixelSvg pixels={[...face, ...coffee, ...steam]} w={18} h={FACE_SIZE.h} dark={dark} />
-}
-
-// door: peeking from door (for login)
-function DoorPose({ dark }: { dark: boolean }) {
-  const face = [...FACE_PIXELS]
-  // Door frame on left side
-  const door = [
-    { x: 0, y: 0, c: 'G' }, { x: 0, y: 1, c: 'G' }, { x: 0, y: 2, c: 'G' },
-    { x: 0, y: 3, c: 'G' }, { x: 0, y: 4, c: 'G' }, { x: 0, y: 5, c: 'G' },
-    { x: 0, y: 6, c: 'G' }, { x: 0, y: 7, c: 'G' }, { x: 0, y: 8, c: 'G' },
-    { x: 0, y: 9, c: 'G' },
-    { x: 1, y: 4, c: 'Q' }, // Door handle
-  ]
-  return <PixelSvg pixels={[...door, ...face.map(p => ({ ...p, x: p.x + 2 }))]} w={FACE_SIZE.w + 2} h={FACE_SIZE.h} dark={dark} />
-}
-
-// ══════════════════════════════════════════════════════════
-// ══ FULL-BODY HERO POSE (laptop with green terminal) ══
-// ══════════════════════════════════════════════════════════
-
-// Full body capybara with sunglasses, holding laptop
-// Eyes: 'n' = thin line deadpan eyes (Gen Z stare) - covered by glasses anyway
-const HERO_BODY_ART = `
-.......ee....ee...............
-......eeee..eeee..............
-.....HHHHHHHHHHHHHH...........
-....HHHHHHHHHHHHHHHH..........
-....HnnnHHHHnnnHHHHH..........
-....BHHHHHHHHHHHHBh...........
-.....HHHHHNNHHHHHH............
-...HHHHHHHNNHHHHHHHHHH........
-..HHHHHHHHHHHHHHHHHHHHh.......
-.HHHHHHHHbbbbbbbbHHHHHHH......
-.HHHHHHHHbbbbbbbbHHHHHHHh.....
-..HHHHHHHHHHHHHHHHHHHHHh......
-...HHHHHHHHHHHHHHHHHHHH........
-....hhhh..........hhhh........
-....hhhh..........hhhh........
-`
-
-const HERO_BODY_PIXELS = parseArt(HERO_BODY_ART)
-const HERO_BODY_SIZE = artSize(HERO_BODY_ART)
-
-function HeroLaptopPose({ dark }: { dark: boolean }) {
-  const body = [...HERO_BODY_PIXELS]
-
-  // Sunglasses overlay - covers 2 rows for the bigger cute eyes
-  const glasses = [
-    // Top row of glasses
-    { x: 4, y: 4, c: 'G' }, { x: 5, y: 4, c: 'L' }, { x: 6, y: 4, c: 'L' }, { x: 7, y: 4, c: 'L' },
-    { x: 8, y: 4, c: 'G' }, { x: 9, y: 4, c: 'G' },
-    { x: 10, y: 4, c: 'L' }, { x: 11, y: 4, c: 'L' }, { x: 12, y: 4, c: 'L' },
-    { x: 13, y: 4, c: 'G' }, { x: 14, y: 4, c: 'G' },
-    // Bottom row of glasses
-    { x: 4, y: 5, c: 'G' }, { x: 5, y: 5, c: 'L' }, { x: 6, y: 5, c: 'L' }, { x: 7, y: 5, c: 'L' },
-    { x: 8, y: 5, c: 'G' }, { x: 9, y: 5, c: 'G' },
-    { x: 10, y: 5, c: 'L' }, { x: 11, y: 5, c: 'L' }, { x: 12, y: 5, c: 'L' },
-    { x: 13, y: 5, c: 'G' }, { x: 14, y: 5, c: 'G' },
-  ]
-
-  // Laptop - positioned to the right as if being held
-  const laptopX = 20
-  const laptopY = 7
-  const laptop: { x: number; y: number; c: string }[] = []
-
-  // Laptop screen frame (dark)
-  for (let dy = 0; dy < 6; dy++)
-    for (let dx = 0; dx < 9; dx++)
-      laptop.push({ x: laptopX + dx, y: laptopY + dy, c: 'S' })
-
-  // Green terminal screen (inner)
-  for (let dy = 1; dy < 5; dy++)
-    for (let dx = 1; dx < 8; dx++)
-      laptop.push({ x: laptopX + dx, y: laptopY + dy, c: 's' })
-
-  // Terminal text lines (dark on green)
-  const terminalLines = [
-    { x: laptopX + 2, y: laptopY + 1, c: 'G' },
-    { x: laptopX + 3, y: laptopY + 1, c: 'G' },
-    { x: laptopX + 4, y: laptopY + 1, c: 'G' },
-    { x: laptopX + 5, y: laptopY + 1, c: 'G' },
-    { x: laptopX + 2, y: laptopY + 2, c: 'G' },
-    { x: laptopX + 3, y: laptopY + 2, c: 'G' },
-    { x: laptopX + 2, y: laptopY + 3, c: 'G' },
-    { x: laptopX + 3, y: laptopY + 3, c: 'G' },
-    { x: laptopX + 4, y: laptopY + 3, c: 'G' },
-    { x: laptopX + 6, y: laptopY + 3, c: 'G' },
-    // Cursor blink
-    { x: laptopX + 2, y: laptopY + 4, c: 'Q' },
-  ]
-
-  // Laptop base/keyboard
-  for (let dx = -1; dx < 10; dx++)
-    laptop.push({ x: laptopX + dx, y: laptopY + 6, c: 'S' })
 
   // Gold chain
   const chain = [
-    { x: 8, y: 8, c: 'Q' }, { x: 9, y: 8, c: 'Q' }, { x: 10, y: 8, c: 'Q' },
-    { x: 11, y: 8, c: 'Q' }, { x: 12, y: 8, c: 'Q' }, { x: 13, y: 8, c: 'Q' },
-    { x: 10, y: 9, c: 'Q' }, { x: 11, y: 9, c: 'Q' },
+    { x: 7, y: 12, c: 'Q' }, { x: 8, y: 12, c: 'Q' }, { x: 9, y: 12, c: 'Q' },
+    { x: 10, y: 12, c: 'Q' }, { x: 11, y: 12, c: 'Q' }, { x: 12, y: 12, c: 'Q' },
+    { x: 13, y: 12, c: 'Q' }, { x: 14, y: 12, c: 'Q' }, { x: 15, y: 12, c: 'Q' },
+    { x: 10, y: 13, c: 'Q' }, { x: 11, y: 13, c: 'Q' }, { x: 12, y: 13, c: 'Q' },
   ]
+
+  return <PixelSvg pixels={[...FACE_PIXELS, ...glasses, ...chain]} w={FACE_SIZE.w} h={FACE_SIZE.h + 2} dark={dark} />
+}
+
+// sleepy: zzz floating
+function SleepyPose({ dark }: { dark: boolean }) {
+  const zzz = [
+    { x: 20, y: 3, c: 'Z' },
+    { x: 22, y: 2, c: 'Z' },
+    { x: 24, y: 1, c: 'Z' },
+  ]
+  return <PixelSvg pixels={[...FACE_PIXELS, ...zzz]} w={26} h={FACE_SIZE.h} dark={dark} />
+}
+
+// eating: grass in mouth
+function EatingPose({ dark }: { dark: boolean }) {
+  const grass = [
+    { x: 18, y: 9, c: 'M' }, { x: 19, y: 9, c: 'M' }, { x: 20, y: 9, c: 'M' },
+    { x: 18, y: 10, c: 'M' }, { x: 19, y: 10, c: 'M' },
+    { x: 19, y: 11, c: 'M' },
+  ]
+  return <PixelSvg pixels={[...FACE_PIXELS, ...grass]} w={FACE_SIZE.w + 2} h={FACE_SIZE.h} dark={dark} />
+}
+
+// wink: one eye winking (^)
+function WinkPose({ dark }: { dark: boolean }) {
+  // Replace right eye with ^ shape
+  const winkPixels = FACE_PIXELS.map(p => {
+    if (p.c === 'n' && p.x >= 14 && p.x <= 15) {
+      return { ...p, c: 'H' } // Hide right eye
+    }
+    return p
+  })
+  const wink = [
+    { x: 14, y: 5, c: 'n' }, { x: 15, y: 4, c: 'n' }, { x: 16, y: 5, c: 'n' },
+  ]
+  return <PixelSvg pixels={[...winkPixels, ...wink]} w={FACE_SIZE.w} h={FACE_SIZE.h} dark={dark} />
+}
+
+// Hero laptop pose - full body with laptop
+function HeroLaptopPose({ dark }: { dark: boolean }) {
+  const body = [...HERO_BODY_PIXELS]
+
+  // Sunglasses
+  const glasses = [
+    { x: 6, y: 5, c: 'G' }, { x: 7, y: 5, c: 'L' }, { x: 8, y: 5, c: 'L' }, { x: 9, y: 5, c: 'L' }, { x: 10, y: 5, c: 'G' },
+    { x: 6, y: 6, c: 'G' }, { x: 7, y: 6, c: 'L' }, { x: 8, y: 6, c: 'L' }, { x: 9, y: 6, c: 'L' }, { x: 10, y: 6, c: 'G' },
+    { x: 11, y: 5, c: 'G' }, { x: 12, y: 5, c: 'G' }, { x: 13, y: 5, c: 'G' },
+    { x: 11, y: 6, c: 'G' }, { x: 12, y: 6, c: 'G' }, { x: 13, y: 6, c: 'G' },
+    { x: 14, y: 5, c: 'G' }, { x: 15, y: 5, c: 'L' }, { x: 16, y: 5, c: 'L' }, { x: 17, y: 5, c: 'L' }, { x: 18, y: 5, c: 'G' },
+    { x: 14, y: 6, c: 'G' }, { x: 15, y: 6, c: 'L' }, { x: 16, y: 6, c: 'L' }, { x: 17, y: 6, c: 'L' }, { x: 18, y: 6, c: 'G' },
+  ]
+
+  // Gold chain
+  const chain = [
+    { x: 10, y: 11, c: 'Q' }, { x: 11, y: 11, c: 'Q' }, { x: 12, y: 11, c: 'Q' },
+    { x: 13, y: 11, c: 'Q' }, { x: 14, y: 11, c: 'Q' }, { x: 15, y: 11, c: 'Q' },
+    { x: 12, y: 12, c: 'Q' }, { x: 13, y: 12, c: 'Q' },
+  ]
+
+  // Laptop
+  const laptopX = 26
+  const laptopY = 10
+  const laptop: { x: number; y: number; c: string }[] = []
+
+  // Screen frame
+  for (let dy = 0; dy < 7; dy++)
+    for (let dx = 0; dx < 10; dx++)
+      laptop.push({ x: laptopX + dx, y: laptopY + dy, c: 'S' })
+
+  // Screen glow
+  for (let dy = 1; dy < 6; dy++)
+    for (let dx = 1; dx < 9; dx++)
+      laptop.push({ x: laptopX + dx, y: laptopY + dy, c: 's' })
+
+  // Terminal lines
+  const terminal = [
+    { x: laptopX + 2, y: laptopY + 2, c: 'G' }, { x: laptopX + 3, y: laptopY + 2, c: 'G' },
+    { x: laptopX + 4, y: laptopY + 2, c: 'G' }, { x: laptopX + 5, y: laptopY + 2, c: 'G' },
+    { x: laptopX + 2, y: laptopY + 3, c: 'G' }, { x: laptopX + 3, y: laptopY + 3, c: 'G' },
+    { x: laptopX + 2, y: laptopY + 4, c: 'Q' }, // cursor
+  ]
+
+  // Keyboard
+  for (let dx = -1; dx < 11; dx++)
+    laptop.push({ x: laptopX + dx, y: laptopY + 7, c: 'S' })
 
   return (
     <PixelSvg
-      pixels={[...body, ...glasses, ...chain, ...laptop, ...terminalLines]}
-      w={30}
+      pixels={[...body, ...glasses, ...chain, ...laptop, ...terminal]}
+      w={37}
       h={HERO_BODY_SIZE.h}
       dark={dark}
     />
   )
 }
 
-// ── Pose registry ──
+// Ecosystem pose - capybara on alligator!
+function EcosystemPose({ dark }: { dark: boolean }) {
+  return <PixelSvg pixels={ECOSYSTEM_PIXELS} w={ECOSYSTEM_SIZE.w} h={ECOSYSTEM_SIZE.h} dark={dark} />
+}
+
+// search: magnifying glass
+function SearchPose({ dark }: { dark: boolean }) {
+  const magnifier = [
+    { x: 22, y: 4, c: 'G' }, { x: 23, y: 4, c: 'G' }, { x: 24, y: 4, c: 'G' },
+    { x: 22, y: 5, c: 'G' }, { x: 24, y: 5, c: 'G' },
+    { x: 22, y: 6, c: 'G' }, { x: 23, y: 6, c: 'G' }, { x: 24, y: 6, c: 'G' },
+    { x: 25, y: 7, c: 'G' }, { x: 26, y: 8, c: 'G' }, { x: 27, y: 9, c: 'G' },
+  ]
+  return <PixelSvg pixels={[...FACE_PIXELS, ...magnifier]} w={28} h={FACE_SIZE.h} dark={dark} />
+}
+
+// building: hard hat
+function BuildingPose({ dark }: { dark: boolean }) {
+  const hat = [
+    { x: 6, y: 0, c: 'Q' }, { x: 7, y: 0, c: 'Q' }, { x: 8, y: 0, c: 'Q' },
+    { x: 9, y: 0, c: 'Q' }, { x: 10, y: 0, c: 'Q' }, { x: 11, y: 0, c: 'Q' },
+    { x: 12, y: 0, c: 'Q' }, { x: 13, y: 0, c: 'Q' }, { x: 14, y: 0, c: 'Q' },
+    { x: 15, y: 0, c: 'Q' }, { x: 16, y: 0, c: 'Q' },
+    { x: 5, y: 1, c: 'Q' }, { x: 6, y: 1, c: 'Q' }, { x: 7, y: 1, c: 'Q' },
+    { x: 8, y: 1, c: 'Q' }, { x: 9, y: 1, c: 'Q' }, { x: 10, y: 1, c: 'Q' },
+    { x: 11, y: 1, c: 'Q' }, { x: 12, y: 1, c: 'Q' }, { x: 13, y: 1, c: 'Q' },
+    { x: 14, y: 1, c: 'Q' }, { x: 15, y: 1, c: 'Q' }, { x: 16, y: 1, c: 'Q' },
+    { x: 17, y: 1, c: 'Q' },
+  ]
+  const shiftedFace = FACE_PIXELS.map(p => ({ ...p, y: p.y + 2 }))
+  return <PixelSvg pixels={[...hat, ...shiftedFace]} w={FACE_SIZE.w} h={FACE_SIZE.h + 2} dark={dark} />
+}
+
+// reading: glasses + paper
+function ReadingPose({ dark }: { dark: boolean }) {
+  const glasses = [
+    { x: 4, y: 5, c: 'G' }, { x: 5, y: 5, c: 'L' }, { x: 6, y: 5, c: 'L' }, { x: 7, y: 5, c: 'L' }, { x: 8, y: 5, c: 'G' },
+    { x: 9, y: 5, c: 'G' }, { x: 10, y: 5, c: 'G' }, { x: 11, y: 5, c: 'G' },
+    { x: 12, y: 5, c: 'G' }, { x: 13, y: 5, c: 'L' }, { x: 14, y: 5, c: 'L' }, { x: 15, y: 5, c: 'L' }, { x: 16, y: 5, c: 'G' },
+  ]
+  const paper = [
+    { x: 19, y: 8, c: 'W' }, { x: 20, y: 8, c: 'W' }, { x: 21, y: 8, c: 'W' }, { x: 22, y: 8, c: 'W' },
+    { x: 19, y: 9, c: 'W' }, { x: 20, y: 9, c: 'n' }, { x: 21, y: 9, c: 'n' }, { x: 22, y: 9, c: 'W' },
+    { x: 19, y: 10, c: 'W' }, { x: 20, y: 10, c: 'n' }, { x: 21, y: 10, c: 'W' }, { x: 22, y: 10, c: 'W' },
+    { x: 19, y: 11, c: 'W' }, { x: 20, y: 11, c: 'W' }, { x: 21, y: 11, c: 'W' }, { x: 22, y: 11, c: 'W' },
+  ]
+  return <PixelSvg pixels={[...FACE_PIXELS, ...glasses, ...paper]} w={24} h={FACE_SIZE.h} dark={dark} />
+}
+
+// heart: heart eyes
+function HeartPose({ dark }: { dark: boolean }) {
+  // Replace eye area with hearts
+  const faceNoEyes = FACE_PIXELS.filter(p => p.c !== 'n')
+  const hearts = [
+    // Left heart
+    { x: 5, y: 4, c: 'B' }, { x: 8, y: 4, c: 'B' },
+    { x: 5, y: 5, c: 'B' }, { x: 6, y: 5, c: 'B' }, { x: 7, y: 5, c: 'B' }, { x: 8, y: 5, c: 'B' },
+    { x: 6, y: 6, c: 'B' }, { x: 7, y: 6, c: 'B' },
+    // Right heart
+    { x: 13, y: 4, c: 'B' }, { x: 16, y: 4, c: 'B' },
+    { x: 13, y: 5, c: 'B' }, { x: 14, y: 5, c: 'B' }, { x: 15, y: 5, c: 'B' }, { x: 16, y: 5, c: 'B' },
+    { x: 14, y: 6, c: 'B' }, { x: 15, y: 6, c: 'B' },
+  ]
+  return <PixelSvg pixels={[...faceNoEyes, ...hearts]} w={FACE_SIZE.w} h={FACE_SIZE.h} dark={dark} />
+}
+
+// question: ? bubble
+function QuestionPose({ dark }: { dark: boolean }) {
+  const extra = (
+    <>
+      <circle cx={22} cy={4} r={3} fill={fill(dark, 'W')} />
+      <text x={20.5} y={5.5} fill={fill(dark, 'N')} fontSize="4" fontWeight="bold" fontFamily="monospace">
+        ?
+      </text>
+    </>
+  )
+  return <PixelSvg pixels={FACE_PIXELS} w={26} h={FACE_SIZE.h} dark={dark} extra={extra} />
+}
+
+// coffee: holding coffee
+function CoffeePose({ dark }: { dark: boolean }) {
+  const cup = [
+    { x: 20, y: 8, c: 'W' }, { x: 21, y: 8, c: 'W' }, { x: 22, y: 8, c: 'W' },
+    { x: 20, y: 9, c: 'h' }, { x: 21, y: 9, c: 'h' }, { x: 22, y: 9, c: 'h' },
+    { x: 20, y: 10, c: 'h' }, { x: 21, y: 10, c: 'h' }, { x: 22, y: 10, c: 'h' },
+    { x: 23, y: 9, c: 'h' },
+  ]
+  const steam = [
+    { x: 20, y: 7, c: 'T' }, { x: 22, y: 6, c: 'T' },
+  ]
+  return <PixelSvg pixels={[...FACE_PIXELS, ...cup, ...steam]} w={24} h={FACE_SIZE.h} dark={dark} />
+}
+
+// door: peeking from door
+function DoorPose({ dark }: { dark: boolean }) {
+  const door = []
+  for (let y = 0; y < FACE_SIZE.h; y++) {
+    door.push({ x: 0, y, c: 'G' })
+    door.push({ x: 1, y, c: 'G' })
+  }
+  door.push({ x: 2, y: 6, c: 'Q' }) // handle
+  const shiftedFace = FACE_PIXELS.map(p => ({ ...p, x: p.x + 3 }))
+  return <PixelSvg pixels={[...door, ...shiftedFace]} w={FACE_SIZE.w + 4} h={FACE_SIZE.h} dark={dark} />
+}
+
+// notfound: ser pls bubble
+function NotFoundPose({ dark }: { dark: boolean }) {
+  const cigarette = [
+    { x: 20, y: 11, c: 'C' }, { x: 21, y: 11, c: 'C' }, { x: 22, y: 11, c: 'F' },
+  ]
+  const smoke = [{ x: 23, y: 10, c: 'T' }, { x: 24, y: 9, c: 'T' }]
+  const shiftedFace = FACE_PIXELS.map(p => ({ ...p, y: p.y + 3 }))
+  const extra = (
+    <>
+      <rect x={16} y={0} width={12} height={5} rx={1} fill={fill(dark, 'W')} />
+      <polygon points="17,5 19,5 16,7" fill={fill(dark, 'W')} />
+      <text x={17} y={3.5} fill={fill(dark, 'N')} fontSize="3" fontWeight="bold" fontFamily="monospace">
+        ser pls
+      </text>
+    </>
+  )
+  return (
+    <PixelSvg
+      pixels={[...shiftedFace, ...cigarette.map(p => ({ ...p, y: p.y + 3 })), ...smoke.map(p => ({ ...p, y: p.y + 3 }))]}
+      w={26}
+      h={FACE_SIZE.h + 5}
+      dark={dark}
+      extra={extra}
+    />
+  )
+}
+
+// empty: shrug vibes
+function EmptyPose({ dark }: { dark: boolean }) {
+  const extra = (
+    <text x={2} y={FACE_SIZE.h + 3} fill={fill(dark, 'n')} fontSize="4" fontFamily="monospace">
+      ¯\_(ツ)_/¯
+    </text>
+  )
+  return <PixelSvg pixels={FACE_PIXELS} w={FACE_SIZE.w + 2} h={FACE_SIZE.h + 5} dark={dark} extra={extra} />
+}
+
+// success: WAGMI
+function SuccessPose({ dark }: { dark: boolean }) {
+  const shiftedFace = FACE_PIXELS.map(p => ({ ...p, y: p.y + 3 }))
+  const extra = (
+    <>
+      <rect x={2} y={0} width={12} height={5} rx={1} fill={fill(dark, 'R')} />
+      <text x={3} y={3.5} fill={fill(dark, 'r')} fontSize="3" fontWeight="bold" fontFamily="monospace">
+        WAGMI
+      </text>
+    </>
+  )
+  return <PixelSvg pixels={shiftedFace} w={FACE_SIZE.w} h={FACE_SIZE.h + 5} dark={dark} extra={extra} />
+}
+
+// ══════════════════════════════════════════════════════════
+// ══ POSE REGISTRY ══
+// ══════════════════════════════════════════════════════════
+
 const POSES: Record<string, (props: { dark: boolean }) => React.ReactNode> = {
-  // Base poses
   blank: BlankPose,
   dejected: DejectedPose,
   sparkle: SparklePose,
@@ -568,7 +594,7 @@ const POSES: Record<string, (props: { dark: boolean }) => React.ReactNode> = {
   eating: EatingPose,
   wink: WinkPose,
   heroLaptop: HeroLaptopPose,
-  // Page-specific poses
+  ecosystem: EcosystemPose,
   search: SearchPose,
   building: BuildingPose,
   reading: ReadingPose,
@@ -576,7 +602,7 @@ const POSES: Record<string, (props: { dark: boolean }) => React.ReactNode> = {
   question: QuestionPose,
   coffee: CoffeePose,
   door: DoorPose,
-  // Page aliases
+  // Aliases
   main: HeroLaptopPose,
   careers: SearchPose,
   investors: HeartPose,
@@ -584,7 +610,6 @@ const POSES: Record<string, (props: { dark: boolean }) => React.ReactNode> = {
   articles: ReadingPose,
   bookmarks: HeartPose,
   login: DoorPose,
-  // State aliases
   loading: SweatingPose,
   notfound: NotFoundPose,
   empty: EmptyPose,
@@ -592,24 +617,21 @@ const POSES: Record<string, (props: { dark: boolean }) => React.ReactNode> = {
   error: SweatingPose,
 }
 
-// ── Meme content (Gen Z style) ──
+// ══════════════════════════════════════════════════════════
+// ══ MEME CONTENT ══
+// ══════════════════════════════════════════════════════════
+
 const CLICK_QUOTES = [
-  // Gen Z vibes
-  'bruh', 'no cap this job bussin', 'slay', 'its giving... employed',
-  'bestie ur hired', 'periodt', 'lowkey a vibe', 'highkey fire',
-  'not me applying at 3am', 'real', 'facts no printer',
-  // Crypto Gen Z
+  'bruh', 'no cap', 'slay', 'its giving... employed',
+  'bestie ur hired', 'periodt', 'lowkey fire', 'real',
   'ser pls', 'gm', 'wagmi', 'ngmi fr', 'wen lambo',
-  'this is fine', 'probably nothing', 'few understand',
-  'touch grass', 'down bad', 'up only', 'LFG',
-  // Mixed
-  'ate and left no crumbs', 'understood the assignment',
-  'main character energy', 'living rent free',
+  'probably nothing', 'few understand', 'touch grass',
+  'ate and left no crumbs', 'main character energy',
 ]
 
 const TSUNDERE_MSGS = [
-  '뭘 봐... (bruh)', '...', '*judges silently*', '별로야.',
-  'mid tbh', '...관심 없어', '*stares in deadpan*', 'ok and?',
+  '뭘 봐...', '...', '*stares*', '별로야.',
+  'mid tbh', '...관심 없어', 'ok and?', 'hm.',
 ]
 
 export const TIME_MSGS: Record<TimeOfDay, string> = {
@@ -621,11 +643,13 @@ export const TIME_MSGS: Record<TimeOfDay, string> = {
   night: 'this is fine',
 }
 
-// ── Easter egg state ──
+// ══════════════════════════════════════════════════════════
+// ══ MAIN COMPONENT ══
+// ══════════════════════════════════════════════════════════
+
 let globalClicks = 0
 let easterEggTriggered = false
 
-// ── Main component ──
 export default function Pixelbara({ pose, size = 120, className = '', clickable = false, suppressHover = false }: PixelbaraProps) {
   const dark = useIsDark()
   const [hoverMsg, setHoverMsg] = useState<string | null>(null)
@@ -674,7 +698,10 @@ export default function Pixelbara({ pose, size = 120, className = '', clickable 
   )
 }
 
-// ── TimeAwarePixelbara ──
+// ══════════════════════════════════════════════════════════
+// ══ VARIANT COMPONENTS ══
+// ══════════════════════════════════════════════════════════
+
 export function TimeAwarePixelbara(props: Omit<PixelbaraProps, 'pose'>) {
   const time = useTimeOfDay()
   const pose = useMemo((): PoseId => {
@@ -688,22 +715,21 @@ export function TimeAwarePixelbara(props: Omit<PixelbaraProps, 'pose'>) {
   return <Pixelbara {...props} pose={pose} />
 }
 
-// ── MiniPixelbara (face only, compact) - Gen Z deadpan stare ──
+// Mini version - super compact, Gen Z deadpan stare
 export function MiniPixelbara({ className = '' }: { className?: string }) {
   const dark = useIsDark()
-  // Gen Z deadpan eyes (ㅡ_ㅡ): n=thin line eyes
   const miniArt = `
-..ee..ee
-HHHHHHHH
-HHHHHHHH
-nnnHnnnH
-HHHNNHhh
-.HHHHHH.
+..EeE..EeE..
+.HHHHHHHHHH.
+.HHnHHHHnHH.
+.HHHHHHHHHH.
+..HHHNNHHH..
+...HHHHHH...
 `
   const pixels = parseArt(miniArt)
   const { w, h } = artSize(miniArt)
   return (
-    <span className={`inline-block ${className}`} style={{ width: 18, height: 14 }}>
+    <span className={`inline-block ${className}`} style={{ width: 24, height: 18 }}>
       <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full" shapeRendering="crispEdges" preserveAspectRatio="xMidYMid meet">
         {pixels.map((p, i) => (
           <rect key={i} x={p.x} y={p.y} width={1} height={1} fill={fill(dark, p.c)} />
@@ -713,31 +739,30 @@ HHHNNHhh
   )
 }
 
-// ── PixelbaraToggleIcon (for theme toggle) - Gen Z deadpan stare ──
+// Toggle icon version
 export function PixelbaraToggleIcon({ withGlasses, className = '' }: { withGlasses: boolean; className?: string }) {
   const dark = useIsDark()
-  // Gen Z deadpan eyes (ㅡ_ㅡ): n=thin line eyes, or sunglasses
   const miniArt = withGlasses
     ? `
-..ee..ee
-HHHHHHHH
-GLLGLLGH
-GLLGLLGH
-HHHNNHhh
-.HHHHHH.
+..EeE..EeE..
+.HHHHHHHHHH.
+.GLLGGLLGHH.
+.GLLGGLLGHH.
+..HHHNNHHH..
+...HHHHHH...
 `
     : `
-..ee..ee
-HHHHHHHH
-HHHHHHHH
-nnnHnnnH
-HHHNNHhh
-.HHHHHH.
+..EeE..EeE..
+.HHHHHHHHHH.
+.HHnHHHHnHH.
+.HHHHHHHHHH.
+..HHHNNHHH..
+...HHHHHH...
 `
   const pixels = parseArt(miniArt)
   const { w, h } = artSize(miniArt)
   return (
-    <span className={`inline-block ${className}`} style={{ width: 20, height: 16 }}>
+    <span className={`inline-block ${className}`} style={{ width: 24, height: 18 }}>
       <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full" shapeRendering="crispEdges" preserveAspectRatio="xMidYMid meet">
         {pixels.map((p, i) => (
           <rect key={i} x={p.x} y={p.y} width={1} height={1} fill={fill(dark, p.c)} />
@@ -747,6 +772,9 @@ HHHNNHhh
   )
 }
 
-// ── Exports for other components ──
+// ══════════════════════════════════════════════════════════
+// ══ EXPORTS ══
+// ══════════════════════════════════════════════════════════
+
 export { useTimeOfDay }
 export type { TimeOfDay, PoseId, PoseAlias }
