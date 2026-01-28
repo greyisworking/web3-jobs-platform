@@ -49,32 +49,19 @@ module.exports = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
-  			// ── A24 MINIMAL — black/white + one accent ──
-  			'a24-bg': '#FAFAFA',
+  			// ── Warm cream (LAVEREE-style) ──
+  			'a24-bg': '#FDFCF9',
   			'a24-surface': '#FFFFFF',
   			'a24-text': '#1a1a1a',
   			'a24-muted': '#999999',
-  			'a24-border': '#e5e5e5',
-  			'a24-accent': '#FF5DA2',     // SUBSTANCE hot pink (used sparingly)
-  			'a24-accent-dim': '#FF5DA2',
-  			// ── THE SUBSTANCE pastel card colors ──
-  			'card-sky': '#89CFF0',
-  			'card-pink': '#FBCFE8',
-  			'card-cream': '#FEF3C7',
-  			'card-mint': '#A7F3D0',
-  			'card-coral': '#FECACA',
+  			'a24-border': '#e5e7eb',
+  			'a24-accent': '#1a1a1a',
   			// ── Dark mode ──
   			'a24-dark-bg': '#111111',
   			'a24-dark-surface': '#1a1a1a',
   			'a24-dark-text': '#e5e5e5',
   			'a24-dark-muted': '#666666',
   			'a24-dark-border': '#2a2a2a',
-  			// Dark card tints (muted versions)
-  			'card-sky-dark': '#1b2838',
-  			'card-pink-dark': '#2a1a25',
-  			'card-cream-dark': '#2a2518',
-  			'card-mint-dark': '#1a2a22',
-  			'card-coral-dark': '#2a1c1c',
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -84,7 +71,7 @@ module.exports = {
   		fontFamily: {
   			heading: ['var(--font-body)', 'sans-serif'],
   			body: ['var(--font-body)', 'sans-serif'],
-  			script: ['var(--font-script)', 'serif'],
+  			script: ['var(--font-script)', 'cursive'],
   		},
   		keyframes: {
   			shimmer: {

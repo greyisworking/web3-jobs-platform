@@ -14,7 +14,7 @@ export default function NotFound() {
 
         <Link
           href="/"
-          className="text-[11px] font-light uppercase tracking-[0.4em] text-a24-text dark:text-a24-dark-text border border-a24-text dark:border-a24-dark-text px-8 py-3 hover:bg-a24-text hover:text-a24-surface dark:hover:bg-a24-dark-text dark:hover:text-a24-dark-bg transition-colors inline-block"
+          className="group inline-flex items-center gap-2 text-[11px] font-light uppercase tracking-[0.4em] text-a24-text dark:text-a24-dark-text border border-a24-text dark:border-a24-dark-text px-8 py-3 hover:bg-a24-text hover:text-a24-surface dark:hover:bg-a24-dark-text dark:hover:text-a24-dark-bg transition-colors"
         >
           Back to Home
         </Link>

@@ -17,25 +17,25 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
+    --background: 45 33% 99%;
     --foreground: 0 0% 10%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
-    --primary: 336 100% 68%;
+    --primary: 0 0% 10%;
     --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 96%;
     --secondary-foreground: 0 0% 10%;
     --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted-foreground: 0 0% 60%;
     --accent: 0 0% 96%;
     --accent-foreground: 0 0% 10%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 336 100% 68%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 0 0% 10%;
     --chart-1: 0 72% 51%;
     --chart-2: 145 45% 55%;
     --chart-3: 336 100% 68%;
@@ -50,7 +50,7 @@
     --card-foreground: 0 0% 90%;
     --popover: 0 0% 10%;
     --popover-foreground: 0 0% 90%;
-    --primary: 336 100% 68%;
+    --primary: 0 0% 90%;
     --primary-foreground: 0 0% 7%;
     --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 90%;
@@ -62,7 +62,7 @@
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 17%;
     --input: 0 0% 17%;
-    --ring: 336 100% 68%;
+    --ring: 0 0% 90%;
     --chart-1: 336 100% 60%;
     --chart-2: 145 60% 45%;
     --chart-3: 209 83% 60%;
@@ -82,5 +82,12 @@
     font-family: var(--font-body), sans-serif;
     font-weight: 200;
     letter-spacing: 0.2em;
+  }
+}
+
+/* Custom cursor: hide default cursor on non-touch devices */
+@media (pointer: fine) {
+  html:not(.admin-page) * {
+    cursor: none !important;
   }
 }

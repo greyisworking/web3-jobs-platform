@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Copy, ExternalLink, MapPin, Briefcase, Globe, Building2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Copy, ExternalLink, MapPin, Briefcase, Globe, Building2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Job } from '@/types/job'
 import { trackEvent } from '@/lib/analytics'
@@ -97,14 +97,14 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
   const tags = parseTags(job.tags)
 
   return (
-    <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
+    <div className="min-h-screen bg-[#FDFCF9] dark:bg-a24-dark-bg">
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-8">
         {/* Back link */}
         <Link
           href="/careers"
-          className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+          className="group inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
           Back to Careers
         </Link>
 
@@ -161,9 +161,10 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
         {/* Description */}
         {job.description && (
           <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-            <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-4">
+            <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
               Description
             </h3>
+            <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
             <p className="text-sm text-a24-text dark:text-a24-dark-text whitespace-pre-line leading-relaxed">
               {job.description}
             </p>
@@ -173,9 +174,10 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
         {/* Tech stack */}
         {tags.length > 0 && (
           <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-            <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-4">
+            <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
               Tech Stack
             </h3>
+            <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
                 <span
@@ -192,9 +194,10 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
         {/* VC Backers */}
         {job.backers && job.backers.length > 0 && (
           <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-            <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-4">
+            <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
               VC Backers
             </h3>
+            <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
             <div className="flex flex-wrap gap-1.5 mb-6">
               {job.backers.map((backer) => (
                 <GlowBadge key={backer} name={backer} />
@@ -252,10 +255,11 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'page' })}
-            className="flex items-center justify-center gap-2 w-full py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-[11px] font-light uppercase tracking-[0.35em] hover:opacity-80 transition-opacity"
+            className="group flex items-center justify-center gap-2 w-full py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-[11px] font-light uppercase tracking-[0.35em] hover:opacity-80 transition-all duration-300"
           >
             <ExternalLink className="w-4 h-4" />
-            지원하기
+            Apply Now
+            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
           </a>
         </div>
       </div>

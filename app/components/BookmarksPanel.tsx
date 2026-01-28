@@ -1,6 +1,6 @@
 'use client'
 
-import { X, Trash2, CheckCircle } from 'lucide-react'
+import { X, Trash2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookmarks } from '@/hooks/useBookmarks'
 
@@ -74,12 +74,6 @@ export default function BookmarksPanel({ open, onClose }: BookmarksPanelProps) {
                           <span className="text-[11px] text-a24-muted dark:text-a24-dark-muted">
                             {new Date(item.savedAt).toLocaleDateString('ko-KR')}
                           </span>
-                          {item.verified && (
-                            <span className="inline-flex items-center gap-0.5 text-[11px] text-a24-muted">
-                              <CheckCircle className="w-3 h-3" />
-                              Verified
-                            </span>
-                          )}
                         </div>
                       </div>
 

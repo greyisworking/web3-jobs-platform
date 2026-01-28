@@ -8,6 +8,9 @@ import SearchWithSuggestions from '../components/SearchWithSuggestions'
 import JobCard from '../components/JobCard'
 import VCBackersDashboard from '../components/VCBackersDashboard'
 import { JobCardSkeletonGrid } from '../components/JobCardSkeleton'
+import SubpageHeader from '../components/SubpageHeader'
+import ScrollReveal from '../components/ScrollReveal'
+import Footer from '../components/Footer'
 
 interface Stats {
   total: number
@@ -82,36 +85,15 @@ function CareersContent() {
       )
     }
 
-    if (f.region) {
-      filtered = filtered.filter((job) => job.region === f.region)
-    }
-
-    if (f.type) {
-      filtered = filtered.filter((job) => (job.type ?? '').includes(f.type))
-    }
-
-    if (f.sector) {
-      filtered = filtered.filter((job) =>
-        (job.sector ?? '').toLowerCase().includes(f.sector.toLowerCase())
-      )
-    }
-
-    if (f.backer) {
-      filtered = filtered.filter((job) => job.backers?.includes(f.backer))
-    }
-
+    if (f.region) filtered = filtered.filter((job) => job.region === f.region)
+    if (f.type) filtered = filtered.filter((job) => (job.type ?? '').includes(f.type))
+    if (f.sector) filtered = filtered.filter((job) => (job.sector ?? '').toLowerCase().includes(f.sector.toLowerCase()))
+    if (f.backer) filtered = filtered.filter((job) => job.backers?.includes(f.backer))
     if (f.techStack) {
       const tech = f.techStack.toLowerCase()
-      filtered = filtered.filter(
-        (job) =>
-          (job.title ?? '').toLowerCase().includes(tech) ||
-          (job.category ?? '').toLowerCase().includes(tech)
-      )
+      filtered = filtered.filter((job) => (job.title ?? '').toLowerCase().includes(tech) || (job.category ?? '').toLowerCase().includes(tech))
     }
-
-    if (vc) {
-      filtered = filtered.filter((job) => job.backers?.includes(vc))
-    }
+    if (vc) filtered = filtered.filter((job) => job.backers?.includes(vc))
 
     setFilteredJobs(filtered)
   }
@@ -133,8 +115,11 @@ function CareersContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-        <main className="max-w-6xl mx-auto px-6 py-12">
+      <div className="min-h-screen bg-[#FDFCF9] dark:bg-a24-dark-bg">
+        <div className="max-w-6xl mx-auto px-6">
+          <SubpageHeader title="C A R E E R S" />
+        </div>
+        <main className="max-w-6xl mx-auto px-6 pb-12">
           <JobCardSkeletonGrid count={9} />
         </main>
       </div>
@@ -142,64 +127,76 @@ function CareersContent() {
   }
 
   return (
-    <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <main className="max-w-6xl mx-auto px-6 py-12">
-        {/* Page Title + Search */}
-        <div className="mb-10">
-          <h1 className="text-3xl md:text-4xl font-extralight uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text mb-3">
-            Careers
-          </h1>
-          <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted mb-8">
-            Web3 업계의 모든 채용 공고를 한곳에서 찾아보세요.
-          </p>
-          <div className="max-w-lg">
-            <SearchWithSuggestions onSearch={handleSearch} jobs={jobs} />
+    <div className="min-h-screen bg-[#FDFCF9] dark:bg-a24-dark-bg">
+      <div className="max-w-6xl mx-auto px-6">
+        <SubpageHeader title="C A R E E R S" />
+      </div>
+
+      <main className="max-w-6xl mx-auto px-6">
+        {/* Search */}
+        <ScrollReveal>
+          <div className="mb-10">
+            <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted mb-6">
+              Web3 업계의 모든 채용 공고를 한곳에서 찾아보세요.
+            </p>
+            <div className="max-w-lg">
+              <SearchWithSuggestions onSearch={handleSearch} jobs={jobs} />
+            </div>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* Filters */}
-        <SmartFilterBar onFilterChange={handleSmartFilterChange} />
+        <ScrollReveal delay={100}>
+          <SmartFilterBar onFilterChange={handleSmartFilterChange} />
+        </ScrollReveal>
 
         {/* VC Backers */}
-        <VCBackersDashboard
-          vcCounts={vcCounts}
-          selectedVC={selectedVC}
-          onSelectVC={handleVCSelect}
-        />
+        <ScrollReveal delay={150}>
+          <VCBackersDashboard
+            vcCounts={vcCounts}
+            selectedVC={selectedVC}
+            onSelectVC={handleVCSelect}
+          />
+        </ScrollReveal>
 
         {/* Stats line */}
-        <div className="flex items-baseline gap-8 mb-10 pb-6 border-b border-a24-border dark:border-a24-dark-border">
-          <div>
-            <span className="text-3xl font-extralight text-a24-text dark:text-a24-dark-text">{stats.total}</span>
-            <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">positions</span>
+        <ScrollReveal delay={200}>
+          <div className="flex items-baseline gap-8 mb-10 pb-6 border-b border-a24-border dark:border-a24-dark-border">
+            <div>
+              <span className="text-3xl font-extralight text-a24-text dark:text-a24-dark-text">{stats.total}</span>
+              <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">positions</span>
+            </div>
+            <div>
+              <span className="text-3xl font-extralight text-a24-text dark:text-a24-dark-text">{stats.global}</span>
+              <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">global</span>
+            </div>
+            <div>
+              <span className="text-3xl font-extralight text-a24-text dark:text-a24-dark-text">{stats.korea}</span>
+              <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">korea</span>
+            </div>
           </div>
-          <div>
-            <span className="text-3xl font-extralight text-a24-text dark:text-a24-dark-text">{stats.global}</span>
-            <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">global</span>
-          </div>
-          <div>
-            <span className="text-3xl font-extralight text-a24-text dark:text-a24-dark-text">{stats.korea}</span>
-            <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">korea</span>
-          </div>
-        </div>
+        </ScrollReveal>
 
         {/* Source stats */}
-        <div className="mb-12">
-          <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-4">
-            Sources
-          </h2>
-          <div className="flex flex-wrap gap-x-6 gap-y-1">
-            {stats.sources.map((source) => (
-              <span key={source.source} className="text-xs text-a24-muted dark:text-a24-dark-muted">
-                {source.source} <span className="text-a24-text dark:text-a24-dark-text font-medium">{source._count}</span>
-              </span>
-            ))}
+        <ScrollReveal delay={250}>
+          <div className="mb-12">
+            <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
+              Sources
+            </h2>
+            <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
+            <div className="flex flex-wrap gap-x-6 gap-y-1">
+              {stats.sources.map((source) => (
+                <span key={source.source} className="text-xs text-a24-muted dark:text-a24-dark-muted">
+                  {source.source} <span className="text-a24-text dark:text-a24-dark-text font-medium">{source._count}</span>
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* Jobs Grid */}
         <div className="mb-16">
-          <div className="flex justify-between items-baseline mb-8">
+          <div className="flex justify-between items-baseline mb-2">
             <h2 className="text-lg font-extralight uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">
               Open Positions
             </h2>
@@ -207,16 +204,13 @@ function CareersContent() {
               {filteredJobs.length} results
             </span>
           </div>
+          <div className="w-10 h-px bg-a24-text dark:bg-a24-dark-text mb-8" />
 
           {filteredJobs.length === 0 ? (
             <div className="py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
               <p className="text-a24-muted dark:text-a24-dark-muted text-sm">
                 {jobs.length === 0 ? (
-                  <>
-                    No jobs found yet.{' '}
-                    <code className="text-a24-text dark:text-a24-dark-text">npm run crawl</code>{' '}
-                    to collect job data.
-                  </>
+                  <>No jobs found yet. <code className="text-a24-text dark:text-a24-dark-text">npm run crawl</code> to collect job data.</>
                 ) : (
                   'No jobs match your filters.'
                 )}
@@ -234,20 +228,7 @@ function CareersContent() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-a24-border dark:border-a24-dark-border">
-        <div className="max-w-6xl mx-auto px-6 py-10 flex justify-between items-end">
-          <div>
-            <span className="text-lg font-extralight uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">NEUN</span>
-            <p className="text-xs text-a24-muted dark:text-a24-dark-muted mt-2 uppercase tracking-[0.2em]">
-              40+ sources &mdash; updated every 3h
-            </p>
-          </div>
-          <p className="text-xs text-a24-muted dark:text-a24-dark-muted">
-            neun.io
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
@@ -255,7 +236,7 @@ function CareersContent() {
 export default function CareersPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
+      <div className="min-h-screen bg-[#FDFCF9] dark:bg-a24-dark-bg">
         <main className="max-w-6xl mx-auto px-6 py-12">
           <JobCardSkeletonGrid count={9} />
         </main>

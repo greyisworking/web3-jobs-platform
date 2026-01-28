@@ -2,26 +2,27 @@
 
 import { useEffect, useCallback, useSyncExternalStore } from 'react'
 import { toast } from 'sonner'
-
-const STORAGE_KEY = 'web3-bookmarks'
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 
 export interface BookmarkItem {
   jobId: string
   savedAt: string
   title: string
   company: string
-  verified?: boolean
+  location?: string
 }
 
 interface UseBookmarksReturn {
   bookmarks: BookmarkItem[]
   toggle: (job: { id: string; title: string; company: string }) => void
   isBookmarked: (jobId: string) => boolean
+  loading: boolean
 }
 
-// ── 글로벌 공유 상태 (모든 useBookmarks 인스턴스가 동기화) ──
+// ── Global shared state (all useBookmarks instances stay in sync) ──
 
 let globalBookmarks: BookmarkItem[] = []
+let globalLoading = true
 const listeners = new Set<() => void>()
 
 function emitChange() {
@@ -41,54 +42,46 @@ function subscribe(callback: () => void): () => void {
   return () => listeners.delete(callback)
 }
 
-function loadBookmarks(): BookmarkItem[] {
-  if (typeof window === 'undefined') return []
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
-}
-
-function persistBookmarks(items: BookmarkItem[]) {
+function setBookmarks(items: BookmarkItem[]) {
   globalBookmarks = items
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-  }
   emitChange()
 }
 
-// 클라이언트 초기화 (한 번만)
+// Fetch bookmarks from Supabase API
 let initialized = false
+
+async function fetchBookmarks() {
+  try {
+    const res = await fetch('/api/bookmarks')
+    if (!res.ok) {
+      globalLoading = false
+      emitChange()
+      return
+    }
+    const data = await res.json()
+    const items: BookmarkItem[] = (data.bookmarks ?? []).map((b: any) => ({
+      jobId: b.id,
+      savedAt: b.savedAt,
+      title: b.title,
+      company: b.company,
+      location: b.location,
+    }))
+    globalBookmarks = items
+    globalLoading = false
+    emitChange()
+  } catch {
+    globalLoading = false
+    emitChange()
+  }
+}
 
 function ensureInitialized() {
   if (initialized || typeof window === 'undefined') return
   initialized = true
-  globalBookmarks = loadBookmarks()
-
-  if (globalBookmarks.length > 0) {
-    const ids = globalBookmarks.map((b) => b.jobId)
-    fetch('/api/bookmarks/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jobIds: ids }),
-    })
-      .then((res) => res.json())
-      .then((data: { verified: string[] }) => {
-        const verifiedSet = new Set(data.verified)
-        const updated = globalBookmarks.map((b) => ({
-          ...b,
-          verified: verifiedSet.has(b.jobId),
-        }))
-        persistBookmarks(updated)
-      })
-      .catch(() => {})
-  }
+  fetchBookmarks()
 }
 
 export function useBookmarks(): UseBookmarksReturn {
-  // 초기화
   useEffect(() => {
     ensureInitialized()
   }, [])
@@ -96,32 +89,65 @@ export function useBookmarks(): UseBookmarksReturn {
   const bookmarks = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
   const toggle = useCallback(
-    (job: { id: string; title: string; company: string }) => {
-      const prev = globalBookmarks
-      const exists = prev.some((b) => b.jobId === job.id)
-      let next: BookmarkItem[]
+    async (job: { id: string; title: string; company: string }) => {
+      // Check auth first
+      const supabase = createSupabaseBrowserClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        // Not logged in — redirect handled by BookmarkButton
+        return
+      }
+
+      const exists = globalBookmarks.some((b) => b.jobId === job.id)
 
       if (exists) {
-        next = prev.filter((b) => b.jobId !== job.id)
+        // Optimistic remove
+        const prev = globalBookmarks
+        setBookmarks(prev.filter((b) => b.jobId !== job.id))
+
+        const res = await fetch('/api/bookmarks', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jobId: job.id }),
+        })
+
+        if (!res.ok) {
+          setBookmarks(prev) // rollback
+          toast.error('북마크 제거 실패')
+          return
+        }
+
         toast.success('북마크 제거', {
           description: `${job.title} 북마크가 해제되었습니다`,
         })
       } else {
-        next = [
-          ...prev,
-          {
-            jobId: job.id,
-            savedAt: new Date().toISOString(),
-            title: job.title,
-            company: job.company,
-          },
-        ]
+        // Optimistic add
+        const prev = globalBookmarks
+        const newItem: BookmarkItem = {
+          jobId: job.id,
+          savedAt: new Date().toISOString(),
+          title: job.title,
+          company: job.company,
+        }
+        setBookmarks([newItem, ...prev])
+
+        const res = await fetch('/api/bookmarks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jobId: job.id }),
+        })
+
+        if (!res.ok) {
+          setBookmarks(prev) // rollback
+          toast.error('북마크 추가 실패')
+          return
+        }
+
         toast.success('북마크 추가', {
           description: `${job.title} 북마크에 저장되었습니다`,
         })
       }
-
-      persistBookmarks(next)
     },
     []
   )
@@ -131,5 +157,14 @@ export function useBookmarks(): UseBookmarksReturn {
     [bookmarks]
   )
 
-  return { bookmarks, toggle, isBookmarked }
+  return { bookmarks, toggle, isBookmarked, loading: globalLoading }
+}
+
+// Force re-fetch (call after login/logout)
+export function refreshBookmarks() {
+  initialized = false
+  globalBookmarks = []
+  globalLoading = true
+  emitChange()
+  ensureInitialized()
 }

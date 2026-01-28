@@ -1,12 +1,14 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Cormorant_Garamond } from 'next/font/google'
+import { Inter, Caveat } from 'next/font/google'
 import { Toaster } from 'sonner'
 import WebVitals from './components/WebVitals'
 import Navigation from './components/Navigation'
+import CustomCursor from './components/CustomCursor'
+import PageTransition from './components/PageTransition'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], weight: ['200', '300', '400', '500', '700'], display: 'swap', variable: '--font-body' })
-const cormorant = Cormorant_Garamond({ subsets: ['latin'], weight: ['300', '400'], style: ['italic'], display: 'swap', variable: '--font-script' })
+const caveat = Caveat({ subsets: ['latin'], weight: ['400', '500', '600', '700'], display: 'swap', variable: '--font-script' })
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.io'),
@@ -45,8 +47,10 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${inter.variable} ${cormorant.variable} ${inter.className}`}>
+      <body className={`${inter.variable} ${caveat.variable} ${inter.className}`}>
         <WebVitals />
+        <CustomCursor />
+        <PageTransition />
         <Navigation />
         {children}
         <Toaster

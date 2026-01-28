@@ -23,7 +23,8 @@
     "test:api": "tsx tests/api-tests.ts",
     "test:e2e": "tsx tests/e2e-tests.ts",
     "test:data": "tsx tests/data-quality-tests.ts",
-    "test:all": "tsx tests/run-all-tests.ts"
+    "test:all": "tsx tests/run-all-tests.ts",
+    "validate": "tsx scripts/validate-jobs.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",
