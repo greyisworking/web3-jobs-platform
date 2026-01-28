@@ -1,16 +1,15 @@
 /**
- * Clean Korean job titles that have location, experience, and period
- * info concatenated into the title string.
+ * Aggressive job title cleaning for Korean & English job postings.
  *
- * Examples:
- *   "데이터 분석가 [AI기술팀]서울 송파구경력 3년 이상상시"
- *     → "데이터 분석가 [AI기술팀]"
- *
- *   "프론트엔드 개발자 서울 강남구 경력 5년"
- *     → "프론트엔드 개발자"
- *
- *   "마케팅 매니저(신입/경력)"
- *     → "마케팅 매니저"
+ * Cleaning priority (applied in order):
+ * 1. Cut at first bracket or concatenated Korean metadata
+ * 2. Remove [팀명], 【팀명】 brackets
+ * 3. Remove company name prefix from title
+ * 4. Remove "채용", "모집", "구인" patterns
+ * 5. Remove location suffixes (, Korea / , Seoul / etc.)
+ * 6. Remove work type suffixes ((Remote), (Hybrid), etc.)
+ * 7. Remove trailing experience/period metadata
+ * 8. Final whitespace cleanup
  */
 
 const KOREAN_CITIES = [
@@ -19,21 +18,28 @@ const KOREAN_CITIES = [
   '판교', '분당', '성남', '수원', '용인', '화성', '고양', '안양',
 ]
 
-// Build a regex that matches city names (used as boundary for metadata)
-const cityPattern = new RegExp(`(?:${KOREAN_CITIES.join('|')})`)
-
-export function cleanJobTitle(raw: string): string {
+export function cleanJobTitle(raw: string, companyName?: string): string {
   if (!raw) return raw
 
-  let title = raw
+  let title = raw.trim()
 
-  // 1) If a Korean city name appears and is followed by metadata keywords,
-  //    remove from the city name to the end of the string.
+  // ── Step 1: Aggressive cut for concatenated mess ──
+  // E.g. "브랜드 마케터 [마케팅팀]서울 송파구경력 5년 이상상시"
+  // Cut at first [ or 【 that is followed by Korean text (team/dept bracket)
+  const bracketCutMatch = title.match(/^(.+?)\s*[[\[【].*?[팀부본사업실센터].*?[\]】\]]/)
+  if (bracketCutMatch) {
+    const afterBracket = title.slice(bracketCutMatch[0].length)
+    // If what follows the bracket is location/metadata, just keep pre-bracket part
+    if (!afterBracket || /^[\s]*(?:서울|경기|판교|부산|대구|대전|인천|경력|신입|상시|수시)/.test(afterBracket)) {
+      title = bracketCutMatch[1].trim()
+    }
+  }
+
+  // Cut at Korean city name when followed by metadata (for concatenated strings)
   for (const city of KOREAN_CITIES) {
     const idx = title.indexOf(city)
     if (idx > 0) {
       const rest = title.slice(idx)
-      // Only strip if the rest contains metadata-like content
       if (/(?:구|시|군|동|경력|년|이상|이하|상시|마감|수시|신입|무관|협의)/.test(rest)) {
         title = title.slice(0, idx).trim()
         break
@@ -41,18 +47,91 @@ export function cleanJobTitle(raw: string): string {
     }
   }
 
-  // 2) Remove trailing parenthesized experience/employment type
+  // Cut at 경력, 신입, 상시 when they appear as standalone suffixes
+  title = title.replace(/\s*경력\s*(?:\d+\s*년?\s*(?:이상|이하)?|무관)?\s*$/, '')
+  title = title.replace(/\s*(?:신입\/?경력|신입)\s*$/, '')
+  title = title.replace(/\s*(?:상시|수시|채용시\s*마감)\s*$/, '')
+
+  // ── Step 2: Remove ALL bracket content (team/dept names) ──
+  // [AI기술팀], [플랫폼개발팀], 【마케팅본부】, etc.
+  title = title.replace(/\s*[[\[【][^\]】\]]*[\]】\]]\s*/g, ' ')
+
+  // ── Step 3: Remove company name prefix from title ──
+  if (companyName) {
+    const cleanCompany = cleanCompanyName(companyName)
+    // Remove patterns: [Company], (Company), Company:, Company -, 【Company】
+    const escaped = escapeRegex(cleanCompany)
+    title = title.replace(new RegExp(`^\\s*[\\[\\(【]?${escaped}[\\]\\)】]?\\s*[:\\-]?\\s*`, 'i'), '')
+    // Also try with the raw company name
+    const escapedRaw = escapeRegex(companyName)
+    title = title.replace(new RegExp(`^\\s*[\\[\\(【]?${escapedRaw}[\\]\\)】]?\\s*[:\\-]?\\s*`, 'i'), '')
+  }
+
+  // ── Step 4: Remove 채용/모집/구인 patterns ──
+  title = title.replace(/\s*(?:정규직\s*)?(?:채용|모집|구인|인재채용|인재\s*모집)\s*$/g, '')
+  title = title.replace(/^\s*(?:정규직\s*)?(?:채용|모집|구인|인재채용)\s*/g, '')
+
+  // ── Step 5: Remove location suffixes ──
+  // English: ", Korea", ", South Korea", ", Seoul", "- Korea", etc.
+  title = title.replace(/\s*[,\-]\s*(?:South\s+)?Korea\s*$/i, '')
+  title = title.replace(/\s*[,\-]\s*Seoul\s*$/i, '')
+  title = title.replace(/\s*[,\-]\s*(?:Singapore|Japan|Tokyo|Hong Kong|Remote)\s*$/i, '')
+  // Korean: ", 한국", ", 서울", ", 경기", etc.
+  title = title.replace(/\s*[,\-]\s*(?:한국|대한민국)\s*$/g, '')
+  for (const city of KOREAN_CITIES) {
+    title = title.replace(new RegExp(`\\s*[,\\-]\\s*${city}\\s*$`, 'g'), '')
+  }
+  // Parenthesized: (Korea), (Seoul), (한국), (서울)
+  title = title.replace(/\s*\(\s*(?:South\s+)?Korea\s*\)\s*$/i, '')
+  title = title.replace(/\s*\(\s*Seoul\s*\)\s*$/i, '')
+  title = title.replace(/\s*\(\s*(?:한국|서울|경기|판교)\s*\)\s*$/g, '')
+
+  // ── Step 6: Remove work type suffixes ──
+  title = title.replace(/\s*\(\s*(?:Remote|Hybrid|Onsite|On-site|원격|재택|하이브리드)\s*\)\s*$/ig, '')
+  title = title.replace(/\s*[,\-]\s*(?:Remote|Hybrid)\s*$/i, '')
+
+  // ── Step 7: Remove trailing parenthesized experience ──
   title = title.replace(/\s*\((?:신입\/?경력|경력\s*(?:무관|\d+\s*년?\s*(?:이상)?)|신입)\)\s*$/g, '')
 
-  // 3) Remove standalone trailing experience/period text
-  title = title.replace(/\s+(?:경력\s*(?:무관|\d+\s*년?\s*(?:이상|이하)?))\s*$/g, '')
-  title = title.replace(/\s+(?:신입\/?경력|신입)\s*$/g, '')
-  title = title.replace(/\s+(?:상시|수시|채용시\s*마감)\s*$/g, '')
-
-  // 4) Clean up whitespace and trailing punctuation
+  // ── Step 8: Final cleanup ──
   title = title.replace(/\s{2,}/g, ' ').trim()
-  title = title.replace(/[\s\-·,]+$/, '').trim()
+  title = title.replace(/[\s\-·,/]+$/, '').trim()
+  title = title.replace(/^[\s\-·,/]+/, '').trim()
 
-  // Fallback to original if we over-cleaned
   return title.length > 0 ? title : raw
+}
+
+/**
+ * Clean company name by removing legal entity suffixes.
+ *
+ * Examples:
+ *   "(주)핑거"       → "핑거"
+ *   "주식회사 카카오"  → "카카오"
+ *   "Acme Inc."      → "Acme"
+ */
+export function cleanCompanyName(raw: string): string {
+  if (!raw) return raw
+
+  let name = raw.trim()
+
+  // Korean legal suffixes
+  name = name.replace(/^\s*\(주\)\s*/g, '')
+  name = name.replace(/\s*\(주\)\s*$/g, '')
+  name = name.replace(/^\s*\(주식회사\)\s*/g, '')
+  name = name.replace(/\s*\(주식회사\)\s*$/g, '')
+  name = name.replace(/^\s*주식회사\s*/g, '')
+  name = name.replace(/\s*주식회사\s*$/g, '')
+
+  // English legal suffixes
+  name = name.replace(/\s*,?\s*(?:Inc\.?|Corp\.?|Ltd\.?|Co\.?\s*,?\s*Ltd\.?|LLC|L\.L\.C\.?|PLC|Pte\.?\s*Ltd\.?|GmbH|AG|S\.A\.?|B\.V\.?)\s*$/i, '')
+
+  // Clean up
+  name = name.replace(/\s{2,}/g, ' ').trim()
+  name = name.replace(/[\s\-·,]+$/, '').trim()
+
+  return name.length > 0 ? name : raw
+}
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { useDecayEffect } from '@/hooks/useDecayEffect'
 import type { Job } from '@/types/job'
 import { trackEvent } from '@/lib/analytics'
-import { cleanJobTitle } from '@/lib/clean-job-title'
+import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import BookmarkButton from './BookmarkButton'
 
 interface JobCardProps {
@@ -21,7 +21,8 @@ const cardVariants = {
 export default function JobCard({ job, index }: JobCardProps) {
   const { opacity, isFading } = useDecayEffect(job.postedDate)
   const number = String(index + 1).padStart(3, '0')
-  const displayTitle = cleanJobTitle(job.title)
+  const displayTitle = cleanJobTitle(job.title, job.company)
+  const displayCompany = cleanCompanyName(job.company)
 
   return (
     <motion.div
@@ -46,7 +47,7 @@ export default function JobCard({ job, index }: JobCardProps) {
               {number}
             </span>
             <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-a24-muted dark:text-a24-dark-muted leading-tight truncate">
-              {job.company}
+              {displayCompany}
             </p>
           </div>
           <div className="flex-shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation() }}>

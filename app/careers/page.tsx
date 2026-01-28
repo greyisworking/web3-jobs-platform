@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState, useMemo, Suspense } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowRight } from 'lucide-react'
 import type { Job } from '@/types/job'
 import SmartFilterBar, { SmartFilters } from '../components/SmartFilterBar'
 import SearchWithSuggestions from '../components/SearchWithSuggestions'
@@ -11,6 +12,8 @@ import { JobCardSkeletonGrid } from '../components/JobCardSkeleton'
 import SubpageHeader from '../components/SubpageHeader'
 import ScrollReveal from '../components/ScrollReveal'
 import Footer from '../components/Footer'
+
+const PAGE_SIZE = 12
 
 interface Stats {
   total: number
@@ -38,10 +41,16 @@ function CareersContent() {
     backer: '',
     techStack: '',
   })
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   useEffect(() => {
     fetchJobs()
   }, [])
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [filteredJobs])
 
   const fetchJobs = async () => {
     try {
@@ -112,6 +121,13 @@ function CareersContent() {
     setSelectedVC(vc)
     applyAllFilters(smartFilters, vc, searchQuery)
   }
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + PAGE_SIZE)
+  }
+
+  const visibleJobs = filteredJobs.slice(0, visibleCount)
+  const hasMore = visibleCount < filteredJobs.length
 
   if (loading) {
     return (
@@ -217,13 +233,34 @@ function CareersContent() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              <AnimatePresence mode="popLayout">
-                {filteredJobs.map((job, index) => (
-                  <JobCard key={job.id} job={job} index={index} />
-                ))}
-              </AnimatePresence>
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                <AnimatePresence mode="popLayout">
+                  {visibleJobs.map((job, index) => (
+                    <JobCard key={job.id} job={job} index={index} />
+                  ))}
+                </AnimatePresence>
+              </div>
+
+              {/* View More / No More */}
+              <div className="flex justify-center mt-14">
+                {hasMore ? (
+                  <motion.button
+                    onClick={handleLoadMore}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="group inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.4em] font-light text-a24-text dark:text-a24-dark-text border border-a24-text dark:border-a24-dark-text px-10 py-4 hover:bg-a24-text hover:text-white dark:hover:bg-a24-dark-text dark:hover:text-a24-dark-bg transition-all duration-300"
+                  >
+                    View More
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </motion.button>
+                ) : (
+                  <p className="text-[11px] uppercase tracking-[0.3em] font-light text-a24-muted/50 dark:text-a24-dark-muted/50">
+                    No more positions
+                  </p>
+                )}
+              </div>
+            </>
           )}
         </div>
       </main>

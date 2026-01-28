@@ -6,6 +6,7 @@ import { ArrowLeft, Copy, ExternalLink, MapPin, Briefcase, Globe, Building2 } fr
 import { toast } from 'sonner'
 import type { Job } from '@/types/job'
 import { trackEvent } from '@/lib/analytics'
+import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import BookmarkButton from '@/app/components/BookmarkButton'
 import GlowBadge from '@/app/components/GlowBadge'
 import {
@@ -117,10 +118,10 @@ export default function JobDetailPageClient({ job }: JobDetailPageClientProps) {
         {/* Company & Title */}
         <div>
           <p className="text-3xl font-extralight uppercase tracking-[0.1em] text-a24-text dark:text-a24-dark-text mb-2">
-            {job.company}
+            {cleanCompanyName(job.company)}
           </p>
           <h1 className="text-lg text-a24-text dark:text-a24-dark-text mb-4">
-            {job.title}
+            {cleanJobTitle(job.title, job.company)}
           </h1>
 
           {/* Meta */}
