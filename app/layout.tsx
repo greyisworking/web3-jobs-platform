@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Bebas_Neue } from 'next/font/google'
+import { Inter, Cormorant_Garamond } from 'next/font/google'
 import { Toaster } from 'sonner'
 import WebVitals from './components/WebVitals'
 import Navigation from './components/Navigation'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '700'], display: 'swap', variable: '--font-body' })
-const bebasNeue = Bebas_Neue({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-heading' })
+const inter = Inter({ subsets: ['latin'], weight: ['200', '300', '400', '500', '700'], display: 'swap', variable: '--font-body' })
+const cormorant = Cormorant_Garamond({ subsets: ['latin'], weight: ['300', '400'], style: ['italic'], display: 'swap', variable: '--font-script' })
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.io'),
@@ -45,7 +45,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${inter.variable} ${bebasNeue.variable} ${inter.className}`}>
+      <body className={`${inter.variable} ${cormorant.variable} ${inter.className}`}>
         <WebVitals />
         <Navigation />
         {children}

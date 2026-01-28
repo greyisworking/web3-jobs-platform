@@ -27,37 +27,39 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
       {/* Hero Section */}
-      <section className="max-w-6xl mx-auto px-6 py-24 md:py-36">
+      <section className="max-w-6xl mx-auto px-6 py-28 md:py-40">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
         >
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading uppercase leading-[0.95] text-a24-text dark:text-a24-dark-text mb-6">
-            FIND YOUR <em className="not-italic font-body italic text-a24-muted dark:text-a24-dark-muted">Next</em> CHAPTER
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extralight uppercase tracking-[0.25em] leading-[1.1] text-a24-text dark:text-a24-dark-text mb-8">
+            FIND YOUR{' '}
+            <em className="font-script italic normal-case text-[1.15em] tracking-[0.02em] text-a24-text dark:text-a24-dark-text">Next</em>
+            {' '}CHAPTER
           </h1>
-          <p className="text-base md:text-lg text-a24-muted dark:text-a24-dark-muted mb-10 max-w-lg">
+          <p className="text-sm md:text-base font-light text-a24-muted dark:text-a24-dark-muted mb-12 max-w-md tracking-wide">
             당신의 다음 이야기, 여기서 시작하세요.
           </p>
           <Link
             href="/careers"
-            className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text border border-a24-text dark:border-a24-dark-text px-8 py-4 hover:bg-a24-text hover:text-a24-surface dark:hover:bg-a24-dark-text dark:hover:text-a24-dark-bg transition-colors"
+            className="inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.4em] font-light text-a24-text dark:text-a24-dark-text border border-a24-text dark:border-a24-dark-text px-10 py-4 hover:bg-a24-text hover:text-a24-surface dark:hover:bg-a24-dark-text dark:hover:text-a24-dark-bg transition-colors"
           >
             Explore Careers
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </motion.div>
       </section>
 
       {/* Featured Jobs */}
-      <section className="max-w-6xl mx-auto px-6 pb-24">
-        <div className="flex justify-between items-baseline mb-8">
-          <h2 className="text-2xl font-heading uppercase tracking-[0.15em] text-a24-text dark:text-a24-dark-text">
+      <section className="max-w-6xl mx-auto px-6 pb-28">
+        <div className="flex justify-between items-baseline mb-10">
+          <h2 className="text-lg md:text-xl font-extralight uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">
             Featured Positions
           </h2>
           <Link
             href="/careers"
-            className="text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+            className="text-[11px] uppercase tracking-[0.3em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
           >
             View All
           </Link>
@@ -66,8 +68,8 @@ export default function Home() {
         {loading ? (
           <JobCardSkeletonGrid count={6} />
         ) : jobs.length === 0 ? (
-          <div className="py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
-            <p className="text-a24-muted dark:text-a24-dark-muted text-sm">
+          <div className="py-24 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
+            <p className="text-a24-muted dark:text-a24-dark-muted text-sm font-light">
               No jobs found yet.
             </p>
           </div>
@@ -82,14 +84,14 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-a24-border dark:border-a24-dark-border">
-        <div className="max-w-6xl mx-auto px-6 py-10 flex justify-between items-end">
+        <div className="max-w-6xl mx-auto px-6 py-12 flex justify-between items-end">
           <div>
-            <span className="text-xl font-heading font-bold tracking-[0.05em] text-a24-text dark:text-a24-dark-text">NEUN</span>
-            <p className="text-xs text-a24-muted dark:text-a24-dark-muted mt-2 uppercase tracking-[0.2em]">
+            <span className="text-lg font-extralight uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">Neun</span>
+            <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted mt-2 uppercase tracking-[0.3em] font-light">
               40+ sources &mdash; updated every 3h
             </p>
           </div>
-          <p className="text-xs text-a24-muted dark:text-a24-dark-muted">
+          <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted font-light tracking-[0.2em]">
             neun.io
           </p>
         </div>

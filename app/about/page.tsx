@@ -8,40 +8,40 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <main className="max-w-3xl mx-auto px-6 py-24">
-        <h1 className="text-5xl md:text-6xl font-heading uppercase tracking-[0.1em] text-a24-text dark:text-a24-dark-text mb-8">
+      <main className="max-w-3xl mx-auto px-6 py-28">
+        <h1 className="text-3xl md:text-4xl font-extralight uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text mb-10">
           About
         </h1>
 
-        <div className="space-y-8 text-sm text-a24-text dark:text-a24-dark-text leading-relaxed">
-          <p className="text-base text-a24-muted dark:text-a24-dark-muted">
+        <div className="space-y-10 text-sm text-a24-text dark:text-a24-dark-text leading-relaxed">
+          <p className="text-base font-light text-a24-muted dark:text-a24-dark-muted">
             Neun은 Web3 업계의 채용 정보를 한곳에 모아 제공하는 플랫폼입니다.
           </p>
 
-          <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-            <h2 className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+          <div className="border-t border-a24-border dark:border-a24-dark-border pt-10">
+            <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-5">
               What We Do
             </h2>
-            <p>
+            <p className="font-light leading-relaxed">
               We aggregate Web3 job listings from 40+ global and Korean sources, updated every 3 hours.
               From DeFi protocols to NFT marketplaces, from Layer 1 blockchains to gaming studios &mdash;
               we bring every opportunity to one place.
             </p>
           </div>
 
-          <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-            <h2 className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+          <div className="border-t border-a24-border dark:border-a24-dark-border pt-10">
+            <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-5">
               Why Neun
             </h2>
-            <p>
+            <p className="font-light leading-relaxed">
               &ldquo;는&rdquo; (neun) is a Korean particle that marks the topic of a sentence.
               It frames context, sets the stage.
               Like the particle itself, we set the stage for your next chapter in Web3.
             </p>
           </div>
 
-          <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-            <h2 className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+          <div className="border-t border-a24-border dark:border-a24-dark-border pt-10">
+            <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-5">
               Sources
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -50,18 +50,18 @@ export default function AboutPage() {
                 'wanted.co.kr', 'remote3.co', 'remoteok.com', 'rocketpunch.com',
                 'jobkorea.co.kr', 'jobs.sui.io', 'jobs.solana.com', 'ethereum.foundation',
               ].map((source) => (
-                <span key={source} className="text-xs text-a24-muted dark:text-a24-dark-muted py-1">
+                <span key={source} className="text-[11px] font-light text-a24-muted dark:text-a24-dark-muted py-1 tracking-wide">
                   {source}
                 </span>
               ))}
             </div>
           </div>
 
-          <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-            <h2 className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+          <div className="border-t border-a24-border dark:border-a24-dark-border pt-10">
+            <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-5">
               Contact
             </h2>
-            <p className="text-a24-muted dark:text-a24-dark-muted">
+            <p className="font-light text-a24-muted dark:text-a24-dark-muted tracking-wide">
               hello@neun.io
             </p>
           </div>

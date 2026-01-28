@@ -82,8 +82,9 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		fontFamily: {
-  			heading: ['var(--font-heading)', 'sans-serif'],
+  			heading: ['var(--font-body)', 'sans-serif'],
   			body: ['var(--font-body)', 'sans-serif'],
+  			script: ['var(--font-script)', 'serif'],
   		},
   		keyframes: {
   			shimmer: {

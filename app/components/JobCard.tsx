@@ -48,7 +48,7 @@ export default function JobCard({ job, index }: JobCardProps) {
       >
         {/* Company */}
         <div className="flex items-start justify-between mb-4">
-          <p className="text-lg font-heading uppercase tracking-[0.1em] text-a24-text dark:text-a24-dark-text leading-tight">
+          <p className="text-sm font-extralight uppercase tracking-[0.25em] text-a24-text dark:text-a24-dark-text leading-tight">
             {job.company}
           </p>
           <div onClick={(e) => { e.preventDefault(); e.stopPropagation() }}>
@@ -57,12 +57,12 @@ export default function JobCard({ job, index }: JobCardProps) {
         </div>
 
         {/* Title */}
-        <h3 className="text-sm text-a24-text dark:text-a24-dark-text leading-snug group-hover:underline decoration-1 underline-offset-2">
+        <h3 className="text-sm font-light text-a24-text dark:text-a24-dark-text leading-snug group-hover:underline decoration-1 underline-offset-2">
           {job.title}
         </h3>
 
         {/* Location */}
-        <p className="text-xs text-a24-muted dark:text-a24-dark-muted mt-2 uppercase tracking-wider">
+        <p className="text-[11px] font-light text-a24-muted dark:text-a24-dark-muted mt-3 uppercase tracking-[0.2em]">
           {job.location}
         </p>
       </Link>

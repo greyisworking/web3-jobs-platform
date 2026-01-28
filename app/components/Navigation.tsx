@@ -29,19 +29,19 @@ export default function Navigation() {
       <header className="sticky top-0 z-50 bg-a24-surface dark:bg-a24-dark-surface border-b border-a24-border dark:border-a24-dark-border">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="text-2xl font-heading font-bold tracking-[0.05em] text-a24-text dark:text-a24-dark-text select-none">
-            NEUN
+          <Link href="/" className="text-sm font-extralight uppercase tracking-[0.4em] text-a24-text dark:text-a24-dark-text select-none">
+            Neun
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-10">
             {NAV_LINKS.map(({ href, label }) => {
               const isActive = href === '/' ? pathname === '/' : pathname?.startsWith(href)
               return (
                 <Link
                   key={href}
                   href={href}
-                  className={`text-xs uppercase tracking-[0.3em] transition-colors ${
+                  className={`text-[11px] uppercase tracking-[0.35em] font-light transition-colors ${
                     isActive
                       ? 'text-a24-text dark:text-a24-dark-text'
                       : 'text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text'
@@ -53,9 +53,9 @@ export default function Navigation() {
             })}
             <button
               onClick={() => setBookmarksPanelOpen(true)}
-              className="flex items-center gap-1.5 text-xs uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+              className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.35em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
             >
-              <Bookmark className="w-3.5 h-3.5" />
+              <Bookmark className="w-3 h-3" />
               Saved
             </button>
             <ThemeToggle />
@@ -84,7 +84,7 @@ export default function Navigation() {
                     key={href}
                     href={href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`text-xs uppercase tracking-[0.3em] py-2 transition-colors ${
+                    className={`text-[11px] uppercase tracking-[0.35em] font-light py-2 transition-colors ${
                       isActive
                         ? 'text-a24-text dark:text-a24-dark-text'
                         : 'text-a24-muted dark:text-a24-dark-muted'
@@ -99,9 +99,9 @@ export default function Navigation() {
                   setMobileMenuOpen(false)
                   setBookmarksPanelOpen(true)
                 }}
-                className="flex items-center gap-1.5 text-xs uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted py-2"
+                className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.35em] font-light text-a24-muted dark:text-a24-dark-muted py-2"
               >
-                <Bookmark className="w-3.5 h-3.5" />
+                <Bookmark className="w-3 h-3" />
                 Saved
               </button>
             </nav>

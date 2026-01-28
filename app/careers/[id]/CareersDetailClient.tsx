@@ -110,10 +110,10 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
 
         {/* Company & Title */}
         <div>
-          <p className="text-3xl font-heading uppercase tracking-[0.1em] text-a24-text dark:text-a24-dark-text mb-2">
+          <p className="text-2xl font-extralight uppercase tracking-[0.25em] text-a24-text dark:text-a24-dark-text mb-3">
             {job.company}
           </p>
-          <h1 className="text-lg text-a24-text dark:text-a24-dark-text mb-4">
+          <h1 className="text-base font-light text-a24-text dark:text-a24-dark-text mb-4">
             {job.title}
           </h1>
 
@@ -161,7 +161,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
         {/* Description */}
         {job.description && (
           <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-            <h3 className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+            <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-4">
               Description
             </h3>
             <p className="text-sm text-a24-text dark:text-a24-dark-text whitespace-pre-line leading-relaxed">
@@ -173,7 +173,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
         {/* Tech stack */}
         {tags.length > 0 && (
           <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-            <h3 className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+            <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-4">
               Tech Stack
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -192,7 +192,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
         {/* VC Backers */}
         {job.backers && job.backers.length > 0 && (
           <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-            <h3 className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+            <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-4">
               VC Backers
             </h3>
             <div className="flex flex-wrap gap-1.5 mb-6">
@@ -207,7 +207,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
               if (!reason) return null
               return (
                 <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
-                  <p className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-2">
+                  <p className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-2">
                     Why This Company
                   </p>
                   <p className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed">
@@ -252,7 +252,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'page' })}
-            className="flex items-center justify-center gap-2 w-full py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-xs font-heading uppercase tracking-[0.3em] hover:opacity-80 transition-opacity"
+            className="flex items-center justify-center gap-2 w-full py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-[11px] font-light uppercase tracking-[0.35em] hover:opacity-80 transition-opacity"
           >
             <ExternalLink className="w-4 h-4" />
             지원하기

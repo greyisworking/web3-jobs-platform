@@ -146,10 +146,10 @@ function CareersContent() {
       <main className="max-w-6xl mx-auto px-6 py-12">
         {/* Page Title + Search */}
         <div className="mb-10">
-          <h1 className="text-4xl md:text-5xl font-heading uppercase tracking-[0.1em] text-a24-text dark:text-a24-dark-text mb-2">
+          <h1 className="text-3xl md:text-4xl font-extralight uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text mb-3">
             Careers
           </h1>
-          <p className="text-sm text-a24-muted dark:text-a24-dark-muted mb-8">
+          <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted mb-8">
             Web3 업계의 모든 채용 공고를 한곳에서 찾아보세요.
           </p>
           <div className="max-w-lg">
@@ -170,22 +170,22 @@ function CareersContent() {
         {/* Stats line */}
         <div className="flex items-baseline gap-8 mb-10 pb-6 border-b border-a24-border dark:border-a24-dark-border">
           <div>
-            <span className="text-4xl font-heading text-a24-text dark:text-a24-dark-text">{stats.total}</span>
+            <span className="text-3xl font-extralight text-a24-text dark:text-a24-dark-text">{stats.total}</span>
             <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">positions</span>
           </div>
           <div>
-            <span className="text-4xl font-heading text-a24-text dark:text-a24-dark-text">{stats.global}</span>
+            <span className="text-3xl font-extralight text-a24-text dark:text-a24-dark-text">{stats.global}</span>
             <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">global</span>
           </div>
           <div>
-            <span className="text-4xl font-heading text-a24-text dark:text-a24-dark-text">{stats.korea}</span>
+            <span className="text-3xl font-extralight text-a24-text dark:text-a24-dark-text">{stats.korea}</span>
             <span className="ml-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted">korea</span>
           </div>
         </div>
 
         {/* Source stats */}
         <div className="mb-12">
-          <h2 className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+          <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-4">
             Sources
           </h2>
           <div className="flex flex-wrap gap-x-6 gap-y-1">
@@ -200,7 +200,7 @@ function CareersContent() {
         {/* Jobs Grid */}
         <div className="mb-16">
           <div className="flex justify-between items-baseline mb-8">
-            <h2 className="text-2xl font-heading uppercase tracking-[0.15em] text-a24-text dark:text-a24-dark-text">
+            <h2 className="text-lg font-extralight uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">
               Open Positions
             </h2>
             <span className="text-xs text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider">
@@ -238,7 +238,7 @@ function CareersContent() {
       <footer className="border-t border-a24-border dark:border-a24-dark-border">
         <div className="max-w-6xl mx-auto px-6 py-10 flex justify-between items-end">
           <div>
-            <span className="text-xl font-heading font-bold tracking-[0.05em] text-a24-text dark:text-a24-dark-text">NEUN</span>
+            <span className="text-lg font-extralight uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">NEUN</span>
             <p className="text-xs text-a24-muted dark:text-a24-dark-muted mt-2 uppercase tracking-[0.2em]">
               40+ sources &mdash; updated every 3h
             </p>

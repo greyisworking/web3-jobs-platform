@@ -34,7 +34,7 @@ export default function VCBackersDashboard({
   return (
     <div className="mb-10 pb-6 border-b border-a24-border dark:border-a24-dark-border">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xs font-heading uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted">
+        <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted">
           VC Backers
         </h2>
         {selectedVC && (
