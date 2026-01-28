@@ -3,13 +3,21 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Star } from 'lucide-react'
 import { useDecayEffect } from '@/hooks/useDecayEffect'
 import type { Job } from '@/types/job'
 import { trackEvent } from '@/lib/analytics'
 import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import BookmarkButton from './BookmarkButton'
 import { MiniPixelbara } from './Pixelbara'
+import { PixelStar } from './PixelIcons'
+
+function isNewJob(postedDate: Date | string | null | undefined): boolean {
+  if (!postedDate) return false
+  const posted = new Date(postedDate)
+  const now = new Date()
+  const diffMs = now.getTime() - posted.getTime()
+  return diffMs < 7 * 24 * 60 * 60 * 1000
+}
 
 interface JobCardProps {
   job: Job
@@ -33,7 +41,7 @@ function VCBadge({ backers }: { backers: string[] }) {
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
-      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+      <PixelStar className="text-amber-400" size={12} />
       {showTooltip && (
         <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 text-[10px] whitespace-nowrap bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg rounded z-50">
           Backed by {tooltipText}
@@ -68,6 +76,13 @@ export default function JobCard({ job, index }: JobCardProps) {
         }}
         className="relative block p-6 h-[180px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border -mt-px -ml-px transition-all duration-300 ease-out hover:-translate-y-1 group flex flex-col overflow-hidden"
       >
+        {/* NEW badge */}
+        {isNewJob(job.postedDate) && (
+          <span className="absolute top-2 left-2 font-pixel text-[8px] text-neun-success uppercase tracking-wider animate-blink">
+            NEW
+          </span>
+        )}
+
         {/* Mini pixelbara + meme tooltip on hover */}
         {hovered && (
           <>

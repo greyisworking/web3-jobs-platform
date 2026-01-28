@@ -15,6 +15,7 @@ interface PixelbaraProps {
   size?: number
   className?: string
   clickable?: boolean
+  suppressHover?: boolean
 }
 
 // ── Hooks ──
@@ -467,7 +468,7 @@ let globalClicks = 0
 let easterEggTriggered = false
 
 // ── Main component ──
-export default function Pixelbara({ pose, size = 120, className = '', clickable = false }: PixelbaraProps) {
+export default function Pixelbara({ pose, size = 120, className = '', clickable = false, suppressHover = false }: PixelbaraProps) {
   const dark = useIsDark()
   const [hoverMsg, setHoverMsg] = useState<string | null>(null)
   const PoseComponent = POSES[pose] ?? POSES.blank
@@ -488,10 +489,10 @@ export default function Pixelbara({ pose, size = 120, className = '', clickable 
   }, [clickable])
 
   const handleMouseEnter = useCallback(() => {
-    if (!clickable) return
+    if (!clickable || suppressHover) return
     const msg = TSUNDERE_MSGS[Math.floor(Math.random() * TSUNDERE_MSGS.length)]
     setHoverMsg(msg)
-  }, [clickable])
+  }, [clickable, suppressHover])
 
   const handleMouseLeave = useCallback(() => setHoverMsg(null), [])
 

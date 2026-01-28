@@ -50,7 +50,7 @@ export default function BookmarksPanel({ open, onClose }: BookmarksPanelProps) {
             <div className="flex-1 overflow-y-auto p-6 space-y-3">
               {bookmarks.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-a24-muted dark:text-a24-dark-muted">
-                  <p className="text-sm">No saved jobs yet.</p>
+                  <p className="text-sm">ser... you haven&apos;t saved anything. ngmi.</p>
                 </div>
               ) : (
                 <AnimatePresence mode="popLayout">

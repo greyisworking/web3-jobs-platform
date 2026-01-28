@@ -229,7 +229,7 @@ function CareersContent() {
                   </motion.button>
                 ) : (
                   <p className="text-[11px] uppercase tracking-[0.3em] font-light text-a24-muted/50 dark:text-a24-dark-muted/50">
-                    No more positions
+                    that&apos;s all folks. touch grass.
                   </p>
                 )}
               </div>

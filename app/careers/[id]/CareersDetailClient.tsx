@@ -73,7 +73,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
-      toast.success('Link copied!')
+      toast.success('Copied! now go shill it ser')
     })
     trackEvent('share_click', { job_id: job.id, method: 'copy_url', source: 'page' })
   }
@@ -95,174 +95,231 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
     trackEvent('share_click', { job_id: job.id, method: 'linkedin', source: 'page' })
   }
 
+  const handleShareTelegram = () => {
+    const text = `${job.title} at ${job.company}`
+    window.open(
+      `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`,
+      '_blank'
+    )
+    trackEvent('share_click', { job_id: job.id, method: 'telegram', source: 'page' })
+  }
+
   const tags = parseTags(job.tags)
+  const isNew = job.postedDate && (() => {
+    const posted = new Date(job.postedDate!)
+    const now = new Date()
+    return now.getTime() - posted.getTime() < 7 * 24 * 60 * 60 * 1000
+  })()
 
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <main className="max-w-3xl mx-auto px-6 py-12 space-y-8">
+      <main className="max-w-6xl mx-auto px-6 py-12">
         {/* Back link */}
         <Link
           href="/careers"
-          className="group inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+          className="group inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors mb-8 block"
         >
           <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
           Back to Careers
         </Link>
 
-        {/* Company & Title */}
-        <div>
-          <p className="text-2xl font-light uppercase tracking-[0.25em] text-a24-text dark:text-a24-dark-text mb-3">
-            {cleanCompanyName(job.company)}
-          </p>
-          <h1 className="text-base font-light text-a24-text dark:text-a24-dark-text mb-4">
-            {cleanJobTitle(job.title, job.company)}
-          </h1>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+          {/* ── Left column: Content ── */}
+          <div className="space-y-8">
+            {/* Company & Title */}
+            <div>
+              <p className="text-2xl font-light uppercase tracking-[0.25em] text-a24-text dark:text-a24-dark-text mb-3">
+                {cleanCompanyName(job.company)}
+              </p>
+              <div className="flex items-center gap-3">
+                <h1 className="text-base font-light text-a24-text dark:text-a24-dark-text">
+                  {cleanJobTitle(job.title, job.company)}
+                </h1>
+                {isNew && (
+                  <span className="font-pixel text-[8px] text-neun-success uppercase tracking-wider animate-blink">
+                    NEW
+                  </span>
+                )}
+              </div>
 
-          {/* Meta */}
-          <div className="flex flex-wrap gap-4 text-xs text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider">
-            <span className="flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5" />
-              {job.location}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Briefcase className="w-3.5 h-3.5" />
-              {job.type}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Globe className="w-3.5 h-3.5" />
-              {job.region}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5" />
-              {job.source}
-            </span>
-          </div>
-        </div>
-
-        {/* Salary */}
-        {job.salary && (
-          <div className="py-4 border-t border-b border-a24-border dark:border-a24-dark-border">
-            <p className="text-sm text-a24-text dark:text-a24-dark-text font-medium">
-              {job.salary}
-            </p>
-          </div>
-        )}
-
-        {/* Badges */}
-        {job.badges && job.badges.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {job.badges.map((b) => {
-              const BadgeComponent = BADGE_COMPONENT_MAP[b]
-              if (!BadgeComponent) return null
-              return <BadgeComponent key={b} />
-            })}
-          </div>
-        )}
-
-        {/* Description */}
-        {job.description && (
-          <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-            <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
-              Description
-            </h3>
-            <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
-            <p className="text-sm text-a24-text dark:text-a24-dark-text whitespace-pre-line leading-relaxed">
-              {job.description}
-            </p>
-          </div>
-        )}
-
-        {/* Tech stack */}
-        {tags.length > 0 && (
-          <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-            <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
-              Tech Stack
-            </h3>
-            <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-3 py-1 text-xs border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text"
-                >
-                  {tag}
+              {/* Meta */}
+              <div className="flex flex-wrap gap-4 text-xs text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider mt-4">
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {job.location}
                 </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* VC Backers */}
-        {job.backers && job.backers.length > 0 && (
-          <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-            <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
-              VC Backers
-            </h3>
-            <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
-            <div className="flex flex-wrap gap-1.5 mb-6">
-              {job.backers.map((backer) => (
-                <GlowBadge key={backer} name={backer} />
-              ))}
+                <span className="flex items-center gap-1.5">
+                  <Briefcase className="w-3.5 h-3.5" />
+                  {job.type}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5" />
+                  {job.region}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5" />
+                  {job.source}
+                </span>
+              </div>
             </div>
 
-            {(() => {
-              const priorityBacker = findPriorityBacker(job.backers!)
-              const reason = priorityBacker ? VC_REASONS[priorityBacker] : null
-              if (!reason) return null
-              return (
-                <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
-                  <p className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-2">
-                    Why This Company
-                  </p>
-                  <p className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed">
-                    <strong>{priorityBacker}</strong> &mdash; {reason}
-                  </p>
+            {/* Salary */}
+            {job.salary && (
+              <div className="py-4 border-t border-b border-a24-border dark:border-a24-dark-border">
+                <p className="text-sm text-a24-text dark:text-a24-dark-text font-medium">
+                  {job.salary}
+                </p>
+              </div>
+            )}
+
+            {/* Badges */}
+            {job.badges && job.badges.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {job.badges.map((b) => {
+                  const BadgeComponent = BADGE_COMPONENT_MAP[b]
+                  if (!BadgeComponent) return null
+                  return <BadgeComponent key={b} />
+                })}
+              </div>
+            )}
+
+            {/* Description */}
+            {job.description && (
+              <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+                <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
+                  Description
+                </h3>
+                <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
+                <p className="text-sm text-a24-text dark:text-a24-dark-text whitespace-pre-line leading-relaxed">
+                  {job.description}
+                </p>
+              </div>
+            )}
+
+            {/* Tech stack */}
+            {tags.length > 0 && (
+              <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+                <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
+                  Tech Stack
+                </h3>
+                <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1 text-xs border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
-              )
-            })()}
+              </div>
+            )}
           </div>
-        )}
-      </main>
 
-      {/* Footer */}
-      <div className="sticky bottom-0 z-40 bg-a24-surface dark:bg-a24-dark-surface border-t border-a24-border dark:border-a24-dark-border">
-        <div className="max-w-3xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-3 mb-3">
-            <button
-              onClick={handleCopyUrl}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:text-a24-text dark:hover:text-a24-dark-text hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
+          {/* ── Right column: Sidebar ── */}
+          <aside className="lg:sticky lg:top-20 lg:self-start space-y-4">
+            {/* Apply Now CTA */}
+            <a
+              href={job.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'page' })}
+              className="group flex items-center justify-center gap-2 w-full py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-[11px] font-light uppercase tracking-[0.35em] hover:opacity-80 transition-all duration-300"
             >
-              <Copy className="w-3.5 h-3.5" />
-              URL
-            </button>
-            <button
-              onClick={handleShareTwitter}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:text-a24-text dark:hover:text-a24-dark-text hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
-            >
-              Twitter
-            </button>
-            <button
-              onClick={handleShareLinkedIn}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:text-a24-text dark:hover:text-a24-dark-text hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
-            >
-              LinkedIn
-            </button>
-            <div className="ml-auto">
+              <ExternalLink className="w-4 h-4" />
+              Apply Now
+              <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+            </a>
+
+            {/* Share section */}
+            <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface space-y-3">
+              <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted">
+                Share
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={handleCopyUrl}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:text-a24-text dark:hover:text-a24-dark-text hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  URL
+                </button>
+                <button
+                  onClick={handleShareTwitter}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:text-a24-text dark:hover:text-a24-dark-text hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
+                >
+                  Twitter
+                </button>
+                <button
+                  onClick={handleShareTelegram}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:text-a24-text dark:hover:text-a24-dark-text hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
+                >
+                  Telegram
+                </button>
+                <button
+                  onClick={handleShareLinkedIn}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:text-a24-text dark:hover:text-a24-dark-text hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
+                >
+                  LinkedIn
+                </button>
+              </div>
+            </div>
+
+            {/* Bookmark */}
+            <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface flex items-center justify-between">
+              <span className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted">
+                Bookmark
+              </span>
               <BookmarkButton job={{ id: job.id, title: job.title, company: job.company }} />
             </div>
-          </div>
-          <a
-            href={job.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'page' })}
-            className="group flex items-center justify-center gap-2 w-full py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-[11px] font-light uppercase tracking-[0.35em] hover:opacity-80 transition-all duration-300"
-          >
-            <ExternalLink className="w-4 h-4" />
-            Apply Now
-            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-          </a>
+
+            {/* VC Backers in sidebar */}
+            {job.backers && job.backers.length > 0 && (
+              <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface space-y-3">
+                <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted">
+                  VC Backers
+                </h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {job.backers.map((backer) => (
+                    <GlowBadge key={backer} name={backer} />
+                  ))}
+                </div>
+
+                {(() => {
+                  const priorityBacker = findPriorityBacker(job.backers!)
+                  const reason = priorityBacker ? VC_REASONS[priorityBacker] : null
+                  if (!reason) return null
+                  return (
+                    <div className="pt-3 border-t border-a24-border dark:border-a24-dark-border">
+                      <p className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-2">
+                        Why This Company
+                      </p>
+                      <p className="text-xs text-a24-text dark:text-a24-dark-text leading-relaxed">
+                        <strong>{priorityBacker}</strong> &mdash; {reason}
+                      </p>
+                    </div>
+                  )
+                })()}
+              </div>
+            )}
+          </aside>
         </div>
+      </main>
+
+      {/* Mobile fixed bottom Apply button */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-a24-surface dark:bg-a24-dark-surface border-t border-a24-border dark:border-a24-dark-border p-4">
+        <a
+          href={job.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'mobile' })}
+          className="group flex items-center justify-center gap-2 w-full py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-[11px] font-light uppercase tracking-[0.35em] hover:opacity-80 transition-all duration-300"
+        >
+          <ExternalLink className="w-4 h-4" />
+          Apply Now
+          <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+        </a>
       </div>
     </div>
   )

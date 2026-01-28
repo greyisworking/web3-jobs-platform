@@ -11,8 +11,8 @@ export default function TouchGrassReminder() {
     const timer = setTimeout(() => {
       if (!shown.current) {
         shown.current = true
-        toast('touch grass ser 🌿', {
-          description: 'You\'ve been browsing for 5 minutes. Go outside.',
+        toast('touch grass ser', {
+          description: "You've been browsing for 5 minutes. Go outside.",
           duration: 5000,
         })
       }

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Caveat, Silkscreen } from 'next/font/google'
+import { Inter, Caveat, Press_Start_2P } from 'next/font/google'
 import { Toaster } from 'sonner'
 import WebVitals from './components/WebVitals'
 import Navigation from './components/Navigation'
@@ -10,7 +10,7 @@ import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], weight: ['200', '300', '400', '500', '700'], display: 'swap', variable: '--font-body' })
 const caveat = Caveat({ subsets: ['latin'], weight: ['400', '500', '600', '700'], display: 'swap', variable: '--font-script' })
-const silkscreen = Silkscreen({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-pixel' })
+const pressStart2P = Press_Start_2P({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-pixel' })
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.io'),
@@ -49,7 +49,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${inter.variable} ${caveat.variable} ${silkscreen.variable} ${inter.className}`}>
+      <body className={`${inter.variable} ${caveat.variable} ${pressStart2P.variable} ${inter.className}`}>
         <WebVitals />
         <PageTransition />
         <Navigation />

@@ -68,7 +68,8 @@ export default function Home() {
 
           {/* Right: Pixelbara full body with laptop */}
           <div className="flex-shrink-0">
-            <Pixelbara pose="heroLaptop" size={340} clickable />
+            <Pixelbara pose="heroLaptop" size={400} clickable suppressHover className="hidden md:block" />
+            <Pixelbara pose="heroLaptop" size={200} clickable suppressHover className="block md:hidden" />
           </div>
         </motion.div>
       </section>
