@@ -57,22 +57,24 @@ module.exports = {
   			'a24-border': '#e5e5e5',
   			'a24-accent': '#FF5DA2',     // SUBSTANCE hot pink (used sparingly)
   			'a24-accent-dim': '#FF5DA2',
-  			// ── Subtle card tints (A24 editorial) ──
-  			'card-white': '#FFFFFF',
-  			'card-cream': '#FFF9F2',
-  			'card-blue': '#F3F8FC',
-  			'card-pink': '#FDF3F6',
+  			// ── THE SUBSTANCE pastel card colors ──
+  			'card-sky': '#89CFF0',
+  			'card-pink': '#FBCFE8',
+  			'card-cream': '#FEF3C7',
+  			'card-mint': '#A7F3D0',
+  			'card-coral': '#FECACA',
   			// ── Dark mode ──
   			'a24-dark-bg': '#111111',
   			'a24-dark-surface': '#1a1a1a',
   			'a24-dark-text': '#e5e5e5',
   			'a24-dark-muted': '#666666',
   			'a24-dark-border': '#2a2a2a',
-  			// Dark card tints
-  			'card-white-dark': '#1a1a1a',
-  			'card-cream-dark': '#1c1a17',
-  			'card-blue-dark': '#171a1e',
-  			'card-pink-dark': '#1c1719',
+  			// Dark card tints (muted versions)
+  			'card-sky-dark': '#1b2838',
+  			'card-pink-dark': '#2a1a25',
+  			'card-cream-dark': '#2a2518',
+  			'card-mint-dark': '#1a2a22',
+  			'card-coral-dark': '#2a1c1c',
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

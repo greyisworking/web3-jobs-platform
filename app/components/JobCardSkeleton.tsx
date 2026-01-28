@@ -1,8 +1,9 @@
 const CARD_TINTS = [
-  'bg-card-white dark:bg-card-white-dark',
-  'bg-card-cream dark:bg-card-cream-dark',
-  'bg-card-blue dark:bg-card-blue-dark',
+  'bg-card-sky dark:bg-card-sky-dark',
   'bg-card-pink dark:bg-card-pink-dark',
+  'bg-card-cream dark:bg-card-cream-dark',
+  'bg-card-mint dark:bg-card-mint-dark',
+  'bg-card-coral dark:bg-card-coral-dark',
 ]
 
 function ShimmerBlock({ className }: { className?: string }) {

@@ -1,18 +1,19 @@
 import type { Metadata, Viewport } from 'next'
-import { DM_Sans, Bebas_Neue } from 'next/font/google'
+import { Inter, Bebas_Neue } from 'next/font/google'
 import { Toaster } from 'sonner'
 import WebVitals from './components/WebVitals'
+import Navigation from './components/Navigation'
 import './globals.css'
 
-const dmSans = DM_Sans({ subsets: ['latin'], weight: ['400', '500', '700'], display: 'swap', variable: '--font-body' })
+const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '700'], display: 'swap', variable: '--font-body' })
 const bebasNeue = Bebas_Neue({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-heading' })
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.io'),
-  title: '는 neun — Web3 Jobs',
+  title: 'Neun — Web3 Careers',
   description: 'Web3 jobs aggregated from 40+ global and Korean sources',
   openGraph: {
-    siteName: '는 neun',
+    siteName: 'Neun',
   },
   robots: {
     index: true,
@@ -44,8 +45,9 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${dmSans.variable} ${bebasNeue.variable} ${dmSans.className}`}>
+      <body className={`${inter.variable} ${bebasNeue.variable} ${inter.className}`}>
         <WebVitals />
+        <Navigation />
         {children}
         <Toaster
           position="bottom-right"

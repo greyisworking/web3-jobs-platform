@@ -16,7 +16,7 @@ export default function NotFound() {
           href="/"
           className="text-xs uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text border border-a24-text dark:border-a24-dark-text px-6 py-3 hover:bg-a24-text hover:text-a24-surface dark:hover:bg-a24-dark-text dark:hover:text-a24-dark-bg transition-colors inline-block"
         >
-          Back to Jobs
+          Back to Home
         </Link>
       </div>
     </div>

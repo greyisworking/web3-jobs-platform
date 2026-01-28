@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useDecayEffect } from '@/hooks/useDecayEffect'
 import type { Job } from '@/types/job'
@@ -11,12 +12,13 @@ interface JobCardProps {
   index: number
 }
 
-// A24 editorial — 4 subtle alternating tints
+// THE SUBSTANCE pastels — 5 vibrant alternating colors
 const CARD_TINTS = [
-  { light: 'bg-card-white', dark: 'dark:bg-card-white-dark' },
+  { light: 'bg-card-sky', dark: 'dark:bg-card-sky-dark' },
+  { light: 'bg-card-pink', dark: 'dark:bg-card-pink-dark' },
   { light: 'bg-card-cream', dark: 'dark:bg-card-cream-dark' },
-  { light: 'bg-card-blue',  dark: 'dark:bg-card-blue-dark' },
-  { light: 'bg-card-pink',  dark: 'dark:bg-card-pink-dark' },
+  { light: 'bg-card-mint', dark: 'dark:bg-card-mint-dark' },
+  { light: 'bg-card-coral', dark: 'dark:bg-card-coral-dark' },
 ]
 
 const cardVariants = {
@@ -29,40 +31,41 @@ export default function JobCard({ job, index }: JobCardProps) {
   const tint = CARD_TINTS[index % CARD_TINTS.length]
 
   return (
-    <motion.a
-      href={job.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={() => {
-        trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'card' })
-      }}
+    <motion.div
       variants={cardVariants}
       initial="hidden"
       animate="visible"
       exit="hidden"
       transition={{ duration: 0.2 }}
-      className={`block p-6 ${tint.light} ${tint.dark} border border-a24-border dark:border-a24-dark-border -mt-px -ml-px hover:bg-a24-bg dark:hover:bg-a24-dark-bg transition-colors group cursor-pointer`}
       style={{ opacity: isFading ? opacity : undefined }}
     >
-      {/* Company */}
-      <div className="flex items-start justify-between mb-4">
-        <p className="text-lg font-heading uppercase tracking-[0.1em] text-a24-text dark:text-a24-dark-text leading-tight">
-          {job.company}
-        </p>
-        <div onClick={(e) => e.preventDefault()}>
-          <BookmarkButton job={{ id: job.id, title: job.title, company: job.company }} />
+      <Link
+        href={`/careers/${job.id}`}
+        onClick={() => {
+          trackEvent('job_card_click', { job_id: job.id, title: job.title, company: job.company })
+        }}
+        className={`block p-6 ${tint.light} ${tint.dark} border border-a24-border dark:border-a24-dark-border -mt-px -ml-px hover:opacity-80 transition-opacity group cursor-pointer`}
+      >
+        {/* Company */}
+        <div className="flex items-start justify-between mb-4">
+          <p className="text-lg font-heading uppercase tracking-[0.1em] text-a24-text dark:text-a24-dark-text leading-tight">
+            {job.company}
+          </p>
+          <div onClick={(e) => { e.preventDefault(); e.stopPropagation() }}>
+            <BookmarkButton job={{ id: job.id, title: job.title, company: job.company }} />
+          </div>
         </div>
-      </div>
 
-      {/* Title */}
-      <h3 className="text-sm text-a24-text dark:text-a24-dark-text leading-snug group-hover:underline decoration-1 underline-offset-2">
-        {job.title}
-      </h3>
+        {/* Title */}
+        <h3 className="text-sm text-a24-text dark:text-a24-dark-text leading-snug group-hover:underline decoration-1 underline-offset-2">
+          {job.title}
+        </h3>
 
-      {/* Location */}
-      <p className="text-xs text-a24-muted dark:text-a24-dark-muted mt-2 uppercase tracking-wider">
-        {job.location}
-      </p>
-    </motion.a>
+        {/* Location */}
+        <p className="text-xs text-a24-muted dark:text-a24-dark-muted mt-2 uppercase tracking-wider">
+          {job.location}
+        </p>
+      </Link>
+    </motion.div>
   )
 }

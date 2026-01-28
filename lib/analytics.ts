@@ -3,6 +3,7 @@
 export type AnalyticsEventType =
   | 'job_view'
   | 'job_apply_click'
+  | 'job_card_click'
   | 'filter_use'
   | 'vc_click'
   | 'share_click'
