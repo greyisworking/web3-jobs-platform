@@ -90,84 +90,85 @@ interface VCData {
   companies: string[]
 }
 
+// Generate URL-safe slug from VC name
+function vcToSlug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+}
+
 function InvestorCard({ vc, index }: { vc: VCData; index: number }) {
   const [hovered, setHovered] = useState(false)
+  const slug = vcToSlug(vc.name)
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="group relative p-6 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border hover:-translate-y-1 transition-all duration-300"
-    >
-      {/* Tier badge */}
-      <span className={`absolute top-3 right-3 px-2 py-0.5 text-[10px] font-medium tracking-wider ${
-        vc.tier === 'top'
-          ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
-          : vc.tier === 'major'
-            ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
-            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-      }`}>
-        {vc.tier === 'top' ? 'TOP TIER' : vc.tier === 'major' ? 'MAJOR' : 'NOTABLE'}
-      </span>
-
-      {/* VC name */}
-      <h3 className="text-xl font-semibold text-a24-text dark:text-a24-dark-text mb-2 pr-20">
-        {vc.name}
-      </h3>
-
-      {/* Description */}
-      <p className="text-[13px] text-a24-muted dark:text-a24-dark-muted mb-4 line-clamp-2">
-        {vc.description}
-      </p>
-
-      {/* Portfolio count */}
-      <div className="flex items-center gap-2 mb-4">
-        <Building2 className="w-4 h-4 text-a24-muted/60 dark:text-a24-dark-muted/60" />
-        <span className="text-[12px] text-a24-muted dark:text-a24-dark-muted">
-          <strong className="text-a24-text dark:text-a24-dark-text">{vc.portfolioCount}</strong> companies hiring
+    <Link href={`/investors/${slug}`}>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: index * 0.05 }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className="group relative p-6 h-full bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+      >
+        {/* Tier badge */}
+        <span className={`absolute top-3 right-3 px-2 py-0.5 text-[10px] font-medium tracking-wider ${
+          vc.tier === 'top'
+            ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
+            : vc.tier === 'major'
+              ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+        }`}>
+          {vc.tier === 'top' ? 'TOP TIER' : vc.tier === 'major' ? 'MAJOR' : 'NOTABLE'}
         </span>
-      </div>
 
-      {/* Portfolio companies preview */}
-      <div className="flex flex-wrap gap-1.5 mb-4">
-        {vc.companies.slice(0, 3).map((company) => (
-          <span
-            key={company}
-            className="px-2 py-0.5 text-[10px] bg-a24-bg dark:bg-a24-dark-bg text-a24-muted dark:text-a24-dark-muted border border-a24-border/50 dark:border-a24-dark-border/50"
-          >
-            {company}
+        {/* VC name */}
+        <h3 className="text-xl font-semibold text-a24-text dark:text-a24-dark-text mb-2 pr-20 group-hover:underline decoration-1 underline-offset-4">
+          {vc.name}
+        </h3>
+
+        {/* Description */}
+        <p className="text-[13px] text-a24-muted dark:text-a24-dark-muted mb-4 line-clamp-2">
+          {vc.description}
+        </p>
+
+        {/* Portfolio count */}
+        <div className="flex items-center gap-2 mb-4">
+          <Building2 className="w-4 h-4 text-a24-muted/60 dark:text-a24-dark-muted/60" />
+          <span className="text-[12px] text-a24-muted dark:text-a24-dark-muted">
+            <strong className="text-a24-text dark:text-a24-dark-text">{vc.portfolioCount}</strong> companies hiring
           </span>
-        ))}
-        {vc.companies.length > 3 && (
-          <span className="px-2 py-0.5 text-[10px] text-a24-muted/60 dark:text-a24-dark-muted/60">
-            +{vc.companies.length - 3} more
+        </div>
+
+        {/* Portfolio companies preview */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {vc.companies.slice(0, 3).map((company) => (
+            <span
+              key={company}
+              className="px-2 py-0.5 text-[10px] bg-a24-bg dark:bg-a24-dark-bg text-a24-muted dark:text-a24-dark-muted border border-a24-border/50 dark:border-a24-dark-border/50"
+            >
+              {company}
+            </span>
+          ))}
+          {vc.companies.length > 3 && (
+            <span className="px-2 py-0.5 text-[10px] text-a24-muted/60 dark:text-a24-dark-muted/60">
+              +{vc.companies.length - 3} more
+            </span>
+          )}
+        </div>
+
+        {/* View profile link */}
+        <span className="inline-flex items-center gap-1.5 text-[11px] text-a24-muted dark:text-a24-dark-muted group-hover:text-a24-text dark:group-hover:text-a24-dark-text transition-colors">
+          View portfolio
+          <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
+        </span>
+
+        {/* Hover meme */}
+        {hovered && (
+          <span className="absolute top-1 left-4 text-[9px] text-a24-muted/40 dark:text-a24-dark-muted/40 italic">
+            smart money bestie
           </span>
         )}
-      </div>
-
-      {/* Website link */}
-      {vc.website && (
-        <Link
-          href={vc.website}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-[11px] text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
-        >
-          Visit website
-          <ArrowRight className="w-3 h-3" />
-        </Link>
-      )}
-
-      {/* Hover meme */}
-      {hovered && (
-        <span className="absolute top-1 left-4 text-[9px] text-a24-muted/40 dark:text-a24-dark-muted/40 italic">
-          smart money ser
-        </span>
-      )}
-    </motion.div>
+      </motion.div>
+    </Link>
   )
 }
 
@@ -243,7 +244,7 @@ export default function InvestorsPage() {
               {vcData.length} VCs backing {totalPortfolio}+ Web3 companies
             </p>
           </div>
-          <Pixelbara pose="sparkle" size={80} />
+          <Pixelbara pose="investors" size={100} clickable />
         </div>
 
         {/* Tier filters */}

@@ -64,12 +64,12 @@ const WARNING_KEYWORDS = [
   'bankruptcy', 'insolvent',
 ]
 
-// Pixelbara comments for each trust level
+// Pixelbara comments for each trust level (Gen Z style)
 export const TRUST_COMMENTS: Record<TrustLevel, string> = {
-  verified: "this one's legit ser",
-  caution: 'hmm... dyor anon',
-  warning: 'be careful fren...',
-  blacklisted: 'run. just run.',
+  verified: 'no cap this ones fire',
+  caution: 'lowkey mid... dyor bestie',
+  warning: 'giving... red flags',
+  blacklisted: 'bruh run. literally run.',
 }
 
 // ══════════════════════════════════════════════════════════

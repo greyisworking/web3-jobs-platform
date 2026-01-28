@@ -136,9 +136,9 @@ function CareersContent() {
       <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
         <main className="max-w-6xl mx-auto px-6 pt-24 pb-12">
           <div className="flex flex-col items-center justify-center py-16">
-            <Pixelbara pose="loading" size={160} />
-            <p className="mt-4 text-sm font-light text-a24-muted dark:text-a24-dark-muted tracking-wide">
-              brewing jobs...
+            <Pixelbara pose="careers" size={160} />
+            <p className="mt-4 text-sm font-medium text-a24-muted dark:text-a24-dark-muted tracking-wide">
+              searching for that bag...
             </p>
           </div>
           <JobCardSkeletonGrid count={9} />
@@ -198,11 +198,11 @@ function CareersContent() {
 
           {filteredJobs.length === 0 ? (
             <div className="py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
-              <Pixelbara pose="empty" size={140} className="mx-auto mb-4" />
-              <p className="text-a24-muted dark:text-a24-dark-muted text-sm">
+              <Pixelbara pose="empty" size={140} className="mx-auto mb-4" clickable />
+              <p className="text-a24-muted dark:text-a24-dark-muted text-base font-medium">
                 {jobs.length === 0
-                  ? 'No jobs found yet. ngmi.'
-                  : 'down bad... no jobs match your filters.'}
+                  ? 'bruh... no jobs rn. touch grass.'
+                  : 'lowkey no matches... try different filters bestie'}
               </p>
             </div>
           ) : (

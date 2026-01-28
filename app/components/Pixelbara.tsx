@@ -7,8 +7,10 @@ import { toast } from 'sonner'
 type PoseId =
   | 'blank' | 'dejected' | 'sparkle' | 'smoking' | 'sweating'
   | 'bling' | 'sleepy' | 'eating' | 'wink' | 'heroLaptop'
+  | 'search' | 'building' | 'reading' | 'heart' | 'question' | 'coffee' | 'door'
 
 type PoseAlias = 'main' | 'loading' | 'notfound' | 'empty' | 'success'
+  | 'careers' | 'investors' | 'companies' | 'articles' | 'bookmarks' | 'error' | 'login'
 
 interface PixelbaraProps {
   pose: PoseId | PoseAlias
@@ -117,19 +119,19 @@ function artSize(art: string): { w: number; h: number } {
 }
 
 // ══════════════════════════════════════════════════════════
-// ══ FACE-ONLY PIXEL ART (CUTE CAPYBARA STYLE) ══
+// ══ FACE-ONLY PIXEL ART (GEN Z DEADPAN STYLE) ══
 // ══════════════════════════════════════════════════════════
 
-// Base face - 16x12 grid, focused on the adorable face
-// Key features: CUTE ROUND EYES (・ω・) with sparkle + soft nose
-// Eyes: 'o' = white background, 'x' = pupil, 'k' = sparkle highlight
-// 'B' = blush for extra cuteness
+// Base face - 16x12 grid, focused on the face
+// Key features: GEN Z STARE (ㅡ_ㅡ) deadpan/judgmental eyes
+// Eyes: horizontal lines 'n' = thin line eyes (deadpan)
+// 'B' = blush, big nostrils
 const FACE_ART = `
 ....ee....ee....
 ...eeee..eeee...
 ..HHHHHHHHHHHH..
-.HHooxxHooxxHHH.
-.HHokxxHokxxHHH.
+.HHHHHHHHHHHHHH.
+.HHnnnHHHnnnHHH.
 .BHHHHHHHHHHHBh.
 ..HHHHHNNHHHHH..
 ..HHHHHNNHHHHh..
@@ -329,8 +331,7 @@ function EmptyPose({ dark }: { dark: boolean }) {
 
 // success: happy squint eyes (^_^) + WAGMI
 function SuccessPose({ dark }: { dark: boolean }) {
-  // Remove original eyes, replace with happy curved lines
-  const face = FACE_PIXELS.map(p => ((p.c === 'x' || p.c === 'o') ? { ...p, c: 'H' } : p))
+  const face = [...FACE_PIXELS]
   // Happy eyes: ^ shape (curved up)
   const happyEyes = [
     { x: 3, y: 4, c: 'x' }, { x: 4, y: 3, c: 'x' }, { x: 5, y: 4, c: 'x' },
@@ -348,17 +349,128 @@ function SuccessPose({ dark }: { dark: boolean }) {
 }
 
 // ══════════════════════════════════════════════════════════
+// ══ PAGE-SPECIFIC POSES ══
+// ══════════════════════════════════════════════════════════
+
+// search: magnifying glass, deadpan stare
+function SearchPose({ dark }: { dark: boolean }) {
+  const face = [...FACE_PIXELS]
+  // Magnifying glass next to face
+  const magnifier = [
+    { x: 15, y: 3, c: 'G' }, { x: 16, y: 3, c: 'G' }, { x: 17, y: 3, c: 'G' },
+    { x: 15, y: 4, c: 'G' }, { x: 17, y: 4, c: 'G' },
+    { x: 15, y: 5, c: 'G' }, { x: 16, y: 5, c: 'G' }, { x: 17, y: 5, c: 'G' },
+    { x: 18, y: 6, c: 'G' }, { x: 19, y: 7, c: 'G' }, { x: 20, y: 8, c: 'G' },
+  ]
+  return <PixelSvg pixels={[...face, ...magnifier]} w={21} h={FACE_SIZE.h} dark={dark} />
+}
+
+// building: hard hat + wrench (for companies)
+function BuildingPose({ dark }: { dark: boolean }) {
+  const face = [...FACE_PIXELS]
+  // Hard hat on top
+  const hardHat = [
+    { x: 4, y: 0, c: 'Q' }, { x: 5, y: 0, c: 'Q' }, { x: 6, y: 0, c: 'Q' },
+    { x: 7, y: 0, c: 'Q' }, { x: 8, y: 0, c: 'Q' }, { x: 9, y: 0, c: 'Q' },
+    { x: 10, y: 0, c: 'Q' }, { x: 11, y: 0, c: 'Q' },
+    { x: 3, y: 1, c: 'Q' }, { x: 4, y: 1, c: 'Q' }, { x: 5, y: 1, c: 'Q' },
+    { x: 6, y: 1, c: 'Q' }, { x: 7, y: 1, c: 'Q' }, { x: 8, y: 1, c: 'Q' },
+    { x: 9, y: 1, c: 'Q' }, { x: 10, y: 1, c: 'Q' }, { x: 11, y: 1, c: 'Q' },
+    { x: 12, y: 1, c: 'Q' },
+  ]
+  return <PixelSvg pixels={[...face.map(p => ({ ...p, y: p.y + 2 })), ...hardHat]} w={FACE_SIZE.w} h={FACE_SIZE.h + 2} dark={dark} />
+}
+
+// reading: glasses + book/document
+function ReadingPose({ dark }: { dark: boolean }) {
+  const face = [...FACE_PIXELS]
+  // Regular glasses (not sunglasses)
+  const glasses = [
+    { x: 2, y: 4, c: 'G' }, { x: 3, y: 4, c: 'L' }, { x: 4, y: 4, c: 'L' }, { x: 5, y: 4, c: 'G' },
+    { x: 6, y: 4, c: 'G' }, { x: 7, y: 4, c: 'G' },
+    { x: 8, y: 4, c: 'G' }, { x: 9, y: 4, c: 'L' }, { x: 10, y: 4, c: 'L' }, { x: 11, y: 4, c: 'G' },
+  ]
+  // Document/paper below
+  const paper = [
+    { x: 12, y: 7, c: 'W' }, { x: 13, y: 7, c: 'W' }, { x: 14, y: 7, c: 'W' }, { x: 15, y: 7, c: 'W' },
+    { x: 12, y: 8, c: 'W' }, { x: 13, y: 8, c: 'n' }, { x: 14, y: 8, c: 'n' }, { x: 15, y: 8, c: 'W' },
+    { x: 12, y: 9, c: 'W' }, { x: 13, y: 9, c: 'n' }, { x: 14, y: 9, c: 'W' }, { x: 15, y: 9, c: 'W' },
+  ]
+  return <PixelSvg pixels={[...face, ...glasses, ...paper]} w={17} h={FACE_SIZE.h} dark={dark} />
+}
+
+// heart: heart eyes for investors/bookmarks
+function HeartPose({ dark }: { dark: boolean }) {
+  const face = [...FACE_PIXELS]
+  // Heart-shaped eyes
+  const hearts = [
+    { x: 2, y: 3, c: 'B' }, { x: 5, y: 3, c: 'B' },
+    { x: 2, y: 4, c: 'B' }, { x: 3, y: 4, c: 'B' }, { x: 4, y: 4, c: 'B' }, { x: 5, y: 4, c: 'B' },
+    { x: 3, y: 5, c: 'B' }, { x: 4, y: 5, c: 'B' },
+    { x: 8, y: 3, c: 'B' }, { x: 11, y: 3, c: 'B' },
+    { x: 8, y: 4, c: 'B' }, { x: 9, y: 4, c: 'B' }, { x: 10, y: 4, c: 'B' }, { x: 11, y: 4, c: 'B' },
+    { x: 9, y: 5, c: 'B' }, { x: 10, y: 5, c: 'B' },
+  ]
+  return <PixelSvg pixels={[...face, ...hearts]} w={FACE_SIZE.w} h={FACE_SIZE.h} dark={dark} />
+}
+
+// question: confused face with ? bubble
+function QuestionPose({ dark }: { dark: boolean }) {
+  const face = [...FACE_PIXELS]
+  const extra = (
+    <>
+      <circle cx={15} cy={3} r={2.5} fill={fill(dark, 'W')} />
+      <text x={14} y={4} fill={fill(dark, 'N')} fontSize="3" fontWeight="bold" fontFamily="monospace">
+        ?
+      </text>
+    </>
+  )
+  return <PixelSvg pixels={face} w={18} h={FACE_SIZE.h} dark={dark} extra={extra} />
+}
+
+// coffee: holding coffee cup (for late night grinding)
+function CoffeePose({ dark }: { dark: boolean }) {
+  const face = [...FACE_PIXELS]
+  // Coffee cup
+  const coffee = [
+    { x: 14, y: 6, c: 'W' }, { x: 15, y: 6, c: 'W' }, { x: 16, y: 6, c: 'W' },
+    { x: 14, y: 7, c: 'h' }, { x: 15, y: 7, c: 'h' }, { x: 16, y: 7, c: 'h' },
+    { x: 14, y: 8, c: 'h' }, { x: 15, y: 8, c: 'h' }, { x: 16, y: 8, c: 'h' },
+    { x: 17, y: 7, c: 'h' }, // Handle
+  ]
+  // Steam
+  const steam = [
+    { x: 14, y: 5, c: 'T' }, { x: 16, y: 4, c: 'T' },
+  ]
+  return <PixelSvg pixels={[...face, ...coffee, ...steam]} w={18} h={FACE_SIZE.h} dark={dark} />
+}
+
+// door: peeking from door (for login)
+function DoorPose({ dark }: { dark: boolean }) {
+  const face = [...FACE_PIXELS]
+  // Door frame on left side
+  const door = [
+    { x: 0, y: 0, c: 'G' }, { x: 0, y: 1, c: 'G' }, { x: 0, y: 2, c: 'G' },
+    { x: 0, y: 3, c: 'G' }, { x: 0, y: 4, c: 'G' }, { x: 0, y: 5, c: 'G' },
+    { x: 0, y: 6, c: 'G' }, { x: 0, y: 7, c: 'G' }, { x: 0, y: 8, c: 'G' },
+    { x: 0, y: 9, c: 'G' },
+    { x: 1, y: 4, c: 'Q' }, // Door handle
+  ]
+  return <PixelSvg pixels={[...door, ...face.map(p => ({ ...p, x: p.x + 2 }))]} w={FACE_SIZE.w + 2} h={FACE_SIZE.h} dark={dark} />
+}
+
+// ══════════════════════════════════════════════════════════
 // ══ FULL-BODY HERO POSE (laptop with green terminal) ══
 // ══════════════════════════════════════════════════════════
 
 // Full body capybara with sunglasses, holding laptop
-// Eyes: 'o' = white background, 'x' = pupil, 'k' = sparkle (covered by glasses anyway)
+// Eyes: 'n' = thin line deadpan eyes (Gen Z stare) - covered by glasses anyway
 const HERO_BODY_ART = `
 .......ee....ee...............
 ......eeee..eeee..............
 .....HHHHHHHHHHHHHH...........
-....HooxxHHooxxHHHH...........
-....HokxxHHokxxHHHH...........
+....HHHHHHHHHHHHHHHH..........
+....HnnnHHHHnnnHHHHH..........
 ....BHHHHHHHHHHHHBh...........
 .....HHHHHNNHHHHHH............
 ...HHHHHHHNNHHHHHHHHHH........
@@ -445,6 +557,7 @@ function HeroLaptopPose({ dark }: { dark: boolean }) {
 
 // ── Pose registry ──
 const POSES: Record<string, (props: { dark: boolean }) => React.ReactNode> = {
+  // Base poses
   blank: BlankPose,
   dejected: DejectedPose,
   sparkle: SparklePose,
@@ -455,26 +568,48 @@ const POSES: Record<string, (props: { dark: boolean }) => React.ReactNode> = {
   eating: EatingPose,
   wink: WinkPose,
   heroLaptop: HeroLaptopPose,
-  // Legacy aliases
+  // Page-specific poses
+  search: SearchPose,
+  building: BuildingPose,
+  reading: ReadingPose,
+  heart: HeartPose,
+  question: QuestionPose,
+  coffee: CoffeePose,
+  door: DoorPose,
+  // Page aliases
   main: HeroLaptopPose,
+  careers: SearchPose,
+  investors: HeartPose,
+  companies: BuildingPose,
+  articles: ReadingPose,
+  bookmarks: HeartPose,
+  login: DoorPose,
+  // State aliases
   loading: SweatingPose,
   notfound: NotFoundPose,
   empty: EmptyPose,
   success: SuccessPose,
+  error: SweatingPose,
 }
 
-// ── Meme content ──
+// ── Meme content (Gen Z style) ──
 const CLICK_QUOTES = [
-  'gm anon', 'wagmi', 'ngmi... jk', 'wen moon?',
+  // Gen Z vibes
+  'bruh', 'no cap this job bussin', 'slay', 'its giving... employed',
+  'bestie ur hired', 'periodt', 'lowkey a vibe', 'highkey fire',
+  'not me applying at 3am', 'real', 'facts no printer',
+  // Crypto Gen Z
+  'ser pls', 'gm', 'wagmi', 'ngmi fr', 'wen lambo',
   'this is fine', 'probably nothing', 'few understand',
-  "ser, this is a wendy's", 'touch grass', "i'm in it for the tech",
-  'not financial advice', 'LFG', 'looks rare',
-  'down bad fr fr', 'up only', 'wen lambo',
+  'touch grass', 'down bad', 'up only', 'LFG',
+  // Mixed
+  'ate and left no crumbs', 'understood the assignment',
+  'main character energy', 'living rent free',
 ]
 
 const TSUNDERE_MSGS = [
-  '뭘 봐...', '...', 'hmph.', 'b-baka', '별로야.',
-  'whatever.', '...관심 없어', '*stares*',
+  '뭘 봐... (bruh)', '...', '*judges silently*', '별로야.',
+  'mid tbh', '...관심 없어', '*stares in deadpan*', 'ok and?',
 ]
 
 export const TIME_MSGS: Record<TimeOfDay, string> = {
@@ -553,15 +688,15 @@ export function TimeAwarePixelbara(props: Omit<PixelbaraProps, 'pose'>) {
   return <Pixelbara {...props} pose={pose} />
 }
 
-// ── MiniPixelbara (face only, compact) ──
+// ── MiniPixelbara (face only, compact) - Gen Z deadpan stare ──
 export function MiniPixelbara({ className = '' }: { className?: string }) {
   const dark = useIsDark()
-  // Cute eyes (・ω・): o=white, x=pupil, k=sparkle
+  // Gen Z deadpan eyes (ㅡ_ㅡ): n=thin line eyes
   const miniArt = `
 ..ee..ee
 HHHHHHHH
-oxxoxxHH
-kxxkxxHH
+HHHHHHHH
+nnnHnnnH
 HHHNNHhh
 .HHHHHH.
 `
@@ -578,10 +713,10 @@ HHHNNHhh
   )
 }
 
-// ── PixelbaraToggleIcon (for theme toggle) ──
+// ── PixelbaraToggleIcon (for theme toggle) - Gen Z deadpan stare ──
 export function PixelbaraToggleIcon({ withGlasses, className = '' }: { withGlasses: boolean; className?: string }) {
   const dark = useIsDark()
-  // Cute eyes (・ω・): o=white, x=pupil, k=sparkle
+  // Gen Z deadpan eyes (ㅡ_ㅡ): n=thin line eyes, or sunglasses
   const miniArt = withGlasses
     ? `
 ..ee..ee
@@ -594,8 +729,8 @@ HHHNNHhh
     : `
 ..ee..ee
 HHHHHHHH
-oxxoxxHH
-kxxkxxHH
+HHHHHHHH
+nnnHnnnH
 HHHNNHhh
 .HHHHHH.
 `

@@ -82,7 +82,7 @@ function CompanyCard({ company, index }: { company: PriorityCompany; index: numb
       {/* Hover meme */}
       {hovered && (
         <span className="absolute top-1 left-4 text-[9px] text-a24-muted/40 dark:text-a24-dark-muted/40 italic">
-          probably hiring ser
+          lowkey hiring rn
         </span>
       )}
     </motion.div>
@@ -114,7 +114,7 @@ export default function CompaniesPage() {
               {filteredCompanies.length} Web3 companies from Korea&apos;s top VC portfolios
             </p>
           </div>
-          <Pixelbara pose="bling" size={80} />
+          <Pixelbara pose="companies" size={100} clickable />
         </div>
 
         {/* Filters */}
@@ -163,9 +163,9 @@ export default function CompaniesPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20">
-            <Pixelbara pose="dejected" size={120} />
-            <p className="mt-4 text-a24-muted dark:text-a24-dark-muted text-sm">
-              no companies found... ngmi
+            <Pixelbara pose="dejected" size={120} clickable />
+            <p className="mt-4 text-a24-muted dark:text-a24-dark-muted text-base font-medium">
+              bruh no matches... try different filters
             </p>
           </div>
         )}
@@ -173,7 +173,7 @@ export default function CompaniesPage() {
         {/* Bottom meme */}
         <div className="mt-12 text-center">
           <p className="text-[11px] text-a24-muted/50 dark:text-a24-dark-muted/50 tracking-wider">
-            ser, these companies are hiring. what are you waiting for?
+            these companies are literally hiring. apply bestie.
           </p>
         </div>
       </main>
