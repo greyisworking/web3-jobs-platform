@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 // ── Types ──
 type PoseId =
   | 'blank' | 'dejected' | 'sparkle' | 'smoking' | 'sweating'
-  | 'bling' | 'sleepy' | 'eating' | 'wink'
+  | 'bling' | 'sleepy' | 'eating' | 'wink' | 'heroLaptop'
 
 type PoseAlias = 'main' | 'loading' | 'notfound' | 'empty' | 'success'
 
@@ -329,6 +329,96 @@ function SuccessPose({ dark }: { dark: boolean }) {
   return <PixelSvg pixels={[...face.map(p => ({ ...p, y: p.y + 2 })), ...happyEyes.map(p => ({ ...p, y: p.y + 2 }))]} w={FACE_SIZE.w} h={FACE_SIZE.h + 4} dark={dark} extra={extra} />
 }
 
+// ══════════════════════════════════════════════════════════
+// ══ FULL-BODY HERO POSE (laptop with green terminal) ══
+// ══════════════════════════════════════════════════════════
+
+// Full body capybara with sunglasses, holding laptop
+const HERO_BODY_ART = `
+.......ee....ee...............
+......eeee..eeee..............
+.....HHHHHHHHHHHHHH...........
+....HHHHHHHHHHHHHHHH..........
+....HHxHHHHHHHxHHHHH.........
+....HHHHHHHHHHHHHHHHH.........
+....HHHHHHHHHHHHHHnn.........
+.....HHHHHNNHHHHHH............
+...HHHHHHHNNHHHHHHHHHH........
+..HHHHHHHHHHHHHHHHHHHHh......
+.HHHHHHHHbbbbbbbbHHHHHHH.....
+.HHHHHHHHbbbbbbbbHHHHHHHh....
+..HHHHHHHHHHHHHHHHHHHHHh.....
+...HHHHHHHHHHHHHHHHHHHH.......
+....DDDD..........DDDD........
+....DDDD..........DDDD........
+`
+
+const HERO_BODY_PIXELS = parseArt(HERO_BODY_ART)
+const HERO_BODY_SIZE = artSize(HERO_BODY_ART)
+
+function HeroLaptopPose({ dark }: { dark: boolean }) {
+  const body = [...HERO_BODY_PIXELS]
+
+  // Sunglasses overlay
+  const glasses = [
+    { x: 4, y: 4, c: 'G' }, { x: 5, y: 4, c: 'L' }, { x: 6, y: 4, c: 'L' },
+    { x: 7, y: 4, c: 'G' }, { x: 8, y: 4, c: 'G' }, { x: 9, y: 4, c: 'G' },
+    { x: 10, y: 4, c: 'G' }, { x: 11, y: 4, c: 'L' }, { x: 12, y: 4, c: 'L' },
+    { x: 13, y: 4, c: 'G' }, { x: 14, y: 4, c: 'G' }, { x: 15, y: 4, c: 'G' },
+  ]
+
+  // Laptop - positioned to the right as if being held
+  const laptopX = 20
+  const laptopY = 7
+  const laptop: { x: number; y: number; c: string }[] = []
+
+  // Laptop screen frame (dark)
+  for (let dy = 0; dy < 6; dy++)
+    for (let dx = 0; dx < 9; dx++)
+      laptop.push({ x: laptopX + dx, y: laptopY + dy, c: 'S' })
+
+  // Green terminal screen (inner)
+  for (let dy = 1; dy < 5; dy++)
+    for (let dx = 1; dx < 8; dx++)
+      laptop.push({ x: laptopX + dx, y: laptopY + dy, c: 's' })
+
+  // Terminal text lines (dark on green)
+  const terminalLines = [
+    { x: laptopX + 2, y: laptopY + 1, c: 'G' },
+    { x: laptopX + 3, y: laptopY + 1, c: 'G' },
+    { x: laptopX + 4, y: laptopY + 1, c: 'G' },
+    { x: laptopX + 5, y: laptopY + 1, c: 'G' },
+    { x: laptopX + 2, y: laptopY + 2, c: 'G' },
+    { x: laptopX + 3, y: laptopY + 2, c: 'G' },
+    { x: laptopX + 2, y: laptopY + 3, c: 'G' },
+    { x: laptopX + 3, y: laptopY + 3, c: 'G' },
+    { x: laptopX + 4, y: laptopY + 3, c: 'G' },
+    { x: laptopX + 6, y: laptopY + 3, c: 'G' },
+    // Cursor blink
+    { x: laptopX + 2, y: laptopY + 4, c: 'Q' },
+  ]
+
+  // Laptop base/keyboard
+  for (let dx = -1; dx < 10; dx++)
+    laptop.push({ x: laptopX + dx, y: laptopY + 6, c: 'S' })
+
+  // Gold chain
+  const chain = [
+    { x: 8, y: 8, c: 'Q' }, { x: 9, y: 8, c: 'Q' }, { x: 10, y: 8, c: 'Q' },
+    { x: 11, y: 8, c: 'Q' }, { x: 12, y: 8, c: 'Q' }, { x: 13, y: 8, c: 'Q' },
+    { x: 10, y: 9, c: 'Q' }, { x: 11, y: 9, c: 'Q' },
+  ]
+
+  return (
+    <PixelSvg
+      pixels={[...body, ...glasses, ...chain, ...laptop, ...terminalLines]}
+      w={30}
+      h={HERO_BODY_SIZE.h}
+      dark={dark}
+    />
+  )
+}
+
 // ── Pose registry ──
 const POSES: Record<string, (props: { dark: boolean }) => React.ReactNode> = {
   blank: BlankPose,
@@ -340,8 +430,9 @@ const POSES: Record<string, (props: { dark: boolean }) => React.ReactNode> = {
   sleepy: SleepyPose,
   eating: EatingPose,
   wink: WinkPose,
+  heroLaptop: HeroLaptopPose,
   // Legacy aliases
-  main: BlingPose,
+  main: HeroLaptopPose,
   loading: SweatingPose,
   notfound: NotFoundPose,
   empty: EmptyPose,

@@ -66,9 +66,9 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Right: Pixelbara (bling: sunglasses + gold chain) */}
+          {/* Right: Pixelbara full body with laptop */}
           <div className="flex-shrink-0">
-            <Pixelbara pose="bling" size={340} clickable />
+            <Pixelbara pose="heroLaptop" size={340} clickable />
           </div>
         </motion.div>
       </section>
