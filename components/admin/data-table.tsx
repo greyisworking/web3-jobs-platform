@@ -114,7 +114,7 @@ export function DataTable<T>({
               {columns.map((col) => (
                 <TableHead
                   key={col.key}
-                  className={col.sortable ? 'cursor-pointer select-none' : ''}
+                  className={col.sortable ? 'select-none' : ''}
                   onClick={col.sortable ? () => handleSort(col.key) : undefined}
                 >
                   {col.header}

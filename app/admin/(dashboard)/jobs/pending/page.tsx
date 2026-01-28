@@ -267,7 +267,7 @@ export default function PendingJobsPage() {
                 return (
                   <label
                     key={badge}
-                    className="flex items-center gap-3 cursor-pointer"
+                    className="flex items-center gap-3"
                   >
                     <input
                       type="checkbox"

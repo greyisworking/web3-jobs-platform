@@ -223,7 +223,7 @@ export default function SearchWithSuggestions({
                         e.stopPropagation()
                         removeRecent(item.text)
                       }}
-                      className="text-a24-muted hover:text-a24-accent cursor-pointer"
+                      className="text-a24-muted hover:text-a24-accent"
                     >
                       <X className="w-3 h-3" />
                     </span>

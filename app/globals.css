@@ -84,10 +84,3 @@
     letter-spacing: 0.2em;
   }
 }
-
-/* Custom cursor: hide default cursor on non-touch devices */
-@media (pointer: fine) {
-  html:not(.admin-page) * {
-    cursor: none !important;
-  }
-}

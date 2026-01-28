@@ -3,7 +3,6 @@ import { Inter, Caveat } from 'next/font/google'
 import { Toaster } from 'sonner'
 import WebVitals from './components/WebVitals'
 import Navigation from './components/Navigation'
-import CustomCursor from './components/CustomCursor'
 import PageTransition from './components/PageTransition'
 import './globals.css'
 
@@ -49,7 +48,6 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${caveat.variable} ${inter.className}`}>
         <WebVitals />
-        <CustomCursor />
         <PageTransition />
         <Navigation />
         {children}

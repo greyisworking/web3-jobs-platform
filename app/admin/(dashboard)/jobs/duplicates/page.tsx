@@ -102,7 +102,7 @@ export default function DuplicatesPage() {
         groups.map((group) => (
           <Card key={group.key}>
             <CardHeader
-              className="cursor-pointer"
+              className=""
               onClick={() =>
                 setExpandedGroup(
                   expandedGroup === group.key ? null : group.key
