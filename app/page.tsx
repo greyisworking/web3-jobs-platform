@@ -8,7 +8,7 @@ import type { Job } from '@/types/job'
 import JobCard from './components/JobCard'
 import { JobCardSkeletonGrid } from './components/JobCardSkeleton'
 import Pixelbara from './components/Pixelbara'
-import { MiniPixelbara } from './components/Pixelbara'
+import { MiniPixelbara, TimeAwarePixelbara, useTimeOfDay, TIME_MSGS } from './components/Pixelbara'
 import SocialProof from './components/SocialProof'
 import ScrollPixelbara from './components/ScrollPixelbara'
 import ScrollReveal from './components/ScrollReveal'
@@ -66,9 +66,9 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Right: Pixelbara (big, clickable) */}
+          {/* Right: Pixelbara (time-aware, clickable) */}
           <div className="flex-shrink-0">
-            <Pixelbara pose="main" size={340} clickable />
+            <TimeAwarePixelbara size={340} clickable />
           </div>
         </motion.div>
       </section>

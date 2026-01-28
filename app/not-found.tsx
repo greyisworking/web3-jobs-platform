@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg flex items-center justify-center px-4">
       <div className="text-center max-w-lg">
-        <Pixelbara pose="notfound" size={220} className="mx-auto mb-8" />
+        <Pixelbara pose="smoking" size={220} className="mx-auto mb-8" />
 
         <p className="text-[100px] md:text-[140px] font-extralight leading-none tracking-[0.15em] text-a24-text dark:text-a24-dark-text select-none mb-4">
           404

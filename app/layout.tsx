@@ -4,6 +4,8 @@ import { Toaster } from 'sonner'
 import WebVitals from './components/WebVitals'
 import Navigation from './components/Navigation'
 import PageTransition from './components/PageTransition'
+import KonamiEasterEgg from './components/KonamiEasterEgg'
+import TouchGrassReminder from './components/TouchGrassReminder'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], weight: ['200', '300', '400', '500', '700'], display: 'swap', variable: '--font-body' })
@@ -51,6 +53,8 @@ export default function RootLayout({
         <PageTransition />
         <Navigation />
         {children}
+        <KonamiEasterEgg />
+        <TouchGrassReminder />
         <Toaster
           position="bottom-right"
           theme="system"

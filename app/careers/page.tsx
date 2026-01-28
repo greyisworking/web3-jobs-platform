@@ -202,7 +202,7 @@ function CareersContent() {
               <p className="text-a24-muted dark:text-a24-dark-muted text-sm">
                 {jobs.length === 0
                   ? 'No jobs found yet. ngmi.'
-                  : 'No jobs match your filters. probably ngmi.'}
+                  : 'down bad... no jobs match your filters.'}
               </p>
             </div>
           ) : (

@@ -68,11 +68,16 @@ export default function JobCard({ job, index }: JobCardProps) {
         }}
         className="relative block p-6 h-[180px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border -mt-px -ml-px transition-all duration-300 ease-out hover:-translate-y-1 group flex flex-col overflow-hidden"
       >
-        {/* Mini pixelbara on hover */}
+        {/* Mini pixelbara + meme tooltip on hover */}
         {hovered && (
-          <div className="absolute bottom-2 right-2 opacity-30 transition-opacity">
-            <MiniPixelbara />
-          </div>
+          <>
+            <div className="absolute bottom-2 right-2 opacity-30 transition-opacity">
+              <MiniPixelbara />
+            </div>
+            <span className="absolute top-1 right-10 text-[9px] text-a24-muted/50 dark:text-a24-dark-muted/50 italic pointer-events-none">
+              it&apos;s giving... job
+            </span>
+          </>
         )}
 
         {/* Number + Company */}

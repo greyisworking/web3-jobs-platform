@@ -18,7 +18,7 @@ export default function Error({
         </p>
 
         <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted mb-8 tracking-wide">
-          ngmi... but you can try again.
+          ser pls... try again.
         </p>
 
         <button
