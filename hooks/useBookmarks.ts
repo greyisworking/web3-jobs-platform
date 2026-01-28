@@ -118,8 +118,8 @@ export function useBookmarks(): UseBookmarksReturn {
           return
         }
 
-        toast.success('북마크 제거', {
-          description: `${job.title} 북마크가 해제되었습니다`,
+        toast.success('removed... ngmi', {
+          description: `${job.title} has been unsaved`,
         })
       } else {
         // Optimistic add
@@ -144,8 +144,8 @@ export function useBookmarks(): UseBookmarksReturn {
           return
         }
 
-        toast.success('북마크 추가', {
-          description: `${job.title} 북마크에 저장되었습니다`,
+        toast.success('saved! wagmi', {
+          description: `${job.title} has been bookmarked`,
         })
       }
     },

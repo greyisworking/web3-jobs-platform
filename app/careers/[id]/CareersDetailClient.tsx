@@ -136,7 +136,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                   {cleanJobTitle(job.title, job.company)}
                 </h1>
                 {isNew && (
-                  <span className="font-pixel text-[8px] text-neun-success uppercase tracking-wider animate-blink">
+                  <span className="font-semibold text-[9px] text-neun-success uppercase tracking-wider">
                     NEW
                   </span>
                 )}

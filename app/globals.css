@@ -119,9 +119,9 @@
     font-family: var(--font-body), 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-pixel), 'Pretendard Variable', Pretendard, var(--font-body), sans-serif;
-    font-weight: 400;
-    letter-spacing: 0.15em;
+    font-family: var(--font-heading), 'Pretendard Variable', Pretendard, var(--font-body), sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
 }
 

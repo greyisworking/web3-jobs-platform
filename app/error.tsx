@@ -25,7 +25,7 @@ export default function Error({ error, reset }: ErrorProps) {
         </div>
 
         {/* Error text */}
-        <h1 className="font-pixel text-4xl md:text-5xl text-a24-text dark:text-a24-dark-text mb-4 tracking-wider">
+        <h1 className="font-heading text-4xl md:text-5xl font-bold text-a24-text dark:text-a24-dark-text mb-4">
           oops
         </h1>
 

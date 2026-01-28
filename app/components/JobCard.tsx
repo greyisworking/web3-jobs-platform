@@ -78,7 +78,7 @@ export default function JobCard({ job, index }: JobCardProps) {
       >
         {/* NEW badge */}
         {isNewJob(job.postedDate) && (
-          <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-neun-success/20 border border-neun-success text-neun-success font-pixel text-[8px] uppercase tracking-wider">
+          <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-neun-success/20 border border-neun-success text-neun-success font-semibold text-[9px] uppercase tracking-wider">
             NEW
           </span>
         )}
@@ -102,7 +102,7 @@ export default function JobCard({ job, index }: JobCardProps) {
               {number}
             </span>
             <div className="flex items-center min-w-0">
-              <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-a24-muted dark:text-a24-dark-muted leading-tight truncate">
+              <p className="text-[13px] font-medium uppercase tracking-[0.15em] text-a24-muted dark:text-a24-dark-muted leading-tight truncate">
                 {displayCompany}
               </p>
               {job.backers && job.backers.length > 0 && (
@@ -116,12 +116,12 @@ export default function JobCard({ job, index }: JobCardProps) {
         </div>
 
         {/* Title */}
-        <h3 className="text-[15px] font-semibold text-a24-text dark:text-a24-dark-text leading-snug group-hover:underline decoration-1 underline-offset-2 line-clamp-2 flex-1">
+        <h3 className="text-[17px] font-semibold text-a24-text dark:text-a24-dark-text leading-snug group-hover:underline decoration-1 underline-offset-2 line-clamp-2 flex-1">
           {displayTitle}
         </h3>
 
         {/* Location */}
-        <p className="text-[11px] font-light text-a24-muted/70 dark:text-a24-dark-muted/70 mt-2 uppercase tracking-[0.2em] truncate">
+        <p className="text-[13px] font-light text-a24-muted/70 dark:text-a24-dark-muted/70 mt-2 uppercase tracking-[0.15em] truncate">
           {job.location}
         </p>
       </Link>

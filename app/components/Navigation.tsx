@@ -81,6 +81,8 @@ export default function Navigation() {
 
             <Link href="/" className={linkClass(isActive('/'))}>Home</Link>
             <Link href="/careers" className={linkClass(isActive('/careers'))}>Careers</Link>
+            <Link href="/companies" className={linkClass(isActive('/companies'))}>Companies</Link>
+            <Link href="/investors" className={linkClass(isActive('/investors'))}>Investors</Link>
             <Link href="/articles" className={linkClass(isActive('/articles'))}>Articles</Link>
 
             {/* About with dropdown */}
@@ -155,6 +157,8 @@ export default function Navigation() {
             <nav className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3">
               <Link href="/" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/'))} py-2`}>Home</Link>
               <Link href="/careers" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/careers'))} py-2`}>Careers</Link>
+              <Link href="/companies" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/companies'))} py-2`}>Companies</Link>
+              <Link href="/investors" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/investors'))} py-2`}>Investors</Link>
               <Link href="/articles" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/articles'))} py-2`}>Articles</Link>
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-2 mt-1">
                 <p className="text-[10px] uppercase tracking-[0.3em] font-light text-a24-muted/60 dark:text-a24-dark-muted/60 mb-2">About</p>

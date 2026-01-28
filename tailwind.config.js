@@ -83,8 +83,7 @@ module.exports = {
       // ═══ TYPOGRAPHY ═══
       // ════════════════════════════════════════════
       fontFamily: {
-        pixel:   ['var(--font-pixel)', 'monospace'],
-        heading: ['var(--font-pixel)', 'var(--font-body)', 'sans-serif'],
+        heading: ['var(--font-heading)', 'var(--font-body)', 'sans-serif'],
         body:    ['var(--font-body)', 'sans-serif'],
         script:  ['var(--font-script)', 'cursive'],
         mono:    ['ui-monospace', 'SFMono-Regular', 'monospace'],

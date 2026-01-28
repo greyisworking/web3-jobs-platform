@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Caveat, VT323 } from 'next/font/google'
+import { Inter, Caveat, Space_Grotesk } from 'next/font/google'
 import { Toaster } from 'sonner'
 import WebVitals from './components/WebVitals'
 import Navigation from './components/Navigation'
@@ -10,7 +10,7 @@ import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], weight: ['200', '300', '400', '500', '700'], display: 'swap', variable: '--font-body' })
 const caveat = Caveat({ subsets: ['latin'], weight: ['400', '500', '600', '700'], display: 'swap', variable: '--font-script' })
-const vt323 = VT323({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-pixel' })
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['400', '500', '600', '700'], display: 'swap', variable: '--font-heading' })
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.io'),
@@ -91,7 +91,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${inter.variable} ${caveat.variable} ${vt323.variable} ${inter.className}`}>
+      <body className={`${inter.variable} ${caveat.variable} ${spaceGrotesk.variable} ${inter.className}`}>
         <WebVitals />
         <PageTransition />
         <Navigation />

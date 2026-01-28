@@ -54,39 +54,43 @@ function useTimeOfDay(): TimeOfDay {
 }
 
 // ── Color palette: [light, dark] ──
+// CUTE CAPYBARA COLORS - warm orange-brown, friendly & soft
 const P: Record<string, [string, string]> = {
-  // Face/fur colors
-  H: ['#8B7355', '#C9A87C'],    // main fur
-  h: ['#6B5344', '#A88960'],    // darker fur/shadow
-  b: ['#A89070', '#D4C0A0'],    // belly/lighter fur
+  // Face/fur colors - WARM ORANGE-BROWN
+  H: ['#C4956A', '#D4A87A'],    // main fur - warm caramel
+  h: ['#A67B52', '#B8956A'],    // darker fur/shadow
+  b: ['#D4B090', '#E4C8A8'],    // belly/lighter fur - creamy
 
-  // Eye colors - CUTE ROUND EYES
-  e: ['#3A2820', '#6A5848'],    // ears
-  x: ['#1A1008', '#1A1008'],    // eye pupil (always dark for cuteness)
+  // Eye colors - CUTE SPARKLY EYES (・ω・)
+  e: ['#8B7355', '#A88960'],    // ears - soft brown
+  x: ['#2D1B10', '#2D1B10'],    // eye pupil - deep brown (not pure black)
   o: ['#FFFFFF', '#FFFFFF'],    // eye white
   k: ['#FFFFFF', '#FFFFFF'],    // eye sparkle/highlight
 
-  // Nostril - THE STAR OF THE SHOW
-  N: ['#2A1810', '#4A3828'],    // nostril dark
+  // Nose/Nostril - cute pink-ish brown
+  N: ['#6B4A3A', '#8B6A5A'],    // nostril - softer brown
+
+  // Blush - for extra cuteness
+  B: ['#E8A090', '#F0B8A8'],    // pink blush
 
   // Accessories
-  G: ['#1A1008', '#E0DDD8'],    // glasses frame
-  L: ['#38BDF8', '#7DD3FC'],    // glasses lens
-  Q: ['#EAB308', '#FDE047'],    // gold/bling
+  G: ['#2D1B10', '#E8E4E0'],    // glasses frame
+  L: ['#60B0E0', '#90D0F0'],    // glasses lens - softer blue
+  Q: ['#F0C040', '#FFD860'],    // gold/bling - warmer gold
 
   // Misc
-  S: ['#334155', '#94A3B8'],    // laptop
-  s: ['#4ADE80', '#86EFAC'],    // laptop screen
-  C: ['#F5F0EB', '#D6D0C8'],    // cigarette
-  F: ['#FF4500', '#FF6030'],    // fire
-  T: ['#9A9490', '#686460'],    // smoke
-  w: ['#70B8E0', '#50A0D0'],    // water/sweat/tears
-  Z: ['#70B8E0', '#50A0D0'],    // zzz
-  M: ['#60A060', '#80C080'],    // grass
-  W: ['#FFFFFF', '#3A3835'],    // white/speech bubble
-  R: ['#22C55E', '#4ADE80'],    // green (wagmi sign)
-  r: ['#FFFFFF', '#052E16'],    // wagmi text
-  n: ['#2A1A0E', '#C8B8A0'],    // thin line
+  S: ['#404858', '#A0A8B8'],    // laptop
+  s: ['#60D890', '#90F0B0'],    // laptop screen
+  C: ['#F8F4F0', '#E0DCD8'],    // cigarette
+  F: ['#FF6030', '#FF8050'],    // fire
+  T: ['#A8A4A0', '#787470'],    // smoke
+  w: ['#80C8F0', '#60B0E0'],    // water/sweat/tears
+  Z: ['#80C8F0', '#60B0E0'],    // zzz
+  M: ['#70B870', '#90D090'],    // grass
+  W: ['#FFFFFF', '#404040'],    // white/speech bubble
+  R: ['#30C860', '#60E890'],    // green (wagmi sign)
+  r: ['#FFFFFF', '#103020'],    // wagmi text
+  n: ['#4A3020', '#D8C8B0'],    // thin line - closed eyes
 }
 
 function fill(dark: boolean, key: string): string {
@@ -117,19 +121,19 @@ function artSize(art: string): { w: number; h: number } {
 // ══════════════════════════════════════════════════════════
 
 // Base face - 16x12 grid, focused on the adorable face
-// Key features: CUTE ROUND EYES with sparkle + BIG ROUND NOSTRILS
-// Eyes: 'o' = white, 'x' = pupil, 'k' = sparkle highlight
+// Key features: CUTE ROUND EYES (・ω・) with sparkle + soft nose
+// Eyes: 'o' = white background, 'x' = pupil, 'k' = sparkle highlight
+// 'B' = blush for extra cuteness
 const FACE_ART = `
 ....ee....ee....
 ...eeee..eeee...
 ..HHHHHHHHHHHH..
-.HHHHHHHHHHHHHH.
-.HHoxHHHHoxHHHH.
-.HHxxHHHHxxHHHH.
-.HHHHHHHHHHHHhh.
+.HHooxxHooxxHHH.
+.HHokxxHokxxHHH.
+.BHHHHHHHHHHHBh.
 ..HHHHHNNHHHHH..
 ..HHHHHNNHHHHh..
-...HHHHHHHHHH...
+...HHbbbbbHHH...
 ....HHHHHHHH....
 `
 
@@ -348,15 +352,14 @@ function SuccessPose({ dark }: { dark: boolean }) {
 // ══════════════════════════════════════════════════════════
 
 // Full body capybara with sunglasses, holding laptop
-// Eyes: 'o' = white highlight, 'x' = pupil (covered by glasses anyway)
+// Eyes: 'o' = white background, 'x' = pupil, 'k' = sparkle (covered by glasses anyway)
 const HERO_BODY_ART = `
 .......ee....ee...............
 ......eeee..eeee..............
 .....HHHHHHHHHHHHHH...........
-....HHHHHHHHHHHHHHHH..........
-....HHoxHHHHoxHHHHH...........
-....HHxxHHHHxxHHHHH...........
-....HHHHHHHHHHHHHHhh..........
+....HooxxHHooxxHHHH...........
+....HokxxHHokxxHHHH...........
+....BHHHHHHHHHHHHBh...........
 .....HHHHHNNHHHHHH............
 ...HHHHHHHNNHHHHHHHHHH........
 ..HHHHHHHHHHHHHHHHHHHHh.......
@@ -364,8 +367,8 @@ const HERO_BODY_ART = `
 .HHHHHHHHbbbbbbbbHHHHHHHh.....
 ..HHHHHHHHHHHHHHHHHHHHHh......
 ...HHHHHHHHHHHHHHHHHHHH........
-....DDDD..........DDDD........
-....DDDD..........DDDD........
+....hhhh..........hhhh........
+....hhhh..........hhhh........
 `
 
 const HERO_BODY_PIXELS = parseArt(HERO_BODY_ART)
@@ -553,12 +556,12 @@ export function TimeAwarePixelbara(props: Omit<PixelbaraProps, 'pose'>) {
 // ── MiniPixelbara (face only, compact) ──
 export function MiniPixelbara({ className = '' }: { className?: string }) {
   const dark = useIsDark()
-  // Cute eyes with highlight: o=white, x=pupil
+  // Cute eyes (・ω・): o=white, x=pupil, k=sparkle
   const miniArt = `
 ..ee..ee
 HHHHHHHH
-HoxHoxHH
-HxxHxxHH
+oxxoxxHH
+kxxkxxHH
 HHHNNHhh
 .HHHHHH.
 `
@@ -578,21 +581,21 @@ HHHNNHhh
 // ── PixelbaraToggleIcon (for theme toggle) ──
 export function PixelbaraToggleIcon({ withGlasses, className = '' }: { withGlasses: boolean; className?: string }) {
   const dark = useIsDark()
-  // Cute eyes: o=white highlight, x=pupil
+  // Cute eyes (・ω・): o=white, x=pupil, k=sparkle
   const miniArt = withGlasses
     ? `
 ..ee..ee
 HHHHHHHH
 GLLGLLGH
-HHHHHHHH
+GLLGLLGH
 HHHNNHhh
 .HHHHHH.
 `
     : `
 ..ee..ee
 HHHHHHHH
-HoxHoxHH
-HxxHxxHH
+oxxoxxHH
+kxxkxxHH
 HHHNNHhh
 .HHHHHH.
 `
