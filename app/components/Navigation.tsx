@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, ChevronDown } from 'lucide-react'
+import { Menu, X, ChevronDown, Plus } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import ThemeToggle from './ThemeToggle'
+import NeunLogo from './NeunLogo'
 
 const ABOUT_SUBMENU = [
   { href: '/about/story', label: 'Our Story' },
@@ -68,17 +69,15 @@ export default function Navigation() {
       <header className={`sticky top-0 z-50 bg-a24-bg/95 dark:bg-a24-dark-surface/95 backdrop-blur-sm transition-all duration-300 ${scrolled ? 'border-b border-a24-border dark:border-a24-dark-border' : 'border-b border-transparent'}`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           {/* Left: Logo + Nav */}
-          <div className="hidden md:flex items-center gap-8">
-            {/* Logo */}
-            <Link href="/" className="text-xs font-extralight uppercase tracking-[0.5em] text-a24-text dark:text-a24-dark-text select-none mr-2">
-              N E U N
-            </Link>
+          <div className="hidden md:flex items-center gap-6">
+            {/* Interactive Logo with Pixelbara */}
+            <NeunLogo className="mr-2" />
 
             <Link href="/" className={linkClass(isActive('/'))}>Home</Link>
             <Link href="/careers" className={linkClass(isActive('/careers'))}>Careers</Link>
             <Link href="/companies" className={linkClass(isActive('/companies'))}>Companies</Link>
             <Link href="/investors" className={linkClass(isActive('/investors'))}>Investors</Link>
-            <Link href="/articles" className={linkClass(isActive('/articles'))}>Articles</Link>
+            <Link href="/ecosystems" className={linkClass(isActive('/ecosystems'))}>Ecosystems</Link>
 
             {/* About with dropdown */}
             <div
@@ -120,12 +119,19 @@ export default function Navigation() {
           </div>
 
           {/* Mobile: Logo */}
-          <Link href="/" className="md:hidden text-xs font-extralight uppercase tracking-[0.5em] text-a24-text dark:text-a24-dark-text select-none">
-            N E U N
-          </Link>
+          <NeunLogo className="md:hidden" />
 
-          {/* Right: Auth + Theme */}
-          <div className="hidden md:flex items-center gap-6">
+          {/* Right: Post Job CTA + Auth + Theme */}
+          <div className="hidden md:flex items-center gap-4">
+            {/* Post a Job CTA */}
+            <Link
+              href="/post-job"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-[10px] uppercase tracking-wider font-medium bg-neun-success text-white hover:opacity-90 transition-opacity"
+            >
+              <Plus className="w-3 h-3" />
+              Post Job
+            </Link>
+
             {isLoggedIn ? (
               <Link href="/account" className={linkClass(isActive('/account'))}>Account</Link>
             ) : (
@@ -154,6 +160,7 @@ export default function Navigation() {
               <Link href="/careers" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/careers'))} py-2`}>Careers</Link>
               <Link href="/companies" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/companies'))} py-2`}>Companies</Link>
               <Link href="/investors" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/investors'))} py-2`}>Investors</Link>
+              <Link href="/ecosystems" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/ecosystems'))} py-2`}>Ecosystems</Link>
               <Link href="/articles" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/articles'))} py-2`}>Articles</Link>
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-2 mt-1">
                 <p className="text-[10px] uppercase tracking-[0.3em] font-light text-a24-muted/60 dark:text-a24-dark-muted/60 mb-2">About</p>
@@ -162,6 +169,16 @@ export default function Navigation() {
                     {label}
                   </Link>
                 ))}
+              </div>
+              <div className="border-t border-a24-border dark:border-a24-dark-border pt-3 mt-1">
+                <Link
+                  href="/post-job"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-[10px] uppercase tracking-wider font-medium bg-neun-success text-white"
+                >
+                  <Plus className="w-3 h-3" />
+                  Post a Job
+                </Link>
               </div>
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-2 mt-1">
                 {isLoggedIn ? (
