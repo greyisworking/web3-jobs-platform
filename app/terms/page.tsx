@@ -42,7 +42,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-4">1. Acceptance of Terms</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
-              By accessing or using NEUN (neun.xyz), you agree to be bound by these Terms of Service.
+              By accessing or using NEUN (neun.wtf), you agree to be bound by these Terms of Service.
               If you do not agree to these terms, please do not use our service.
             </p>
           </section>
@@ -115,7 +115,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-4">9. Contact</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
-              For questions about these terms, please contact us at legal@neun.xyz
+              For questions about these terms, please contact us at legal@neun.wtf
             </p>
           </section>
         </div>

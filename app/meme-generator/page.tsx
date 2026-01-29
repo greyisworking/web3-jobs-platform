@@ -81,7 +81,7 @@ export default function MemeGeneratorPage() {
 
   const handleShare = useCallback(() => {
     const text = bottomText || topText || 'check out this meme'
-    const url = 'https://neun.xyz/meme-generator'
+    const url = 'https://neun.wtf/meme-generator'
     const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`
     window.open(tweetUrl, '_blank')
   }, [topText, bottomText])
@@ -156,7 +156,7 @@ export default function MemeGeneratorPage() {
                 className="absolute bottom-2 right-2 text-[10px] opacity-50"
                 style={{ color: textColor }}
               >
-                neun.xyz
+                neun.wtf
               </p>
             </div>
 

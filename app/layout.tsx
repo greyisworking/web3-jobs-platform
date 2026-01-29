@@ -14,7 +14,7 @@ const caveat = Caveat({ subsets: ['latin'], weight: ['400', '500', '600', '700']
 const pressStart = Press_Start_2P({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-pixel' })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.io'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.wtf'),
   title: {
     default: 'NEUN — Web3 Careers from Top VC Portfolios',
     template: '%s | NEUN',
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://neun.io',
+    url: 'https://neun.wtf',
     siteName: 'NEUN',
     title: 'NEUN — Web3 Careers from Top VC Portfolios',
     description: 'Find Web3 jobs from a16z, Paradigm, Hashed portfolio companies. Curated blockchain, DeFi, and crypto careers.',

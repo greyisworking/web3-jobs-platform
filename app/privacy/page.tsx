@@ -155,7 +155,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold mb-4">11. Contact Us</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
-              For privacy-related questions, please contact us at privacy@neun.xyz
+              For privacy-related questions, please contact us at privacy@neun.wtf
             </p>
           </section>
         </div>

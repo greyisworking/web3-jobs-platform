@@ -150,7 +150,7 @@ export default function OurStoryPage() {
         </h2>
         <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-5" />
         <p className="font-light text-a24-muted dark:text-a24-dark-muted tracking-wide mb-2">
-          Email: hello@neun.xyz
+          Email: hello@neun.wtf
         </p>
         <p className="font-light text-a24-muted dark:text-a24-dark-muted tracking-wide mb-4">
           Twitter: @neunjobs

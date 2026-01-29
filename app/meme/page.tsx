@@ -251,7 +251,7 @@ export default function MemePage() {
   // Share to Twitter
   const handleTwitterShare = useCallback(() => {
     const text = bottomText || topText || 'check out my meme'
-    const url = 'https://neun.xyz/meme'
+    const url = 'https://neun.wtf/meme'
     const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text + ' ')}&url=${encodeURIComponent(url)}`
     window.open(tweetUrl, '_blank')
     toast("spreading the word fr", { duration: 2000 })
@@ -260,7 +260,7 @@ export default function MemePage() {
   // Share to Telegram
   const handleTelegramShare = useCallback(() => {
     const text = bottomText || topText || 'check out my meme'
-    const url = 'https://neun.xyz/meme'
+    const url = 'https://neun.wtf/meme'
     const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`
     window.open(telegramUrl, '_blank')
     toast("spreading the word fr", { duration: 2000 })
@@ -358,7 +358,7 @@ export default function MemePage() {
                 className="absolute bottom-1 right-2 text-[8px] font-medium opacity-30"
                 style={{ color: isTransparent ? '#888' : bg.textColor }}
               >
-                neun.xyz
+                neun.wtf
               </p>
             </div>
 
