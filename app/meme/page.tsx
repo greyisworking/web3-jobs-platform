@@ -29,7 +29,7 @@ const POSES: { id: PoseId; label: string; category: string }[] = [
   { id: 'rugged', label: 'rugged', category: 'web3' },
   { id: 'whaleMode', label: 'whale mode', category: 'web3' },
   { id: 'airdrop', label: 'airdrop', category: 'web3' },
-  { id: 'staking', label: 'staking', category: 'web3' },
+  { id: 'apeIn', label: 'ape in', category: 'web3' },
   // Emotion poses
   { id: 'gmSer', label: 'gm ser', category: 'emotion' },
   { id: 'downBad', label: 'down bad', category: 'emotion' },
