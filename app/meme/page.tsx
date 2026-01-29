@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft, Download, RefreshCw, Copy, Check,
-  Shuffle, Sparkles, Twitter, Square, Circle, Smartphone
+  Shuffle, Sparkles, Twitter, Square, Smartphone
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Pixelbara from '../components/Pixelbara'
@@ -68,7 +68,6 @@ const BACKGROUNDS: { id: string; label: string; value: string; textColor: string
 
 const DOWNLOAD_SIZES = [
   { id: 'square', label: '1:1', width: 1000, height: 1000, icon: Square },
-  { id: 'pfp', label: 'PFP', width: 400, height: 400, icon: Circle },
   { id: 'story', label: '9:16', width: 1080, height: 1920, icon: Smartphone },
 ]
 
