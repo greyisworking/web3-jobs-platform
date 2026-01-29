@@ -1403,8 +1403,8 @@ function RugPose({ dark }: { dark: boolean }) {
 }
 
 function GmPose({ dark }: { dark: boolean }) {
-  const pixels = parseArt(GM_ART)
-  const size = artSize(GM_ART)
+  const pixels = parseArt(GM_SER_ART)
+  const size = artSize(GM_SER_ART)
   return <PixelSvg pixels={pixels} w={size.w} h={size.h} dark={dark} />
 }
 
@@ -1415,8 +1415,8 @@ function TouchGrassPose({ dark }: { dark: boolean }) {
 }
 
 function OnsenPose({ dark }: { dark: boolean }) {
-  const pixels = parseArt(ONSEN_ART)
-  const size = artSize(ONSEN_ART)
+  const pixels = parseArt(HOT_TUB_ART)
+  const size = artSize(HOT_TUB_ART)
   return <PixelSvg pixels={pixels} w={size.w} h={size.h} dark={dark} />
 }
 

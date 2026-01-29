@@ -65,7 +65,7 @@ export default async function CompanyDashboardPage() {
             gm, {company.name}
           </h1>
           <p className="text-gray-400 mt-1">
-            Here's what's happening with your jobs
+            Your job posting overview
           </p>
         </div>
         <Link

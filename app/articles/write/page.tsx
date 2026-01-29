@@ -8,7 +8,7 @@ import { useAccount, useEnsName } from 'wagmi'
 import RichTextEditor from '@/app/components/RichTextEditor'
 import Pixelbara from '@/app/components/Pixelbara'
 import Blockies, { truncateAddress } from '@/app/components/Blockies'
-import WalletConnect from '@/app/components/WalletConnect'
+import { WalletConnect } from '@/app/components/WalletConnect'
 
 const SUGGESTED_TAGS = [
   'DeFi', 'NFT', 'DAO', 'Layer2', 'Security', 'Trading',
