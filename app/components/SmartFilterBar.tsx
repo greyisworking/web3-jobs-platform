@@ -13,6 +13,8 @@ export interface SmartFilters {
   backer: string
   techStack: string
   tier1VCOnly: boolean
+  daoJobsOnly: boolean
+  tokenGatedOnly: boolean
 }
 
 interface SmartFilterBarProps {
@@ -58,6 +60,8 @@ const emptyFilters: SmartFilters = {
   backer: '',
   techStack: '',
   tier1VCOnly: false,
+  daoJobsOnly: false,
+  tokenGatedOnly: false,
 }
 
 export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) {
@@ -72,6 +76,8 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
     backer: searchParams.get('backer') ?? '',
     techStack: searchParams.get('techStack') ?? '',
     tier1VCOnly: searchParams.get('tier1vc') === 'true',
+    daoJobsOnly: searchParams.get('dao') === 'true',
+    tokenGatedOnly: searchParams.get('tokengate') === 'true',
   }))
 
   useEffect(() => {
@@ -88,6 +94,10 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
       for (const [key, value] of Object.entries(next)) {
         if (key === 'tier1VCOnly') {
           if (value) params.set('tier1vc', 'true')
+        } else if (key === 'daoJobsOnly') {
+          if (value) params.set('dao', 'true')
+        } else if (key === 'tokenGatedOnly') {
+          if (value) params.set('tokengate', 'true')
         } else if (value) {
           params.set(key, value as string)
         }
@@ -128,37 +138,106 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
   }
 
   const activeCount = Object.entries(filters).filter(([k, v]) => {
-    if (k === 'tier1VCOnly') return v === true
+    if (k === 'tier1VCOnly' || k === 'daoJobsOnly' || k === 'tokenGatedOnly') return v === true
     return Boolean(v)
   }).length
 
   return (
     <div className="mb-8 pb-4 border-b border-a24-border dark:border-a24-dark-border">
-      {/* Tier 1 VC Toggle */}
-      <div className="flex items-center justify-between mb-4 py-3 px-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
-        <div>
-          <span className="text-xs font-medium uppercase tracking-[0.2em] text-a24-text dark:text-a24-dark-text">
-            Tier 1 VC Only
-          </span>
-          <span className="ml-2 text-[10px] text-a24-muted dark:text-a24-dark-muted">
-            Show only VC-backed roles
-          </span>
-        </div>
-        <button
-          onClick={handleTier1Toggle}
-          className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
-            filters.tier1VCOnly
-              ? 'bg-a24-text dark:bg-a24-dark-text'
-              : 'bg-a24-border dark:bg-a24-dark-border'
-          }`}
-          aria-label="Toggle Tier 1 VC filter"
-        >
-          <span
-            className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white dark:bg-a24-dark-bg transition-transform duration-200 ${
-              filters.tier1VCOnly ? 'translate-x-5' : 'translate-x-0'
+      {/* Web3 Filter Toggles */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+        {/* Tier 1 VC Toggle */}
+        <div className="flex items-center justify-between py-3 px-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
+          <div>
+            <span className="text-xs font-medium uppercase tracking-[0.2em] text-a24-text dark:text-a24-dark-text">
+              Tier 1 VC
+            </span>
+            <span className="ml-2 text-[10px] text-a24-muted dark:text-a24-dark-muted">
+              VC-backed
+            </span>
+          </div>
+          <button
+            onClick={handleTier1Toggle}
+            className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
+              filters.tier1VCOnly
+                ? 'bg-a24-text dark:bg-a24-dark-text'
+                : 'bg-a24-border dark:bg-a24-dark-border'
             }`}
-          />
-        </button>
+            aria-label="Toggle Tier 1 VC filter"
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white dark:bg-a24-dark-bg transition-transform duration-200 ${
+                filters.tier1VCOnly ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* DAO Jobs Toggle */}
+        <div className="flex items-center justify-between py-3 px-4 border border-purple-500/30 bg-purple-500/5">
+          <div>
+            <span className="text-xs font-medium uppercase tracking-[0.2em] text-purple-400">
+              DAO Jobs
+            </span>
+            <span className="ml-2 text-[10px] text-purple-400/60">
+              governance roles
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              const next = { ...filters, daoJobsOnly: !filters.daoJobsOnly }
+              setFilters(next)
+              syncToURL(next)
+              onFilterChange(next)
+              trackEvent('filter_use', { filter_key: 'daoJobsOnly', filter_value: String(next.daoJobsOnly) })
+            }}
+            className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
+              filters.daoJobsOnly
+                ? 'bg-purple-500'
+                : 'bg-a24-border dark:bg-a24-dark-border'
+            }`}
+            aria-label="Toggle DAO Jobs filter"
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white dark:bg-a24-dark-bg transition-transform duration-200 ${
+                filters.daoJobsOnly ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Token Gated Toggle */}
+        <div className="flex items-center justify-between py-3 px-4 border border-yellow-500/30 bg-yellow-500/5">
+          <div>
+            <span className="text-xs font-medium uppercase tracking-[0.2em] text-yellow-400">
+              Token Gate
+            </span>
+            <span className="ml-2 text-[10px] text-yellow-400/60">
+              holders only
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              const next = { ...filters, tokenGatedOnly: !filters.tokenGatedOnly }
+              setFilters(next)
+              syncToURL(next)
+              onFilterChange(next)
+              trackEvent('filter_use', { filter_key: 'tokenGatedOnly', filter_value: String(next.tokenGatedOnly) })
+            }}
+            className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
+              filters.tokenGatedOnly
+                ? 'bg-yellow-500'
+                : 'bg-a24-border dark:bg-a24-dark-border'
+            }`}
+            aria-label="Toggle Token Gated filter"
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white dark:bg-a24-dark-bg transition-transform duration-200 ${
+                filters.tokenGatedOnly ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
       {/* Header */}
@@ -247,6 +326,40 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
                 <button
                   onClick={() => clearFilter('tier1VCOnly')}
                   className="hover:text-a24-accent transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </motion.span>
+            )}
+            {filters.daoJobsOnly && (
+              <motion.span
+                layout
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs text-purple-400 border border-purple-500/30"
+              >
+                DAO Jobs
+                <button
+                  onClick={() => clearFilter('daoJobsOnly')}
+                  className="hover:text-purple-300 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </motion.span>
+            )}
+            {filters.tokenGatedOnly && (
+              <motion.span
+                layout
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs text-yellow-400 border border-yellow-500/30"
+              >
+                Token Gated
+                <button
+                  onClick={() => clearFilter('tokenGatedOnly')}
+                  className="hover:text-yellow-300 transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>

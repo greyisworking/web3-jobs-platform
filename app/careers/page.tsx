@@ -41,6 +41,8 @@ function CareersContent() {
     backer: '',
     techStack: '',
     tier1VCOnly: false,
+    daoJobsOnly: false,
+    tokenGatedOnly: false,
   })
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
@@ -105,6 +107,8 @@ function CareersContent() {
     }
     if (vc) filtered = filtered.filter((job) => job.backers?.includes(vc))
     if (f.tier1VCOnly) filtered = filtered.filter((job) => job.backers && job.backers.length > 0)
+    if (f.daoJobsOnly) filtered = filtered.filter((job) => job.is_dao_job === true)
+    if (f.tokenGatedOnly) filtered = filtered.filter((job) => job.token_gate != null)
 
     setFilteredJobs(filtered)
   }

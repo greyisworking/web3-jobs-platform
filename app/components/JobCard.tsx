@@ -11,6 +11,7 @@ import BookmarkButton from './BookmarkButton'
 import { MiniPixelbara } from './Pixelbara'
 import { PixelStar } from './PixelIcons'
 import { MiniTrustBadge } from './TrustBadge'
+import { Lock, Vote } from 'lucide-react'
 
 function isNewJob(postedDate: Date | string | null | undefined): boolean {
   if (!postedDate) return false
@@ -83,6 +84,27 @@ export default function JobCard({ job, index }: JobCardProps) {
             NEW
           </span>
         )}
+
+        {/* Token Gate & DAO badges */}
+        <div className="absolute top-2 right-12 flex items-center gap-1">
+          {job.token_gate && (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 text-[9px] uppercase tracking-wider">
+              <Lock className="w-2.5 h-2.5" />
+              {job.token_gate.symbol || 'TOKEN'}
+            </span>
+          )}
+          {job.is_dao_job && (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-purple-500/20 border border-purple-500/50 text-purple-400 text-[9px] uppercase tracking-wider">
+              <Vote className="w-2.5 h-2.5" />
+              DAO
+            </span>
+          )}
+          {job.is_alpha && (
+            <span className="px-1.5 py-0.5 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 text-[9px] uppercase tracking-wider">
+              ALPHA
+            </span>
+          )}
+        </div>
 
         {/* Trust badge + Mini pixelbara on hover */}
         {hovered && (

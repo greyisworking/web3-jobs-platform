@@ -1,3 +1,5 @@
+import type { TokenGate } from './web3'
+
 export interface Job {
   id: string
   title: string
@@ -16,4 +18,8 @@ export interface Job {
   badges?: string[] | null
   description?: string | null
   tags?: string | null
+  // Web3 OG features
+  token_gate?: TokenGate | null
+  is_dao_job?: boolean
+  is_alpha?: boolean
 }
