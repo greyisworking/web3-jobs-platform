@@ -22,7 +22,7 @@ const POSES: { id: PoseId; label: string; category: string }[] = [
   { id: 'lyingDown', label: 'lying down', category: 'basic' },
   // Work poses
   { id: 'shippingCode', label: 'shipping code', category: 'work' },
-  { id: 'phoneCheck', label: 'phone check', category: 'work' },
+  { id: 'lowBattery', label: 'low battery', category: 'work' },
   // Web3 poses
   { id: 'diamondHands', label: 'diamond hands', category: 'web3' },
   { id: 'toTheMoon', label: 'to the moon', category: 'web3' },
@@ -34,10 +34,10 @@ const POSES: { id: PoseId; label: string; category: string }[] = [
   { id: 'gmSer', label: 'gm ser', category: 'emotion' },
   { id: 'downBad', label: 'down bad', category: 'emotion' },
   { id: 'itsSoOver', label: 'its so over', category: 'emotion' },
-  { id: 'wereSoBack', label: 'we are so back', category: 'emotion' },
+  { id: 'wereSoBack', label: 'we so back', category: 'emotion' },
   // Meme legend poses
   { id: 'touchGrass', label: 'touch grass', category: 'meme' },
-  { id: 'ridingMarket', label: 'riding the market', category: 'meme' },
+  { id: 'ecosystemFriends', label: 'ecosystem fren', category: 'meme' },
   { id: 'hotTub', label: 'hot tub', category: 'meme' },
 ]
 
