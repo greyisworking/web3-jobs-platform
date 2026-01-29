@@ -177,12 +177,12 @@ const WARNING_KEYWORDS = [
   'bankruptcy', 'insolvent',
 ]
 
-// Pixelbara comments for each trust level (Gen Z style)
+// Pixelbara comments for each trust level (Web3 degen style)
 export const TRUST_COMMENTS: Record<TrustLevel, string> = {
-  verified: 'no cap this ones legit',
-  caution: 'seems ok... dyor tho',
-  warning: 'hm idk bestie... be careful',
-  blacklisted: 'bruh run. literally run.',
+  verified: 'ser this ones legit fr',
+  caution: 'anon team... idk man. dyor',
+  warning: 'giving rug energy ngl',
+  blacklisted: 'they rugged. i was there.',
 }
 
 // ══════════════════════════════════════════════════════════

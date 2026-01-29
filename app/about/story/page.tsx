@@ -100,6 +100,31 @@ export default function OurStoryPage() {
 
       <div className="border-t border-a24-border dark:border-a24-dark-border pt-10">
         <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
+          Pixelbara&apos;s Philosophy
+        </h2>
+        <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-5" />
+        <div className="flex items-start gap-6">
+          <Pixelbara pose="hodl" size={100} clickable />
+          <div className="space-y-4">
+            <p className="font-light leading-relaxed">
+              Pixelbara survived the 2022 bear market. 90% down, still vibing. Still shipping.
+              That&apos;s the energy we bring to job hunting in Web3.
+            </p>
+            <div className="space-y-2 text-a24-muted dark:text-a24-dark-muted text-sm">
+              <p className="italic">&quot;portfolio might be red but my commits are green&quot;</p>
+              <p className="italic">&quot;down bad but still building&quot;</p>
+              <p className="italic">&quot;touched grass once. came back to ship more code&quot;</p>
+            </div>
+            <p className="font-light leading-relaxed text-a24-muted dark:text-a24-dark-muted">
+              Pixelbara doesn&apos;t panic sell. Doesn&apos;t chase pumps. Just builds quietly,
+              survives every cycle, and helps anons find legit jobs. That&apos;s the way.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-a24-border dark:border-a24-dark-border pt-10">
+        <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
           Sources
         </h2>
         <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-5" />

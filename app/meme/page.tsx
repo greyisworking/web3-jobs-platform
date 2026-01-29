@@ -21,13 +21,18 @@ const POSES: { id: PoseId; label: string; emoji: string }[] = [
   { id: 'bling', label: 'Gold Chain', emoji: '⛓️' },
   { id: 'coffee', label: 'Coffee', emoji: '☕' },
   { id: 'sweating', label: 'Sweating', emoji: '😰' },
-  { id: 'dejected', label: 'Sad', emoji: '😢' },
   { id: 'sleepy', label: 'Sleepy', emoji: '😴' },
-  { id: 'eating', label: 'Eating', emoji: '🌿' },
   { id: 'ecosystem', label: 'On Alligator', emoji: '🐊' },
   { id: 'heart', label: 'Heart', emoji: '❤️' },
-  { id: 'search', label: 'Search', emoji: '🔍' },
   { id: 'coin', label: 'Coins', emoji: '🪙' },
+  // Web3 poses
+  { id: 'hodl', label: 'HODL', emoji: '📉' },
+  { id: 'rug', label: 'Rugged', emoji: '👛' },
+  { id: 'gm', label: 'GM', emoji: '🌅' },
+  { id: 'touchGrass', label: 'Touch Grass', emoji: '🌿' },
+  { id: 'onsen', label: 'Staking', emoji: '🍊' },
+  { id: 'airdrop', label: 'Airdrop', emoji: '🪂' },
+  { id: 'downBad', label: 'Down Bad', emoji: '📊' },
 ]
 
 // ══════════════════════════════════════════════════════════
@@ -66,6 +71,7 @@ const DOWNLOAD_SIZES = [
 // ══════════════════════════════════════════════════════════
 
 const PRESET_TEXTS: { top?: string; bottom: string }[] = [
+  // OG Gen Z / Job hunting
   { bottom: 'not me job hunting at 3am' },
   { bottom: 'linkedin is scary' },
   { bottom: 'pls hire me ser' },
@@ -77,13 +83,36 @@ const PRESET_TEXTS: { top?: string; bottom: string }[] = [
   { bottom: 'touched grass, still unemployed' },
   { top: 'interviewer: weakness?', bottom: 'me: i care too much about being employed' },
   { top: 'salary: competitive', bottom: '*laughs in poverty*' },
-  { bottom: 'when the startup rugs after 2 weeks' },
-  { bottom: 'down bad fr fr' },
   { bottom: 'recruiter ghosted me again' },
-  { top: 'web3 is the future', bottom: 'the future:' },
   { bottom: 'main character but unemployed' },
   { bottom: 'delulu is not the solulu' },
   { top: 'me explaining my gap year', bottom: 'it was a learning experience' },
+  // Web3 degen classics
+  { bottom: 'ser this is fine' },
+  { bottom: 'rug where' },
+  { top: 'gm to everyone', bottom: 'except sellers' },
+  { bottom: 'down 90% but still vibing' },
+  { bottom: 'not my first rug' },
+  { bottom: 'few understand' },
+  { bottom: '1 eth = 1 eth' },
+  { bottom: 'probably nothing' },
+  { top: 'trust me bro', bottom: 'i did my own research' },
+  { bottom: 'wen moon ser' },
+  { bottom: 'wagmi... right?' },
+  { top: 'portfolio:', bottom: '-99% ytd' },
+  { bottom: 'airdrop farming at 4am' },
+  { top: 'me after buying the dip', bottom: 'it dipped more' },
+  { bottom: 'ngmi but make it aesthetic' },
+  { top: 'they said its the next 100x', bottom: 'it was not' },
+  { bottom: 'when the startup rugs after 2 weeks' },
+  { bottom: 'down bad fr fr' },
+  { top: 'web3 is the future', bottom: 'the future:' },
+  { bottom: 'touched grass. portfolio still red.' },
+  { top: 'bear market survivor', bottom: '2022 veteran' },
+  { bottom: 'still shipping in the bear' },
+  { bottom: 'cope. seethe. hodl.' },
+  { top: 'anon dev rug when?', bottom: 'asking for a friend' },
+  { bottom: 'ser i am just a simple farmer' },
 ]
 
 // ══════════════════════════════════════════════════════════
