@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, Copy, ExternalLink, MapPin, Briefcase, Globe, Building2, AlertTriangle, Search } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Copy, ExternalLink, MapPin, Briefcase, Globe, Building2, AlertTriangle, Search, Flag, User } from 'lucide-react'
+import { useAccount } from 'wagmi'
 import { toast } from 'sonner'
 import type { Job } from '@/types/job'
 import { trackEvent } from '@/lib/analytics'
@@ -86,13 +87,54 @@ interface CareersDetailClientProps {
 
 export default function CareersDetailClient({ job }: CareersDetailClientProps) {
   const [urlStatus, setUrlStatus] = useState<'valid' | 'invalid' | 'checking'>('checking')
+  const [showReportModal, setShowReportModal] = useState(false)
+  const [reportReason, setReportReason] = useState('')
+  const [reportSubmitting, setReportSubmitting] = useState(false)
   const hasValidUrl = isValidUrl(job.url)
+  const { address } = useAccount()
 
   useEffect(() => {
     trackEvent('job_view', { job_id: job.id, title: job.title, company: job.company, source: 'page' })
     // Set URL status based on basic validation
     setUrlStatus(hasValidUrl ? 'valid' : 'invalid')
   }, [job.id, job.title, job.company, hasValidUrl])
+
+  const handleReport = async () => {
+    if (!reportReason.trim()) {
+      toast.error('Please provide a reason for reporting')
+      return
+    }
+
+    setReportSubmitting(true)
+    try {
+      const res = await fetch('/api/jobs/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: job.id,
+          reason: reportReason,
+          walletAddress: address,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to submit report')
+      }
+
+      toast.success('Report submitted. Thank you!')
+      setShowReportModal(false)
+      setReportReason('')
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to submit report')
+    } finally {
+      setReportSubmitting(false)
+    }
+  }
+
+  // Truncate address helper
+  const truncateAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
 
   // Get priority company data for trust check
   const priorityCompany = findPriorityCompany(job.company)
@@ -388,9 +430,85 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                 })()}
               </div>
             )}
+
+            {/* Posted by (for user-posted jobs) */}
+            {(job as any).postedBy && (
+              <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
+                <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-2">
+                  Posted By
+                </h3>
+                <div className="flex items-center gap-2">
+                  <User className="w-3.5 h-3.5 text-a24-muted dark:text-a24-dark-muted" />
+                  <span className="text-xs font-mono text-a24-text dark:text-a24-dark-text">
+                    {truncateAddress((job as any).postedBy)}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Report button */}
+            <button
+              onClick={() => setShowReportModal(true)}
+              className="w-full p-3 border border-a24-border dark:border-a24-dark-border text-[10px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted hover:text-red-500 hover:border-red-500/50 transition-colors flex items-center justify-center gap-2"
+            >
+              <Flag className="w-3 h-3" />
+              Report Job
+            </button>
           </aside>
         </div>
       </main>
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowReportModal(false)}>
+          <div
+            className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-a24-text dark:text-a24-dark-text mb-2">
+              Report Job
+            </h3>
+            <p className="text-sm text-a24-muted dark:text-a24-dark-muted mb-4">
+              Help us keep NEUN safe. Report spam, scams, or inappropriate content.
+            </p>
+
+            <div className="mb-4">
+              <label className="block text-[11px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted mb-2">
+                Reason for report *
+              </label>
+              <select
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                className="w-full px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text focus:outline-none focus:border-a24-text dark:focus:border-a24-dark-text"
+              >
+                <option value="">Select a reason</option>
+                <option value="spam">Spam or fake job</option>
+                <option value="scam">Suspected scam</option>
+                <option value="expired">Job no longer available</option>
+                <option value="inappropriate">Inappropriate content</option>
+                <option value="misleading">Misleading information</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowReportModal(false)}
+                className="flex-1 px-4 py-2 text-[11px] uppercase tracking-wider border border-a24-border dark:border-a24-dark-border text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReport}
+                disabled={reportSubmitting || !reportReason}
+                className="flex-1 px-4 py-2 text-[11px] uppercase tracking-wider bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
+              >
+                {reportSubmitting ? 'Submitting...' : 'Submit Report'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile fixed bottom Apply button */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-a24-surface dark:bg-a24-dark-surface border-t border-a24-border dark:border-a24-dark-border p-4">

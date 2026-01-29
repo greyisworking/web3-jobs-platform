@@ -3,9 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Send, Building2, Briefcase, MapPin, DollarSign, Code } from 'lucide-react'
+import { ArrowLeft, Send, Building2, Briefcase, MapPin, DollarSign, Code, Wallet, CheckCircle } from 'lucide-react'
+import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { toast } from 'sonner'
 import Pixelbara from '../components/Pixelbara'
 import { PRIORITY_COMPANIES } from '@/lib/priority-companies'
+import { truncateAddress } from '../components/WalletConnect'
 
 const SECTORS = [
   'DeFi',
@@ -32,6 +35,14 @@ const REGIONS = [
 ]
 
 const JOB_TYPES = ['Full-time', 'Part-time', 'Contract', 'Internship']
+
+// Connector info for display
+const CONNECTOR_INFO: Record<string, { icon: string; label: string }> = {
+  'injected': { icon: '🦊', label: 'MetaMask' },
+  'metaMask': { icon: '🦊', label: 'MetaMask' },
+  'walletConnect': { icon: '🔗', label: 'WalletConnect' },
+  'coinbaseWalletSDK': { icon: '🔵', label: 'Coinbase' },
+}
 
 interface JobPostForm {
   companyName: string
@@ -67,6 +78,11 @@ export default function PostJobPage() {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
 
+  // Wallet hooks
+  const { address, isConnected } = useAccount()
+  const { connect, connectors, isPending } = useConnect()
+  const { disconnect } = useDisconnect()
+
   // Check if company is in priority list
   const isPriorityCompany = PRIORITY_COMPANIES.some(
     (c) =>
@@ -76,6 +92,12 @@ export default function PostJobPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!isConnected || !address) {
+      toast.error('Please connect your wallet first')
+      return
+    }
+
     setSubmitting(true)
     setError('')
 
@@ -83,21 +105,29 @@ export default function PostJobPage() {
       const response = await fetch('/api/jobs/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          walletAddress: address,
+        }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        throw new Error('Failed to submit job')
+        throw new Error(data.error || 'Failed to submit job')
       }
 
       setSubmitted(true)
-    } catch {
-      setError('Failed to submit job. Please try again.')
+      toast.success('Job posted successfully!')
+    } catch (err: any) {
+      setError(err.message || 'Failed to submit job. Please try again.')
+      toast.error(err.message || 'Failed to submit job')
     } finally {
       setSubmitting(false)
     }
   }
 
+  // Success state
   if (submitted) {
     return (
       <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
@@ -109,16 +139,20 @@ export default function PostJobPage() {
           >
             <Pixelbara pose="success" size={160} className="mx-auto mb-6" />
             <h1 className="text-2xl font-bold text-a24-text dark:text-a24-dark-text mb-4">
-              Job Submitted!
+              Job Posted!
             </h1>
             <p className="text-a24-muted dark:text-a24-dark-muted mb-2">
-              no cap, we got your job posting bestie
+              Your job is now live on NEUN Jobs
             </p>
-            <p className="text-sm text-a24-muted/70 dark:text-a24-dark-muted/70 mb-8">
-              Our team will review it within 24-48 hours.
-              {isPriorityCompany && ' (Priority review for VC-backed companies)'}
+            <p className="text-sm text-a24-muted/70 dark:text-a24-dark-muted/70 mb-2">
+              Posted by: {truncateAddress(address!)}
             </p>
-            <div className="flex gap-4 justify-center">
+            {isPriorityCompany && (
+              <p className="text-sm text-neun-success mb-4">
+                VC-backed company - featured placement
+              </p>
+            )}
+            <div className="flex gap-4 justify-center mt-8">
               <Link
                 href="/careers"
                 className="px-6 py-3 text-[11px] uppercase tracking-wider bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg"
@@ -154,6 +188,89 @@ export default function PostJobPage() {
     )
   }
 
+  // Not connected - show wallet connection prompt
+  if (!isConnected) {
+    return (
+      <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
+        <main className="max-w-2xl mx-auto px-6 pt-24 pb-12">
+          {/* Back link */}
+          <Link
+            href="/careers"
+            className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text mb-8 transition-colors"
+          >
+            <ArrowLeft className="w-3 h-3" />
+            Back to Jobs
+          </Link>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-16"
+          >
+            <Pixelbara pose="building" size={140} className="mx-auto mb-8" />
+
+            <h1 className="text-2xl md:text-3xl font-bold text-a24-text dark:text-a24-dark-text mb-4">
+              Connect Wallet to Post Job
+            </h1>
+            <p className="text-a24-muted dark:text-a24-dark-muted mb-2">
+              Wallet connection is required to post jobs
+            </p>
+            <p className="text-sm text-a24-muted/70 dark:text-a24-dark-muted/70 mb-8">
+              Your wallet address will be displayed on the job posting
+            </p>
+
+            <div className="max-w-sm mx-auto space-y-3">
+              <p className="text-[10px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted mb-4">
+                Select Wallet
+              </p>
+              {connectors.map((c) => {
+                const info = CONNECTOR_INFO[c.id] || { icon: '🔗', label: c.name }
+                return (
+                  <button
+                    key={c.uid}
+                    onClick={() => connect({ connector: c })}
+                    disabled={isPending}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left border border-a24-border dark:border-a24-dark-border hover:border-a24-text dark:hover:border-a24-dark-text transition-colors disabled:opacity-50"
+                  >
+                    <span className="text-xl">{info.icon}</span>
+                    <span className="text-sm font-medium text-a24-text dark:text-a24-dark-text">
+                      {info.label}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className="mt-12 p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface/50 dark:bg-a24-dark-surface/50 max-w-md mx-auto">
+              <h3 className="text-[11px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted mb-3">
+                Why Wallet Required?
+              </h3>
+              <ul className="text-sm text-a24-muted dark:text-a24-dark-muted space-y-2 text-left">
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-neun-success mt-0.5 flex-shrink-0" />
+                  <span>Instant posting - no admin approval needed</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-neun-success mt-0.5 flex-shrink-0" />
+                  <span>Transparent - your wallet is shown on the job</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-neun-success mt-0.5 flex-shrink-0" />
+                  <span>Accountability - reduces spam and scams</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-neun-success mt-0.5 flex-shrink-0" />
+                  <span>Free for VC-backed companies</span>
+                </li>
+              </ul>
+            </div>
+          </motion.div>
+        </main>
+      </div>
+    )
+  }
+
+  // Connected - show job form
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
       <main className="max-w-2xl mx-auto px-6 pt-24 pb-12">
@@ -173,10 +290,31 @@ export default function PostJobPage() {
               Post a Job
             </h1>
             <p className="text-a24-muted dark:text-a24-dark-muted text-sm">
-              reach the best web3 talent in korea
+              Reach the best web3 talent in Korea
             </p>
           </div>
           <Pixelbara pose="building" size={80} />
+        </div>
+
+        {/* Connected wallet info */}
+        <div className="mb-6 p-4 bg-neun-success/10 border border-neun-success/30 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Wallet className="w-5 h-5 text-neun-success" />
+            <div>
+              <p className="text-sm font-medium text-a24-text dark:text-a24-dark-text">
+                {truncateAddress(address!)}
+              </p>
+              <p className="text-[10px] text-a24-muted dark:text-a24-dark-muted">
+                Jobs will be posted from this wallet
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => disconnect()}
+            className="text-[10px] uppercase tracking-wider text-a24-muted hover:text-red-500 transition-colors"
+          >
+            Disconnect
+          </button>
         </div>
 
         {/* Priority company notice */}
@@ -187,7 +325,7 @@ export default function PostJobPage() {
             className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"
           >
             <p className="text-sm text-emerald-700 dark:text-emerald-300">
-              slay! {form.companyName} is in our priority list. Your job will be fast-tracked for review.
+              {form.companyName} is a VC-backed company - your job will be featured!
             </p>
           </motion.div>
         )}
@@ -246,11 +384,10 @@ export default function PostJobPage() {
               </div>
               <div>
                 <label className="block text-sm text-a24-text dark:text-a24-dark-text mb-2">
-                  Contact Email *
+                  Contact Email (optional)
                 </label>
                 <input
                   type="email"
-                  required
                   value={form.contactEmail}
                   onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
                   placeholder="hr@company.com"
@@ -323,7 +460,7 @@ export default function PostJobPage() {
                   type="text"
                   value={form.salaryRange}
                   onChange={(e) => setForm({ ...form, salaryRange: e.target.value })}
-                  placeholder="e.g., $80k-120k or 협의"
+                  placeholder="e.g., $80k-120k or negotiable"
                   className="w-full px-4 py-3 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border focus:border-a24-text dark:focus:border-a24-dark-text outline-none transition-colors text-a24-text dark:text-a24-dark-text"
                 />
               </div>
@@ -411,17 +548,19 @@ export default function PostJobPage() {
             className="w-full flex items-center justify-center gap-3 px-6 py-4 text-[12px] uppercase tracking-wider font-bold bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg hover:opacity-90 disabled:opacity-50 transition-all"
           >
             {submitting ? (
-              'Submitting...'
+              'Posting...'
             ) : (
               <>
                 <Send className="w-4 h-4" />
-                Submit Job Posting
+                Post Job Now
               </>
             )}
           </button>
 
           <p className="text-center text-[11px] text-a24-muted/60 dark:text-a24-dark-muted/60">
-            By submitting, you agree to our posting guidelines.
+            By posting, you agree to our guidelines.
+            <br />
+            Your job will be posted immediately from {truncateAddress(address!)}
             <br />
             Free for VC-backed companies. Others: $99/posting.
           </p>

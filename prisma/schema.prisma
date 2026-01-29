@@ -27,11 +27,38 @@ model Job {
   status        String    @default("active")
   lastValidated DateTime?
 
+  // User-posted job fields
+  postedBy      String?  // Wallet address of poster
+  reportCount   Int      @default(0)
+  isHidden      Boolean  @default(false)
+
   @@index([company])
   @@index([source])
   @@index([region])
   @@index([isActive])
   @@index([postedDate])
+  @@index([postedBy])
+}
+
+model JobReport {
+  id          String   @id @default(uuid())
+  jobId       String
+  reporterWallet String?
+  reporterIp  String?
+  reason      String
+  createdAt   DateTime @default(now())
+
+  @@index([jobId])
+  @@index([reporterWallet])
+}
+
+model WalletBlacklist {
+  id          String   @id @default(uuid())
+  wallet      String   @unique
+  reason      String?
+  createdAt   DateTime @default(now())
+
+  @@index([wallet])
 }
 
 model CrawlLog {

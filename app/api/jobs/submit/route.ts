@@ -22,12 +22,29 @@ export async function POST(request: Request) {
       requirements,
       techStack,
       applyUrl,
+      walletAddress, // New: poster's wallet address
     } = body
 
     // Validate required fields
-    if (!companyName || !sector || !contactEmail || !jobTitle || !jobType || !location || !description || !requirements) {
+    if (!companyName || !sector || !jobTitle || !jobType || !location || !description || !requirements) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+
+    // Wallet is required for instant posting
+    if (!walletAddress) {
+      return NextResponse.json(
+        { error: 'Wallet connection required to post jobs' },
+        { status: 401 }
+      )
+    }
+
+    // Validate wallet address format
+    if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+      return NextResponse.json(
+        { error: 'Invalid wallet address' },
         { status: 400 }
       )
     }
@@ -40,71 +57,120 @@ export async function POST(request: Request) {
     )
 
     // Determine region from location
-    const region = location.toLowerCase().includes('korea') ? 'korea' : 'global'
+    const region = location.toLowerCase().includes('korea') ? 'Korea' : 'Global'
+
+    // Generate unique URL for the job
+    const jobUrl = `https://neun.jobs/job/${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
     if (!supabaseUrl || !supabaseKey) {
       // Fallback: just log and return success if no Supabase
-      console.log('Job submission (no Supabase):', {
+      console.log('Job posted (no Supabase):', {
         companyName,
         jobTitle,
-        contactEmail,
+        walletAddress,
         isPriority: !!priorityCompany,
       })
       return NextResponse.json({
         success: true,
-        message: 'Job submitted for review',
+        message: 'Job posted successfully',
         isPriority: !!priorityCompany,
+        instant: true,
       })
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // Insert job submission (pending approval)
+    // Check if wallet is blacklisted
+    const { data: blacklistCheck } = await supabase
+      .from('WalletBlacklist')
+      .select('id')
+      .eq('wallet', walletAddress.toLowerCase())
+      .single()
+
+    if (blacklistCheck) {
+      return NextResponse.json(
+        { error: 'This wallet has been blocked from posting jobs' },
+        { status: 403 }
+      )
+    }
+
+    // Build tags from tech stack
+    const tags = techStack
+      ? techStack.split(',').map((t: string) => t.trim()).filter(Boolean)
+      : []
+
+    // Insert job directly to Job table (instant posting)
     const { data, error } = await supabase
-      .from('job_submissions')
+      .from('Job')
       .insert({
-        company_name: companyName,
-        company_website: companyWebsite || null,
-        sector,
-        contact_email: contactEmail,
-        job_title: jobTitle,
-        job_type: jobType,
+        title: jobTitle,
+        company: companyName,
         location,
+        type: jobType,
+        category: sector,
+        description: `${description}\n\nRequirements:\n${requirements}`,
+        url: applyUrl || jobUrl,
+        salary: salaryRange || null,
+        tags: JSON.stringify(tags),
+        source: 'user-posted',
         region,
-        salary_range: salaryRange || null,
-        description,
-        requirements,
-        tech_stack: techStack || null,
-        apply_url: applyUrl || null,
-        is_priority: !!priorityCompany,
+        postedDate: new Date().toISOString(),
+        isActive: true,
+        status: 'active',
+        postedBy: walletAddress.toLowerCase(),
+        reportCount: 0,
+        isHidden: false,
+        // Add backers if priority company
         backers: priorityCompany?.backers || null,
-        status: 'pending',
-        created_at: new Date().toISOString(),
+        sector: priorityCompany?.sector || sector,
       })
-      .select()
+      .select('id')
       .single()
 
     if (error) {
-      console.error('Failed to submit job:', error)
+      console.error('Failed to post job:', error)
 
-      // If table doesn't exist, create fallback response
-      if (error.code === '42P01') {
-        // Table doesn't exist - log and return success anyway
-        console.log('Job submission (no table):', {
-          companyName,
-          jobTitle,
-          contactEmail,
-          isPriority: !!priorityCompany,
-        })
+      // If columns don't exist, try without new columns
+      if (error.code === '42703') {
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('Job')
+          .insert({
+            title: jobTitle,
+            company: companyName,
+            location,
+            type: jobType,
+            category: sector,
+            description: `${description}\n\nRequirements:\n${requirements}\n\nPosted by: ${walletAddress}`,
+            url: applyUrl || jobUrl,
+            salary: salaryRange || null,
+            tags: JSON.stringify(tags),
+            source: 'user-posted',
+            region,
+            postedDate: new Date().toISOString(),
+            isActive: true,
+            status: 'active',
+          })
+          .select('id')
+          .single()
+
+        if (fallbackError) {
+          return NextResponse.json(
+            { error: 'Failed to post job' },
+            { status: 500 }
+          )
+        }
+
         return NextResponse.json({
           success: true,
-          message: 'Job submitted for review',
+          id: fallbackData?.id,
+          message: 'Job posted successfully',
           isPriority: !!priorityCompany,
+          instant: true,
         })
       }
 
       return NextResponse.json(
-        { error: 'Failed to submit job' },
+        { error: 'Failed to post job' },
         { status: 500 }
       )
     }
@@ -112,8 +178,9 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       id: data?.id,
-      message: 'Job submitted for review',
+      message: 'Job posted successfully',
       isPriority: !!priorityCompany,
+      instant: true,
     })
   } catch (error) {
     console.error('Job submission error:', error)
