@@ -389,3 +389,160 @@ export function PixelLinkedIn({ className, size }: PixelIconProps) {
   ]
   return <PixelGrid paths={paths} size={size} className={className} />
 }
+
+// ══════════════════════════════════════════════════════════
+// Web3 Badge Icons - 8bit Game Item Style
+// ══════════════════════════════════════════════════════════
+
+// 💎 Diamond (OG Degen)
+export function PixelDiamond({ className, size }: PixelIconProps) {
+  const paths = [
+    [2,0],[3,0],[4,0],[5,0],
+    [1,1],[2,1],[3,1],[4,1],[5,1],[6,1],
+    [0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],
+    [1,3],[2,3],[3,3],[4,3],[5,3],[6,3],
+    [2,4],[3,4],[4,4],[5,4],
+    [3,5],[4,5],
+    [3,6],[4,6],
+    [3,7],[4,7],
+  ]
+  return <PixelGrid paths={paths} size={size} className={className} />
+}
+
+// 🖼️ Frame (NFT Collector)
+export function PixelFrame({ className, size }: PixelIconProps) {
+  const paths = [
+    [0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],
+    [0,1],[1,1],[6,1],[7,1],
+    [0,2],[1,2],[3,2],[4,2],[6,2],[7,2],
+    [0,3],[1,3],[3,3],[4,3],[5,3],[6,3],[7,3],
+    [0,4],[1,4],[4,4],[5,4],[6,4],[7,4],
+    [0,5],[1,5],[6,5],[7,5],
+    [0,6],[1,6],[6,6],[7,6],
+    [0,7],[1,7],[2,7],[3,7],[4,7],[5,7],[6,7],[7,7],
+  ]
+  return <PixelGrid paths={paths} size={size} className={className} />
+}
+
+// 🗳️ Ballot Box (DAO Contributor)
+export function PixelBallot({ className, size }: PixelIconProps) {
+  const paths = [
+    [2,0],[3,0],[4,0],[5,0],
+    [2,1],[5,1],
+    [0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],
+    [0,3],[1,3],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],
+    [0,4],[1,4],[3,4],[4,4],[6,4],[7,4],
+    [0,5],[1,5],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],
+    [0,6],[1,6],[2,6],[3,6],[4,6],[5,6],[6,6],[7,6],
+    [0,7],[1,7],[2,7],[3,7],[4,7],[5,7],[6,7],[7,7],
+  ]
+  return <PixelGrid paths={paths} size={size} className={className} />
+}
+
+// 🪙 Coin Stack (DeFi Native)
+export function PixelCoinStack({ className, size }: PixelIconProps) {
+  const paths = [
+    // Top coin
+    [2,0],[3,0],[4,0],[5,0],
+    [1,1],[2,1],[3,1],[4,1],[5,1],[6,1],
+    // Middle coin
+    [2,2],[3,2],[4,2],[5,2],
+    [1,3],[2,3],[3,3],[4,3],[5,3],[6,3],
+    // Bottom coin
+    [2,4],[3,4],[4,4],[5,4],
+    [1,5],[2,5],[3,5],[4,5],[5,5],[6,5],
+    [2,6],[3,6],[4,6],[5,6],
+    [1,7],[2,7],[3,7],[4,7],[5,7],[6,7],
+  ]
+  return <PixelGrid paths={paths} size={size} className={className} />
+}
+
+// 🔨 Hammer (Builder)
+export function PixelHammer({ className, size }: PixelIconProps) {
+  const paths = [
+    [0,0],[1,0],[2,0],[3,0],[4,0],
+    [0,1],[1,1],[2,1],[3,1],[4,1],
+    [0,2],[1,2],[2,2],[3,2],[4,2],
+    [3,3],[4,3],
+    [3,4],[4,4],
+    [3,5],[4,5],
+    [3,6],[4,6],
+    [3,7],[4,7],
+  ]
+  return <PixelGrid paths={paths} size={size} className={className} />
+}
+
+// 🛡️ Shield (Trust Score)
+export function PixelShield({ className, size }: PixelIconProps) {
+  const paths = [
+    [1,0],[2,0],[3,0],[4,0],[5,0],[6,0],
+    [0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],
+    [0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],
+    [0,3],[1,3],[3,3],[4,3],[6,3],[7,3],
+    [1,4],[2,4],[3,4],[4,4],[5,4],[6,4],
+    [2,5],[3,5],[4,5],[5,5],
+    [3,6],[4,6],
+    [3,7],[4,7],
+  ]
+  return <PixelGrid paths={paths} size={size} className={className} />
+}
+
+// 🚀 Rocket (To The Moon)
+export function PixelRocket({ className, size }: PixelIconProps) {
+  const paths = [
+    [3,0],[4,0],
+    [2,1],[3,1],[4,1],[5,1],
+    [2,2],[3,2],[4,2],[5,2],
+    [1,3],[2,3],[3,3],[4,3],[5,3],[6,3],
+    [1,4],[2,4],[3,4],[4,4],[5,4],[6,4],
+    [0,5],[1,5],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],
+    [2,6],[3,6],[4,6],[5,6],
+    [2,7],[3,7],[4,7],[5,7],
+  ]
+  return <PixelGrid paths={paths} size={size} className={className} />
+}
+
+// 🌙 Moon
+export function PixelMoon({ className, size }: PixelIconProps) {
+  const paths = [
+    [2,0],[3,0],[4,0],[5,0],
+    [1,1],[2,1],[5,1],[6,1],
+    [1,2],[2,2],[6,2],
+    [0,3],[1,3],[6,3],[7,3],
+    [0,4],[1,4],[6,4],[7,4],
+    [1,5],[2,5],[6,5],
+    [1,6],[2,6],[5,6],[6,6],
+    [2,7],[3,7],[4,7],[5,7],
+  ]
+  return <PixelGrid paths={paths} size={size} className={className} />
+}
+
+// ⚡ Lightning (Fast/Alpha)
+export function PixelLightning({ className, size }: PixelIconProps) {
+  const paths = [
+    [4,0],[5,0],[6,0],
+    [3,1],[4,1],[5,1],
+    [2,2],[3,2],[4,2],
+    [1,3],[2,3],[3,3],[4,3],[5,3],[6,3],
+    [3,4],[4,4],[5,4],
+    [2,5],[3,5],[4,5],
+    [1,6],[2,6],[3,6],
+    [0,7],[1,7],[2,7],
+  ]
+  return <PixelGrid paths={paths} size={size} className={className} />
+}
+
+// 🔮 Crystal Ball (Alpha Hunter)
+export function PixelCrystal({ className, size }: PixelIconProps) {
+  const paths = [
+    [2,0],[3,0],[4,0],[5,0],
+    [1,1],[2,1],[3,1],[4,1],[5,1],[6,1],
+    [1,2],[2,2],[3,2],[4,2],[5,2],[6,2],
+    [1,3],[2,3],[3,3],[4,3],[5,3],[6,3],
+    [2,4],[3,4],[4,4],[5,4],
+    [3,5],[4,5],
+    [2,6],[3,6],[4,6],[5,6],
+    [1,7],[2,7],[3,7],[4,7],[5,7],[6,7],
+  ]
+  return <PixelGrid paths={paths} size={size} className={className} />
+}
