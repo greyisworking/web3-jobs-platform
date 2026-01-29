@@ -3,15 +3,19 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, Calendar, Eye } from 'lucide-react'
+import { ArrowRight, Clock, Eye, Heart, PenLine } from 'lucide-react'
+import { useAccount } from 'wagmi'
 import type { Article } from '@/types/article'
 import SubpageHeader from '../components/SubpageHeader'
 import Footer from '../components/Footer'
 import Pixelbara from '../components/Pixelbara'
+import Blockies, { truncateAddress } from '../components/Blockies'
 
 export default function ArticlesPage() {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedTag, setSelectedTag] = useState<string | null>(null)
+  const { isConnected } = useAccount()
 
   useEffect(() => {
     fetch('/api/articles')
@@ -31,67 +35,198 @@ export default function ArticlesPage() {
     })
   }
 
+  // Get all unique tags
+  const allTags = [...new Set(articles.flatMap(a => a.tags || []))]
+
+  // Filter by selected tag
+  const filteredArticles = selectedTag
+    ? articles.filter(a => a.tags?.includes(selectedTag))
+    : articles
+
   return (
-    <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
+    <div className="min-h-screen bg-gray-950">
       <div className="max-w-3xl mx-auto px-6">
         <SubpageHeader title="A R T I C L E S" />
       </div>
 
       <main className="max-w-3xl mx-auto px-6 pb-20">
+        {/* Hero with Pixelbara */}
+        <div className="py-12 border-b border-gray-800 mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-purple-400 mb-2">
+                Web3 Insights
+              </p>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Reading the Alpha
+              </h2>
+              <p className="text-sm text-gray-400">
+                Discover insights from the community. Connect wallet to write.
+              </p>
+            </div>
+            <div className="relative">
+              <Pixelbara pose="sitting" size={100} className="opacity-90" />
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gray-800 px-2 py-1 text-[10px] text-gray-400 whitespace-nowrap">
+                reading the alpha
+              </div>
+            </div>
+          </div>
+
+          {/* Write Button */}
+          <div className="mt-6">
+            {isConnected ? (
+              <Link
+                href="/articles/write"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
+              >
+                <PenLine className="w-4 h-4" />
+                Write Article
+              </Link>
+            ) : (
+              <div className="text-sm text-gray-500">
+                Connect wallet to write articles
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Tag Filter */}
+        {allTags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            <button
+              onClick={() => setSelectedTag(null)}
+              className={`px-3 py-1 text-xs font-medium transition-colors ${
+                !selectedTag
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-800 text-gray-400 hover:text-white'
+              }`}
+            >
+              All
+            </button>
+            {allTags.map(tag => (
+              <button
+                key={tag}
+                onClick={() => setSelectedTag(tag)}
+                className={`px-3 py-1 text-xs font-medium transition-colors ${
+                  selectedTag === tag
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:text-white'
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
+
         {loading ? (
           <div className="py-24 text-center">
             <Pixelbara pose="loading" size={120} className="mx-auto mb-4" />
-            <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted">
+            <p className="text-sm text-gray-500">
               Loading articles...
             </p>
           </div>
-        ) : articles.length === 0 ? (
-          <div className="py-24 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
+        ) : filteredArticles.length === 0 ? (
+          <div className="py-24 text-center border border-gray-800">
             <Pixelbara pose="empty" size={140} className="mx-auto mb-4" />
-            <p className="text-lg font-light uppercase tracking-[0.2em] text-a24-text dark:text-a24-dark-text mb-2">
+            <p className="text-lg text-white mb-2">
               No articles yet
             </p>
-            <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted tracking-wide">
-              Web3 insights coming soon. Stay tuned.
+            <p className="text-sm text-gray-500">
+              {isConnected
+                ? 'Be the first to share your alpha!'
+                : 'Connect wallet to start writing.'
+              }
             </p>
           </div>
         ) : (
           <div className="space-y-0">
-            {articles.map((article, index) => (
+            {filteredArticles.map((article, index) => (
               <motion.article
                 key={article.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="border-b border-a24-border dark:border-a24-dark-border"
+                className="border-b border-gray-800"
               >
                 <Link
                   href={`/articles/${article.slug}`}
-                  className="block py-8 group"
+                  className="block py-6 group"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-lg font-medium text-a24-text dark:text-a24-dark-text mb-2 group-hover:underline decoration-1 underline-offset-4">
+                      {/* Tags */}
+                      {article.tags && article.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {article.tags.slice(0, 3).map(tag => (
+                            <span
+                              key={tag}
+                              className="px-2 py-0.5 bg-purple-600/20 text-purple-400 text-[10px] uppercase tracking-wider"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <h2 className="text-lg font-medium text-white mb-2 group-hover:text-purple-400 transition-colors">
                         {article.title}
                       </h2>
+
                       {article.excerpt && (
-                        <p className="text-sm text-a24-muted dark:text-a24-dark-muted line-clamp-2 mb-3">
+                        <p className="text-sm text-gray-400 line-clamp-2 mb-3">
                           {article.excerpt}
                         </p>
                       )}
-                      <div className="flex items-center gap-4 text-[11px] text-a24-muted/70 dark:text-a24-dark-muted/70 uppercase tracking-wider">
+
+                      {/* Author & Meta */}
+                      <div className="flex items-center gap-4 text-[11px] text-gray-500">
+                        {/* Author with Blockies */}
+                        <div className="flex items-center gap-1.5">
+                          {article.author_address ? (
+                            <>
+                              <Blockies address={article.author_address} size={16} />
+                              <span className="text-gray-400">
+                                {article.author_ens || truncateAddress(article.author_address)}
+                              </span>
+                            </>
+                          ) : (
+                            <span>{article.author_name}</span>
+                          )}
+                        </div>
+
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {article.published_at ? formatDate(article.published_at) : 'Draft'}
+                          <Clock className="w-3 h-3" />
+                          {article.reading_time || 1} min
                         </span>
+
                         <span className="flex items-center gap-1">
                           <Eye className="w-3 h-3" />
                           {article.view_count}
                         </span>
-                        <span>{article.author_name}</span>
+
+                        {article.collect_count > 0 && (
+                          <span className="flex items-center gap-1 text-purple-400">
+                            <Heart className="w-3 h-3" />
+                            {article.collect_count}
+                          </span>
+                        )}
                       </div>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-a24-muted dark:text-a24-dark-muted opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-1" />
+
+                    {/* Cover Image Thumbnail */}
+                    {article.cover_image && (
+                      <div className="w-24 h-24 flex-shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={article.cover_image}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+
+                    <ArrowRight className="w-4 h-4 text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-1" />
                   </div>
                 </Link>
               </motion.article>

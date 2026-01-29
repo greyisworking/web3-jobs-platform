@@ -8,13 +8,25 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const limit = parseInt(searchParams.get('limit') || '20')
     const offset = parseInt(searchParams.get('offset') || '0')
+    const tag = searchParams.get('tag')
 
-    const { data: articles, error, count } = await supabase
+    let query = supabase
       .from('articles')
-      .select('id, slug, title, excerpt, cover_image, author_name, published_at, view_count', { count: 'exact' })
+      .select(`
+        id, slug, title, excerpt, cover_image,
+        author_name, author_address, author_ens,
+        tags, reading_time, collect_count, tip_amount,
+        published_at, view_count
+      `, { count: 'exact' })
       .eq('published', true)
       .order('published_at', { ascending: false })
-      .range(offset, offset + limit - 1)
+
+    // Filter by tag if provided
+    if (tag) {
+      query = query.contains('tags', [tag])
+    }
+
+    const { data: articles, error, count } = await query.range(offset, offset + limit - 1)
 
     if (error) throw error
 
@@ -25,32 +37,55 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/articles - Create article (admin only)
+// POST /api/articles - Create article (wallet-connected users or admin)
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createSupabaseServerClient()
-
-    // Check admin auth
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: admin } = await supabase
-      .from('admins')
-      .select('id')
-      .eq('id', user.id)
-      .single()
-
-    if (!admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
-    }
-
     const body = await request.json()
-    const { title, slug, excerpt, content, cover_image, published } = body
+    const {
+      title,
+      slug,
+      excerpt,
+      content,
+      cover_image,
+      tags,
+      published,
+      author_address,
+      author_ens,
+      author_name,
+      reading_time,
+    } = body
 
     if (!title || !slug || !content) {
       return NextResponse.json({ error: 'Title, slug, and content are required' }, { status: 400 })
+    }
+
+    // Wallet-based auth - if author_address is provided, use that
+    // Otherwise fall back to admin auth
+    let authorId = null
+    let finalAuthorName = author_name || 'Anonymous'
+    let finalAuthorAddress = author_address || null
+    let finalAuthorEns = author_ens || null
+
+    if (!author_address) {
+      // Check admin auth for non-wallet submissions
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        return NextResponse.json({ error: 'Wallet connection or admin auth required' }, { status: 401 })
+      }
+
+      const { data: admin } = await supabase
+        .from('admins')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+
+      if (!admin) {
+        return NextResponse.json({ error: 'Admin access required for non-wallet submissions' }, { status: 403 })
+      }
+
+      authorId = user.id
+      finalAuthorName = user.email?.split('@')[0] || 'NEUN'
     }
 
     const { data: article, error } = await supabase
@@ -61,8 +96,12 @@ export async function POST(request: NextRequest) {
         excerpt,
         content,
         cover_image,
-        author_id: user.id,
-        author_name: user.email?.split('@')[0] || 'NEUN',
+        tags: tags || [],
+        author_id: authorId,
+        author_name: finalAuthorName,
+        author_address: finalAuthorAddress,
+        author_ens: finalAuthorEns,
+        reading_time: reading_time || 1,
         published,
         published_at: published ? new Date().toISOString() : null,
       })
