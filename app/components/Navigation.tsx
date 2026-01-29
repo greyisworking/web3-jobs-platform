@@ -7,21 +7,31 @@ import { Menu, X, ChevronDown, Plus } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import ThemeToggle from './ThemeToggle'
 import NeunLogo from './NeunLogo'
-import { WalletConnect } from './WalletConnect'
 
+// Careers dropdown items
+const CAREERS_SUBMENU = [
+  { href: '/careers', label: 'All Jobs' },
+  { href: '/bounties', label: 'Bounties & Grants' },
+]
+
+// About dropdown items
 const ABOUT_SUBMENU = [
-  { href: '/about/story', label: 'Our Story' },
-  { href: '/about/notice', label: 'Notice' },
-  { href: '/about/press', label: 'Press' },
+  { href: '/about/story', label: 'About NEUN' },
+  { href: '/meme', label: 'Meme Generator' },
+  { href: '/terms', label: 'Terms' },
+  { href: '/privacy', label: 'Privacy' },
 ]
 
 export default function Navigation() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [careersOpen, setCareersOpen] = useState(false)
   const [aboutOpen, setAboutOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const careersRef = useRef<HTMLDivElement>(null)
   const aboutRef = useRef<HTMLDivElement>(null)
+  const careersTimeout = useRef<NodeJS.Timeout | null>(null)
   const aboutTimeout = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
@@ -56,6 +66,15 @@ export default function Navigation() {
         : 'text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text'
     }`
 
+  const handleCareersEnter = () => {
+    if (careersTimeout.current) clearTimeout(careersTimeout.current)
+    setCareersOpen(true)
+  }
+
+  const handleCareersLeave = () => {
+    careersTimeout.current = setTimeout(() => setCareersOpen(false), 200)
+  }
+
   const handleAboutEnter = () => {
     if (aboutTimeout.current) clearTimeout(aboutTimeout.current)
     setAboutOpen(true)
@@ -75,12 +94,48 @@ export default function Navigation() {
             <NeunLogo className="mr-2" />
 
             <Link href="/" className={linkClass(isActive('/'))}>Home</Link>
-            <Link href="/careers" className={linkClass(isActive('/careers'))}>Careers</Link>
+
+            {/* Careers with dropdown */}
+            <div
+              ref={careersRef}
+              className="relative"
+              onMouseEnter={handleCareersEnter}
+              onMouseLeave={handleCareersLeave}
+            >
+              <Link
+                href="/careers"
+                className={`${linkClass(isActive('/careers') || isActive('/bounties'))} inline-flex items-center gap-1`}
+              >
+                Careers
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${careersOpen ? 'rotate-180' : ''}`} />
+              </Link>
+
+              {/* Dropdown */}
+              {careersOpen && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3">
+                  <div className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border py-2 min-w-[160px]">
+                    {CAREERS_SUBMENU.map(({ href, label }) => (
+                      <Link
+                        key={href}
+                        href={href}
+                        onClick={() => setCareersOpen(false)}
+                        className={`block px-5 py-2 text-[11px] uppercase tracking-[0.25em] font-light transition-colors ${
+                          pathname === href
+                            ? 'text-a24-text dark:text-a24-dark-text'
+                            : 'text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text'
+                        }`}
+                      >
+                        {label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <Link href="/companies" className={linkClass(isActive('/companies'))}>Companies</Link>
             <Link href="/investors" className={linkClass(isActive('/investors'))}>Investors</Link>
             <Link href="/ecosystems" className={linkClass(isActive('/ecosystems'))}>Ecosystems</Link>
-            <Link href="/bounties" className={`${linkClass(isActive('/bounties'))} !text-amber-500 dark:!text-amber-400`}>Bounties</Link>
-            <Link href="/meme" className={`${linkClass(isActive('/meme'))} !text-pink-500 dark:!text-pink-400`}>Meme</Link>
 
             {/* About with dropdown */}
             <div
@@ -89,18 +144,17 @@ export default function Navigation() {
               onMouseEnter={handleAboutEnter}
               onMouseLeave={handleAboutLeave}
             >
-              <Link
-                href="/about/story"
-                className={`${linkClass(isActive('/about'))} inline-flex items-center gap-1`}
+              <button
+                className={`${linkClass(isActive('/about') || isActive('/meme') || isActive('/terms') || isActive('/privacy'))} inline-flex items-center gap-1`}
               >
                 About
                 <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${aboutOpen ? 'rotate-180' : ''}`} />
-              </Link>
+              </button>
 
               {/* Dropdown */}
               {aboutOpen && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3">
-                  <div className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border py-2 min-w-[140px]">
+                  <div className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border py-2 min-w-[160px]">
                     {ABOUT_SUBMENU.map(({ href, label }) => (
                       <Link
                         key={href}
@@ -124,7 +178,7 @@ export default function Navigation() {
           {/* Mobile: Logo */}
           <NeunLogo className="md:hidden" />
 
-          {/* Right: Post Job CTA + Wallet + Auth + Theme */}
+          {/* Right: Post Job CTA + Auth + Theme */}
           <div className="hidden md:flex items-center gap-4">
             {/* Post a Job CTA */}
             <Link
@@ -134,9 +188,6 @@ export default function Navigation() {
               <Plus className="w-3 h-3" />
               Post Job
             </Link>
-
-            {/* Wallet Connect */}
-            <WalletConnect />
 
             {isLoggedIn ? (
               <Link href="/account" className={linkClass(isActive('/account'))}>Account</Link>
@@ -163,13 +214,22 @@ export default function Navigation() {
           <div className="md:hidden border-t border-a24-border dark:border-a24-dark-border">
             <nav className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3">
               <Link href="/" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/'))} py-2`}>Home</Link>
-              <Link href="/careers" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/careers'))} py-2`}>Careers</Link>
+
+              {/* Careers section */}
+              <div className="border-t border-a24-border dark:border-a24-dark-border pt-2 mt-1">
+                <p className="text-[10px] uppercase tracking-[0.3em] font-light text-a24-muted/60 dark:text-a24-dark-muted/60 mb-2">Careers</p>
+                {CAREERS_SUBMENU.map(({ href, label }) => (
+                  <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)} className={`${linkClass(pathname === href)} py-2 pl-4 block`}>
+                    {label}
+                  </Link>
+                ))}
+              </div>
+
               <Link href="/companies" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/companies'))} py-2`}>Companies</Link>
               <Link href="/investors" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/investors'))} py-2`}>Investors</Link>
               <Link href="/ecosystems" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/ecosystems'))} py-2`}>Ecosystems</Link>
-              <Link href="/bounties" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/bounties'))} py-2 !text-amber-500`}>Bounties</Link>
-              <Link href="/meme" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/meme'))} py-2 !text-pink-500`}>Meme</Link>
-              <Link href="/articles" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/articles'))} py-2`}>Articles</Link>
+
+              {/* About section */}
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-2 mt-1">
                 <p className="text-[10px] uppercase tracking-[0.3em] font-light text-a24-muted/60 dark:text-a24-dark-muted/60 mb-2">About</p>
                 {ABOUT_SUBMENU.map(({ href, label }) => (
@@ -178,6 +238,7 @@ export default function Navigation() {
                   </Link>
                 ))}
               </div>
+
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-3 mt-1">
                 <Link
                   href="/post-job"
