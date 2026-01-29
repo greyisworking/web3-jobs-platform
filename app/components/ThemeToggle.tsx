@@ -29,43 +29,43 @@ function PixelSun() {
   )
 }
 
-// Pixel art Moon (8-bit style)
+// Pixel art Moon (8-bit style) - Dark purple for light mode
 function PixelMoon() {
   return (
     <svg width="24" height="24" viewBox="0 0 16 16" style={{ imageRendering: 'pixelated' }}>
-      {/* Moon crescent shape */}
-      <rect x="5" y="2" width="6" height="1" fill="#E0E0E0" />
-      <rect x="4" y="3" width="2" height="1" fill="#E0E0E0" />
-      <rect x="10" y="3" width="2" height="1" fill="#E0E0E0" />
-      <rect x="3" y="4" width="2" height="1" fill="#E0E0E0" />
-      <rect x="3" y="5" width="2" height="1" fill="#E0E0E0" />
-      <rect x="2" y="6" width="2" height="1" fill="#E0E0E0" />
-      <rect x="2" y="7" width="2" height="2" fill="#E0E0E0" />
-      <rect x="2" y="9" width="2" height="1" fill="#E0E0E0" />
-      <rect x="3" y="10" width="2" height="1" fill="#E0E0E0" />
-      <rect x="3" y="11" width="2" height="1" fill="#E0E0E0" />
-      <rect x="4" y="12" width="2" height="1" fill="#E0E0E0" />
-      <rect x="5" y="13" width="6" height="1" fill="#E0E0E0" />
-      <rect x="10" y="12" width="2" height="1" fill="#E0E0E0" />
-      {/* Inner moon fill */}
-      <rect x="5" y="3" width="5" height="1" fill="#F5F5F5" />
-      <rect x="5" y="4" width="6" height="1" fill="#F5F5F5" />
-      <rect x="5" y="5" width="6" height="1" fill="#F5F5F5" />
-      <rect x="4" y="6" width="7" height="1" fill="#F5F5F5" />
-      <rect x="4" y="7" width="7" height="2" fill="#F5F5F5" />
-      <rect x="4" y="9" width="7" height="1" fill="#F5F5F5" />
-      <rect x="5" y="10" width="6" height="1" fill="#F5F5F5" />
-      <rect x="5" y="11" width="6" height="1" fill="#F5F5F5" />
-      <rect x="6" y="12" width="4" height="1" fill="#F5F5F5" />
-      {/* Crater details */}
-      <rect x="6" y="5" width="2" height="2" fill="#BDBDBD" />
-      <rect x="9" y="8" width="1" height="1" fill="#BDBDBD" />
-      <rect x="5" y="10" width="1" height="1" fill="#BDBDBD" />
-      {/* Stars around moon */}
-      <rect x="12" y="3" width="1" height="1" fill="#FFFDE7" />
-      <rect x="14" y="6" width="1" height="1" fill="#FFFDE7" />
-      <rect x="13" y="11" width="1" height="1" fill="#FFFDE7" />
-      <rect x="1" y="3" width="1" height="1" fill="#FFFDE7" />
+      {/* Moon crescent shape - dark purple outline */}
+      <rect x="5" y="2" width="6" height="1" fill="#4C1D95" />
+      <rect x="4" y="3" width="2" height="1" fill="#4C1D95" />
+      <rect x="10" y="3" width="2" height="1" fill="#4C1D95" />
+      <rect x="3" y="4" width="2" height="1" fill="#4C1D95" />
+      <rect x="3" y="5" width="2" height="1" fill="#4C1D95" />
+      <rect x="2" y="6" width="2" height="1" fill="#4C1D95" />
+      <rect x="2" y="7" width="2" height="2" fill="#4C1D95" />
+      <rect x="2" y="9" width="2" height="1" fill="#4C1D95" />
+      <rect x="3" y="10" width="2" height="1" fill="#4C1D95" />
+      <rect x="3" y="11" width="2" height="1" fill="#4C1D95" />
+      <rect x="4" y="12" width="2" height="1" fill="#4C1D95" />
+      <rect x="5" y="13" width="6" height="1" fill="#4C1D95" />
+      <rect x="10" y="12" width="2" height="1" fill="#4C1D95" />
+      {/* Inner moon fill - purple */}
+      <rect x="5" y="3" width="5" height="1" fill="#6D28D9" />
+      <rect x="5" y="4" width="6" height="1" fill="#6D28D9" />
+      <rect x="5" y="5" width="6" height="1" fill="#6D28D9" />
+      <rect x="4" y="6" width="7" height="1" fill="#6D28D9" />
+      <rect x="4" y="7" width="7" height="2" fill="#6D28D9" />
+      <rect x="4" y="9" width="7" height="1" fill="#6D28D9" />
+      <rect x="5" y="10" width="6" height="1" fill="#6D28D9" />
+      <rect x="5" y="11" width="6" height="1" fill="#6D28D9" />
+      <rect x="6" y="12" width="4" height="1" fill="#6D28D9" />
+      {/* Crater details - darker purple */}
+      <rect x="6" y="5" width="2" height="2" fill="#3B0764" />
+      <rect x="9" y="8" width="1" height="1" fill="#3B0764" />
+      <rect x="5" y="10" width="1" height="1" fill="#3B0764" />
+      {/* Stars around moon - light purple */}
+      <rect x="12" y="3" width="1" height="1" fill="#A78BFA" />
+      <rect x="14" y="6" width="1" height="1" fill="#A78BFA" />
+      <rect x="13" y="11" width="1" height="1" fill="#A78BFA" />
+      <rect x="1" y="3" width="1" height="1" fill="#A78BFA" />
     </svg>
   )
 }
@@ -100,7 +100,7 @@ export default function ThemeToggle() {
       aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
       className="w-8 h-8 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
     >
-      {dark ? <PixelMoon /> : <PixelSun />}
+      {dark ? <PixelSun /> : <PixelMoon />}
     </button>
   )
 }
