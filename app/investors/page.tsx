@@ -301,7 +301,10 @@ export default function InvestorsPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20">
-            <Pixelbara pose="dejected" size={120} />
+            <Pixelbara pose="building" size={120} className="mb-4" />
+            <p className="text-sm text-a24-muted dark:text-a24-dark-muted">
+              more VCs coming...
+            </p>
             <p className="mt-4 text-a24-muted dark:text-a24-dark-muted text-sm">
               no VCs found... few understand
             </p>

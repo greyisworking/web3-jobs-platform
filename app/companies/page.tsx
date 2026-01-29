@@ -163,9 +163,9 @@ export default function CompaniesPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20">
-            <Pixelbara pose="dejected" size={120} clickable />
-            <p className="mt-4 text-a24-muted dark:text-a24-dark-muted text-base font-medium">
-              bruh no matches... try different filters
+            <Pixelbara pose="success" size={120} className="mb-4" />
+            <p className="text-sm text-a24-muted dark:text-a24-dark-muted">
+              more companies coming...
             </p>
           </div>
         )}

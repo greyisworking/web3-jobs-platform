@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
   const badge = searchParams.get('badge') || undefined
   const backer = searchParams.get('backer') || undefined
   const sector = searchParams.get('sector') || undefined
+  const posted = searchParams.get('posted') === 'true'
   const page = parseInt(searchParams.get('page') || '1', 10)
   const pageSize = parseInt(searchParams.get('pageSize') || '20', 10)
   const offset = (page - 1) * pageSize
@@ -27,6 +28,11 @@ export async function GET(request: NextRequest) {
     .select('*', { count: 'exact' })
     .order('crawledAt', { ascending: false })
     .range(offset, offset + pageSize - 1)
+
+  // Filter to user-posted jobs only
+  if (posted) {
+    query = query.or('source.eq.user-posted,postedBy.not.is.null')
+  }
 
   if (status) {
     const isActive = status === 'active' ? true : status === 'inactive' ? false : undefined

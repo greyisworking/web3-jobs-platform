@@ -202,11 +202,11 @@ function CareersContent() {
 
           {filteredJobs.length === 0 ? (
             <div className="py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
-              <Pixelbara pose="empty" size={140} className="mx-auto mb-4" clickable />
-              <p className="text-a24-muted dark:text-a24-dark-muted text-base font-medium">
+              <Pixelbara pose="question" size={140} className="mx-auto mb-4" clickable />
+              <p className="text-a24-muted dark:text-a24-dark-muted text-sm">
                 {jobs.length === 0
-                  ? 'bruh... no jobs rn. touch grass.'
-                  : 'lowkey no matches... try different filters bestie'}
+                  ? 'no jobs found... ngmi'
+                  : 'no jobs found... try different filters ser'}
               </p>
             </div>
           ) : (

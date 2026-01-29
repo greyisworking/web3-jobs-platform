@@ -12,6 +12,7 @@ import {
   Radio,
   Shield,
   BarChart3,
+  Flag,
 } from 'lucide-react'
 
 interface NavItem {
@@ -30,6 +31,7 @@ const navSections: NavSection[] = [
     title: 'General',
     items: [
       { href: '/admin', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" /> },
+      { href: '/admin/moderation', label: 'Moderation', icon: <Flag className="h-4 w-4" /> },
       { href: '/admin/jobs/pending', label: 'Pending Jobs', icon: <Clock className="h-4 w-4" /> },
       { href: '/admin/jobs/duplicates', label: 'Duplicates', icon: <CopyCheck className="h-4 w-4" /> },
       { href: '/admin/errors', label: 'Error Logs', icon: <AlertCircle className="h-4 w-4" /> },

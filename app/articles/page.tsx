@@ -6,6 +6,8 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Clock, Eye, Heart, PenLine } from 'lucide-react'
 import { useAccount } from 'wagmi'
 import type { Article } from '@/types/article'
+import type { User } from '@supabase/supabase-js'
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import SubpageHeader from '../components/SubpageHeader'
 import Footer from '../components/Footer'
 import Pixelbara from '../components/Pixelbara'
@@ -15,7 +17,14 @@ export default function ArticlesPage() {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const { isConnected } = useAccount()
+  const supabase = createSupabaseBrowserClient()
+
+  // Check auth state
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
+  }, [supabase.auth])
 
   useEffect(() => {
     fetch('/api/articles')
@@ -74,7 +83,7 @@ export default function ArticlesPage() {
 
           {/* Write Button */}
           <div className="mt-6">
-            {isConnected ? (
+            {(isConnected || user) ? (
               <Link
                 href="/articles/write"
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
@@ -83,9 +92,12 @@ export default function ArticlesPage() {
                 Write Article
               </Link>
             ) : (
-              <div className="text-sm text-gray-500">
-                Connect wallet to write articles
-              </div>
+              <Link
+                href="/articles/write"
+                className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+              >
+                Sign in to write articles
+              </Link>
             )}
           </div>
         </div>
@@ -128,16 +140,17 @@ export default function ArticlesPage() {
           </div>
         ) : filteredArticles.length === 0 ? (
           <div className="py-24 text-center border border-gray-800">
-            <Pixelbara pose="empty" size={140} className="mx-auto mb-4" />
-            <p className="text-lg text-white mb-2">
-              No articles yet
+            <Pixelbara pose="sparkle" size={140} className="mx-auto mb-4" />
+            <p className="text-sm text-gray-400">
+              no articles yet... be the first writer
             </p>
-            <p className="text-sm text-gray-500">
-              {isConnected
-                ? 'Be the first to share your alpha!'
-                : 'Connect wallet to start writing.'
-              }
-            </p>
+            <Link
+              href="/articles/write"
+              className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
+            >
+              <PenLine className="w-4 h-4" />
+              Write Article
+            </Link>
           </div>
         ) : (
           <div className="space-y-0">
