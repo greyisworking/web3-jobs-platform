@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, Copy, ExternalLink, MapPin, Briefcase, Globe, Building2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Copy, ExternalLink, MapPin, Briefcase, Globe, Building2, AlertTriangle, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Job } from '@/types/job'
 import { trackEvent } from '@/lib/analytics'
@@ -22,6 +22,19 @@ import {
   Web3PerksBadge,
   EnglishBadge,
 } from '@/app/components/badges'
+
+/**
+ * Check if a URL is valid and accessible
+ */
+function isValidUrl(url: string | null | undefined): boolean {
+  if (!url) return false
+  try {
+    new URL(url)
+    return true
+  } catch {
+    return false
+  }
+}
 
 const BADGE_COMPONENT_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Verified: VerifiedBadge,
@@ -72,9 +85,14 @@ interface CareersDetailClientProps {
 }
 
 export default function CareersDetailClient({ job }: CareersDetailClientProps) {
+  const [urlStatus, setUrlStatus] = useState<'valid' | 'invalid' | 'checking'>('checking')
+  const hasValidUrl = isValidUrl(job.url)
+
   useEffect(() => {
     trackEvent('job_view', { job_id: job.id, title: job.title, company: job.company, source: 'page' })
-  }, [job.id, job.title, job.company])
+    // Set URL status based on basic validation
+    setUrlStatus(hasValidUrl ? 'valid' : 'invalid')
+  }, [job.id, job.title, job.company, hasValidUrl])
 
   // Get priority company data for trust check
   const priorityCompany = findPriorityCompany(job.company)
@@ -244,17 +262,36 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
           {/* ── Right column: Sidebar ── */}
           <aside className="lg:sticky lg:top-20 lg:self-start space-y-4">
             {/* Apply Now CTA */}
-            <a
-              href={job.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'page' })}
-              className="group flex items-center justify-center gap-2 w-full py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-[11px] font-light uppercase tracking-[0.35em] hover:opacity-80 transition-all duration-300"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Apply Now
-              <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-            </a>
+            {urlStatus === 'valid' ? (
+              <a
+                href={job.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'page' })}
+                className="group flex items-center justify-center gap-2 w-full py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-[11px] font-light uppercase tracking-[0.35em] hover:opacity-80 transition-all duration-300"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Apply Now
+                <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+              </a>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-center gap-2 w-full py-3 bg-a24-muted/20 dark:bg-a24-dark-muted/20 text-a24-muted dark:text-a24-dark-muted text-[11px] font-light uppercase tracking-[0.35em] border border-a24-border dark:border-a24-dark-border">
+                  <AlertTriangle className="w-4 h-4" />
+                  Expired / Unavailable
+                </div>
+                <a
+                  href={`https://www.google.com/search?q=${encodeURIComponent(`${job.company} careers ${job.title}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackEvent('job_search_fallback', { job_id: job.id, company: job.company })}
+                  className="group flex items-center justify-center gap-2 w-full py-2.5 border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text text-[10px] font-light uppercase tracking-[0.25em] hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  Search on Google
+                </a>
+              </div>
+            )}
 
             {/* Share section */}
             <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface space-y-3">
@@ -357,17 +394,36 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
 
       {/* Mobile fixed bottom Apply button */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-a24-surface dark:bg-a24-dark-surface border-t border-a24-border dark:border-a24-dark-border p-4">
-        <a
-          href={job.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'mobile' })}
-          className="group flex items-center justify-center gap-2 w-full py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-[11px] font-light uppercase tracking-[0.35em] hover:opacity-80 transition-all duration-300"
-        >
-          <ExternalLink className="w-4 h-4" />
-          Apply Now
-          <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-        </a>
+        {urlStatus === 'valid' ? (
+          <a
+            href={job.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'mobile' })}
+            className="group flex items-center justify-center gap-2 w-full py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-[11px] font-light uppercase tracking-[0.35em] hover:opacity-80 transition-all duration-300"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Apply Now
+            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+          </a>
+        ) : (
+          <div className="flex gap-2">
+            <div className="flex-1 flex items-center justify-center gap-2 py-3 bg-a24-muted/20 text-a24-muted text-[10px] uppercase tracking-wider">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              Expired
+            </div>
+            <a
+              href={`https://www.google.com/search?q=${encodeURIComponent(`${job.company} careers ${job.title}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent('job_search_fallback', { job_id: job.id, company: job.company })}
+              className="flex-1 flex items-center justify-center gap-2 py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-[10px] uppercase tracking-wider"
+            >
+              <Search className="w-3.5 h-3.5" />
+              Search
+            </a>
+          </div>
+        )}
       </div>
     </div>
   )
