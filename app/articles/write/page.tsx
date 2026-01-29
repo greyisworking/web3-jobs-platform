@@ -3,12 +3,15 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Eye, Loader2, X, Plus, Wallet } from 'lucide-react'
+import { ArrowLeft, Save, Eye, Loader2, X, Plus, Wallet, Shield } from 'lucide-react'
 import { useAccount, useEnsName } from 'wagmi'
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import type { User } from '@supabase/supabase-js'
 import RichTextEditor from '@/app/components/RichTextEditor'
 import Pixelbara from '@/app/components/Pixelbara'
 import Blockies, { truncateAddress } from '@/app/components/Blockies'
 import { WalletConnect } from '@/app/components/WalletConnect'
+import Web3Badges from '@/app/components/Web3Badges'
 
 const SUGGESTED_TAGS = [
   'DeFi', 'NFT', 'DAO', 'Layer2', 'Security', 'Trading',
@@ -17,8 +20,16 @@ const SUGGESTED_TAGS = [
 
 export default function ArticleWritePage() {
   const router = useRouter()
+  const supabase = createSupabaseBrowserClient()
+
+  // Auth state
+  const [user, setUser] = useState<User | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
+
+  // Wallet state (optional)
   const { address, isConnected } = useAccount()
   const { data: ensName } = useEnsName({ address })
+
   const [loading, setLoading] = useState(false)
   const [tagInput, setTagInput] = useState('')
   const [form, setForm] = useState({
@@ -30,6 +41,21 @@ export default function ArticleWritePage() {
     tags: [] as string[],
     published: false,
   })
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      setAuthLoading(false)
+    }
+    getUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase.auth])
 
   const generateSlug = (title: string) => {
     return title
@@ -61,9 +87,8 @@ export default function ArticleWritePage() {
     setForm(prev => ({ ...prev, tags: prev.tags.filter(t => t !== tag) }))
   }
 
-  // Calculate reading time (average 200 words per minute)
   const calculateReadingTime = (content: string) => {
-    const text = content.replace(/<[^>]*>/g, '') // Strip HTML
+    const text = content.replace(/<[^>]*>/g, '')
     const words = text.trim().split(/\s+/).length
     return Math.max(1, Math.ceil(words / 200))
   }
@@ -74,8 +99,8 @@ export default function ArticleWritePage() {
       return
     }
 
-    if (!address) {
-      alert('Please connect your wallet')
+    if (!user) {
+      alert('Please log in to write articles')
       return
     }
 
@@ -83,15 +108,28 @@ export default function ArticleWritePage() {
     try {
       const readingTime = calculateReadingTime(form.content)
 
+      // Determine author info based on wallet connection or user email
+      const authorInfo = isConnected && address
+        ? {
+            author_address: address,
+            author_ens: ensName || null,
+            author_name: ensName || truncateAddress(address),
+          }
+        : {
+            author_address: null,
+            author_ens: null,
+            author_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous',
+          }
+
       const res = await fetch('/api/articles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
           published: publish,
-          author_address: address,
-          author_ens: ensName || null,
-          author_name: ensName || truncateAddress(address),
+          ...authorInfo,
+          author_email: user.email,
+          author_avatar: user.user_metadata?.avatar_url || null,
           reading_time: readingTime,
         }),
       })
@@ -110,24 +148,94 @@ export default function ArticleWritePage() {
     }
   }
 
-  // Not connected - show wallet connect prompt
-  if (!isConnected) {
+  const handleGoogleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=/articles/write`,
+      },
+    })
+  }
+
+  const handleKakaoLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=/articles/write`,
+      },
+    })
+  }
+
+  // Loading state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-gray-500 animate-spin" />
+      </div>
+    )
+  }
+
+  // Not logged in - show login options
+  if (!user) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-6">
           <Pixelbara pose="question" size={140} className="mx-auto mb-6" />
           <h1 className="text-2xl font-bold text-white mb-2">
-            Connect Wallet to Write
+            Log In to Write
           </h1>
           <p className="text-sm text-gray-400 mb-8">
-            ser, connect your wallet to share your alpha with the community.
+            Share your alpha with the community. Log in to get started.
           </p>
 
-          <WalletConnect />
+          <div className="space-y-3">
+            {/* Google Login */}
+            <button
+              onClick={handleGoogleLogin}
+              className="w-full flex items-center justify-center gap-3 py-3.5 bg-white text-gray-900 text-sm font-medium hover:bg-gray-100 transition-colors"
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+                <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+                <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+                <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+              </svg>
+              Continue with Google
+            </button>
+
+            {/* Kakao Login */}
+            <button
+              onClick={handleKakaoLogin}
+              className="w-full flex items-center justify-center gap-3 py-3.5 bg-[#FEE500] text-[#191919] text-sm font-medium hover:bg-[#FDD800] transition-colors"
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M9 0.6C4.029 0.6 0 3.726 0 7.554C0 9.918 1.558 12.006 3.931 13.239L2.933 16.827C2.845 17.139 3.213 17.385 3.483 17.193L7.773 14.355C8.175 14.397 8.583 14.418 9 14.418C13.971 14.418 18 11.382 18 7.554C18 3.726 13.971 0.6 9 0.6Z"
+                  fill="#191919"
+                />
+              </svg>
+              Continue with Kakao
+            </button>
+          </div>
+
+          <div className="flex items-center gap-4 my-6">
+            <div className="flex-1 h-px bg-gray-800" />
+            <span className="text-xs text-gray-500 uppercase tracking-wider">or</span>
+            <div className="flex-1 h-px bg-gray-800" />
+          </div>
+
+          <Link
+            href="/login"
+            className="text-sm text-gray-400 hover:text-white transition-colors"
+          >
+            Log in with Email
+          </Link>
 
           <Link
             href="/articles"
-            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300 mt-6 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300 mt-8 transition-colors block"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Articles
@@ -136,6 +244,11 @@ export default function ArticleWritePage() {
       </div>
     )
   }
+
+  // Get display name
+  const displayName = isConnected && address
+    ? (ensName || truncateAddress(address))
+    : (user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous')
 
   return (
     <div className="min-h-screen bg-gray-950">
@@ -151,10 +264,26 @@ export default function ArticleWritePage() {
           </Link>
 
           <div className="flex items-center gap-4">
-            {/* Connected Wallet */}
+            {/* Connected User/Wallet Info */}
             <div className="flex items-center gap-2 text-sm text-gray-400">
-              <Blockies address={address!} size={20} />
-              <span>{ensName || truncateAddress(address!)}</span>
+              {isConnected && address ? (
+                <>
+                  <Blockies address={address} size={20} />
+                  <span>{displayName}</span>
+                </>
+              ) : (
+                <>
+                  {user.user_metadata?.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={user.user_metadata.avatar_url} alt="" className="w-5 h-5 rounded-full" />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs">
+                      {displayName[0].toUpperCase()}
+                    </div>
+                  )}
+                  <span>{displayName}</span>
+                </>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -238,7 +367,6 @@ export default function ArticleWritePage() {
                 Tags (up to 5)
               </label>
 
-              {/* Selected Tags */}
               {form.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-3">
                   {form.tags.map(tag => (
@@ -255,7 +383,6 @@ export default function ArticleWritePage() {
                 </div>
               )}
 
-              {/* Tag Input */}
               {form.tags.length < 5 && (
                 <div className="flex gap-2">
                   <input
@@ -281,7 +408,6 @@ export default function ArticleWritePage() {
                 </div>
               )}
 
-              {/* Suggested Tags */}
               <div className="flex flex-wrap gap-1.5 mt-3">
                 {SUGGESTED_TAGS.filter(t => !form.tags.includes(t.toLowerCase())).slice(0, 6).map(tag => (
                   <button
@@ -313,17 +439,57 @@ export default function ArticleWritePage() {
                   Publishing As
                 </h3>
                 <div className="flex items-center gap-3">
-                  <Blockies address={address!} size={40} />
+                  {isConnected && address ? (
+                    <Blockies address={address} size={40} />
+                  ) : user.user_metadata?.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={user.user_metadata.avatar_url} alt="" className="w-10 h-10 rounded-full" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold">
+                      {displayName[0].toUpperCase()}
+                    </div>
+                  )}
                   <div>
-                    <p className="text-white font-medium">
-                      {ensName || truncateAddress(address!)}
-                    </p>
-                    <p className="text-xs text-gray-500 font-mono">
-                      {truncateAddress(address!)}
+                    <p className="text-white font-medium">{displayName}</p>
+                    <p className="text-xs text-gray-500">
+                      {isConnected ? truncateAddress(address!) : user.email}
                     </p>
                   </div>
                 </div>
               </div>
+
+              {/* Wallet Connection - Optional Benefits */}
+              {!isConnected && (
+                <div className="border border-purple-500/30 bg-purple-500/5 p-5">
+                  <h3 className="text-xs uppercase tracking-wider text-purple-400 mb-3 font-medium flex items-center gap-2">
+                    <Wallet className="w-3.5 h-3.5" />
+                    Connect Wallet
+                  </h3>
+                  <p className="text-xs text-gray-400 mb-4">
+                    Optional: Connect wallet for additional benefits
+                  </p>
+                  <ul className="space-y-2 text-xs text-gray-500 mb-4">
+                    <li className="flex items-center gap-2">
+                      <Shield className="w-3 h-3 text-purple-400" />
+                      On-chain reputation badges
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Shield className="w-3 h-3 text-purple-400" />
+                      POAP for published articles
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Shield className="w-3 h-3 text-purple-400" />
+                      ENS name display
+                    </li>
+                  </ul>
+                  <WalletConnect />
+                </div>
+              )}
+
+              {/* Show Web3 badges if wallet connected */}
+              {isConnected && address && (
+                <Web3Badges address={address} showSync compact />
+              )}
 
               {/* Writing Guide */}
               <div className="border border-gray-800 p-5">

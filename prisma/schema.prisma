@@ -14,7 +14,7 @@ model Job {
   location    String
   type        String   // Full-time, Part-time, Contract, Remote
   category    String   // Engineering, Design, Marketing, etc.
-  description String?  @db.Text
+  description String?
   url         String   @unique
   salary      String?
   tags        String?  // JSON string array
@@ -39,7 +39,7 @@ model CrawlLog {
   source    String
   status    String   // success, failed
   jobCount  Int      @default(0)
-  error     String?  @db.Text
+  error     String?
   createdAt DateTime @default(now())
 
   @@index([source])
