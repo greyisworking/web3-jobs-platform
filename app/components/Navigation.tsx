@@ -39,13 +39,24 @@ export default function Navigation() {
       <header className={`sticky top-0 z-50 bg-a24-bg/95 dark:bg-a24-dark-surface/95 backdrop-blur-sm transition-all duration-300 ${scrolled ? 'border-b border-a24-border dark:border-a24-dark-border' : 'border-b border-transparent'}`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           {/* Left: Logo + Nav */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {/* Logo - clicks to home */}
             <NeunLogo className="mr-2" />
 
             <Link href="/careers" className={linkClass(isActive('/careers') || isActive('/bounties') || isActive('/ecosystems'))}>Jobs</Link>
             <Link href="/companies" className={linkClass(isActive('/companies'))}>Companies</Link>
             <Link href="/investors" className={linkClass(isActive('/investors'))}>Investors</Link>
+            <Link href="/articles" className={linkClass(isActive('/articles'))}>Articles</Link>
+            <Link
+              href="/meme"
+              className={`text-[11px] uppercase tracking-[0.3em] font-light transition-colors ${
+                isActive('/meme')
+                  ? 'text-[#FF1493]'
+                  : 'text-[#FF69B4] hover:text-[#FF1493]'
+              }`}
+            >
+              Meme
+            </Link>
           </div>
 
           {/* Mobile: Logo */}
@@ -87,6 +98,14 @@ export default function Navigation() {
               <Link href="/careers" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/careers'))} py-2`}>Jobs</Link>
               <Link href="/companies" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/companies'))} py-2`}>Companies</Link>
               <Link href="/investors" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/investors'))} py-2`}>Investors</Link>
+              <Link href="/articles" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/articles'))} py-2`}>Articles</Link>
+              <Link
+                href="/meme"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-[11px] uppercase tracking-[0.3em] font-light py-2 text-[#FF69B4] hover:text-[#FF1493] transition-colors"
+              >
+                Meme
+              </Link>
 
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-3 mt-1 flex flex-col gap-3">
                 <Link
