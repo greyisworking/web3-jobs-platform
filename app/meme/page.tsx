@@ -12,27 +12,33 @@ import type { PoseId } from '../components/Pixelbara'
 import { PixelSend } from '../components/PixelIcons'
 
 // ══════════════════════════════════════════════════════════
-// POSES
+// POSES - Organized by category for easy browsing
 // ══════════════════════════════════════════════════════════
 
-const POSES: { id: PoseId; label: string; emoji: string }[] = [
-  { id: 'blank', label: 'Basic', emoji: 'ㅡ_ㅡ' },
-  { id: 'heroLaptop', label: 'Laptop', emoji: '💻' },
-  { id: 'bling', label: 'Gold Chain', emoji: '⛓️' },
-  { id: 'coffee', label: 'Coffee', emoji: '☕' },
-  { id: 'sweating', label: 'Sweating', emoji: '😰' },
-  { id: 'sleepy', label: 'Sleepy', emoji: '😴' },
-  { id: 'ecosystem', label: 'On Alligator', emoji: '🐊' },
-  { id: 'heart', label: 'Heart', emoji: '❤️' },
-  { id: 'coin', label: 'Coins', emoji: '🪙' },
+const POSES: { id: PoseId; label: string; category: string }[] = [
+  // Basic poses
+  { id: 'justVibing', label: 'just vibing', category: 'basic' },
+  { id: 'sitting', label: 'sitting', category: 'basic' },
+  { id: 'lyingDown', label: 'lying down', category: 'basic' },
+  // Work poses
+  { id: 'shippingCode', label: 'shipping code', category: 'work' },
+  { id: 'phoneCheck', label: 'phone check', category: 'work' },
   // Web3 poses
-  { id: 'hodl', label: 'HODL', emoji: '📉' },
-  { id: 'rug', label: 'Rugged', emoji: '👛' },
-  { id: 'gm', label: 'GM', emoji: '🌅' },
-  { id: 'touchGrass', label: 'Touch Grass', emoji: '🌿' },
-  { id: 'onsen', label: 'Staking', emoji: '🍊' },
-  { id: 'airdrop', label: 'Airdrop', emoji: '🪂' },
-  { id: 'downBad', label: 'Down Bad', emoji: '📊' },
+  { id: 'diamondHands', label: 'diamond hands', category: 'web3' },
+  { id: 'toTheMoon', label: 'to the moon', category: 'web3' },
+  { id: 'rugged', label: 'rugged', category: 'web3' },
+  { id: 'whaleMode', label: 'whale mode', category: 'web3' },
+  { id: 'airdrop', label: 'airdrop', category: 'web3' },
+  { id: 'staking', label: 'staking', category: 'web3' },
+  // Emotion poses
+  { id: 'gmSer', label: 'gm ser', category: 'emotion' },
+  { id: 'downBad', label: 'down bad', category: 'emotion' },
+  { id: 'itsSoOver', label: 'its so over', category: 'emotion' },
+  { id: 'wereSoBack', label: 'we are so back', category: 'emotion' },
+  // Meme legend poses
+  { id: 'touchGrass', label: 'touch grass', category: 'meme' },
+  { id: 'ridingMarket', label: 'riding the market', category: 'meme' },
+  { id: 'hotTub', label: 'hot tub', category: 'meme' },
 ]
 
 // ══════════════════════════════════════════════════════════
@@ -417,27 +423,26 @@ export default function MemePage() {
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:from-purple-500 hover:to-pink-500 transition-all"
             >
               <Shuffle className="w-4 h-4" />
-              Random
+              I&apos;m feeling lucky
             </button>
 
             {/* Pose Selection */}
             <div>
               <h3 className="text-[10px] uppercase tracking-wider text-gray-500 mb-2 font-bold">
-                Pose
+                vibe check
               </h3>
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-3 gap-1.5">
                 {POSES.map((pose) => (
                   <button
                     key={pose.id}
                     onClick={() => setSelectedPose(pose.id)}
-                    className={`p-1.5 text-center border transition-all ${
+                    className={`p-2 text-center border transition-all ${
                       selectedPose === pose.id
                         ? 'bg-white text-black border-white'
                         : 'bg-gray-800/50 text-gray-300 border-gray-700 hover:border-gray-500'
                     }`}
                   >
-                    <span className="text-base block">{pose.emoji}</span>
-                    <span className="text-[8px] block">{pose.label}</span>
+                    <span className="text-[9px] block leading-tight">{pose.label}</span>
                   </button>
                 ))}
               </div>
@@ -446,7 +451,7 @@ export default function MemePage() {
             {/* Size Slider */}
             <div>
               <h3 className="text-[10px] uppercase tracking-wider text-gray-500 mb-2 font-bold">
-                Size: {pixelbaraSize}px
+                how thicc: {pixelbaraSize}px
               </h3>
               <input
                 type="range"
@@ -461,7 +466,7 @@ export default function MemePage() {
             {/* Background Selection */}
             <div>
               <h3 className="text-[10px] uppercase tracking-wider text-gray-500 mb-2 font-bold">
-                Background
+                aesthetic
               </h3>
               <div className="grid grid-cols-7 gap-1.5">
                 {BACKGROUNDS.map((b) => (
