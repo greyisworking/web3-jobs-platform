@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 // Standalone Supabase client for scripts (crawlers, migrations, etc.)
 // Uses @supabase/supabase-js directly since scripts run outside Next.js
@@ -7,10 +7,37 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error(
-    'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables'
-  )
+// Check if Supabase is configured
+export const isSupabaseConfigured = !!(supabaseUrl && supabaseKey)
+
+// Create a mock client that does nothing when Supabase is not configured
+const createMockClient = () => {
+  const mockResponse = { data: null, error: null }
+  const mockQueryBuilder = {
+    select: () => mockQueryBuilder,
+    insert: () => Promise.resolve(mockResponse),
+    upsert: () => mockQueryBuilder,
+    update: () => mockQueryBuilder,
+    delete: () => mockQueryBuilder,
+    eq: () => mockQueryBuilder,
+    single: () => Promise.resolve(mockResponse),
+    order: () => mockQueryBuilder,
+    limit: () => mockQueryBuilder,
+    gt: () => mockQueryBuilder,
+  }
+
+  return {
+    from: () => mockQueryBuilder,
+    rpc: () => Promise.resolve(mockResponse),
+  } as unknown as SupabaseClient
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+// Export real client if configured, mock client otherwise
+export const supabase: SupabaseClient = isSupabaseConfigured
+  ? createClient(supabaseUrl!, supabaseKey!)
+  : createMockClient()
+
+// Log configuration status
+if (!isSupabaseConfigured) {
+  console.log('⚠️  Supabase not configured - using Prisma/SQLite only')
+}

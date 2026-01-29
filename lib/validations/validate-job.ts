@@ -1,7 +1,11 @@
-import { supabase } from '../supabase-script'
+import { supabase, isSupabaseConfigured } from '../supabase-script'
+import { PrismaClient } from '@prisma/client'
 import { jobSchema, type JobInput } from './job'
 import { findPriorityCompany } from '../priority-companies'
 import { computeBadges } from '../badges'
+
+// Prisma client for SQLite fallback
+const prisma = new PrismaClient()
 
 export async function validateAndSaveJob(
   rawJob: Record<string, unknown>,
@@ -10,49 +14,96 @@ export async function validateAndSaveJob(
   const result = jobSchema.safeParse(rawJob)
 
   if (!result.success) {
-    // 유효성 검사 실패 → error_logs에 기록
-    await supabase.from('error_logs').insert({
-      level: 'WARN',
-      message: `Validation failed: ${result.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')}`,
-      crawler_name: crawlerName,
-      stack_trace: JSON.stringify({ raw: rawJob, errors: result.error.issues }),
-    })
+    // Validation failed - log error
+    const errorMsg = `Validation failed: ${result.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')}`
+    console.warn(`[${crawlerName}] ${errorMsg}`)
+
+    if (isSupabaseConfigured) {
+      await supabase.from('error_logs').insert({
+        level: 'WARN',
+        message: errorMsg,
+        crawler_name: crawlerName,
+        stack_trace: JSON.stringify({ raw: rawJob, errors: result.error.issues }),
+      })
+    }
     return false
   }
 
   const job = result.data
-  const { data: upsertData, error } = await supabase.from('Job').upsert(
-    {
-      title: job.title,
-      company: job.company,
-      url: job.url,
-      location: job.location,
-      type: job.type,
-      category: job.category,
-      salary: job.salary || null,
-      tags: JSON.stringify(job.tags),
-      source: job.source,
-      region: job.region,
-      isActive: true,
-      postedDate: job.postedDate?.toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    { onConflict: 'url' }
-  ).select('id').single()
 
-  if (error) {
-    await supabase.from('error_logs').insert({
-      level: 'ERROR',
-      message: `DB upsert failed: ${error.message}`,
-      crawler_name: crawlerName,
-      stack_trace: JSON.stringify({ job: job.url, code: error.code }),
-    })
-    return false
-  }
+  // Use Prisma for SQLite, Supabase for production
+  if (isSupabaseConfigured) {
+    const { data: upsertData, error } = await supabase.from('Job').upsert(
+      {
+        title: job.title,
+        company: job.company,
+        url: job.url,
+        location: job.location,
+        type: job.type,
+        category: job.category,
+        salary: job.salary || null,
+        tags: JSON.stringify(job.tags),
+        source: job.source,
+        region: job.region,
+        isActive: true,
+        postedDate: job.postedDate?.toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      { onConflict: 'url' }
+    ).select('id').single()
 
-  // Enrich after save (non-fatal)
-  if (upsertData?.id) {
-    await enrichJobAfterSave(upsertData.id)
+    if (error) {
+      await supabase.from('error_logs').insert({
+        level: 'ERROR',
+        message: `DB upsert failed: ${error.message}`,
+        crawler_name: crawlerName,
+        stack_trace: JSON.stringify({ job: job.url, code: error.code }),
+      })
+      return false
+    }
+
+    // Enrich after save (non-fatal)
+    if (upsertData?.id) {
+      await enrichJobAfterSave(upsertData.id)
+    }
+  } else {
+    // Use Prisma/SQLite
+    try {
+      await prisma.job.upsert({
+        where: { url: job.url },
+        update: {
+          title: job.title,
+          company: job.company,
+          location: job.location,
+          type: job.type,
+          category: job.category,
+          salary: job.salary || null,
+          tags: JSON.stringify(job.tags),
+          source: job.source,
+          region: job.region,
+          isActive: true,
+          postedDate: job.postedDate,
+          updatedAt: new Date(),
+        },
+        create: {
+          title: job.title,
+          company: job.company,
+          url: job.url,
+          location: job.location,
+          type: job.type,
+          category: job.category,
+          salary: job.salary || null,
+          tags: JSON.stringify(job.tags),
+          source: job.source,
+          region: job.region,
+          isActive: true,
+          postedDate: job.postedDate,
+        },
+      })
+    } catch (error: any) {
+      console.error(`[${crawlerName}] Prisma upsert failed:`, error.message)
+      return false
+    }
   }
 
   return true
@@ -67,6 +118,8 @@ export async function validateAndSaveJob(
  * Non-fatal: errors are logged but never thrown.
  */
 export async function enrichJobAfterSave(jobId: string): Promise<void> {
+  if (!isSupabaseConfigured) return // Skip enrichment for SQLite
+
   try {
     const { data: row, error: fetchErr } = await supabase
       .from('Job')

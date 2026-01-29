@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase-script'
+import { supabase, isSupabaseConfigured } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { PRIORITY_COMPANIES } from '../../lib/priority-companies'
 import type { CareerPlatform } from '../../lib/priority-companies'
@@ -126,12 +126,14 @@ export async function crawlPriorityCompanies(): Promise<number> {
     }
   }
 
-  await supabase.from('CrawlLog').insert({
-    source: 'priority-companies',
-    status: 'success',
-    jobCount: totalSaved,
-    createdAt: new Date().toISOString(),
-  })
+  if (isSupabaseConfigured) {
+    await supabase.from('CrawlLog').insert({
+      source: 'priority-companies',
+      status: 'success',
+      jobCount: totalSaved,
+      createdAt: new Date().toISOString(),
+    })
+  }
 
   console.log(`✅ Priority Companies: ${totalSaved} total jobs saved`)
   return totalSaved
