@@ -317,9 +317,11 @@ export default function MemePage() {
                     top: '4%',
                     fontSize: 'clamp(14px, 5vw, 28px)',
                     color: textColor,
-                    fontFamily: 'Impact, Haettenschweiler, sans-serif',
-                    textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000',
-                    letterSpacing: '0.02em',
+                    fontFamily: 'Impact, "Arial Black", "Helvetica Bold", Arial, sans-serif',
+                    fontWeight: 900,
+                    textShadow: '3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 0 3px 0 #000, 0 -3px 0 #000, 3px 0 0 #000, -3px 0 0 #000',
+                    letterSpacing: '0.05em',
+                    WebkitTextStroke: '1px #000',
                   }}
                 >
                   {topText}
@@ -344,9 +346,11 @@ export default function MemePage() {
                     bottom: '4%',
                     fontSize: 'clamp(14px, 5vw, 28px)',
                     color: textColor,
-                    fontFamily: 'Impact, Haettenschweiler, sans-serif',
-                    textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000',
-                    letterSpacing: '0.02em',
+                    fontFamily: 'Impact, "Arial Black", "Helvetica Bold", Arial, sans-serif',
+                    fontWeight: 900,
+                    textShadow: '3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 0 3px 0 #000, 0 -3px 0 #000, 3px 0 0 #000, -3px 0 0 #000',
+                    letterSpacing: '0.05em',
+                    WebkitTextStroke: '1px #000',
                   }}
                 >
                   {bottomText}
