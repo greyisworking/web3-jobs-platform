@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Create client inside handler to avoid build-time initialization
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 export async function POST(req: Request) {
   try {
@@ -13,6 +16,9 @@ export async function POST(req: Request) {
     if (!jobId || !reason) {
       return NextResponse.json({ error: 'Missing jobId or reason' }, { status: 400 })
     }
+
+    // Initialize client at runtime
+    const supabase = getSupabaseClient()
 
     // Insert report into database
     const { error } = await supabase
