@@ -298,26 +298,30 @@ export default function MemePage() {
         // Convert SVG to image
         const img = await svgToImage(svgClone, pixelbaraDrawSize, pixelbaraDrawSize)
 
-        // Draw centered
+        // Draw centered (no offset - text will be positioned relative to this)
         const x = (targetWidth - pixelbaraDrawSize) / 2
-        const y = (targetHeight - pixelbaraDrawSize) / 2 - (bottomText ? targetHeight * 0.05 : 0)
+        const y = (targetHeight - pixelbaraDrawSize) / 2
 
         ctx.imageSmoothingEnabled = false // Crisp pixels
         ctx.drawImage(img, x, y, pixelbaraDrawSize, pixelbaraDrawSize)
       }
 
-      // 3. Draw top text
+      // Calculate text positions relative to Pixelbara (compact layout)
+      const pixelbaraSizeRatioForText = pixelbaraSize / 500
+      const pixelbaraDrawSizeForText = Math.min(targetWidth, targetHeight) * pixelbaraSizeRatioForText * 0.8
+      const centerY = targetHeight / 2
+      const fontSize = targetWidth * 0.08 // Bigger font (was 0.05)
+
+      // 3. Draw top text - right above Pixelbara
       if (topText) {
-        const fontSize = targetWidth * 0.05
-        const y = targetHeight * 0.08
-        drawMemeText(ctx, topText.toUpperCase(), targetWidth / 2, y, targetWidth * 0.9, fontSize, textColor)
+        const textY = centerY - (pixelbaraDrawSizeForText / 2) - fontSize * 0.8
+        drawMemeText(ctx, topText.toUpperCase(), targetWidth / 2, textY, targetWidth * 0.95, fontSize, textColor)
       }
 
-      // 4. Draw bottom text
+      // 4. Draw bottom text - right below Pixelbara
       if (bottomText) {
-        const fontSize = targetWidth * 0.05
-        const y = targetHeight * 0.92
-        drawMemeText(ctx, bottomText.toUpperCase(), targetWidth / 2, y, targetWidth * 0.9, fontSize, textColor)
+        const textY = centerY + (pixelbaraDrawSizeForText / 2) + fontSize * 1.2
+        drawMemeText(ctx, bottomText.toUpperCase(), targetWidth / 2, textY, targetWidth * 0.95, fontSize, textColor)
       }
 
       // 5. Draw watermark
@@ -383,20 +387,25 @@ export default function MemePage() {
         const img = await svgToImage(svgClone, pixelbaraDrawSize, pixelbaraDrawSize)
 
         const x = (targetWidth - pixelbaraDrawSize) / 2
-        const y = (targetHeight - pixelbaraDrawSize) / 2 - (bottomText ? targetHeight * 0.05 : 0)
+        const y = (targetHeight - pixelbaraDrawSize) / 2
 
         ctx.imageSmoothingEnabled = false
         ctx.drawImage(img, x, y, pixelbaraDrawSize, pixelbaraDrawSize)
       }
 
-      // 3. Draw texts
+      // 3. Draw texts (compact layout - close to Pixelbara)
+      const pixelbaraSizeRatioForText = pixelbaraSize / 500
+      const pixelbaraDrawSizeForText = Math.min(targetWidth, targetHeight) * pixelbaraSizeRatioForText * 0.8
+      const centerY = targetHeight / 2
+      const fontSize = targetWidth * 0.08 // Bigger font
+
       if (topText) {
-        const fontSize = targetWidth * 0.05
-        drawMemeText(ctx, topText.toUpperCase(), targetWidth / 2, targetHeight * 0.08, targetWidth * 0.9, fontSize, textColor)
+        const textY = centerY - (pixelbaraDrawSizeForText / 2) - fontSize * 0.8
+        drawMemeText(ctx, topText.toUpperCase(), targetWidth / 2, textY, targetWidth * 0.95, fontSize, textColor)
       }
       if (bottomText) {
-        const fontSize = targetWidth * 0.05
-        drawMemeText(ctx, bottomText.toUpperCase(), targetWidth / 2, targetHeight * 0.92, targetWidth * 0.9, fontSize, textColor)
+        const textY = centerY + (pixelbaraDrawSizeForText / 2) + fontSize * 1.2
+        drawMemeText(ctx, bottomText.toUpperCase(), targetWidth / 2, textY, targetWidth * 0.95, fontSize, textColor)
       }
 
       // 4. Watermark
@@ -483,7 +492,7 @@ export default function MemePage() {
           {/* LEFT: Canvas Preview */}
           {/* ════════════════════════════════════════════════════════ */}
           <div className="space-y-4">
-            {/* Preview Canvas */}
+            {/* Preview Canvas - Compact layout matching download */}
             <div
               className="relative flex flex-col items-center justify-center overflow-hidden mx-auto"
               style={{
@@ -496,54 +505,55 @@ export default function MemePage() {
                 imageRendering: 'pixelated',
               }}
             >
-              {/* Top text */}
-              {topText && (
-                <p
-                  className="absolute left-4 right-4 text-center font-black uppercase leading-tight z-10"
+              {/* Compact content group - text close to Pixelbara */}
+              <div className="flex flex-col items-center justify-center">
+                {/* Top text - right above Pixelbara */}
+                {topText && (
+                  <p
+                    className="text-center font-black uppercase leading-none mb-2 px-2"
+                    style={{
+                      fontSize: 'clamp(18px, 6vw, 40px)',
+                      color: textColor,
+                      fontFamily: 'Impact, "Arial Black", sans-serif',
+                      fontWeight: 900,
+                      textShadow: '3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 0 3px 0 #000, 0 -3px 0 #000, 3px 0 0 #000, -3px 0 0 #000',
+                      wordBreak: 'break-word',
+                      maxWidth: '95%',
+                    }}
+                  >
+                    {topText}
+                  </p>
+                )}
+
+                {/* Pixelbara - centered */}
+                <div
+                  ref={pixelbaraRef}
                   style={{
-                    top: '6%',
-                    fontSize: 'clamp(12px, 4vw, 24px)',
-                    color: textColor,
-                    fontFamily: 'Impact, "Arial Black", sans-serif',
-                    fontWeight: 900,
-                    textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000',
-                    wordBreak: 'break-word',
+                    width: `${pixelbaraSize}px`,
+                    imageRendering: 'pixelated',
                   }}
                 >
-                  {topText}
-                </p>
-              )}
+                  <Pixelbara pose={selectedPose} size={pixelbaraSize} />
+                </div>
 
-              {/* Pixelbara - with ref for Canvas API access */}
-              <div
-                ref={pixelbaraRef}
-                style={{
-                  width: `${pixelbaraSize}px`,
-                  imageRendering: 'pixelated',
-                  marginTop: topText ? '20px' : '0',
-                  marginBottom: bottomText ? '20px' : '0',
-                }}
-              >
-                <Pixelbara pose={selectedPose} size={pixelbaraSize} />
+                {/* Bottom text - right below Pixelbara */}
+                {bottomText && (
+                  <p
+                    className="text-center font-black uppercase leading-none mt-2 px-2"
+                    style={{
+                      fontSize: 'clamp(18px, 6vw, 40px)',
+                      color: textColor,
+                      fontFamily: 'Impact, "Arial Black", sans-serif',
+                      fontWeight: 900,
+                      textShadow: '3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 0 3px 0 #000, 0 -3px 0 #000, 3px 0 0 #000, -3px 0 0 #000',
+                      wordBreak: 'break-word',
+                      maxWidth: '95%',
+                    }}
+                  >
+                    {bottomText}
+                  </p>
+                )}
               </div>
-
-              {/* Bottom text */}
-              {bottomText && (
-                <p
-                  className="absolute left-4 right-4 text-center font-black uppercase leading-tight z-10"
-                  style={{
-                    bottom: '6%',
-                    fontSize: 'clamp(12px, 4vw, 24px)',
-                    color: textColor,
-                    fontFamily: 'Impact, "Arial Black", sans-serif',
-                    fontWeight: 900,
-                    textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000',
-                    wordBreak: 'break-word',
-                  }}
-                >
-                  {bottomText}
-                </p>
-              )}
 
               {/* Watermark */}
               <p
