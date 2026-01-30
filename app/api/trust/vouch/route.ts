@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import {
+  isValidWalletAddress,
+  checkRateLimit,
+  getRateLimitHeaders,
+  rateLimitedResponse,
+  checkSybilRisk,
+  meetsMinimumRequirements,
+  isSelfAction,
+  sanitizeInput,
+} from '@/lib/security'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,18 +19,50 @@ const supabase = createClient(
 // POST /api/trust/vouch - Create a vouch
 export async function POST(request: NextRequest) {
   try {
+    // Get client IP for rate limiting
+    const forwardedFor = request.headers.get('x-forwarded-for')
+    const ip = forwardedFor?.split(',')[0]?.trim() || 'unknown'
+
     const body = await request.json()
     const { voucherWallet, voucheeWallet, message } = body
 
+    // Validate required fields
     if (!voucherWallet || !voucheeWallet) {
-      return NextResponse.json({ error: 'Both wallet addresses required' }, { status: 400 })
+      return NextResponse.json({ error: '지갑 주소가 필요합니다.' }, { status: 400 })
     }
 
-    if (voucherWallet.toLowerCase() === voucheeWallet.toLowerCase()) {
-      return NextResponse.json({ error: "You can't vouch for yourself" }, { status: 400 })
+    // Validate wallet address format
+    if (!isValidWalletAddress(voucherWallet) || !isValidWalletAddress(voucheeWallet)) {
+      return NextResponse.json({ error: '올바른 지갑 주소 형식이 아닙니다.' }, { status: 400 })
     }
 
-    // Check if already vouched
+    // Self-action prevention
+    if (isSelfAction(voucherWallet, voucheeWallet)) {
+      return NextResponse.json({ error: '자기 자신에게 보증할 수 없습니다.' }, { status: 400 })
+    }
+
+    // Rate limiting
+    const rateLimit = checkRateLimit(voucherWallet.toLowerCase(), 'vouch')
+    if (rateLimit.limited) {
+      return rateLimitedResponse(rateLimit.retryAfter!)
+    }
+
+    // Check minimum requirements
+    const requirements = await meetsMinimumRequirements(voucherWallet)
+    if (!requirements.eligible) {
+      return NextResponse.json({ error: requirements.reason }, { status: 403 })
+    }
+
+    // Sybil risk check
+    const sybilCheck = await checkSybilRisk(voucherWallet)
+    if (sybilCheck.isSuspicious && sybilCheck.riskScore >= 70) {
+      console.warn(`High sybil risk detected for ${voucherWallet}: ${sybilCheck.reason}`)
+      return NextResponse.json({
+        error: '의심스러운 활동이 감지되었습니다. 나중에 다시 시도해주세요.',
+      }, { status: 403 })
+    }
+
+    // Check if already vouched (duplicate prevention)
     const { data: existing } = await supabase
       .from('vouches')
       .select('id')
@@ -29,8 +71,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (existing) {
-      return NextResponse.json({ error: 'Already vouched for this user' }, { status: 400 })
+      return NextResponse.json({ error: '이미 이 사용자에게 보증했습니다.' }, { status: 400 })
     }
+
+    // Sanitize message input
+    const sanitizedMessage = message ? sanitizeInput(message, { limitKey: 'message' }) : null
 
     // Create vouch
     const { data, error } = await supabase
@@ -38,7 +83,7 @@ export async function POST(request: NextRequest) {
       .insert({
         voucher_wallet: voucherWallet.toLowerCase(),
         vouchee_wallet: voucheeWallet.toLowerCase(),
-        message: message || null,
+        message: sanitizedMessage,
       })
       .select()
       .single()

@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import {
+  isValidWalletAddress,
+  checkRateLimit,
+  rateLimitedResponse,
+  checkSybilRisk,
+  meetsMinimumRequirements,
+  sanitizeInput,
+} from '@/lib/security'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -110,12 +118,40 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { voteId, voterWallet, decision, comment } = body
 
+    // Validate required fields
     if (!voteId || !voterWallet || !decision) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+      return NextResponse.json({ error: '필수 항목이 누락되었습니다.' }, { status: 400 })
     }
 
+    // Validate wallet address
+    if (!isValidWalletAddress(voterWallet)) {
+      return NextResponse.json({ error: '올바른 지갑 주소 형식이 아닙니다.' }, { status: 400 })
+    }
+
+    // Validate decision
     if (!['guilty', 'not_guilty', 'abstain'].includes(decision)) {
-      return NextResponse.json({ error: 'Invalid decision' }, { status: 400 })
+      return NextResponse.json({ error: '유효하지 않은 투표입니다.' }, { status: 400 })
+    }
+
+    // Rate limiting
+    const rateLimit = checkRateLimit(voterWallet.toLowerCase(), 'vote')
+    if (rateLimit.limited) {
+      return rateLimitedResponse(rateLimit.retryAfter!)
+    }
+
+    // Check minimum requirements
+    const requirements = await meetsMinimumRequirements(voterWallet)
+    if (!requirements.eligible) {
+      return NextResponse.json({ error: requirements.reason }, { status: 403 })
+    }
+
+    // Sybil risk check
+    const sybilCheck = await checkSybilRisk(voterWallet)
+    if (sybilCheck.isSuspicious && sybilCheck.riskScore >= 60) {
+      console.warn(`Sybil risk detected for voter ${voterWallet}: ${sybilCheck.reason}`)
+      return NextResponse.json({
+        error: '의심스러운 활동이 감지되었습니다.',
+      }, { status: 403 })
     }
 
     // Check if vote exists and is still active
@@ -126,18 +162,18 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (voteError || !vote) {
-      return NextResponse.json({ error: 'Vote not found' }, { status: 404 })
+      return NextResponse.json({ error: '투표를 찾을 수 없습니다.' }, { status: 404 })
     }
 
     if (vote.result) {
-      return NextResponse.json({ error: 'Voting has ended' }, { status: 400 })
+      return NextResponse.json({ error: '이미 종료된 투표입니다.' }, { status: 400 })
     }
 
     if (new Date(vote.voting_ends_at) < new Date()) {
-      return NextResponse.json({ error: 'Voting period has expired' }, { status: 400 })
+      return NextResponse.json({ error: '투표 기간이 만료되었습니다.' }, { status: 400 })
     }
 
-    // Check if already voted
+    // Check if already voted (duplicate prevention)
     const { data: existing } = await supabase
       .from('vote_records')
       .select('id')
@@ -146,8 +182,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (existing) {
-      return NextResponse.json({ error: 'Already voted' }, { status: 400 })
+      return NextResponse.json({ error: '이미 투표했습니다.' }, { status: 400 })
     }
+
+    // Sanitize comment
+    const sanitizedComment = comment ? sanitizeInput(comment, { limitKey: 'comment' }) : null
 
     // Cast vote
     const { data, error } = await supabase
@@ -156,7 +195,7 @@ export async function POST(request: NextRequest) {
         vote_id: voteId,
         voter_wallet: voterWallet.toLowerCase(),
         decision,
-        comment: comment || null,
+        comment: sanitizedComment,
       })
       .select()
       .single()
