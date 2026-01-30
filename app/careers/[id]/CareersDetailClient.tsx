@@ -248,12 +248,34 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
               </div>
             </div>
 
-            {/* Salary */}
-            {job.salary && (
-              <div className="py-4 border-t border-b border-a24-border dark:border-a24-dark-border">
-                <p className="text-sm text-a24-text dark:text-a24-dark-text font-medium">
-                  {job.salary}
-                </p>
+            {/* Salary & Experience */}
+            {(job.salary || job.salaryMin || job.salaryMax || job.experienceLevel || job.remoteType) && (
+              <div className="py-4 border-t border-b border-a24-border dark:border-a24-dark-border space-y-2">
+                {/* Salary display */}
+                {(job.salaryMin || job.salaryMax || job.salary) && (
+                  <p className="text-sm text-a24-text dark:text-a24-dark-text font-medium">
+                    {job.salaryMin && job.salaryMax ? (
+                      <>💰 {job.salaryCurrency || 'USD'} {job.salaryMin.toLocaleString()} - {job.salaryMax.toLocaleString()}/yr</>
+                    ) : job.salaryMin ? (
+                      <>💰 {job.salaryCurrency || 'USD'} {job.salaryMin.toLocaleString()}+/yr</>
+                    ) : (
+                      <>💰 {job.salary}</>
+                    )}
+                  </p>
+                )}
+                {/* Experience & Remote badges */}
+                <div className="flex flex-wrap gap-2">
+                  {job.experienceLevel && (
+                    <span className="inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-wider border border-a24-border dark:border-a24-dark-border text-a24-muted dark:text-a24-dark-muted">
+                      📊 {job.experienceLevel}
+                    </span>
+                  )}
+                  {job.remoteType && (
+                    <span className="inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-wider border border-a24-border dark:border-a24-dark-border text-a24-muted dark:text-a24-dark-muted">
+                      🏠 {job.remoteType}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
 
@@ -268,16 +290,78 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
               </div>
             )}
 
-            {/* Description */}
-            {job.description && (
+            {/* Job Description Section */}
+            {job.description ? (
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
                 <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
-                  Description
+                  Job Description
                 </h3>
                 <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
-                <p className="text-sm text-a24-text dark:text-a24-dark-text whitespace-pre-line leading-relaxed">
-                  {job.description}
-                </p>
+                <div
+                  className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-headings:text-a24-text dark:prose-headings:text-a24-dark-text prose-p:text-a24-text dark:prose-p:text-a24-dark-text prose-li:text-a24-text dark:prose-li:text-a24-dark-text prose-strong:text-a24-text dark:prose-strong:text-a24-dark-text"
+                  dangerouslySetInnerHTML={{ __html: job.description }}
+                />
+              </div>
+            ) : (
+              <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+                <div className="p-6 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border border-dashed border-a24-border dark:border-a24-dark-border text-center">
+                  <p className="text-sm text-a24-muted dark:text-a24-dark-muted mb-4">
+                    상세 내용은 원본 사이트에서 확인하세요
+                  </p>
+                  <a
+                    href={job.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'no_description_cta' })}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-neun-primary text-white font-bold text-sm uppercase tracking-wider hover:bg-neun-primary-hover transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    View Full Details & Apply
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {/* Requirements Section */}
+            {job.requirements && (
+              <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+                <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
+                  Requirements
+                </h3>
+                <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
+                <div
+                  className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: job.requirements }}
+                />
+              </div>
+            )}
+
+            {/* Responsibilities Section */}
+            {job.responsibilities && (
+              <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+                <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
+                  Responsibilities
+                </h3>
+                <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
+                <div
+                  className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: job.responsibilities }}
+                />
+              </div>
+            )}
+
+            {/* Benefits Section */}
+            {job.benefits && (
+              <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+                <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
+                  Benefits & Perks
+                </h3>
+                <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
+                <div
+                  className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: job.benefits }}
+                />
               </div>
             )}
 

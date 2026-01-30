@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "crawl": "tsx scripts/crawl.ts",
+    "recrawl:descriptions": "tsx scripts/recrawl-descriptions.ts",
     "schedule": "tsx scripts/scheduler.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run schedule\"",
     "db:push": "prisma db push",
