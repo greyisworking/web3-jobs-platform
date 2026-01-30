@@ -49,7 +49,7 @@ const POSES: { id: PoseId; label: string; category: string }[] = [
 ]
 
 // ══════════════════════════════════════════════════════════
-// BACKGROUNDS
+// BACKGROUNDS - Simplified (no gradients for Canvas API)
 // ══════════════════════════════════════════════════════════
 
 const BACKGROUNDS: { id: string; label: string; value: string; textColor: string }[] = [
@@ -57,6 +57,7 @@ const BACKGROUNDS: { id: string; label: string; value: string; textColor: string
   { id: 'dark', label: 'Dark', value: '#0B0F19', textColor: '#ffffff' },
   { id: 'light', label: 'Light', value: '#F5F5F5', textColor: '#0B0F19' },
   { id: 'black', label: 'Pure Black', value: '#000000', textColor: '#ffffff' },
+  { id: 'white', label: 'Pure White', value: '#FFFFFF', textColor: '#000000' },
   { id: 'ethereum', label: 'Ethereum', value: '#627EEA', textColor: '#ffffff' },
   { id: 'solana', label: 'Solana', value: '#9945FF', textColor: '#ffffff' },
   { id: 'bitcoin', label: 'Bitcoin', value: '#F7931A', textColor: '#000000' },
@@ -64,9 +65,8 @@ const BACKGROUNDS: { id: string; label: string; value: string; textColor: string
   { id: 'arbitrum', label: 'Arbitrum', value: '#28A0F0', textColor: '#ffffff' },
   { id: 'optimism', label: 'Optimism', value: '#FF0420', textColor: '#ffffff' },
   { id: 'base', label: 'Base', value: '#0052FF', textColor: '#ffffff' },
-  { id: 'web3-gradient', label: 'Web3', value: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', textColor: '#ffffff' },
-  { id: 'sunset', label: 'Sunset', value: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', textColor: '#ffffff' },
-  { id: 'neon', label: 'Neon', value: 'linear-gradient(135deg, #00ff87 0%, #60efff 100%)', textColor: '#000000' },
+  { id: 'pink', label: 'Pink', value: '#FF69B4', textColor: '#000000' },
+  { id: 'green', label: 'Green', value: '#00FF87', textColor: '#000000' },
 ]
 
 // ══════════════════════════════════════════════════════════
@@ -152,6 +152,57 @@ const TEXT_COLORS = [
 ]
 
 // ══════════════════════════════════════════════════════════
+// CANVAS DRAWING UTILITIES
+// ══════════════════════════════════════════════════════════
+
+// Convert SVG element to Image
+async function svgToImage(svgElement: SVGElement, width: number, height: number): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const svgData = new XMLSerializer().serializeToString(svgElement)
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
+    const url = URL.createObjectURL(svgBlob)
+
+    const img = new Image()
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      resolve(img)
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Failed to load SVG'))
+    }
+    img.src = url
+  })
+}
+
+// Draw meme text with stroke
+function drawMemeText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  fontSize: number,
+  textColor: string
+) {
+  ctx.save()
+  ctx.font = `bold ${fontSize}px "Impact", "Arial Black", sans-serif`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+
+  // Text stroke (outline)
+  ctx.strokeStyle = '#000000'
+  ctx.lineWidth = fontSize / 8
+  ctx.lineJoin = 'round'
+  ctx.strokeText(text, x, y, maxWidth)
+
+  // Text fill
+  ctx.fillStyle = textColor
+  ctx.fillText(text, x, y, maxWidth)
+  ctx.restore()
+}
+
+// ══════════════════════════════════════════════════════════
 // COMPONENT
 // ══════════════════════════════════════════════════════════
 
@@ -165,14 +216,13 @@ export default function MemePage() {
   const [pixelbaraSize, setPixelbaraSize] = useState(280)
   const [downloadSize, setDownloadSize] = useState('square')
   const [quality, setQuality] = useState('standard')
-  const canvasRef = useRef<HTMLDivElement>(null)
+  const pixelbaraRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     toast("time to make internet history", { duration: 3000 })
   }, [])
 
   const bg = BACKGROUNDS.find((b) => b.id === selectedBg) || BACKGROUNDS[1]
-  const isGradient = bg.value.includes('gradient')
   const isTransparent = bg.value === 'transparent'
   const currentSize = DOWNLOAD_SIZES.find((s) => s.id === downloadSize) || DOWNLOAD_SIZES[0]
   const currentQuality = QUALITY_OPTIONS.find((q) => q.id === quality) || QUALITY_OPTIONS[0]
@@ -198,34 +248,88 @@ export default function MemePage() {
     setBottomText(preset.bottom)
   }, [])
 
-  // Download as PNG - WYSIWYG with explicit dimensions
+  // ══════════════════════════════════════════════════════════
+  // CANVAS API DOWNLOAD - True transparency support
+  // ══════════════════════════════════════════════════════════
   const handleDownload = useCallback(async () => {
-    if (!canvasRef.current) return
+    if (!pixelbaraRef.current) return
 
     try {
-      const { toPng } = await import('html-to-image')
-
-      // Target output dimensions
-      const targetWidth = currentSize.width * currentQuality.multiplier
-      const targetHeight = currentSize.height * currentQuality.multiplier
-
-      // Show loading toast for high-res
+      // Show loading for high-res
       if (currentQuality.multiplier > 1) {
         toast.loading("Generating high-res image...", { id: 'download' })
       }
 
-      // Force exact output dimensions with style override
-      const dataUrl = await toPng(canvasRef.current, {
-        width: targetWidth,
-        height: targetHeight,
-        style: {
-          width: `${targetWidth}px`,
-          height: `${targetHeight}px`,
-        },
-        cacheBust: true,
-        backgroundColor: isTransparent ? undefined : undefined,
-      })
+      // Target dimensions
+      const targetWidth = currentSize.width * currentQuality.multiplier
+      const targetHeight = currentSize.height * currentQuality.multiplier
 
+      // Create canvas
+      const canvas = document.createElement('canvas')
+      canvas.width = targetWidth
+      canvas.height = targetHeight
+      const ctx = canvas.getContext('2d')
+      if (!ctx) throw new Error('Canvas not supported')
+
+      // 1. Draw background (transparent = skip, color = fill)
+      if (!isTransparent) {
+        ctx.fillStyle = bg.value
+        ctx.fillRect(0, 0, targetWidth, targetHeight)
+      }
+      // For transparent, canvas is already transparent (alpha = 0)
+
+      // 2. Get Pixelbara SVG and draw it
+      const svgElement = pixelbaraRef.current.querySelector('svg')
+      if (svgElement) {
+        // Clone SVG to avoid modifying the original
+        const svgClone = svgElement.cloneNode(true) as SVGElement
+
+        // Set explicit dimensions on SVG for proper scaling
+        const viewBox = svgClone.getAttribute('viewBox')
+        if (viewBox) {
+          svgClone.setAttribute('width', String(targetWidth))
+          svgClone.setAttribute('height', String(targetHeight))
+        }
+
+        // Calculate Pixelbara size relative to canvas
+        const pixelbaraSizeRatio = pixelbaraSize / 500 // relative to preview max size
+        const pixelbaraDrawSize = Math.min(targetWidth, targetHeight) * pixelbaraSizeRatio * 0.8
+
+        // Convert SVG to image
+        const img = await svgToImage(svgClone, pixelbaraDrawSize, pixelbaraDrawSize)
+
+        // Draw centered
+        const x = (targetWidth - pixelbaraDrawSize) / 2
+        const y = (targetHeight - pixelbaraDrawSize) / 2 - (bottomText ? targetHeight * 0.05 : 0)
+
+        ctx.imageSmoothingEnabled = false // Crisp pixels
+        ctx.drawImage(img, x, y, pixelbaraDrawSize, pixelbaraDrawSize)
+      }
+
+      // 3. Draw top text
+      if (topText) {
+        const fontSize = targetWidth * 0.05
+        const y = targetHeight * 0.08
+        drawMemeText(ctx, topText.toUpperCase(), targetWidth / 2, y, targetWidth * 0.9, fontSize, textColor)
+      }
+
+      // 4. Draw bottom text
+      if (bottomText) {
+        const fontSize = targetWidth * 0.05
+        const y = targetHeight * 0.92
+        drawMemeText(ctx, bottomText.toUpperCase(), targetWidth / 2, y, targetWidth * 0.9, fontSize, textColor)
+      }
+
+      // 5. Draw watermark
+      ctx.save()
+      ctx.font = `${targetWidth * 0.015}px sans-serif`
+      ctx.fillStyle = isTransparent ? 'rgba(255,255,255,0.3)' : `${bg.textColor}40`
+      ctx.textAlign = 'right'
+      ctx.fillText('neun.wtf', targetWidth - 10, targetHeight - 10)
+      ctx.restore()
+
+      // 6. Export as PNG
+      const dataUrl = canvas.toDataURL('image/png')
       const link = document.createElement('a')
       const qualitySuffix = currentQuality.multiplier > 1 ? `-${currentQuality.id}` : ''
       link.download = `pixelbara-meme-${currentSize.id}${qualitySuffix}-${Date.now()}.png`
@@ -233,50 +337,90 @@ export default function MemePage() {
       link.click()
 
       toast.dismiss('download')
-      const resolution = `${Math.round(targetWidth)}x${Math.round(targetHeight)}`
-      toast.success(`Downloaded! (${resolution}px)`, { duration: 3000 })
+      const resolution = `${targetWidth}x${targetHeight}`
+      toast.success(`Downloaded! (${resolution}px)${isTransparent ? ' - Transparent PNG' : ''}`, { duration: 3000 })
     } catch (error) {
       console.error('Failed to download:', error)
       toast.dismiss('download')
-      toast.error("download failed... try screenshot bestie", { duration: 3000 })
+      toast.error("download failed... try again", { duration: 3000 })
     }
-  }, [currentSize, currentQuality, isTransparent])
+  }, [currentSize, currentQuality, isTransparent, bg, pixelbaraSize, topText, bottomText, textColor])
 
-  // Copy to clipboard with explicit dimensions
+  // Copy to clipboard using Canvas API
   const handleCopy = useCallback(async () => {
-    if (!canvasRef.current) return
+    if (!pixelbaraRef.current) return
 
     try {
-      const { toBlob } = await import('html-to-image')
+      // Target dimensions (use standard quality for clipboard)
+      const targetWidth = currentSize.width
+      const targetHeight = currentSize.height
 
-      // Target output dimensions
-      const targetWidth = currentSize.width * currentQuality.multiplier
-      const targetHeight = currentSize.height * currentQuality.multiplier
+      // Create canvas
+      const canvas = document.createElement('canvas')
+      canvas.width = targetWidth
+      canvas.height = targetHeight
+      const ctx = canvas.getContext('2d')
+      if (!ctx) throw new Error('Canvas not supported')
 
-      // Force exact output dimensions with style override
-      const blob = await toBlob(canvasRef.current, {
-        width: targetWidth,
-        height: targetHeight,
-        style: {
-          width: `${targetWidth}px`,
-          height: `${targetHeight}px`,
-        },
-        cacheBust: true,
-      })
-
-      if (blob) {
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
-        ])
-        setCopied(true)
-        toast.success("copied to clipboard!", { duration: 2000 })
-        setTimeout(() => setCopied(false), 2000)
+      // 1. Draw background
+      if (!isTransparent) {
+        ctx.fillStyle = bg.value
+        ctx.fillRect(0, 0, targetWidth, targetHeight)
       }
+
+      // 2. Get Pixelbara SVG and draw it
+      const svgElement = pixelbaraRef.current.querySelector('svg')
+      if (svgElement) {
+        const svgClone = svgElement.cloneNode(true) as SVGElement
+        const viewBox = svgClone.getAttribute('viewBox')
+        if (viewBox) {
+          svgClone.setAttribute('width', String(targetWidth))
+          svgClone.setAttribute('height', String(targetHeight))
+        }
+
+        const pixelbaraSizeRatio = pixelbaraSize / 500
+        const pixelbaraDrawSize = Math.min(targetWidth, targetHeight) * pixelbaraSizeRatio * 0.8
+        const img = await svgToImage(svgClone, pixelbaraDrawSize, pixelbaraDrawSize)
+
+        const x = (targetWidth - pixelbaraDrawSize) / 2
+        const y = (targetHeight - pixelbaraDrawSize) / 2 - (bottomText ? targetHeight * 0.05 : 0)
+
+        ctx.imageSmoothingEnabled = false
+        ctx.drawImage(img, x, y, pixelbaraDrawSize, pixelbaraDrawSize)
+      }
+
+      // 3. Draw texts
+      if (topText) {
+        const fontSize = targetWidth * 0.05
+        drawMemeText(ctx, topText.toUpperCase(), targetWidth / 2, targetHeight * 0.08, targetWidth * 0.9, fontSize, textColor)
+      }
+      if (bottomText) {
+        const fontSize = targetWidth * 0.05
+        drawMemeText(ctx, bottomText.toUpperCase(), targetWidth / 2, targetHeight * 0.92, targetWidth * 0.9, fontSize, textColor)
+      }
+
+      // 4. Watermark
+      ctx.font = `${targetWidth * 0.015}px sans-serif`
+      ctx.fillStyle = isTransparent ? 'rgba(255,255,255,0.3)' : `${bg.textColor}40`
+      ctx.textAlign = 'right'
+      ctx.fillText('neun.wtf', targetWidth - 10, targetHeight - 10)
+
+      // 5. Copy to clipboard
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ])
+          setCopied(true)
+          toast.success("copied to clipboard!", { duration: 2000 })
+          setTimeout(() => setCopied(false), 2000)
+        }
+      }, 'image/png')
     } catch (error) {
       console.error('Failed to copy:', error)
       toast.error("copy failed... browser skill issue", { duration: 3000 })
     }
-  }, [currentSize, currentQuality])
+  }, [currentSize, isTransparent, bg, pixelbaraSize, topText, bottomText, textColor])
 
   // Share to Twitter
   const handleTwitterShare = useCallback(() => {
@@ -296,20 +440,17 @@ export default function MemePage() {
     toast("spreading the word fr", { duration: 2000 })
   }, [topText, bottomText])
 
-  // Calculate preview dimensions - explicit pixel sizes for reliable capture
+  // Calculate preview dimensions
   const aspectRatio = currentSize.width / currentSize.height
   const previewMaxSize = 500
 
-  // Calculate preview dimensions maintaining aspect ratio
   let previewWidth: number
   let previewHeight: number
 
   if (aspectRatio >= 1) {
-    // Square or landscape: constrain by width
     previewWidth = previewMaxSize
     previewHeight = previewMaxSize / aspectRatio
   } else {
-    // Portrait: constrain by height
     previewHeight = previewMaxSize
     previewWidth = previewMaxSize * aspectRatio
   }
@@ -342,18 +483,20 @@ export default function MemePage() {
           {/* LEFT: Canvas Preview */}
           {/* ════════════════════════════════════════════════════════ */}
           <div className="space-y-4">
-            {/* Canvas - Explicit pixel dimensions for reliable download */}
+            {/* Preview Canvas */}
             <div
-              ref={canvasRef}
               className="relative flex flex-col items-center justify-center overflow-hidden mx-auto"
               style={{
-                background: isTransparent ? 'repeating-conic-gradient(#333 0% 25%, #222 0% 50%) 50% / 20px 20px' : bg.value,
+                // Checkered pattern for transparent preview (CSS only, not in download)
+                background: isTransparent
+                  ? 'repeating-conic-gradient(#333 0% 25%, #222 0% 50%) 50% / 20px 20px'
+                  : bg.value,
                 width: `${previewWidth}px`,
                 height: `${previewHeight}px`,
                 imageRendering: 'pixelated',
               }}
             >
-              {/* Top text - positioned with padding to prevent clipping */}
+              {/* Top text */}
               {topText && (
                 <p
                   className="absolute left-4 right-4 text-center font-black uppercase leading-tight z-10"
@@ -361,11 +504,9 @@ export default function MemePage() {
                     top: '6%',
                     fontSize: 'clamp(12px, 4vw, 24px)',
                     color: textColor,
-                    fontFamily: '"Press Start 2P", "Noto Sans KR", Impact, "Arial Black", Arial, sans-serif',
+                    fontFamily: 'Impact, "Arial Black", sans-serif',
                     fontWeight: 900,
-                    textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 2px 0 0 #000, -2px 0 0 #000',
-                    letterSpacing: '0.05em',
-                    WebkitTextStroke: '1px #000',
+                    textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000',
                     wordBreak: 'break-word',
                   }}
                 >
@@ -373,17 +514,20 @@ export default function MemePage() {
                 </p>
               )}
 
-              {/* Pixelbara - centered and large */}
+              {/* Pixelbara - with ref for Canvas API access */}
               <div
+                ref={pixelbaraRef}
                 style={{
                   width: `${pixelbaraSize}px`,
                   imageRendering: 'pixelated',
+                  marginTop: topText ? '20px' : '0',
+                  marginBottom: bottomText ? '20px' : '0',
                 }}
               >
                 <Pixelbara pose={selectedPose} size={pixelbaraSize} />
               </div>
 
-              {/* Bottom text - positioned with padding to prevent clipping */}
+              {/* Bottom text */}
               {bottomText && (
                 <p
                   className="absolute left-4 right-4 text-center font-black uppercase leading-tight z-10"
@@ -391,11 +535,9 @@ export default function MemePage() {
                     bottom: '6%',
                     fontSize: 'clamp(12px, 4vw, 24px)',
                     color: textColor,
-                    fontFamily: '"Press Start 2P", "Noto Sans KR", Impact, "Arial Black", Arial, sans-serif',
+                    fontFamily: 'Impact, "Arial Black", sans-serif',
                     fontWeight: 900,
-                    textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 2px 0 0 #000, -2px 0 0 #000',
-                    letterSpacing: '0.05em',
-                    WebkitTextStroke: '1px #000',
+                    textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000',
                     wordBreak: 'break-word',
                   }}
                 >
@@ -459,9 +601,9 @@ export default function MemePage() {
 
             {/* Resolution info */}
             <p className="text-center text-[10px] text-a24-muted">
-              {currentSize.width * currentQuality.multiplier} × {currentSize.height * currentQuality.multiplier}px
-              {currentQuality.id === 'print' && ' • 300dpi print ready'}
-              {isTransparent && ' • transparent PNG'}
+              {currentSize.width * currentQuality.multiplier} x {currentSize.height * currentQuality.multiplier}px
+              {currentQuality.id === 'print' && ' (300dpi print ready)'}
+              {isTransparent && ' | Transparent PNG'}
             </p>
 
             {/* Action Buttons */}
@@ -657,7 +799,7 @@ export default function MemePage() {
                 <div>
                   <p className="text-[11px] text-a24-text font-medium">Pro tip</p>
                   <p className="text-[10px] text-a24-muted mt-0.5">
-                    Use transparent BG for stickers!
+                    Transparent = true PNG alpha! Perfect for stickers.
                   </p>
                 </div>
               </div>
