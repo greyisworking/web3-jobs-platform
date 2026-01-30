@@ -11,7 +11,8 @@ import BookmarkButton from './BookmarkButton'
 import { MiniPixelbara } from './Pixelbara'
 import { PixelStar } from './PixelIcons'
 import { MiniTrustBadge } from './TrustBadge'
-import { Lock, Vote } from 'lucide-react'
+import { Lock, Vote, Flag } from 'lucide-react'
+import { toast } from 'sonner'
 
 function isNewJob(postedDate: Date | string | null | undefined): boolean {
   if (!postedDate) return false
@@ -29,6 +30,46 @@ interface JobCardProps {
 const cardVariants = {
   hidden: { opacity: 0, y: 12 },
   visible: { opacity: 1, y: 0 },
+}
+
+function ReportButton({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
+  const [showTooltip, setShowTooltip] = useState(false)
+
+  const handleReport = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const reason = window.prompt('Report reason (spam, scam, inappropriate, etc.):')
+    if (!reason) return
+
+    try {
+      await fetch('/api/jobs/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId, reason }),
+      })
+      toast.success('Report submitted. Thank you!')
+    } catch {
+      toast.error('Failed to submit report')
+    }
+  }
+
+  return (
+    <button
+      onClick={handleReport}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+      className="relative p-1 text-a24-muted/40 hover:text-red-500 transition-colors"
+      aria-label="Report this job"
+    >
+      <Flag className="w-3 h-3" />
+      {showTooltip && (
+        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-0.5 text-[9px] whitespace-nowrap bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg rounded z-50">
+          Report
+        </span>
+      )}
+    </button>
+  )
 }
 
 function VCBadge({ backers }: { backers: string[] }) {
@@ -136,7 +177,8 @@ export default function JobCard({ job, index }: JobCardProps) {
               )}
             </div>
           </div>
-          <div className="flex-shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation() }}>
+          <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation() }}>
+            <ReportButton jobId={job.id} jobTitle={job.title} />
             <BookmarkButton job={{ id: job.id, title: job.title, company: job.company }} />
           </div>
         </div>

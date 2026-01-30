@@ -1,11 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
-const TIER1_VCS = [
-  'a16z', 'Hashed', 'Paradigm', 'Sequoia', 'Dragonfly',
-  'Polychain', 'Pantera', 'SoftBank', 'Animoca', 'Binance',
-  'Electric Capital', 'Galaxy Digital',
+const VC_LOGOS = [
+  { name: 'a16z', color: '#22C55E' },
+  { name: 'Paradigm', color: '#22C55E' },
+  { name: 'Hashed', color: '#22C55E' },
+  { name: 'Sequoia', color: '#22C55E' },
+  { name: 'Dragonfly', color: '#22C55E' },
+  { name: 'Polychain', color: '#22C55E' },
+  { name: 'SoftBank', color: '#22C55E' },
+  { name: 'Animoca', color: '#22C55E' },
+  { name: 'Binance', color: '#22C55E' },
+  { name: 'Electric Capital', color: '#22C55E' },
+  { name: 'Pantera', color: '#22C55E' },
+  { name: 'Galaxy Digital', color: '#22C55E' },
 ]
 
 interface SocialProofData {
@@ -15,7 +24,7 @@ interface SocialProofData {
 
 export default function SocialProof() {
   const [data, setData] = useState<SocialProofData | null>(null)
-  const [showVCs, setShowVCs] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch('/api/jobs')
@@ -42,35 +51,53 @@ export default function SocialProof() {
       .catch(() => {})
   }, [])
 
-  return (
-    <div className="py-8 border-t border-b border-a24-border dark:border-a24-dark-border">
-      <div
-        className="text-center relative"
-        onMouseEnter={() => setShowVCs(true)}
-        onMouseLeave={() => setShowVCs(false)}
-      >
-        <p className="text-xs uppercase tracking-[0.3em] font-medium text-a24-muted dark:text-a24-dark-muted cursor-default">
-          Backed by Tier 1 VCs
-          {data && data.vcBackedJobCount > 0 && (
-            <span className="ml-3 font-light opacity-60">
-              — {data.vcBackedJobCount} open roles
-            </span>
-          )}
-        </p>
+  // Auto-scroll marquee
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
 
-        {/* Hover: VC names */}
-        {showVCs && (
-          <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1 animate-in fade-in duration-200">
-            {TIER1_VCS.map((vc) => (
-              <span
-                key={vc}
-                className="text-[10px] uppercase tracking-[0.2em] font-light text-a24-muted/50 dark:text-a24-dark-muted/50"
-              >
-                {vc}
-              </span>
-            ))}
-          </div>
+    let animationId: number
+    let scrollPos = 0
+
+    const scroll = () => {
+      scrollPos += 0.5
+      if (scrollPos >= el.scrollWidth / 2) {
+        scrollPos = 0
+      }
+      el.scrollLeft = scrollPos
+      animationId = requestAnimationFrame(scroll)
+    }
+
+    animationId = requestAnimationFrame(scroll)
+    return () => cancelAnimationFrame(animationId)
+  }, [])
+
+  return (
+    <div className="py-8 border-t border-b border-a24-border dark:border-a24-dark-border overflow-hidden">
+      <p className="text-center text-xs uppercase tracking-[0.3em] font-medium text-a24-muted dark:text-a24-dark-muted mb-4">
+        Backed by Tier 1 VCs
+        {data && data.vcBackedJobCount > 0 && (
+          <span className="ml-3 font-light opacity-60">
+            — {data.vcBackedJobCount} open roles
+          </span>
         )}
+      </p>
+
+      {/* Marquee slider */}
+      <div
+        ref={scrollRef}
+        className="flex gap-6 overflow-hidden whitespace-nowrap"
+        style={{ scrollBehavior: 'auto' }}
+      >
+        {/* Duplicate for seamless loop */}
+        {[...VC_LOGOS, ...VC_LOGOS].map((vc, i) => (
+          <span
+            key={`${vc.name}-${i}`}
+            className="flex-shrink-0 text-sm font-bold uppercase tracking-wider text-emerald-500"
+          >
+            {vc.name}
+          </span>
+        ))}
       </div>
     </div>
   )
