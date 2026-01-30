@@ -48,57 +48,57 @@ function ShareModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={onClose}>
       <div
-        className="bg-gray-900 border border-gray-800 p-6 w-full max-w-sm mx-4"
+        className="bg-a24-surface border border-a24-border p-6 w-full max-w-sm mx-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-lg font-bold text-white mb-4">Share Article</h3>
+        <h3 className="text-lg font-bold text-a24-text mb-4">Share Article</h3>
 
         <div className="space-y-3">
           <a
             href={shareLinks.twitter}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-gray-700 text-white transition-colors"
+            className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-gray-700 text-a24-text transition-colors"
           >
             <Twitter className="w-5 h-5 text-[#1DA1F2]" />
             <span>Share on Twitter</span>
-            <ExternalLink className="w-4 h-4 ml-auto text-gray-500" />
+            <ExternalLink className="w-4 h-4 ml-auto text-a24-muted" />
           </a>
 
           <a
             href={shareLinks.farcaster}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-gray-700 text-white transition-colors"
+            className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-gray-700 text-a24-text transition-colors"
           >
             <div className="w-5 h-5 bg-purple-500 flex items-center justify-center text-xs font-bold">F</div>
             <span>Share on Farcaster</span>
-            <ExternalLink className="w-4 h-4 ml-auto text-gray-500" />
+            <ExternalLink className="w-4 h-4 ml-auto text-a24-muted" />
           </a>
 
           <a
             href={shareLinks.lens}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-gray-700 text-white transition-colors"
+            className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-gray-700 text-a24-text transition-colors"
           >
             <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-xs font-bold">L</div>
             <span>Share on Lens</span>
-            <ExternalLink className="w-4 h-4 ml-auto text-gray-500" />
+            <ExternalLink className="w-4 h-4 ml-auto text-a24-muted" />
           </a>
 
           <button
             onClick={copyLink}
-            className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-gray-700 text-white transition-colors w-full"
+            className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-gray-700 text-a24-text transition-colors w-full"
           >
-            {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5 text-gray-400" />}
+            {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5 text-a24-muted" />}
             <span>{copied ? 'Copied!' : 'Copy Link'}</span>
           </button>
         </div>
 
         <button
           onClick={onClose}
-          className="mt-4 w-full py-2 text-sm text-gray-400 hover:text-white transition-colors"
+          className="mt-4 w-full py-2 text-sm text-a24-muted hover:text-a24-text transition-colors"
         >
           Close
         </button>
@@ -138,11 +138,11 @@ function TipModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={onClose}>
       <div
-        className="bg-gray-900 border border-gray-800 p-6 w-full max-w-sm mx-4"
+        className="bg-a24-surface border border-a24-border p-6 w-full max-w-sm mx-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-lg font-bold text-white mb-2">Tip the Author</h3>
-        <p className="text-sm text-gray-400 mb-6">
+        <h3 className="text-lg font-bold text-a24-text mb-2">Tip the Author</h3>
+        <p className="text-sm text-a24-muted mb-6">
           Support {article.author_ens || article.author_name} with ETH
         </p>
 
@@ -154,8 +154,8 @@ function TipModal({
               onClick={() => setAmount(preset)}
               className={`py-2 text-sm font-medium transition-colors ${
                 amount === preset
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-800 text-gray-400 hover:text-white'
+                  ? 'bg-purple-600 text-a24-text'
+                  : 'bg-gray-800 text-a24-muted hover:text-a24-text'
               }`}
             >
               {preset}
@@ -171,22 +171,22 @@ function TipModal({
             onChange={(e) => setAmount(e.target.value)}
             min="0.001"
             step="0.001"
-            className="flex-1 bg-gray-800 border border-gray-700 px-3 py-2 text-white outline-none focus:border-purple-500"
+            className="flex-1 bg-gray-800 border border-gray-700 px-3 py-2 text-a24-text outline-none focus:border-purple-500"
           />
-          <span className="text-gray-400">ETH</span>
+          <span className="text-a24-muted">ETH</span>
         </div>
 
         <button
           onClick={handleTip}
           disabled={sending || !amount || parseFloat(amount) <= 0}
-          className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors disabled:opacity-50"
+          className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-a24-text font-medium transition-colors disabled:opacity-50"
         >
           {sending ? 'Sending...' : `Send ${amount} ETH`}
         </button>
 
         <button
           onClick={onClose}
-          className="mt-3 w-full py-2 text-sm text-gray-400 hover:text-white transition-colors"
+          className="mt-3 w-full py-2 text-sm text-a24-muted hover:text-a24-text transition-colors"
         >
           Cancel
         </button>
@@ -282,7 +282,7 @@ export default function ArticleDetailPage() {
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-center">
           <Pixelbara pose="loading" size={120} className="mx-auto mb-4" />
-          <p className="text-sm text-gray-500">Loading...</p>
+          <p className="text-sm text-a24-muted">Loading...</p>
         </div>
       </div>
     )
@@ -293,13 +293,13 @@ export default function ArticleDetailPage() {
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-center">
           <Pixelbara pose="notfound" size={180} className="mx-auto mb-6" />
-          <p className="text-2xl font-bold text-white mb-2">Article not found</p>
-          <p className="text-sm text-gray-400 mb-6">
+          <p className="text-2xl font-bold text-a24-text mb-2">Article not found</p>
+          <p className="text-sm text-a24-muted mb-6">
             ser, this article doesn&apos;t exist.
           </p>
           <button
             onClick={() => router.back()}
-            className="inline-flex items-center gap-2 text-sm text-white border border-gray-700 px-6 py-3 hover:bg-gray-800 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-a24-text border border-gray-700 px-6 py-3 hover:bg-gray-800 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Go Back
@@ -310,12 +310,12 @@ export default function ArticleDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-a24-bg">
       {/* Header */}
       <header className="max-w-3xl mx-auto px-6 pt-24 pb-12">
         <Link
           href="/articles"
-          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-sm text-a24-muted hover:text-a24-text transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Articles
@@ -335,7 +335,7 @@ export default function ArticleDetailPage() {
           </div>
         )}
 
-        <h1 className="text-2xl md:text-4xl font-bold text-white leading-tight mb-6">
+        <h1 className="text-2xl md:text-4xl font-bold text-a24-text leading-tight mb-6">
           {article.title}
         </h1>
 
@@ -348,11 +348,11 @@ export default function ArticleDetailPage() {
                 <>
                   <Blockies address={article.author_address} size={40} />
                   <div>
-                    <p className="text-white font-medium">
+                    <p className="text-a24-text font-medium">
                       {article.author_ens || truncateAddress(article.author_address)}
                     </p>
                     {article.author_ens && (
-                      <p className="text-xs text-gray-500 font-mono">
+                      <p className="text-xs text-a24-muted font-mono">
                         {truncateAddress(article.author_address)}
                       </p>
                     )}
@@ -360,13 +360,13 @@ export default function ArticleDetailPage() {
                 </>
               ) : (
                 <div>
-                  <p className="text-white font-medium">{article.author_name}</p>
+                  <p className="text-a24-text font-medium">{article.author_name}</p>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs text-gray-500">
+          <div className="flex items-center gap-4 text-xs text-a24-muted">
             <span className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5" />
               {article.reading_time || 1} min read
@@ -398,12 +398,12 @@ export default function ArticleDetailPage() {
       <article className="max-w-3xl mx-auto px-6 pb-12">
         <div
           className="prose prose-lg prose-invert max-w-none
-            prose-headings:font-bold prose-headings:text-white
-            prose-p:text-gray-300 prose-p:leading-relaxed
+            prose-headings:font-bold prose-headings:text-a24-text
+            prose-p:text-a24-text prose-p:leading-relaxed
             prose-a:text-purple-400 prose-a:underline prose-a:underline-offset-4
-            prose-blockquote:border-gray-700 prose-blockquote:text-gray-400
+            prose-blockquote:border-gray-700 prose-blockquote:text-a24-muted
             prose-code:text-purple-400 prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5
-            prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800
+            prose-pre:bg-a24-surface prose-pre:border prose-pre:border-a24-border
             prose-img:mx-auto
           "
           dangerouslySetInnerHTML={{ __html: article.content }}
@@ -412,7 +412,7 @@ export default function ArticleDetailPage() {
 
       {/* Action Bar */}
       <div className="max-w-3xl mx-auto px-6 pb-20">
-        <div className="border-t border-b border-gray-800 py-6">
+        <div className="border-t border-b border-a24-border py-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             {/* Collect & Stats */}
             <div className="flex items-center gap-6">
@@ -423,21 +423,21 @@ export default function ArticleDetailPage() {
                   collected
                     ? 'bg-purple-600/20 text-purple-400 cursor-default'
                     : isConnected
-                      ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                      : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                      ? 'bg-purple-600 hover:bg-purple-700 text-a24-text'
+                      : 'bg-gray-800 text-a24-muted cursor-not-allowed'
                 }`}
               >
                 <Heart className={`w-4 h-4 ${collected ? 'fill-current' : ''}`} />
                 {collecting ? 'Collecting...' : collected ? 'Collected' : 'Collect'}
               </button>
 
-              <div className="flex items-center gap-1.5 text-gray-400">
+              <div className="flex items-center gap-1.5 text-a24-muted">
                 <Heart className="w-4 h-4" />
                 <span className="text-sm">{article.collect_count} collected</span>
               </div>
 
               {article.tip_amount > 0 && (
-                <div className="flex items-center gap-1.5 text-gray-400">
+                <div className="flex items-center gap-1.5 text-a24-muted">
                   <Coins className="w-4 h-4" />
                   <span className="text-sm">{article.tip_amount.toFixed(4)} ETH tipped</span>
                 </div>
@@ -449,7 +449,7 @@ export default function ArticleDetailPage() {
               {isConnected && (
                 <button
                   onClick={() => setShowTip(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-a24-text text-sm transition-colors"
                 >
                   <Coins className="w-4 h-4" />
                   Tip
@@ -458,7 +458,7 @@ export default function ArticleDetailPage() {
 
               <button
                 onClick={() => setShowShare(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-a24-text text-sm transition-colors"
               >
                 <Share2 className="w-4 h-4" />
                 Share
@@ -466,7 +466,7 @@ export default function ArticleDetailPage() {
 
               <Link
                 href={`/articles/write?remix=${article.id}`}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-a24-text text-sm transition-colors"
               >
                 <MessageSquare className="w-4 h-4" />
                 Remix
@@ -475,7 +475,7 @@ export default function ArticleDetailPage() {
           </div>
 
           {!isConnected && (
-            <p className="text-xs text-gray-500 mt-4">
+            <p className="text-xs text-a24-muted mt-4">
               Connect wallet to collect and tip
             </p>
           )}
@@ -483,14 +483,14 @@ export default function ArticleDetailPage() {
 
         {/* Author Card */}
         {article.author_address && (
-          <div className="mt-8 p-6 bg-gray-900/50 border border-gray-800">
+          <div className="mt-8 p-6 bg-a24-surface border border-a24-border">
             <div className="flex items-center gap-4">
               <Blockies address={article.author_address} size={60} />
               <div className="flex-1">
-                <p className="text-white font-bold text-lg">
+                <p className="text-a24-text font-bold text-lg">
                   {article.author_ens || truncateAddress(article.author_address)}
                 </p>
-                <p className="text-xs text-gray-500 font-mono mb-2">
+                <p className="text-xs text-a24-muted font-mono mb-2">
                   {article.author_address}
                 </p>
                 <a

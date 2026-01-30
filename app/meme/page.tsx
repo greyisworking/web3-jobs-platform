@@ -289,23 +289,23 @@ export default function MemePage() {
   const aspectRatio = currentSize.width / currentSize.height
 
   return (
-    <div className="min-h-screen bg-[#0B0F19]">
+    <div className="min-h-screen bg-a24-bg">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-12">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-gray-400 hover:text-white transition-colors"
+              className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-a24-muted hover:text-a24-text transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Back
             </Link>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white">
+              <h1 className="text-2xl sm:text-3xl font-black text-a24-text">
                 Meme Generator
               </h1>
-              <p className="text-gray-400 text-sm">make memes not war</p>
+              <p className="text-a24-muted text-sm">make memes not war</p>
             </div>
           </div>
           <Pixelbara pose="meme" size={80} clickable />
@@ -398,7 +398,7 @@ export default function MemePage() {
                     className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border transition-all ${
                       downloadSize === size.id
                         ? 'bg-white text-black border-white'
-                        : 'bg-transparent text-gray-400 border-gray-700 hover:border-gray-500'
+                        : 'bg-transparent text-gray-400 border-a24-border hover:border-gray-500'
                     }`}
                   >
                     <Icon className="w-3 h-3" />
@@ -419,13 +419,13 @@ export default function MemePage() {
               </button>
               <button
                 onClick={handleCopy}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 text-white font-bold hover:bg-gray-700 transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-a24-surface text-white font-bold hover:bg-gray-700 transition-colors"
               >
                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </button>
               <button
                 onClick={handleTwitterShare}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-black text-white font-bold border border-gray-700 hover:bg-gray-900 transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-black text-white font-bold border border-a24-border hover:bg-gray-900 transition-colors"
               >
                 <Twitter className="w-4 h-4" />
               </button>
@@ -441,7 +441,7 @@ export default function MemePage() {
           {/* ════════════════════════════════════════════════════════ */}
           {/* RIGHT: Controls */}
           {/* ════════════════════════════════════════════════════════ */}
-          <div className="space-y-5 bg-gray-900/50 p-4 sm:p-5 border border-gray-800">
+          <div className="space-y-5 bg-a24-surface p-4 sm:p-5 border border-a24-border">
             {/* Random Button */}
             <button
               onClick={handleRandom}
@@ -453,7 +453,7 @@ export default function MemePage() {
 
             {/* Pose Selection */}
             <div>
-              <h3 className="text-[10px] uppercase tracking-wider text-gray-500 mb-2 font-bold">
+              <h3 className="text-[10px] uppercase tracking-wider text-a24-muted mb-2 font-bold">
                 vibe check
               </h3>
               <div className="grid grid-cols-3 gap-1.5">
@@ -464,7 +464,7 @@ export default function MemePage() {
                     className={`p-2 text-center border transition-all ${
                       selectedPose === pose.id
                         ? 'bg-white text-black border-white'
-                        : 'bg-gray-800/50 text-gray-300 border-gray-700 hover:border-gray-500'
+                        : 'bg-a24-surface/50 text-a24-text border-a24-border hover:border-gray-500'
                     }`}
                   >
                     <span className="text-[9px] block leading-tight">{pose.label}</span>
@@ -475,7 +475,7 @@ export default function MemePage() {
 
             {/* Size Slider */}
             <div>
-              <h3 className="text-[10px] uppercase tracking-wider text-gray-500 mb-2 font-bold">
+              <h3 className="text-[10px] uppercase tracking-wider text-a24-muted mb-2 font-bold">
                 how thicc: {pixelbaraSize}px
               </h3>
               <input
@@ -490,7 +490,7 @@ export default function MemePage() {
 
             {/* Background Selection */}
             <div>
-              <h3 className="text-[10px] uppercase tracking-wider text-gray-500 mb-2 font-bold">
+              <h3 className="text-[10px] uppercase tracking-wider text-a24-muted mb-2 font-bold">
                 aesthetic
               </h3>
               <div className="grid grid-cols-7 gap-1.5">
@@ -520,7 +520,7 @@ export default function MemePage() {
             {/* Text Inputs */}
             <div className="space-y-3">
               <div>
-                <h3 className="text-[10px] uppercase tracking-wider text-gray-500 mb-1.5 font-bold">
+                <h3 className="text-[10px] uppercase tracking-wider text-a24-muted mb-1.5 font-bold">
                   Top Text
                 </h3>
                 <input
@@ -528,11 +528,11 @@ export default function MemePage() {
                   value={topText}
                   onChange={(e) => setTopText(e.target.value.toUpperCase())}
                   placeholder="OPTIONAL"
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-white text-sm placeholder-gray-500 focus:border-purple-500 outline-none transition-colors font-bold uppercase"
+                  className="w-full px-3 py-2 bg-a24-surface border border-a24-border text-white text-sm placeholder-gray-500 focus:border-purple-500 outline-none transition-colors font-bold uppercase"
                 />
               </div>
               <div>
-                <h3 className="text-[10px] uppercase tracking-wider text-gray-500 mb-1.5 font-bold">
+                <h3 className="text-[10px] uppercase tracking-wider text-a24-muted mb-1.5 font-bold">
                   Bottom Text
                 </h3>
                 <input
@@ -540,14 +540,14 @@ export default function MemePage() {
                   value={bottomText}
                   onChange={(e) => setBottomText(e.target.value.toUpperCase())}
                   placeholder="ENTER YOUR TEXT"
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-white text-sm placeholder-gray-500 focus:border-purple-500 outline-none transition-colors font-bold uppercase"
+                  className="w-full px-3 py-2 bg-a24-surface border border-a24-border text-white text-sm placeholder-gray-500 focus:border-purple-500 outline-none transition-colors font-bold uppercase"
                 />
               </div>
             </div>
 
             {/* Text Color */}
             <div>
-              <h3 className="text-[10px] uppercase tracking-wider text-gray-500 mb-2 font-bold">
+              <h3 className="text-[10px] uppercase tracking-wider text-a24-muted mb-2 font-bold">
                 Text Color
               </h3>
               <div className="flex gap-1.5">
@@ -570,12 +570,12 @@ export default function MemePage() {
             {/* Gen Z Presets */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">
+                <h3 className="text-[10px] uppercase tracking-wider text-a24-muted font-bold">
                   Presets
                 </h3>
                 <button
                   onClick={() => applyPreset(PRESET_TEXTS[Math.floor(Math.random() * PRESET_TEXTS.length)])}
-                  className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-white transition-colors"
+                  className="flex items-center gap-1 text-[10px] text-a24-muted hover:text-white transition-colors"
                 >
                   <RefreshCw className="w-3 h-3" />
                   Random
@@ -586,7 +586,7 @@ export default function MemePage() {
                   <button
                     key={i}
                     onClick={() => applyPreset(preset)}
-                    className="px-2 py-1 text-[10px] bg-gray-800/50 border border-gray-700 hover:border-purple-500 hover:bg-gray-700 transition-colors text-gray-300 truncate max-w-[160px]"
+                    className="px-2 py-1 text-[10px] bg-a24-surface/50 border border-a24-border hover:border-purple-500 hover:bg-gray-700 transition-colors text-a24-text truncate max-w-[160px]"
                   >
                     {preset.top ? `${preset.top.slice(0, 15)}...` : preset.bottom.slice(0, 20)}
                   </button>
@@ -595,12 +595,12 @@ export default function MemePage() {
             </div>
 
             {/* Pro tip */}
-            <div className="p-3 bg-gray-800/30 border border-gray-700/50">
+            <div className="p-3 bg-a24-surface/30 border border-a24-border/50">
               <div className="flex items-start gap-2">
                 <Sparkles className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-[11px] text-gray-300 font-medium">Pro tip</p>
-                  <p className="text-[10px] text-gray-500 mt-0.5">
+                  <p className="text-[11px] text-a24-text font-medium">Pro tip</p>
+                  <p className="text-[10px] text-a24-muted mt-0.5">
                     Use transparent BG for stickers!
                   </p>
                 </div>

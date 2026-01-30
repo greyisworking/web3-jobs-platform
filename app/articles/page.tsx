@@ -53,29 +53,29 @@ export default function ArticlesPage() {
     : articles
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-a24-bg">
       <div className="max-w-3xl mx-auto px-6">
         <SubpageHeader title="A R T I C L E S" />
       </div>
 
       <main className="max-w-3xl mx-auto px-6 pb-20">
         {/* Hero with Pixelbara */}
-        <div className="py-12 border-b border-gray-800 mb-8">
+        <div className="py-12 border-b border-a24-border mb-8">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-purple-400 mb-2">
                 Web3 Insights
               </p>
-              <h2 className="text-2xl font-bold text-white mb-2">
+              <h2 className="text-2xl font-bold text-a24-text mb-2">
                 Reading the Alpha
               </h2>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-a24-muted">
                 Discover insights from the community. Connect wallet to write.
               </p>
             </div>
             <div className="relative">
               <Pixelbara pose="sitting" size={100} className="opacity-90" />
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gray-800 px-2 py-1 text-[10px] text-gray-400 whitespace-nowrap">
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-a24-surface px-2 py-1 text-[10px] text-a24-muted whitespace-nowrap">
                 reading the alpha
               </div>
             </div>
@@ -86,7 +86,7 @@ export default function ArticlesPage() {
             {(isConnected || user) ? (
               <Link
                 href="/articles/write"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-a24-text text-sm font-medium transition-colors"
               >
                 <PenLine className="w-4 h-4" />
                 Write Article
@@ -94,7 +94,7 @@ export default function ArticlesPage() {
             ) : (
               <Link
                 href="/articles/write"
-                className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                className="text-sm text-a24-muted hover:text-gray-300 transition-colors"
               >
                 Sign in to write articles
               </Link>
@@ -109,8 +109,8 @@ export default function ArticlesPage() {
               onClick={() => setSelectedTag(null)}
               className={`px-3 py-1 text-xs font-medium transition-colors ${
                 !selectedTag
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-800 text-gray-400 hover:text-white'
+                  ? 'bg-purple-600 text-a24-text'
+                  : 'bg-a24-surface text-a24-muted hover:text-a24-text'
               }`}
             >
               All
@@ -121,8 +121,8 @@ export default function ArticlesPage() {
                 onClick={() => setSelectedTag(tag)}
                 className={`px-3 py-1 text-xs font-medium transition-colors ${
                   selectedTag === tag
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-800 text-gray-400 hover:text-white'
+                    ? 'bg-purple-600 text-a24-text'
+                    : 'bg-a24-surface text-a24-muted hover:text-a24-text'
                 }`}
               >
                 {tag}
@@ -134,19 +134,19 @@ export default function ArticlesPage() {
         {loading ? (
           <div className="py-24 text-center">
             <Pixelbara pose="loading" size={120} className="mx-auto mb-4" />
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-a24-muted">
               Loading articles...
             </p>
           </div>
         ) : filteredArticles.length === 0 ? (
-          <div className="py-24 text-center border border-gray-800">
+          <div className="py-24 text-center border border-a24-border">
             <Pixelbara pose="sparkle" size={140} className="mx-auto mb-4" />
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-a24-muted">
               no articles yet... be the first writer
             </p>
             <Link
               href="/articles/write"
-              className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
+              className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-a24-text text-sm font-medium transition-colors"
             >
               <PenLine className="w-4 h-4" />
               Write Article
@@ -160,7 +160,7 @@ export default function ArticlesPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="border-b border-gray-800"
+                className="border-b border-a24-border"
               >
                 <Link
                   href={`/articles/${article.slug}`}
@@ -182,24 +182,24 @@ export default function ArticlesPage() {
                         </div>
                       )}
 
-                      <h2 className="text-lg font-medium text-white mb-2 group-hover:text-purple-400 transition-colors">
+                      <h2 className="text-lg font-medium text-a24-text mb-2 group-hover:text-purple-400 transition-colors">
                         {article.title}
                       </h2>
 
                       {article.excerpt && (
-                        <p className="text-sm text-gray-400 line-clamp-2 mb-3">
+                        <p className="text-sm text-a24-muted line-clamp-2 mb-3">
                           {article.excerpt}
                         </p>
                       )}
 
                       {/* Author & Meta */}
-                      <div className="flex items-center gap-4 text-[11px] text-gray-500">
+                      <div className="flex items-center gap-4 text-[11px] text-a24-muted">
                         {/* Author with Blockies */}
                         <div className="flex items-center gap-1.5">
                           {article.author_address ? (
                             <>
                               <Blockies address={article.author_address} size={16} />
-                              <span className="text-gray-400">
+                              <span className="text-a24-muted">
                                 {article.author_ens || truncateAddress(article.author_address)}
                               </span>
                             </>

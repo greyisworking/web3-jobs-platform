@@ -110,8 +110,8 @@ export default function CreateBountyPage() {
         <main className="max-w-2xl mx-auto px-6 py-20">
           <div className="text-center">
             <Pixelbara pose="question" size={150} className="mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-white mb-4">Connect Wallet to Post</h2>
-            <p className="text-gray-400 mb-8">
+            <h2 className="text-2xl font-bold text-a24-text mb-4">Connect Wallet to Post</h2>
+            <p className="text-a24-muted mb-8">
               You need to connect your wallet to create a bounty.
             </p>
             <WalletConnect />
@@ -124,7 +124,7 @@ export default function CreateBountyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-a24-bg">
       <div className="max-w-6xl mx-auto px-6">
         <SubpageHeader title="P O S T  B O U N T Y" />
       </div>
@@ -133,7 +133,7 @@ export default function CreateBountyPage() {
         {/* Back Link */}
         <Link
           href="/bounties"
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
+          className="inline-flex items-center gap-2 text-a24-muted hover:text-a24-text mb-8 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Bounties
@@ -142,8 +142,8 @@ export default function CreateBountyPage() {
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-white mb-2">Create a Bounty</h2>
-            <p className="text-gray-400">
+            <h2 className="text-2xl font-bold text-a24-text mb-2">Create a Bounty</h2>
+            <p className="text-a24-muted">
               Post a task and reward contributors in crypto.
             </p>
           </div>
@@ -154,7 +154,7 @@ export default function CreateBountyPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Title */}
           <div>
-            <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">
+            <label className="block text-xs uppercase tracking-wider text-a24-muted mb-2">
               Title *
             </label>
             <input
@@ -162,14 +162,14 @@ export default function CreateBountyPage() {
               value={form.title}
               onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
               placeholder="e.g., Build a token swap widget"
-              className="w-full px-4 py-3 bg-gray-900 border border-gray-800 text-white placeholder-gray-600 focus:border-green-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-green-500 focus:outline-none"
               required
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">
+            <label className="block text-xs uppercase tracking-wider text-a24-muted mb-2">
               <FileText className="w-3 h-3 inline mr-1" />
               Description *
             </label>
@@ -178,14 +178,14 @@ export default function CreateBountyPage() {
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               placeholder="Describe the task in detail. What needs to be built? What are the acceptance criteria?"
               rows={5}
-              className="w-full px-4 py-3 bg-gray-900 border border-gray-800 text-white placeholder-gray-600 focus:border-green-500 focus:outline-none resize-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-green-500 focus:outline-none resize-none"
               required
             />
           </div>
 
           {/* Category */}
           <div>
-            <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">
+            <label className="block text-xs uppercase tracking-wider text-a24-muted mb-2">
               <Tag className="w-3 h-3 inline mr-1" />
               Category
             </label>
@@ -197,8 +197,8 @@ export default function CreateBountyPage() {
                   onClick={() => setForm(f => ({ ...f, category: cat.id }))}
                   className={`px-4 py-2 text-sm transition-colors ${
                     form.category === cat.id
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-800 text-gray-400 hover:text-white'
+                      ? 'bg-purple-600 text-a24-text'
+                      : 'bg-gray-800 text-a24-muted hover:text-a24-text'
                   }`}
                 >
                   {cat.emoji} {cat.label}
@@ -210,7 +210,7 @@ export default function CreateBountyPage() {
           {/* Reward */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">
+              <label className="block text-xs uppercase tracking-wider text-a24-muted mb-2">
                 <Zap className="w-3 h-3 inline mr-1" />
                 Reward Amount *
               </label>
@@ -221,18 +221,18 @@ export default function CreateBountyPage() {
                 value={form.reward_amount}
                 onChange={e => setForm(f => ({ ...f, reward_amount: e.target.value }))}
                 placeholder="0.5"
-                className="w-full px-4 py-3 bg-gray-900 border border-gray-800 text-white placeholder-gray-600 focus:border-green-500 focus:outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-green-500 focus:outline-none"
                 required
               />
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">
+              <label className="block text-xs uppercase tracking-wider text-a24-muted mb-2">
                 Token
               </label>
               <select
                 value={form.reward_token}
                 onChange={e => setForm(f => ({ ...f, reward_token: e.target.value }))}
-                className="w-full px-4 py-3 bg-gray-900 border border-gray-800 text-white focus:border-green-500 focus:outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-green-500 focus:outline-none"
               >
                 <option value="ETH">ETH</option>
                 <option value="USDC">USDC</option>
@@ -246,7 +246,7 @@ export default function CreateBountyPage() {
 
           {/* Deadline */}
           <div>
-            <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">
+            <label className="block text-xs uppercase tracking-wider text-a24-muted mb-2">
               <Calendar className="w-3 h-3 inline mr-1" />
               Deadline
             </label>
@@ -255,13 +255,13 @@ export default function CreateBountyPage() {
               value={form.deadline}
               onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-3 bg-gray-900 border border-gray-800 text-white focus:border-green-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-green-500 focus:outline-none"
             />
           </div>
 
           {/* Skills */}
           <div>
-            <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">
+            <label className="block text-xs uppercase tracking-wider text-a24-muted mb-2">
               Required Skills
             </label>
             <div className="flex gap-2 mb-2">
@@ -276,12 +276,12 @@ export default function CreateBountyPage() {
                   }
                 }}
                 placeholder="Add a skill"
-                className="flex-1 px-4 py-2 bg-gray-900 border border-gray-800 text-white placeholder-gray-600 focus:border-green-500 focus:outline-none text-sm"
+                className="flex-1 px-4 py-2 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-green-500 focus:outline-none text-sm"
               />
               <button
                 type="button"
                 onClick={() => addSkill(skillInput)}
-                className="px-4 py-2 bg-gray-800 text-white text-sm hover:bg-gray-700"
+                className="px-4 py-2 bg-gray-800 text-a24-text text-sm hover:bg-gray-700"
               >
                 Add
               </button>
@@ -294,7 +294,7 @@ export default function CreateBountyPage() {
                   key={skill}
                   type="button"
                   onClick={() => addSkill(skill)}
-                  className="px-2 py-1 bg-gray-800/50 text-gray-500 text-xs hover:text-white hover:bg-gray-800"
+                  className="px-2 py-1 bg-gray-800/50 text-gray-500 text-xs hover:text-a24-text hover:bg-gray-800"
                 >
                   + {skill}
                 </button>
@@ -313,7 +313,7 @@ export default function CreateBountyPage() {
                     <button
                       type="button"
                       onClick={() => removeSkill(skill)}
-                      className="hover:text-white"
+                      className="hover:text-a24-text"
                     >
                       ×
                     </button>
@@ -325,7 +325,7 @@ export default function CreateBountyPage() {
 
           {/* Requirements */}
           <div>
-            <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">
+            <label className="block text-xs uppercase tracking-wider text-a24-muted mb-2">
               Requirements
             </label>
             <textarea
@@ -333,13 +333,13 @@ export default function CreateBountyPage() {
               onChange={e => setForm(f => ({ ...f, requirements: e.target.value }))}
               placeholder="Any specific requirements or constraints?"
               rows={3}
-              className="w-full px-4 py-3 bg-gray-900 border border-gray-800 text-white placeholder-gray-600 focus:border-green-500 focus:outline-none resize-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-green-500 focus:outline-none resize-none"
             />
           </div>
 
           {/* Submission Requirements */}
           <div>
-            <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">
+            <label className="block text-xs uppercase tracking-wider text-a24-muted mb-2">
               Submission Requirements
             </label>
             <textarea
@@ -347,13 +347,13 @@ export default function CreateBountyPage() {
               onChange={e => setForm(f => ({ ...f, submission_requirements: e.target.value }))}
               placeholder="What should hunters submit? (e.g., GitHub repo, deployed link, documentation)"
               rows={2}
-              className="w-full px-4 py-3 bg-gray-900 border border-gray-800 text-white placeholder-gray-600 focus:border-green-500 focus:outline-none resize-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-green-500 focus:outline-none resize-none"
             />
           </div>
 
           {/* External URL */}
           <div>
-            <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">
+            <label className="block text-xs uppercase tracking-wider text-a24-muted mb-2">
               <LinkIcon className="w-3 h-3 inline mr-1" />
               External URL (optional)
             </label>
@@ -362,7 +362,7 @@ export default function CreateBountyPage() {
               value={form.external_url}
               onChange={e => setForm(f => ({ ...f, external_url: e.target.value }))}
               placeholder="https://github.com/..."
-              className="w-full px-4 py-3 bg-gray-900 border border-gray-800 text-white placeholder-gray-600 focus:border-green-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-green-500 focus:outline-none"
             />
           </div>
 

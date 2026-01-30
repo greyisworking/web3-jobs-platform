@@ -123,7 +123,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
         <main className="max-w-4xl mx-auto px-6 py-20">
           <div className="text-center">
             <Pixelbara pose="loading" size={100} className="mx-auto mb-4" />
-            <p className="text-gray-500">Loading bounty...</p>
+            <p className="text-a24-muted">Loading bounty...</p>
           </div>
         </main>
         <Footer />
@@ -140,11 +140,11 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
         <main className="max-w-4xl mx-auto px-6 py-20">
           <div className="text-center">
             <Pixelbara pose="question" size={120} className="mx-auto mb-4" />
-            <p className="text-lg text-white mb-2">Bounty not found</p>
-            <p className="text-sm text-gray-500 mb-6">ngmi. this bounty does not exist</p>
+            <p className="text-lg text-a24-text mb-2">Bounty not found</p>
+            <p className="text-sm text-a24-muted mb-6">ngmi. this bounty does not exist</p>
             <Link
               href="/bounties"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white hover:bg-gray-700"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-a24-text hover:bg-gray-700"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Bounties
@@ -157,7 +157,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-a24-bg">
       <div className="max-w-6xl mx-auto px-6">
         <SubpageHeader title="B O U N T Y" />
       </div>
@@ -166,7 +166,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
         {/* Back Link */}
         <Link
           href="/bounties"
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-a24-muted hover:text-a24-text mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Bounties
@@ -177,7 +177,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
           {/* Left Column - Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Header */}
-            <div className="bg-gray-900/50 border border-gray-800 p-6">
+            <div className="bg-a24-surface border border-a24-border p-6">
               <div className="flex items-center gap-2 mb-3">
                 {bounty.category && (
                   <span className="px-2 py-0.5 bg-purple-600/20 text-purple-400 text-xs uppercase tracking-wider">
@@ -190,16 +190,16 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                     : bounty.status === 'in_progress'
                       ? 'bg-yellow-500/20 text-yellow-400'
                       : bounty.status === 'completed'
-                        ? 'bg-gray-500/20 text-gray-400'
+                        ? 'bg-gray-500/20 text-a24-muted'
                         : 'bg-red-500/20 text-red-400'
                 }`}>
                   {bounty.status.replace('_', ' ')}
                 </span>
               </div>
 
-              <h1 className="text-2xl font-bold text-white mb-4">{bounty.title}</h1>
+              <h1 className="text-2xl font-bold text-a24-text mb-4">{bounty.title}</h1>
 
-              <div className="flex items-center gap-4 text-sm text-gray-400">
+              <div className="flex items-center gap-4 text-sm text-a24-muted">
                 <span className="flex items-center gap-1">
                   <Blockies address={bounty.poster_address} size={16} />
                   Posted by {bounty.poster_ens || truncateAddress(bounty.poster_address)}
@@ -216,8 +216,8 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
             </div>
 
             {/* Description */}
-            <div className="bg-gray-900/50 border border-gray-800 p-6">
-              <h2 className="text-sm uppercase tracking-wider text-gray-400 mb-4">Description</h2>
+            <div className="bg-a24-surface border border-a24-border p-6">
+              <h2 className="text-sm uppercase tracking-wider text-a24-muted mb-4">Description</h2>
               <div className="prose prose-invert prose-sm max-w-none">
                 <p className="text-gray-300 whitespace-pre-wrap">{bounty.description}</p>
               </div>
@@ -225,24 +225,24 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
 
             {/* Requirements */}
             {bounty.requirements && (
-              <div className="bg-gray-900/50 border border-gray-800 p-6">
-                <h2 className="text-sm uppercase tracking-wider text-gray-400 mb-4">Requirements</h2>
+              <div className="bg-a24-surface border border-a24-border p-6">
+                <h2 className="text-sm uppercase tracking-wider text-a24-muted mb-4">Requirements</h2>
                 <p className="text-gray-300 whitespace-pre-wrap">{bounty.requirements}</p>
               </div>
             )}
 
             {/* Submission Requirements */}
             {bounty.submission_requirements && (
-              <div className="bg-gray-900/50 border border-gray-800 p-6">
-                <h2 className="text-sm uppercase tracking-wider text-gray-400 mb-4">What to Submit</h2>
+              <div className="bg-a24-surface border border-a24-border p-6">
+                <h2 className="text-sm uppercase tracking-wider text-a24-muted mb-4">What to Submit</h2>
                 <p className="text-gray-300 whitespace-pre-wrap">{bounty.submission_requirements}</p>
               </div>
             )}
 
             {/* Skills */}
             {bounty.skills && bounty.skills.length > 0 && (
-              <div className="bg-gray-900/50 border border-gray-800 p-6">
-                <h2 className="text-sm uppercase tracking-wider text-gray-400 mb-4">Required Skills</h2>
+              <div className="bg-a24-surface border border-a24-border p-6">
+                <h2 className="text-sm uppercase tracking-wider text-a24-muted mb-4">Required Skills</h2>
                 <div className="flex flex-wrap gap-2">
                   {bounty.skills.map(skill => (
                     <span
@@ -258,8 +258,8 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
 
             {/* Submissions (for poster only) */}
             {isPoster && submissions.length > 0 && (
-              <div className="bg-gray-900/50 border border-gray-800 p-6">
-                <h2 className="text-sm uppercase tracking-wider text-gray-400 mb-4 flex items-center gap-2">
+              <div className="bg-a24-surface border border-a24-border p-6">
+                <h2 className="text-sm uppercase tracking-wider text-a24-muted mb-4 flex items-center gap-2">
                   <Trophy className="w-4 h-4 text-yellow-400" />
                   Submissions ({submissions.length})
                 </h2>
@@ -267,12 +267,12 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                   {submissions.map(sub => (
                     <div
                       key={sub.id}
-                      className="p-4 bg-gray-800/50 border border-gray-700"
+                      className="p-4 bg-gray-800/50 border border-a24-border"
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <Blockies address={sub.hunter_address} size={24} />
-                          <span className="text-white font-medium">
+                          <span className="text-a24-text font-medium">
                             {sub.hunter_ens || truncateAddress(sub.hunter_address)}
                           </span>
                         </div>
@@ -281,14 +281,14 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                             ? 'bg-green-500/20 text-green-400'
                             : sub.status === 'rejected'
                               ? 'bg-red-500/20 text-red-400'
-                              : 'bg-gray-500/20 text-gray-400'
+                              : 'bg-gray-500/20 text-a24-muted'
                         }`}>
                           {sub.status}
                         </span>
                       </div>
 
                       {sub.description && (
-                        <p className="text-sm text-gray-400 mb-2">{sub.description}</p>
+                        <p className="text-sm text-a24-muted mb-2">{sub.description}</p>
                       )}
 
                       {sub.submission_url && (
@@ -305,16 +305,16 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                       )}
 
                       {sub.status === 'pending' && (
-                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-700">
+                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-a24-border">
                           <button
-                            className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-a24-text text-xs"
                             onClick={() => toast.info('Approval coming soon')}
                           >
                             <CheckCircle className="w-3 h-3" />
                             Approve
                           </button>
                           <button
-                            className="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-a24-text text-xs"
                             onClick={() => toast.info('Rejection coming soon')}
                           >
                             <XCircle className="w-3 h-3" />
@@ -332,24 +332,24 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
           {/* Right Column - Actions */}
           <div className="space-y-6">
             {/* Reward Card */}
-            <div className="bg-gray-900/50 border border-gray-800 p-6">
+            <div className="bg-a24-surface border border-a24-border p-6">
               <div className="text-center mb-6">
                 <div className="flex items-center justify-center gap-2 text-3xl font-bold text-green-400 mb-2">
                   <Zap className="w-6 h-6" />
                   {bounty.reward_amount} {bounty.reward_token}
                 </div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider">Bounty Reward</p>
+                <p className="text-xs text-a24-muted uppercase tracking-wider">Bounty Reward</p>
               </div>
 
               {!isConnected ? (
                 <div className="text-center">
-                  <p className="text-sm text-gray-400 mb-4">Connect wallet to submit</p>
+                  <p className="text-sm text-a24-muted mb-4">Connect wallet to submit</p>
                   <WalletConnect />
                 </div>
               ) : isPoster ? (
                 <div className="text-center">
-                  <p className="text-sm text-gray-400 mb-2">This is your bounty</p>
-                  <p className="text-xs text-gray-500">Review submissions above</p>
+                  <p className="text-sm text-a24-muted mb-2">This is your bounty</p>
+                  <p className="text-xs text-a24-muted">Review submissions above</p>
                 </div>
               ) : hasSubmitted ? (
                 <div className="text-center">
@@ -357,36 +357,36 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                     <CheckCircle className="w-5 h-5" />
                     <span className="font-medium">Submitted!</span>
                   </div>
-                  <p className="text-xs text-gray-500">Your submission is being reviewed</p>
+                  <p className="text-xs text-a24-muted">Your submission is being reviewed</p>
                 </div>
               ) : canSubmit ? (
                 showSubmitForm ? (
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <label className="block text-xs text-gray-400 mb-1">Submission URL</label>
+                      <label className="block text-xs text-a24-muted mb-1">Submission URL</label>
                       <input
                         type="url"
                         value={submitForm.submission_url}
                         onChange={e => setSubmitForm(f => ({ ...f, submission_url: e.target.value }))}
                         placeholder="https://github.com/..."
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-white text-sm focus:border-green-500 focus:outline-none"
+                        className="w-full px-3 py-2 bg-gray-800 border border-a24-border text-a24-text text-sm focus:border-green-500 focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-400 mb-1">Description</label>
+                      <label className="block text-xs text-a24-muted mb-1">Description</label>
                       <textarea
                         value={submitForm.description}
                         onChange={e => setSubmitForm(f => ({ ...f, description: e.target.value }))}
                         placeholder="Describe your submission..."
                         rows={3}
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-white text-sm focus:border-green-500 focus:outline-none resize-none"
+                        className="w-full px-3 py-2 bg-gray-800 border border-a24-border text-a24-text text-sm focus:border-green-500 focus:outline-none resize-none"
                       />
                     </div>
                     <div className="flex gap-2">
                       <button
                         type="button"
                         onClick={() => setShowSubmitForm(false)}
-                        className="flex-1 py-2 bg-gray-800 text-gray-400 text-sm hover:bg-gray-700"
+                        className="flex-1 py-2 bg-gray-800 text-a24-muted text-sm hover:bg-gray-700"
                       >
                         Cancel
                       </button>
@@ -412,8 +412,8 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                 )
               ) : (
                 <div className="text-center">
-                  <AlertCircle className="w-8 h-8 text-gray-500 mx-auto mb-2" />
-                  <p className="text-sm text-gray-400">
+                  <AlertCircle className="w-8 h-8 text-a24-muted mx-auto mb-2" />
+                  <p className="text-sm text-a24-muted">
                     This bounty is {bounty.status === 'completed' ? 'completed' : 'closed'}
                   </p>
                 </div>
@@ -426,7 +426,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                 href={bounty.external_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 p-4 bg-gray-900/50 border border-gray-800 text-gray-400 hover:text-white hover:border-gray-700 transition-colors"
+                className="flex items-center justify-center gap-2 p-4 bg-a24-surface border border-a24-border text-a24-muted hover:text-a24-text hover:border-a24-border transition-colors"
               >
                 <ExternalLink className="w-4 h-4" />
                 View External Resource

@@ -170,7 +170,7 @@ export default function ArticleWritePage() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-gray-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-a24-muted animate-spin" />
       </div>
     )
   }
@@ -181,10 +181,10 @@ export default function ArticleWritePage() {
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-6">
           <Pixelbara pose="question" size={140} className="mx-auto mb-6" />
-          <h1 className="text-2xl font-bold text-white mb-2">
+          <h1 className="text-2xl font-bold text-a24-text mb-2">
             Log In to Write
           </h1>
-          <p className="text-sm text-gray-400 mb-8">
+          <p className="text-sm text-a24-muted mb-8">
             Share your alpha with the community. Log in to get started.
           </p>
 
@@ -222,20 +222,20 @@ export default function ArticleWritePage() {
 
           <div className="flex items-center gap-4 my-6">
             <div className="flex-1 h-px bg-gray-800" />
-            <span className="text-xs text-gray-500 uppercase tracking-wider">or</span>
+            <span className="text-xs text-a24-muted uppercase tracking-wider">or</span>
             <div className="flex-1 h-px bg-gray-800" />
           </div>
 
           <Link
             href="/login"
-            className="text-sm text-gray-400 hover:text-white transition-colors"
+            className="text-sm text-a24-muted hover:text-a24-text transition-colors"
           >
             Log in with Email
           </Link>
 
           <Link
             href="/articles"
-            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300 mt-8 transition-colors block"
+            className="inline-flex items-center gap-2 text-sm text-a24-muted hover:text-a24-text mt-8 transition-colors block"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Articles
@@ -251,13 +251,13 @@ export default function ArticleWritePage() {
     : (user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous')
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-a24-bg">
       {/* Header */}
-      <header className="border-b border-gray-800">
+      <header className="border-b border-a24-border">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link
             href="/articles"
-            className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-a24-muted hover:text-a24-text transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
@@ -265,7 +265,7 @@ export default function ArticleWritePage() {
 
           <div className="flex items-center gap-4">
             {/* Connected User/Wallet Info */}
-            <div className="flex items-center gap-2 text-sm text-gray-400">
+            <div className="flex items-center gap-2 text-sm text-a24-muted">
               {isConnected && address ? (
                 <>
                   <Blockies address={address} size={20} />
@@ -277,7 +277,7 @@ export default function ArticleWritePage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={user.user_metadata.avatar_url} alt="" className="w-5 h-5 rounded-full" />
                   ) : (
-                    <div className="w-5 h-5 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs">
+                    <div className="w-5 h-5 rounded-full bg-purple-600 flex items-center justify-center text-a24-text text-xs">
                       {displayName[0].toUpperCase()}
                     </div>
                   )}
@@ -290,7 +290,7 @@ export default function ArticleWritePage() {
               <button
                 onClick={() => handleSubmit(false)}
                 disabled={loading}
-                className="inline-flex items-center gap-2 text-sm text-gray-400 border border-gray-700 px-4 py-2 hover:border-gray-500 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 text-sm text-a24-muted border border-gray-700 px-4 py-2 hover:border-gray-500 transition-colors disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
                 Save Draft
@@ -298,7 +298,7 @@ export default function ArticleWritePage() {
               <button
                 onClick={() => handleSubmit(true)}
                 disabled={loading}
-                className="inline-flex items-center gap-2 text-sm bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 text-sm bg-purple-600 hover:bg-purple-700 text-a24-text px-4 py-2 transition-colors disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Publish
@@ -320,9 +320,9 @@ export default function ArticleWritePage() {
                 onChange={handleTitleChange}
                 placeholder="Article Title"
                 maxLength={60}
-                className="w-full text-2xl md:text-3xl font-bold bg-transparent border-none outline-none text-white placeholder:text-gray-600"
+                className="w-full text-2xl md:text-3xl font-bold bg-transparent border-none outline-none text-a24-text placeholder:text-gray-600"
               />
-              <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+              <div className="flex items-center justify-between mt-2 text-xs text-a24-muted">
                 <span>{form.title.length}/60</span>
                 {form.slug && <span className="font-mono">/articles/{form.slug}</span>}
               </div>
@@ -335,7 +335,7 @@ export default function ArticleWritePage() {
                 onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))}
                 placeholder="Brief description (optional)"
                 rows={2}
-                className="w-full text-sm bg-transparent border border-gray-800 p-3 outline-none text-white placeholder:text-gray-600 resize-none focus:border-purple-500 transition-colors"
+                className="w-full text-sm bg-transparent border border-a24-border p-3 outline-none text-a24-text placeholder:text-gray-600 resize-none focus:border-purple-500 transition-colors"
               />
             </div>
 
@@ -346,10 +346,10 @@ export default function ArticleWritePage() {
                 value={form.cover_image}
                 onChange={(e) => setForm((prev) => ({ ...prev, cover_image: e.target.value }))}
                 placeholder="Cover image URL (optional)"
-                className="w-full text-sm bg-transparent border border-gray-800 p-3 outline-none text-white placeholder:text-gray-600 focus:border-purple-500 transition-colors"
+                className="w-full text-sm bg-transparent border border-a24-border p-3 outline-none text-a24-text placeholder:text-gray-600 focus:border-purple-500 transition-colors"
               />
               {form.cover_image && (
-                <div className="mt-2 aspect-video bg-gray-900 overflow-hidden">
+                <div className="mt-2 aspect-video bg-a24-surface overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={form.cover_image}
@@ -363,7 +363,7 @@ export default function ArticleWritePage() {
 
             {/* Tags */}
             <div>
-              <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
+              <label className="block text-xs uppercase tracking-wider text-a24-muted mb-2">
                 Tags (up to 5)
               </label>
 
@@ -375,7 +375,7 @@ export default function ArticleWritePage() {
                       className="inline-flex items-center gap-1 px-2 py-1 bg-purple-600/20 text-purple-400 text-xs"
                     >
                       {tag}
-                      <button onClick={() => removeTag(tag)} className="hover:text-white">
+                      <button onClick={() => removeTag(tag)} className="hover:text-a24-text">
                         <X className="w-3 h-3" />
                       </button>
                     </span>
@@ -396,12 +396,12 @@ export default function ArticleWritePage() {
                       }
                     }}
                     placeholder="Add a tag..."
-                    className="flex-1 text-sm bg-transparent border border-gray-800 px-3 py-2 outline-none text-white placeholder:text-gray-600 focus:border-purple-500 transition-colors"
+                    className="flex-1 text-sm bg-transparent border border-a24-border px-3 py-2 outline-none text-a24-text placeholder:text-gray-600 focus:border-purple-500 transition-colors"
                   />
                   <button
                     onClick={() => addTag(tagInput)}
                     disabled={!tagInput.trim()}
-                    className="px-3 py-2 bg-gray-800 text-gray-400 hover:text-white disabled:opacity-50 transition-colors"
+                    className="px-3 py-2 bg-gray-800 text-a24-muted hover:text-a24-text disabled:opacity-50 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -414,7 +414,7 @@ export default function ArticleWritePage() {
                     key={tag}
                     onClick={() => addTag(tag)}
                     disabled={form.tags.length >= 5}
-                    className="px-2 py-1 text-xs text-gray-500 border border-gray-800 hover:border-gray-600 hover:text-gray-300 disabled:opacity-50 transition-colors"
+                    className="px-2 py-1 text-xs text-a24-muted border border-a24-border hover:border-gray-600 hover:text-a24-text disabled:opacity-50 transition-colors"
                   >
                     {tag}
                   </button>
@@ -434,8 +434,8 @@ export default function ArticleWritePage() {
           <aside className="hidden lg:block">
             <div className="sticky top-8 space-y-6">
               {/* Author Preview */}
-              <div className="border border-gray-800 p-5">
-                <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-4 font-medium">
+              <div className="border border-a24-border p-5">
+                <h3 className="text-xs uppercase tracking-wider text-a24-muted mb-4 font-medium">
                   Publishing As
                 </h3>
                 <div className="flex items-center gap-3">
@@ -445,13 +445,13 @@ export default function ArticleWritePage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={user.user_metadata.avatar_url} alt="" className="w-10 h-10 rounded-full" />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold">
+                    <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-a24-text font-bold">
                       {displayName[0].toUpperCase()}
                     </div>
                   )}
                   <div>
-                    <p className="text-white font-medium">{displayName}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-a24-text font-medium">{displayName}</p>
+                    <p className="text-xs text-a24-muted">
                       {isConnected ? truncateAddress(address!) : user.email}
                     </p>
                   </div>
@@ -465,10 +465,10 @@ export default function ArticleWritePage() {
                     <Wallet className="w-3.5 h-3.5" />
                     Connect Wallet
                   </h3>
-                  <p className="text-xs text-gray-400 mb-4">
+                  <p className="text-xs text-a24-muted mb-4">
                     Optional: Connect wallet for additional benefits
                   </p>
-                  <ul className="space-y-2 text-xs text-gray-500 mb-4">
+                  <ul className="space-y-2 text-xs text-a24-muted mb-4">
                     <li className="flex items-center gap-2">
                       <Shield className="w-3 h-3 text-purple-400" />
                       On-chain reputation badges
@@ -492,11 +492,11 @@ export default function ArticleWritePage() {
               )}
 
               {/* Writing Guide */}
-              <div className="border border-gray-800 p-5">
-                <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-4 font-medium">
+              <div className="border border-a24-border p-5">
+                <h3 className="text-xs uppercase tracking-wider text-a24-muted mb-4 font-medium">
                   Writing Guide
                 </h3>
-                <ul className="space-y-3 text-xs text-gray-400">
+                <ul className="space-y-3 text-xs text-a24-muted">
                   <li className="flex items-start gap-2">
                     <span className="text-purple-400">01</span>
                     <span>Keep titles concise and clear</span>
@@ -521,11 +521,11 @@ export default function ArticleWritePage() {
               </div>
 
               {/* Reading Time Estimate */}
-              <div className="border border-gray-800 p-5">
-                <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-2 font-medium">
+              <div className="border border-a24-border p-5">
+                <h3 className="text-xs uppercase tracking-wider text-a24-muted mb-2 font-medium">
                   Estimated Reading Time
                 </h3>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-a24-text">
                   {calculateReadingTime(form.content)} min
                 </p>
               </div>
