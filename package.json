@@ -24,6 +24,8 @@
     "test:e2e": "tsx tests/e2e-tests.ts",
     "test:data": "tsx tests/data-quality-tests.ts",
     "test:all": "tsx tests/run-all-tests.ts",
+    "test:qa": "tsx tests/qa-phase7-tests.ts",
+    "test:qa:report": "tsx tests/qa-phase7-tests.ts --report",
     "validate": "tsx scripts/validate-jobs.ts"
   },
   "dependencies": {
