@@ -174,3 +174,163 @@
 .pixelbara-rainbow svg {
   animation: pixelbara-rainbow-hue 2s linear infinite;
 }
+
+/* ════════════════════════════════════════════
+   Green Primary Design System
+   ════════════════════════════════════════════ */
+
+/* Green glow effect for buttons */
+.btn-green-glow {
+  @apply bg-emerald-500 text-white font-bold transition-all duration-200;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+}
+
+.btn-green-glow:hover {
+  @apply bg-emerald-400 scale-105;
+  box-shadow: 0 0 20px 4px rgba(34, 197, 94, 0.4);
+}
+
+.btn-green-glow:active {
+  @apply scale-95;
+  box-shadow: 0 0 10px 2px rgba(34, 197, 94, 0.6);
+}
+
+/* Card hover lift animation */
+.card-hover-lift {
+  @apply transition-all duration-300 ease-out;
+}
+
+.card-hover-lift:hover {
+  @apply -translate-y-1;
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
+}
+
+.dark .card-hover-lift:hover {
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(34, 197, 94, 0.1);
+}
+
+/* Green accent link */
+.link-green {
+  @apply text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 transition-colors;
+}
+
+/* Green gradient text */
+.text-gradient-green {
+  @apply bg-gradient-to-r from-emerald-500 to-teal-400 bg-clip-text text-transparent;
+}
+
+/* Green border glow */
+.border-green-glow {
+  @apply border border-emerald-500/20;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  transition: box-shadow 0.3s ease;
+}
+
+.border-green-glow:hover {
+  box-shadow: 0 0 16px 2px rgba(34, 197, 94, 0.2);
+}
+
+/* Pixel click effect */
+@keyframes pixel-pop {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+.pixel-click-effect {
+  position: relative;
+  overflow: visible;
+}
+
+.pixel-click-effect::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: #22C55E;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+}
+
+.pixel-click-effect:active::after {
+  animation: pixel-pop 0.3s ease-out;
+}
+
+/* Touch-friendly button sizing */
+@media (pointer: coarse) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Section spacing */
+.section-spacing {
+  @apply py-16 md:py-20 lg:py-24;
+}
+
+.section-spacing-lg {
+  @apply py-20 md:py-28 lg:py-32;
+}
+
+/* Card gap responsive */
+.card-grid {
+  @apply grid gap-4 md:gap-6 lg:gap-8;
+  grid-template-columns: repeat(1, 1fr);
+}
+
+@media (min-width: 640px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Page transition */
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: page-fade-in 0.4s ease-out;
+}
+
+/* Trust badge colors */
+.trust-verified {
+  @apply bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20;
+}
+
+.trust-caution {
+  @apply bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20;
+}
+
+.trust-warning {
+  @apply bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20;
+}
+
+.trust-danger {
+  @apply bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20;
+}

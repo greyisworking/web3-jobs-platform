@@ -157,13 +157,50 @@ module.exports = {
           '0%, 100%': { opacity: '1' },
           '50%':      { opacity: '0' },
         },
+        'bounce-subtle': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%':      { transform: 'translateY(-4px)' },
+        },
+        'pulse-green': {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(34, 197, 94, 0.4)' },
+          '50%':      { boxShadow: '0 0 0 8px rgba(34, 197, 94, 0)' },
+        },
+        'glow-green': {
+          '0%, 100%': { boxShadow: '0 0 20px 4px rgba(34, 197, 94, 0.2)' },
+          '50%':      { boxShadow: '0 0 30px 8px rgba(34, 197, 94, 0.4)' },
+        },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%':      { transform: 'translateY(-8px)' },
+        },
+        'pixel-blink': {
+          '0%, 90%, 100%': { opacity: '1' },
+          '95%':           { opacity: '0.3' },
+        },
       },
       animation: {
-        shimmer:       'shimmer 3s ease-in-out infinite',
-        'scroll-left': 'scroll-left 30s linear infinite',
-        'fade-in':     'fade-in 0.3s ease-out',
-        'fade-out':    'fade-out 0.2s ease-in',
-        blink:         'blink 1s step-end infinite',
+        shimmer:        'shimmer 3s ease-in-out infinite',
+        'scroll-left':  'scroll-left 30s linear infinite',
+        'fade-in':      'fade-in 0.3s ease-out',
+        'fade-out':     'fade-out 0.2s ease-in',
+        blink:          'blink 1s step-end infinite',
+        'bounce-subtle': 'bounce-subtle 2s ease-in-out infinite',
+        'pulse-green':  'pulse-green 2s ease-in-out infinite',
+        'glow-green':   'glow-green 3s ease-in-out infinite',
+        'float':        'float 3s ease-in-out infinite',
+        'pixel-blink':  'pixel-blink 4s ease-in-out infinite',
+      },
+
+      // ════════════════════════════════════════════
+      // ═══ BOX SHADOW ═══
+      // ════════════════════════════════════════════
+      boxShadow: {
+        'green-sm': '0 0 8px 2px rgba(34, 197, 94, 0.2)',
+        'green-md': '0 0 16px 4px rgba(34, 197, 94, 0.25)',
+        'green-lg': '0 0 24px 6px rgba(34, 197, 94, 0.3)',
+        'green-glow': '0 0 20px 4px rgba(34, 197, 94, 0.4)',
+        'card-hover': '0 12px 24px -8px rgba(0, 0, 0, 0.15)',
+        'card-hover-dark': '0 12px 24px -8px rgba(0, 0, 0, 0.5)',
       },
     },
   },
