@@ -1,12 +1,182 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, Plus } from 'lucide-react'
+import { Menu, X, Plus, ChevronDown, User, LogOut, Settings } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import NeunLogo from './NeunLogo'
 import { WalletConnect } from './WalletConnect'
+import { useAccount, useDisconnect } from 'wagmi'
+
+interface DropdownItem {
+  label: string
+  href: string
+  highlight?: boolean
+}
+
+interface NavDropdownProps {
+  label: string
+  items: DropdownItem[]
+  isActive: boolean
+}
+
+function NavDropdown({ label, items, isActive }: NavDropdownProps) {
+  const [open, setOpen] = useState(false)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setOpen(true)
+  }
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => setOpen(false), 150)
+  }
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <button
+        className={`flex items-center gap-1 text-[11px] uppercase tracking-[0.3em] font-light transition-colors ${
+          isActive
+            ? 'text-neun-success'
+            : 'text-a24-muted dark:text-a24-dark-muted hover:text-neun-success'
+        }`}
+      >
+        {label}
+        <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-2 min-w-[160px] bg-gray-900 dark:bg-gray-950 border border-gray-800 shadow-lg shadow-neun-success/10 z-50">
+          {items.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`block px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] transition-colors ${
+                item.highlight
+                  ? 'text-[#FF69B4] hover:text-[#FF1493] hover:bg-[#FF1493]/10'
+                  : 'text-gray-300 hover:text-neun-success hover:bg-neun-success/10'
+              }`}
+              onClick={() => setOpen(false)}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MobileAccordion({ label, items, isActive, onClose }: NavDropdownProps & { onClose: () => void }) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div className="border-b border-gray-800 last:border-b-0">
+      <button
+        onClick={() => setOpen(!open)}
+        className={`w-full flex items-center justify-between py-3 text-[11px] uppercase tracking-[0.3em] font-light transition-colors ${
+          isActive
+            ? 'text-neun-success'
+            : 'text-a24-muted dark:text-a24-dark-muted'
+        }`}
+      >
+        {label}
+        <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="pb-2 pl-4 flex flex-col gap-1">
+          {items.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`py-2 text-[10px] uppercase tracking-[0.2em] transition-colors ${
+                item.highlight
+                  ? 'text-[#FF69B4] hover:text-[#FF1493]'
+                  : 'text-gray-400 hover:text-neun-success'
+              }`}
+              onClick={onClose}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ProfileDropdown() {
+  const { address } = useAccount()
+  const { disconnect } = useDisconnect()
+  const [open, setOpen] = useState(false)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setOpen(true)
+  }
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => setOpen(false), 150)
+  }
+
+  if (!address) return <WalletConnect />
+
+  const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <button className="flex items-center gap-2 px-3 py-2 border border-neun-success/50 text-neun-success text-[10px] uppercase tracking-wider hover:bg-neun-success/10 transition-colors">
+        <div className="w-2 h-2 bg-neun-success rounded-full animate-pulse" />
+        {shortAddress}
+        <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="absolute top-full right-0 mt-2 min-w-[180px] bg-gray-900 dark:bg-gray-950 border border-gray-800 shadow-lg shadow-neun-success/10 z-50">
+          <Link
+            href="/profile"
+            className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-gray-300 hover:text-neun-success hover:bg-neun-success/10 transition-colors"
+            onClick={() => setOpen(false)}
+          >
+            <User className="w-3.5 h-3.5" />
+            Profile
+          </Link>
+          <Link
+            href="/settings"
+            className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-gray-300 hover:text-neun-success hover:bg-neun-success/10 transition-colors"
+            onClick={() => setOpen(false)}
+          >
+            <Settings className="w-3.5 h-3.5" />
+            Settings
+          </Link>
+          <div className="border-t border-gray-800" />
+          <button
+            onClick={() => {
+              disconnect()
+              setOpen(false)
+            }}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Disconnect
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function Navigation() {
   const pathname = usePathname()
@@ -27,12 +197,26 @@ export default function Navigation() {
     return pathname?.startsWith(href)
   }
 
+  const isJobsActive = isActive('/careers') || isActive('/bounties') || isActive('/ecosystems')
+  const isCommunityActive = isActive('/articles') || isActive('/meme') || isActive('/transparency')
+
   const linkClass = (active: boolean) =>
     `text-[11px] uppercase tracking-[0.3em] font-light transition-colors ${
       active
-        ? 'text-a24-text dark:text-a24-dark-text'
-        : 'text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text'
+        ? 'text-neun-success'
+        : 'text-a24-muted dark:text-a24-dark-muted hover:text-neun-success'
     }`
+
+  const jobsDropdownItems: DropdownItem[] = [
+    { label: 'All Jobs', href: '/careers' },
+    { label: 'Bounties', href: '/bounties' },
+  ]
+
+  const communityDropdownItems: DropdownItem[] = [
+    { label: 'Articles', href: '/articles' },
+    { label: 'Meme', href: '/meme', highlight: true },
+    { label: 'Transparency', href: '/transparency' },
+  ]
 
   return (
     <>
@@ -43,20 +227,18 @@ export default function Navigation() {
             {/* Logo - clicks to home */}
             <NeunLogo className="mr-2" />
 
-            <Link href="/careers" className={linkClass(isActive('/careers') || isActive('/bounties') || isActive('/ecosystems'))}>Jobs</Link>
+            <NavDropdown
+              label="Jobs"
+              items={jobsDropdownItems}
+              isActive={isJobsActive}
+            />
             <Link href="/companies" className={linkClass(isActive('/companies'))}>Companies</Link>
             <Link href="/investors" className={linkClass(isActive('/investors'))}>Investors</Link>
-            <Link href="/articles" className={linkClass(isActive('/articles'))}>Articles</Link>
-            <Link
-              href="/meme"
-              className={`text-[11px] uppercase tracking-[0.3em] font-light transition-colors ${
-                isActive('/meme')
-                  ? 'text-[#FF1493]'
-                  : 'text-[#FF69B4] hover:text-[#FF1493]'
-              }`}
-            >
-              Meme
-            </Link>
+            <NavDropdown
+              label="Community"
+              items={communityDropdownItems}
+              isActive={isCommunityActive}
+            />
           </div>
 
           {/* Mobile: Logo */}
@@ -67,14 +249,14 @@ export default function Navigation() {
             {/* Post a Job CTA - Green button */}
             <Link
               href="/post-job"
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-[10px] uppercase tracking-wider font-medium bg-neun-success text-white hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-[10px] uppercase tracking-wider font-medium bg-neun-success text-white hover:shadow-green-glow transition-all"
             >
               <Plus className="w-3 h-3" />
               Post Job
             </Link>
 
-            {/* Connect - Border button with wallet */}
-            <WalletConnect />
+            {/* Connect / Profile dropdown */}
+            <ProfileDropdown />
 
             <ThemeToggle />
           </div>
@@ -93,25 +275,40 @@ export default function Navigation() {
 
         {/* Mobile Nav */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-a24-border dark:border-a24-dark-border">
-            <nav className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3">
-              <Link href="/careers" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/careers'))} py-2`}>Jobs</Link>
-              <Link href="/companies" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/companies'))} py-2`}>Companies</Link>
-              <Link href="/investors" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/investors'))} py-2`}>Investors</Link>
-              <Link href="/articles" onClick={() => setMobileMenuOpen(false)} className={`${linkClass(isActive('/articles'))} py-2`}>Articles</Link>
+          <div className="md:hidden border-t border-a24-border dark:border-a24-dark-border bg-gray-900/95 dark:bg-gray-950/95">
+            <nav className="max-w-7xl mx-auto px-6 py-2">
+              <MobileAccordion
+                label="Jobs"
+                items={jobsDropdownItems}
+                isActive={isJobsActive}
+                onClose={() => setMobileMenuOpen(false)}
+              />
               <Link
-                href="/meme"
+                href="/companies"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-[11px] uppercase tracking-[0.3em] font-light py-2 text-[#FF69B4] hover:text-[#FF1493] transition-colors"
+                className={`block py-3 border-b border-gray-800 ${linkClass(isActive('/companies'))}`}
               >
-                Meme
+                Companies
               </Link>
+              <Link
+                href="/investors"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block py-3 border-b border-gray-800 ${linkClass(isActive('/investors'))}`}
+              >
+                Investors
+              </Link>
+              <MobileAccordion
+                label="Community"
+                items={communityDropdownItems}
+                isActive={isCommunityActive}
+                onClose={() => setMobileMenuOpen(false)}
+              />
 
-              <div className="border-t border-a24-border dark:border-a24-dark-border pt-3 mt-1 flex flex-col gap-3">
+              <div className="pt-4 pb-2 flex flex-col gap-3">
                 <Link
                   href="/post-job"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-[10px] uppercase tracking-wider font-medium bg-neun-success text-white w-fit"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-[10px] uppercase tracking-wider font-medium bg-neun-success text-white"
                 >
                   <Plus className="w-3 h-3" />
                   Post Job

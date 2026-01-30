@@ -7,7 +7,6 @@ import { crawlCryptoJobsList } from './crawlers/cryptojobslist'
 import { crawlRemote3 } from './crawlers/remote3'
 import { crawlRemoteOK } from './crawlers/remoteok'
 import { crawlRocketPunch } from './crawlers/rocketpunch'
-import { crawlJobKorea } from './crawlers/jobkorea'
 import { crawlSuiJobs } from './crawlers/suijobs'
 import { crawlSolanaJobs } from './crawlers/solanajobs'
 import { crawlEthereumJobs } from './crawlers/ethereum'
@@ -57,7 +56,7 @@ async function main() {
   // 시작 알림
   await sendDiscordNotification(
     '🚀 Starting Crawl',
-    'GitHub Actions crawler started - collecting jobs from 12 sources',
+    'GitHub Actions crawler started - collecting jobs from 11 sources',
     0x3498db
   )
 
@@ -73,7 +72,6 @@ async function main() {
     { name: 'remote3.co', fn: crawlRemote3 },
     { name: 'remoteok.com', fn: crawlRemoteOK },
     { name: 'rocketpunch.com', fn: crawlRocketPunch },
-    { name: 'jobkorea.co.kr', fn: crawlJobKorea },
     { name: 'jobs.sui.io', fn: crawlSuiJobs },
     { name: 'jobs.solana.com', fn: crawlSolanaJobs },
     { name: 'ethereum.foundation', fn: crawlEthereumJobs },
