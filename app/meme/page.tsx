@@ -26,7 +26,7 @@ const POSES: { id: PoseId; label: string; category: string }[] = [
   // Web3 poses
   { id: 'diamondHands', label: 'diamond hands', category: 'web3' },
   { id: 'toTheMoon', label: 'to the moon', category: 'web3' },
-  { id: 'rugged', label: 'rugged', category: 'web3' },
+  { id: 'rugged', label: 'tired af', category: 'work' },
   { id: 'whaleMode', label: 'whale mode', category: 'web3' },
   { id: 'airdrop', label: 'airdrop', category: 'web3' },
   { id: 'apeIn', label: 'ape in', category: 'web3' },
@@ -186,21 +186,27 @@ export default function MemePage() {
     setBottomText(preset.bottom)
   }, [])
 
-  // Download as PNG - improved with no grid lines
+  // Download as PNG - fixed scaling to match preview exactly
   const handleDownload = useCallback(async () => {
     if (!canvasRef.current) return
 
     try {
       const { toPng } = await import('html-to-image')
 
+      // Get the actual rendered size of the canvas
+      const rect = canvasRef.current.getBoundingClientRect()
+      const scale = currentSize.width / rect.width
+
       const options: Parameters<typeof toPng>[1] = {
         width: currentSize.width,
         height: currentSize.height,
         pixelRatio: 1,
         style: {
-          imageRendering: 'pixelated',
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          width: `${rect.width}px`,
+          height: `${rect.height}px`,
         },
-        skipAutoScale: true,
         cacheBust: true,
       }
 
@@ -223,21 +229,28 @@ export default function MemePage() {
     }
   }, [bg, isGradient, isTransparent, currentSize])
 
-  // Copy to clipboard
+  // Copy to clipboard - fixed scaling to match preview exactly
   const handleCopy = useCallback(async () => {
     if (!canvasRef.current) return
 
     try {
       const { toBlob } = await import('html-to-image')
 
+      // Get the actual rendered size of the canvas
+      const rect = canvasRef.current.getBoundingClientRect()
+      const scale = currentSize.width / rect.width
+
       const blob = await toBlob(canvasRef.current, {
         width: currentSize.width,
         height: currentSize.height,
         pixelRatio: 1,
         style: {
-          imageRendering: 'pixelated',
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          width: `${rect.width}px`,
+          height: `${rect.height}px`,
         },
-        skipAutoScale: true,
+        cacheBust: true,
       })
 
       if (blob) {
@@ -315,19 +328,20 @@ export default function MemePage() {
                 imageRendering: 'pixelated',
               }}
             >
-              {/* Top text - closer to pixelbara */}
+              {/* Top text - positioned with padding to prevent clipping */}
               {topText && (
                 <p
-                  className="absolute left-2 right-2 text-center font-black uppercase leading-tight z-10"
+                  className="absolute left-4 right-4 text-center font-black uppercase leading-tight z-10"
                   style={{
-                    top: '4%',
-                    fontSize: 'clamp(14px, 5vw, 28px)',
+                    top: '6%',
+                    fontSize: 'clamp(12px, 4vw, 24px)',
                     color: textColor,
                     fontFamily: '"Press Start 2P", "Noto Sans KR", Impact, "Arial Black", Arial, sans-serif',
                     fontWeight: 900,
-                    textShadow: '3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 0 3px 0 #000, 0 -3px 0 #000, 3px 0 0 #000, -3px 0 0 #000',
+                    textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 2px 0 0 #000, -2px 0 0 #000',
                     letterSpacing: '0.05em',
                     WebkitTextStroke: '1px #000',
+                    wordBreak: 'break-word',
                   }}
                 >
                   {topText}
@@ -344,19 +358,20 @@ export default function MemePage() {
                 <Pixelbara pose={selectedPose} size={pixelbaraSize} />
               </div>
 
-              {/* Bottom text - closer to pixelbara */}
+              {/* Bottom text - positioned with padding to prevent clipping */}
               {bottomText && (
                 <p
-                  className="absolute left-2 right-2 text-center font-black uppercase leading-tight z-10"
+                  className="absolute left-4 right-4 text-center font-black uppercase leading-tight z-10"
                   style={{
-                    bottom: '4%',
-                    fontSize: 'clamp(14px, 5vw, 28px)',
+                    bottom: '6%',
+                    fontSize: 'clamp(12px, 4vw, 24px)',
                     color: textColor,
                     fontFamily: '"Press Start 2P", "Noto Sans KR", Impact, "Arial Black", Arial, sans-serif',
                     fontWeight: 900,
-                    textShadow: '3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 0 3px 0 #000, 0 -3px 0 #000, 3px 0 0 #000, -3px 0 0 #000',
+                    textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 2px 0 0 #000, -2px 0 0 #000',
                     letterSpacing: '0.05em',
                     WebkitTextStroke: '1px #000',
+                    wordBreak: 'break-word',
                   }}
                 >
                   {bottomText}
