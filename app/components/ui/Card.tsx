@@ -1,7 +1,8 @@
 'use client'
 
-import { type ReactNode, type HTMLAttributes } from 'react'
+import { type ReactNode, type HTMLAttributes, memo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, MapPin, Briefcase, Building2, Calendar, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Job } from '@/types/job'
@@ -57,7 +58,7 @@ interface JobCardProps {
   compact?: boolean
 }
 
-export function JobCard({ job, compact = false }: JobCardProps) {
+export const JobCard = memo(function JobCard({ job, compact = false }: JobCardProps) {
   const isNew = job.postedDate && (() => {
     const posted = new Date(job.postedDate)
     const now = new Date()
@@ -110,7 +111,7 @@ export function JobCard({ job, compact = false }: JobCardProps) {
       </Card>
     </Link>
   )
-}
+})
 
 // ══════════════════════════════════════════════
 // Company Card Component
@@ -124,13 +125,21 @@ interface CompanyCardProps {
   href?: string
 }
 
-export function CompanyCard({ name, logo, sector, jobCount, href }: CompanyCardProps) {
+export const CompanyCard = memo(function CompanyCard({ name, logo, sector, jobCount, href }: CompanyCardProps) {
   const content = (
     <Card className="group cursor-pointer text-center">
       {/* Logo */}
-      <div className="w-16 h-16 mx-auto mb-3 bg-a24-bg dark:bg-a24-dark-bg rounded-full flex items-center justify-center overflow-hidden">
+      <div className="w-16 h-16 mx-auto mb-3 bg-a24-bg dark:bg-a24-dark-bg rounded-full flex items-center justify-center overflow-hidden relative">
         {logo ? (
-          <img src={logo} alt={name} className="w-full h-full object-cover" />
+          <Image
+            src={logo}
+            alt={name}
+            fill
+            className="object-cover"
+            sizes="64px"
+            loading="lazy"
+            unoptimized={logo.startsWith('http')}
+          />
         ) : (
           <Building2 className="w-8 h-8 text-a24-muted" />
         )}
@@ -161,7 +170,7 @@ export function CompanyCard({ name, logo, sector, jobCount, href }: CompanyCardP
   }
 
   return content
-}
+})
 
 // ══════════════════════════════════════════════
 // Investor Card Component
@@ -174,14 +183,22 @@ interface InvestorCardProps {
   href?: string
 }
 
-export function InvestorCard({ name, logo, portfolioCount, href }: InvestorCardProps) {
+export const InvestorCard = memo(function InvestorCard({ name, logo, portfolioCount, href }: InvestorCardProps) {
   const content = (
     <Card className="group cursor-pointer">
       <div className="flex items-center gap-4">
         {/* Logo */}
-        <div className="w-12 h-12 bg-a24-bg dark:bg-a24-dark-bg rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+        <div className="w-12 h-12 bg-a24-bg dark:bg-a24-dark-bg rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 relative">
           {logo ? (
-            <img src={logo} alt={name} className="w-full h-full object-contain p-2" />
+            <Image
+              src={logo}
+              alt={name}
+              fill
+              className="object-contain p-2"
+              sizes="48px"
+              loading="lazy"
+              unoptimized={logo.startsWith('http')}
+            />
           ) : (
             <span className="text-lg font-bold text-a24-muted">{name[0]}</span>
           )}
@@ -209,7 +226,7 @@ export function InvestorCard({ name, logo, portfolioCount, href }: InvestorCardP
   }
 
   return content
-}
+})
 
 // ══════════════════════════════════════════════
 // Article Card Component
@@ -226,7 +243,7 @@ interface ArticleCardProps {
   tags?: string[]
 }
 
-export function ArticleCard({
+export const ArticleCard = memo(function ArticleCard({
   title,
   excerpt,
   author,
@@ -241,11 +258,15 @@ export function ArticleCard({
       <Card className="group cursor-pointer h-full overflow-hidden" padding="none">
         {/* Cover Image */}
         {coverImage && (
-          <div className="aspect-video bg-a24-bg dark:bg-a24-dark-bg overflow-hidden">
-            <img
+          <div className="aspect-video bg-a24-bg dark:bg-a24-dark-bg overflow-hidden relative">
+            <Image
               src={coverImage}
               alt={title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              loading="lazy"
+              unoptimized={coverImage.startsWith('http')}
             />
           </div>
         )}
@@ -294,6 +315,6 @@ export function ArticleCard({
       </Card>
     </Link>
   )
-}
+})
 
 export default Card
