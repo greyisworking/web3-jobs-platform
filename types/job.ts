@@ -22,4 +22,7 @@ export interface Job {
   token_gate?: TokenGate | null
   is_dao_job?: boolean
   is_alpha?: boolean
+  // Von Restorff Effect: Visual emphasis
+  is_urgent?: boolean
+  is_featured?: boolean
 }

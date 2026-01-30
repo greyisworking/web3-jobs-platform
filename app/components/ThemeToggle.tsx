@@ -91,17 +91,19 @@ export default function ThemeToggle() {
   }
 
   if (!mounted) {
-    return <div className="w-8 h-8" />
+    return <div className="w-11 h-11" /> // 44px placeholder for Fitts's Law
   }
 
   return (
     <button
       onClick={toggle}
       aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="w-8 h-8 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
+      className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-a24-surface dark:hover:bg-a24-dark-surface hover:scale-110 active:scale-95 transition-all touch-target-44"
     >
       {/* Show current mode: Moon for dark, Sun for light */}
-      {dark ? <PixelMoon /> : <PixelSun />}
+      <div className="w-7 h-7 flex items-center justify-center">
+        {dark ? <PixelMoon /> : <PixelSun />}
+      </div>
     </button>
   )
 }

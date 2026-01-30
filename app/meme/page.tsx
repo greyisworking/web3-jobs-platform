@@ -208,6 +208,7 @@ function drawMemeText(
 
 export default function MemePage() {
   const [selectedPose, setSelectedPose] = useState<PoseId>('blank')
+  const [poseCategory, setPoseCategory] = useState('all') // Hick's Law: filter by category
   const [selectedBg, setSelectedBg] = useState('dark')
   const [topText, setTopText] = useState('')
   const [bottomText, setBottomText] = useState('')
@@ -650,23 +651,42 @@ export default function MemePage() {
               I&apos;m feeling lucky
             </button>
 
-            {/* Pose Selection */}
+            {/* Pose Selection - Hick's Law: Organized by category */}
             <div>
               <h3 className="text-[10px] uppercase tracking-wider text-a24-muted mb-2 font-bold">
                 vibe check
               </h3>
-              <div className="grid grid-cols-3 gap-1.5">
-                {POSES.map((pose) => (
+              {/* Category tabs */}
+              <div className="flex flex-wrap gap-1 mb-3">
+                {['all', 'basic', 'work', 'web3', 'emotion', 'meme'].map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setPoseCategory(cat)}
+                    className={`px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide transition-all min-h-[32px] ${
+                      poseCategory === cat
+                        ? 'bg-neun-primary text-white'
+                        : 'bg-a24-surface/50 text-a24-muted hover:text-a24-text border border-a24-border'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              {/* Pose grid - Fitts's Law: 44px min touch targets */}
+              <div className="grid grid-cols-3 gap-2">
+                {POSES
+                  .filter((pose) => poseCategory === 'all' || pose.category === poseCategory)
+                  .map((pose) => (
                   <button
                     key={pose.id}
                     onClick={() => setSelectedPose(pose.id)}
-                    className={`p-2 text-center border transition-all ${
+                    className={`p-2.5 min-h-[44px] text-center border transition-all touch-target-44 ${
                       selectedPose === pose.id
                         ? 'bg-a24-text dark:bg-a24-dark-text text-a24-bg dark:text-a24-dark-bg border-a24-text dark:border-a24-dark-text'
-                        : 'bg-a24-surface/50 text-a24-text dark:text-a24-dark-text border-a24-border dark:border-a24-dark-border hover:border-a24-muted'
+                        : 'bg-a24-surface/50 text-a24-text dark:text-a24-dark-text border-a24-border dark:border-a24-dark-border hover:border-neun-primary'
                     }`}
                   >
-                    <span className="text-[9px] block leading-tight">{pose.label}</span>
+                    <span className="text-[10px] block leading-tight font-medium">{pose.label}</span>
                   </button>
                 ))}
               </div>

@@ -53,9 +53,9 @@ const variantStyles: Record<ButtonVariant, string> = {
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'px-3 py-1.5 text-small gap-1.5',
-  md: 'px-4 py-2 text-body gap-2',
-  lg: 'px-6 py-3 text-body gap-2.5',
+  sm: 'px-3 py-2 text-small gap-1.5 min-h-[36px]', // Compact but usable
+  md: 'px-4 py-2.5 text-body gap-2 min-h-[44px]', // Fitts's Law: 44px minimum
+  lg: 'px-6 py-3 text-body gap-2.5 min-h-[48px]', // Large touch target
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(

@@ -618,7 +618,7 @@ async function testEdgeCases() {
       await waitForNetworkIdle()
 
       // Check emoji is preserved
-      const value = await input.evaluate((el: HTMLInputElement) => el.value)
+      const value = await input.evaluate((el) => (el as HTMLInputElement).value)
       assert(value.includes('') || value.includes('emoji'), 'Emoji should be preserved in input')
     }
     assert(true, 'Unicode/emoji handling checked')

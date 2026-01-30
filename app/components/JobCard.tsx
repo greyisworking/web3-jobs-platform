@@ -119,12 +119,24 @@ export default function JobCard({ job, index }: JobCardProps) {
         }}
         className="relative block p-4 sm:p-6 min-h-[160px] sm:h-[180px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-card-hover dark:hover:shadow-card-hover-dark hover:border-emerald-500/30 dark:hover:border-emerald-500/20 group flex flex-col overflow-hidden touch-target rounded-sm"
       >
-        {/* NEW badge */}
-        {isNewJob(job.postedDate) && (
-          <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-neun-success/20 border border-neun-success text-neun-success font-semibold text-[9px] uppercase tracking-wider">
-            NEW
-          </span>
-        )}
+        {/* Von Restorff Effect: Urgent/Featured/NEW badges */}
+        <div className="absolute top-2 left-2 flex items-center gap-1.5">
+          {job.is_urgent && (
+            <span className="badge-urgent px-1.5 py-0.5 font-bold text-[9px] uppercase tracking-wider rounded-sm">
+              URGENT
+            </span>
+          )}
+          {job.is_featured && (
+            <span className="badge-recommended px-1.5 py-0.5 font-bold text-[9px] uppercase tracking-wider rounded-sm">
+              FEATURED
+            </span>
+          )}
+          {isNewJob(job.postedDate) && !job.is_urgent && !job.is_featured && (
+            <span className="badge-new-emphasis px-1.5 py-0.5 border border-neun-primary/50 text-[9px] uppercase tracking-wider rounded-sm">
+              NEW
+            </span>
+          )}
+        </div>
 
         {/* Token Gate & DAO badges */}
         <div className="absolute top-2 right-12 flex items-center gap-1">

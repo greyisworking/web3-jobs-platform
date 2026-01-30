@@ -567,3 +567,183 @@
 .toast-exit {
   animation: toast-slide-out 0.2s ease-in;
 }
+
+/* ════════════════════════════════════════════
+   NEUN UX Principles
+   ════════════════════════════════════════════ */
+
+/* ── Fitts's Law: Touch Targets ── */
+.touch-target-44 {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.touch-target-48 {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* ── Von Restorff Effect: Visual Emphasis ── */
+@keyframes urgent-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 12px 4px rgba(239, 68, 68, 0.2);
+  }
+}
+
+@keyframes recommended-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px 4px rgba(34, 197, 94, 0.15);
+  }
+}
+
+.badge-urgent {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  animation: urgent-pulse 2s ease-in-out infinite;
+}
+
+.badge-recommended {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #22C55E;
+  border: 1px solid rgba(34, 197, 94, 0.5);
+  animation: recommended-glow 3s ease-in-out infinite;
+}
+
+.badge-new-emphasis {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: var(--neun-primary);
+  font-weight: 700;
+  animation: recommended-glow 2s ease-in-out infinite;
+}
+
+/* ── Peak-End Rule: Celebration Effects ── */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100%) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes celebration-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes celebration-shine {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.celebration-text {
+  background: linear-gradient(
+    90deg,
+    var(--neun-primary) 0%,
+    #fff 50%,
+    var(--neun-primary) 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: celebration-shine 2s linear infinite;
+}
+
+.celebration-bounce {
+  animation: celebration-bounce 0.6s ease-in-out;
+}
+
+/* ── Doherty Threshold: Loading States ── */
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progress-bar {
+  @apply h-1 bg-a24-border dark:bg-a24-dark-border rounded-full overflow-hidden;
+}
+
+.progress-bar-fill {
+  @apply h-full bg-neun-primary transition-all duration-300 ease-out;
+}
+
+.progress-bar-indeterminate {
+  @apply h-full w-1/3 bg-neun-primary;
+  animation: progress-indeterminate 1s ease-in-out infinite;
+}
+
+/* Skeleton shimmer */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--a24-surface) 25%,
+    var(--a24-border) 50%,
+    var(--a24-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.dark .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--a24-surface) 25%,
+    var(--a24-border) 50%,
+    var(--a24-surface) 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* ── Miller's Law: Information Chunking ── */
+.info-group {
+  @apply flex flex-wrap gap-2;
+}
+
+.info-item {
+  @apply inline-flex items-center gap-1 text-sm text-a24-muted dark:text-a24-dark-muted;
+}
+
+/* ── 8px Grid System ── */
+.gap-grid-1 { gap: 8px; }
+.gap-grid-2 { gap: 16px; }
+.gap-grid-3 { gap: 24px; }
+.gap-grid-4 { gap: 32px; }
+.p-grid-1 { padding: 8px; }
+.p-grid-2 { padding: 16px; }
+.p-grid-3 { padding: 24px; }
+.p-grid-4 { padding: 32px; }
+.m-grid-1 { margin: 8px; }
+.m-grid-2 { margin: 16px; }
+.m-grid-3 { margin: 24px; }
+.m-grid-4 { margin: 32px; }
