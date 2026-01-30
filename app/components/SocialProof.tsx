@@ -1,20 +1,20 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 
 const VC_LOGOS = [
-  { name: 'a16z', color: '#22C55E' },
-  { name: 'Paradigm', color: '#22C55E' },
-  { name: 'Hashed', color: '#22C55E' },
-  { name: 'Sequoia', color: '#22C55E' },
-  { name: 'Dragonfly', color: '#22C55E' },
-  { name: 'Polychain', color: '#22C55E' },
-  { name: 'SoftBank', color: '#22C55E' },
-  { name: 'Animoca', color: '#22C55E' },
-  { name: 'Binance', color: '#22C55E' },
-  { name: 'Electric Capital', color: '#22C55E' },
-  { name: 'Pantera', color: '#22C55E' },
-  { name: 'Galaxy Digital', color: '#22C55E' },
+  'a16z',
+  'Paradigm',
+  'Hashed',
+  'Sequoia',
+  'Dragonfly',
+  'Polychain',
+  'SoftBank',
+  'Animoca',
+  'Binance',
+  'Electric Capital',
+  'Pantera',
+  'Galaxy Digital',
 ]
 
 interface SocialProofData {
@@ -24,7 +24,7 @@ interface SocialProofData {
 
 export default function SocialProof() {
   const [data, setData] = useState<SocialProofData | null>(null)
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const [isPaused, setIsPaused] = useState(false)
 
   useEffect(() => {
     fetch('/api/jobs')
@@ -51,27 +51,6 @@ export default function SocialProof() {
       .catch(() => {})
   }, [])
 
-  // Auto-scroll marquee
-  useEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
-
-    let animationId: number
-    let scrollPos = 0
-
-    const scroll = () => {
-      scrollPos += 0.5
-      if (scrollPos >= el.scrollWidth / 2) {
-        scrollPos = 0
-      }
-      el.scrollLeft = scrollPos
-      animationId = requestAnimationFrame(scroll)
-    }
-
-    animationId = requestAnimationFrame(scroll)
-    return () => cancelAnimationFrame(animationId)
-  }, [])
-
   return (
     <div className="py-8 border-t border-b border-a24-border dark:border-a24-dark-border overflow-hidden">
       <p className="text-center text-xs uppercase tracking-[0.3em] font-medium text-a24-muted dark:text-a24-dark-muted mb-4">
@@ -83,21 +62,35 @@ export default function SocialProof() {
         )}
       </p>
 
-      {/* Marquee slider */}
+      {/* CSS-based Marquee Animation */}
       <div
-        ref={scrollRef}
-        className="flex gap-6 overflow-hidden whitespace-nowrap"
-        style={{ scrollBehavior: 'auto' }}
+        className="relative overflow-hidden"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
       >
-        {/* Duplicate for seamless loop */}
-        {[...VC_LOGOS, ...VC_LOGOS].map((vc, i) => (
-          <span
-            key={`${vc.name}-${i}`}
-            className="flex-shrink-0 text-sm font-bold uppercase tracking-wider text-emerald-500"
-          >
-            {vc.name}
-          </span>
-        ))}
+        <div
+          className={`flex gap-8 whitespace-nowrap ${isPaused ? '' : 'vc-marquee'}`}
+          style={{ width: 'fit-content' }}
+        >
+          {/* First set */}
+          {VC_LOGOS.map((name) => (
+            <span
+              key={`first-${name}`}
+              className="flex-shrink-0 text-sm font-bold uppercase tracking-wider text-neun-primary hover:text-neun-primary-hover transition-colors cursor-default"
+            >
+              {name}
+            </span>
+          ))}
+          {/* Duplicate for seamless loop */}
+          {VC_LOGOS.map((name) => (
+            <span
+              key={`second-${name}`}
+              className="flex-shrink-0 text-sm font-bold uppercase tracking-wider text-neun-primary hover:text-neun-primary-hover transition-colors cursor-default"
+            >
+              {name}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   )

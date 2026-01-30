@@ -12,6 +12,14 @@ module.exports = {
       // ═══ COLORS ═══
       // ════════════════════════════════════════════
       colors: {
+        // ══════════════════════════════════════════════
+        // NEUN Design System v2 Colors
+        // ══════════════════════════════════════════════
+
+        // ── Primary Brand ──
+        'neun-primary': 'var(--neun-primary)',
+        'neun-primary-hover': 'var(--neun-primary-hover)',
+
         // ── Semantic tokens (auto-switch via CSS vars) ──
         'a24-bg':      'var(--a24-bg)',
         'a24-surface': 'var(--a24-surface)',
@@ -22,11 +30,11 @@ module.exports = {
 
         // ── Backward compat: explicit dark values ──
         // (existing code uses dark:bg-a24-dark-*, still works)
-        'a24-dark-bg':      '#0B0F19',
-        'a24-dark-surface': '#151921',
-        'a24-dark-text':    '#E2E8F0',
-        'a24-dark-muted':   '#64748B',
-        'a24-dark-border':  '#1E293B',
+        'a24-dark-bg':      '#0F172A',
+        'a24-dark-surface': '#1E293B',
+        'a24-dark-text':    '#F8FAFC',
+        'a24-dark-muted':   '#94A3B8',
+        'a24-dark-border':  '#334155',
 
         // ── Pixelbara accent palette ──
         'px-gold': {
@@ -90,7 +98,18 @@ module.exports = {
         mono:    ['ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       fontSize: {
-        // Pixel-friendly sizes (multiples of 8)
+        // ══════════════════════════════════════════════
+        // NEUN Design System v2 Typography
+        // ══════════════════════════════════════════════
+
+        // Design system sizes
+        'heading-1': ['3rem', { lineHeight: '1.2', fontWeight: '700' }],       // 48px Bold
+        'heading-2': ['2.25rem', { lineHeight: '1.2', fontWeight: '700' }],    // 36px Bold
+        'heading-3': ['1.5rem', { lineHeight: '1.3', fontWeight: '600' }],     // 24px SemiBold
+        'body':      ['1rem', { lineHeight: '1.5', fontWeight: '400' }],       // 16px Regular
+        'small':     ['0.875rem', { lineHeight: '1.5', fontWeight: '400' }],   // 14px Regular
+
+        // Pixel-friendly sizes (legacy compat)
         'px-xs':   ['0.625rem', { lineHeight: '1rem' }],      // 10px
         'px-sm':   ['0.6875rem', { lineHeight: '1.125rem' }], // 11px (nav labels)
         'px-base': ['0.75rem', { lineHeight: '1.25rem' }],    // 12px
@@ -105,7 +124,21 @@ module.exports = {
       // ═══ SPACING ═══
       // ════════════════════════════════════════════
       spacing: {
-        // Design system spacing scale (8px grid)
+        // ══════════════════════════════════════════════
+        // NEUN Design System v2 Spacing (8px grid)
+        // ══════════════════════════════════════════════
+        '0.5': '0.125rem',  // 2px
+        '1':   '0.25rem',   // 4px
+        '1.5': '0.375rem',  // 6px
+        '2':   '0.5rem',    // 8px
+        '3':   '0.75rem',   // 12px
+        '4':   '1rem',      // 16px
+        '6':   '1.5rem',    // 24px
+        '8':   '2rem',      // 32px
+        '12':  '3rem',      // 48px
+        '16':  '4rem',      // 64px
+
+        // Extended scale
         '4.5': '1.125rem',  // 18px
         '13':  '3.25rem',   // 52px
         '15':  '3.75rem',   // 60px
@@ -113,6 +146,7 @@ module.exports = {
         '22':  '5.5rem',    // 88px
         '26':  '6.5rem',    // 104px
         '30':  '7.5rem',    // 120px
+
         // Section spacing
         'section-sm': '3rem',    // 48px
         'section':    '5rem',    // 80px

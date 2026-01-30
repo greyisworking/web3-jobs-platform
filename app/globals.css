@@ -24,19 +24,27 @@
 /* ── Design tokens ── */
 @layer base {
   :root {
+    /* ══════════════════════════════════════════════
+       NEUN Design System v2 - Light Mode
+       ══════════════════════════════════════════════ */
+
+    /* ── Primary Brand Color ── */
+    --neun-primary:       #22C55E;
+    --neun-primary-hover: #16A34A;
+
     /* ── NEUN semantic colors (light) ── */
-    --a24-bg:      #F9FAFB;
-    --a24-surface: #FFFFFF;
-    --a24-text:    #111827;
-    --a24-muted:   #6B7280;
-    --a24-border:  #E5E7EB;
-    --a24-accent:  #111827;
+    --a24-bg:      #FFFFFF;
+    --a24-surface: #F8FAFC;
+    --a24-text:    #1E293B;
+    --a24-muted:   #64748B;
+    --a24-border:  #E2E8F0;
+    --a24-accent:  #22C55E;
 
     /* ── Functional colors (light) ── */
-    --neun-success: #16A34A;
-    --neun-warning: #CA8A04;
-    --neun-danger:  #DC2626;
-    --neun-info:    #2563EB;
+    --neun-success: #22C55E;
+    --neun-warning: #F59E0B;
+    --neun-danger:  #EF4444;
+    --neun-info:    #3B82F6;
 
     /* ── shadcn/ui compat ── */
     --background: 210 20% 98%;
@@ -67,17 +75,25 @@
   }
 
   .dark {
+    /* ══════════════════════════════════════════════
+       NEUN Design System v2 - Dark Mode
+       ══════════════════════════════════════════════ */
+
+    /* ── Primary Brand Color ── */
+    --neun-primary:       #22C55E;
+    --neun-primary-hover: #16A34A;
+
     /* ── NEUN semantic colors (dark / navy-black) ── */
-    --a24-bg:      #0B0F19;
-    --a24-surface: #151921;
-    --a24-text:    #E2E8F0;
-    --a24-muted:   #64748B;
-    --a24-border:  #1E293B;
-    --a24-accent:  #E2E8F0;
+    --a24-bg:      #0F172A;
+    --a24-surface: #1E293B;
+    --a24-text:    #F8FAFC;
+    --a24-muted:   #94A3B8;
+    --a24-border:  #334155;
+    --a24-accent:  #22C55E;
 
     /* ── Functional colors (dark) ── */
     --neun-success: #22C55E;
-    --neun-warning: #EAB308;
+    --neun-warning: #F59E0B;
     --neun-danger:  #EF4444;
     --neun-info:    #3B82F6;
 
