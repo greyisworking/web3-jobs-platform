@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft, Download, RefreshCw, Copy, Check,
-  Shuffle, Sparkles, Twitter, Square, Smartphone
+  Shuffle, Sparkles, Twitter, Square, Smartphone, Zap, Printer
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Pixelbara from '../components/Pixelbara'
@@ -70,12 +70,22 @@ const BACKGROUNDS: { id: string; label: string; value: string; textColor: string
 ]
 
 // ══════════════════════════════════════════════════════════
-// DOWNLOAD SIZES
+// DOWNLOAD SIZES (Aspect Ratio)
 // ══════════════════════════════════════════════════════════
 
 const DOWNLOAD_SIZES = [
   { id: 'square', label: '1:1', width: 1000, height: 1000, icon: Square },
   { id: 'story', label: '9:16', width: 1080, height: 1920, icon: Smartphone },
+]
+
+// ══════════════════════════════════════════════════════════
+// QUALITY OPTIONS (Resolution)
+// ══════════════════════════════════════════════════════════
+
+const QUALITY_OPTIONS = [
+  { id: 'standard', label: 'Standard', multiplier: 1, icon: Zap, desc: 'Web & Social' },
+  { id: 'hd', label: 'HD', multiplier: 2, icon: Zap, desc: '2x Resolution' },
+  { id: 'print', label: 'Print', multiplier: 3, icon: Printer, desc: '300dpi T-shirt' },
 ]
 
 // ══════════════════════════════════════════════════════════
@@ -154,6 +164,7 @@ export default function MemePage() {
   const [copied, setCopied] = useState(false)
   const [pixelbaraSize, setPixelbaraSize] = useState(280)
   const [downloadSize, setDownloadSize] = useState('square')
+  const [quality, setQuality] = useState('standard')
   const canvasRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -164,6 +175,7 @@ export default function MemePage() {
   const isGradient = bg.value.includes('gradient')
   const isTransparent = bg.value === 'transparent'
   const currentSize = DOWNLOAD_SIZES.find((s) => s.id === downloadSize) || DOWNLOAD_SIZES[0]
+  const currentQuality = QUALITY_OPTIONS.find((q) => q.id === quality) || QUALITY_OPTIONS[0]
 
   // Random generation
   const handleRandom = useCallback(() => {
@@ -186,7 +198,7 @@ export default function MemePage() {
     setBottomText(preset.bottom)
   }, [])
 
-  // Download as PNG - WYSIWYG approach
+  // Download as PNG - WYSIWYG approach with quality options
   const handleDownload = useCallback(async () => {
     if (!canvasRef.current) return
 
@@ -196,35 +208,41 @@ export default function MemePage() {
       // Get the actual rendered size
       const rect = canvasRef.current.getBoundingClientRect()
 
-      // Calculate pixelRatio to achieve target resolution
-      // For 1:1 we want 1000px, for 9:16 we want 1080px width
-      const targetWidth = currentSize.width
+      // Calculate pixelRatio: base resolution * quality multiplier
+      // Standard: 1x, HD: 2x, Print: 3x (for 300dpi on ~10" print)
+      const targetWidth = currentSize.width * currentQuality.multiplier
       const pixelRatio = targetWidth / rect.width
+
+      // Show loading toast for high-res
+      if (currentQuality.multiplier > 1) {
+        toast.loading("Generating high-res image...", { id: 'download' })
+      }
 
       const dataUrl = await toPng(canvasRef.current, {
         pixelRatio: pixelRatio,
         cacheBust: true,
-        // Skip transparent pattern background for actual download
+        // Transparent background preserved for PNG
         backgroundColor: isTransparent ? undefined : undefined,
-        filter: (node) => {
-          // Include all nodes
-          return true
-        },
       })
 
       const link = document.createElement('a')
-      link.download = `pixelbara-meme-${currentSize.id}-${Date.now()}.png`
+      const qualitySuffix = currentQuality.multiplier > 1 ? `-${currentQuality.id}` : ''
+      link.download = `pixelbara-meme-${currentSize.id}${qualitySuffix}-${Date.now()}.png`
       link.href = dataUrl
       link.click()
 
-      toast("masterpiece. truly.", { duration: 3000 })
+      toast.dismiss('download')
+      const resolution = `${Math.round(targetWidth)}x${Math.round(currentSize.height * currentQuality.multiplier)}`
+      toast.success(`Downloaded! (${resolution}px)`, { duration: 3000 })
     } catch (error) {
       console.error('Failed to download:', error)
-      toast("download failed... try screenshot bestie", { duration: 3000 })
+      toast.dismiss('download')
+      toast.error("download failed... try screenshot bestie", { duration: 3000 })
     }
-  }, [currentSize, isTransparent])
+  }, [currentSize, currentQuality, isTransparent])
 
   // Copy to clipboard - WYSIWYG approach
+  // Copy to clipboard with quality settings
   const handleCopy = useCallback(async () => {
     if (!canvasRef.current) return
 
@@ -234,8 +252,8 @@ export default function MemePage() {
       // Get the actual rendered size
       const rect = canvasRef.current.getBoundingClientRect()
 
-      // Calculate pixelRatio to achieve target resolution
-      const targetWidth = currentSize.width
+      // Calculate pixelRatio with quality multiplier
+      const targetWidth = currentSize.width * currentQuality.multiplier
       const pixelRatio = targetWidth / rect.width
 
       const blob = await toBlob(canvasRef.current, {
@@ -248,14 +266,14 @@ export default function MemePage() {
           new ClipboardItem({ 'image/png': blob })
         ])
         setCopied(true)
-        toast("copied to clipboard!", { duration: 2000 })
+        toast.success("copied to clipboard!", { duration: 2000 })
         setTimeout(() => setCopied(false), 2000)
       }
     } catch (error) {
       console.error('Failed to copy:', error)
-      toast("copy failed... browser skill issue", { duration: 3000 })
+      toast.error("copy failed... browser skill issue", { duration: 3000 })
     }
-  }, [currentSize])
+  }, [currentSize, currentQuality])
 
   // Share to Twitter
   const handleTwitterShare = useCallback(() => {
@@ -377,26 +395,57 @@ export default function MemePage() {
               </p>
             </div>
 
-            {/* Download Size Options */}
-            <div className="flex justify-center gap-2">
-              {DOWNLOAD_SIZES.map((size) => {
-                const Icon = size.icon
-                return (
+            {/* Download Options: Size + Quality */}
+            <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4">
+              {/* Aspect Ratio */}
+              <div className="flex justify-center gap-1">
+                {DOWNLOAD_SIZES.map((size) => {
+                  const Icon = size.icon
+                  return (
+                    <button
+                      key={size.id}
+                      onClick={() => setDownloadSize(size.id)}
+                      className={`flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold border transition-all ${
+                        downloadSize === size.id
+                          ? 'bg-white text-black border-white'
+                          : 'bg-transparent text-a24-muted border-a24-border hover:border-a24-text'
+                      }`}
+                    >
+                      <Icon className="w-3 h-3" />
+                      {size.label}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Quality / Resolution */}
+              <div className="flex justify-center gap-1">
+                {QUALITY_OPTIONS.map((q) => (
                   <button
-                    key={size.id}
-                    onClick={() => setDownloadSize(size.id)}
-                    className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border transition-all ${
-                      downloadSize === size.id
-                        ? 'bg-white text-black border-white'
-                        : 'bg-transparent text-gray-400 border-a24-border hover:border-gray-500'
+                    key={q.id}
+                    onClick={() => setQuality(q.id)}
+                    className={`flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold border transition-all ${
+                      quality === q.id
+                        ? q.id === 'print'
+                          ? 'bg-purple-600 text-white border-purple-600'
+                          : 'bg-neun-success text-black border-neun-success'
+                        : 'bg-transparent text-a24-muted border-a24-border hover:border-a24-text'
                     }`}
+                    title={q.desc}
                   >
-                    <Icon className="w-3 h-3" />
-                    {size.label}
+                    {q.id === 'print' ? <Printer className="w-3 h-3" /> : null}
+                    {q.label}
                   </button>
-                )
-              })}
+                ))}
+              </div>
             </div>
+
+            {/* Resolution info */}
+            <p className="text-center text-[10px] text-a24-muted">
+              {currentSize.width * currentQuality.multiplier} × {currentSize.height * currentQuality.multiplier}px
+              {currentQuality.id === 'print' && ' • 300dpi print ready'}
+              {isTransparent && ' • transparent PNG'}
+            </p>
 
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-2 justify-center">
