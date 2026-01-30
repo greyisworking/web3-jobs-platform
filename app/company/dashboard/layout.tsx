@@ -57,15 +57,15 @@ export default async function CompanyDashboardLayout({
   ]
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] flex">
+    <div className="min-h-screen bg-a24-bg flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-900/50 border-r border-gray-800 flex flex-col">
+      <aside className="w-64 bg-a24-surface border-r border-a24-border flex flex-col">
         {/* Logo */}
-        <div className="p-6 border-b border-gray-800">
-          <Link href="/" className="text-xl font-bold text-white">
+        <div className="p-6 border-b border-a24-border">
+          <Link href="/" className="text-xl font-bold text-a24-text">
             NEUN
           </Link>
-          <p className="text-xs text-gray-500 mt-1">Company Portal</p>
+          <p className="text-xs text-a24-muted mt-1">Company Portal</p>
         </div>
 
         {/* Navigation */}
@@ -74,7 +74,7 @@ export default async function CompanyDashboardLayout({
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-gray-800/50 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 text-a24-muted hover:text-a24-text hover:bg-a24-surface/50 transition-colors"
             >
               <item.icon className="w-5 h-5" />
               <span className="text-sm">{item.label}</span>
@@ -84,7 +84,7 @@ export default async function CompanyDashboardLayout({
           {/* Post Job CTA */}
           <Link
             href="/company/dashboard/jobs/new"
-            className="flex items-center gap-3 px-4 py-3 mt-4 bg-purple-600 hover:bg-purple-700 text-white transition-colors"
+            className="flex items-center gap-3 px-4 py-3 mt-4 bg-purple-600 hover:bg-purple-700 text-a24-text transition-colors"
           >
             <Plus className="w-5 h-5" />
             <span className="text-sm font-medium">Post New Job</span>
@@ -92,22 +92,22 @@ export default async function CompanyDashboardLayout({
         </nav>
 
         {/* User section */}
-        <div className="p-4 border-t border-gray-800">
+        <div className="p-4 border-t border-a24-border">
           <div className="flex items-center gap-3 px-2 mb-3">
-            <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+            <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-a24-text text-sm font-bold">
               {company?.name?.[0]?.toUpperCase() || 'C'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-white truncate">
+              <p className="text-sm text-a24-text truncate">
                 {company?.name || 'Company'}
               </p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              <p className="text-xs text-a24-muted truncate">{user.email}</p>
             </div>
           </div>
           <form action="/api/company/logout" method="POST">
             <button
               type="submit"
-              className="flex items-center gap-2 w-full px-4 py-2 text-gray-400 hover:text-red-400 hover:bg-gray-800/50 transition-colors text-sm"
+              className="flex items-center gap-2 w-full px-4 py-2 text-a24-muted hover:text-red-400 hover:bg-a24-surface/50 transition-colors text-sm"
             >
               <LogOut className="w-4 h-4" />
               Sign Out

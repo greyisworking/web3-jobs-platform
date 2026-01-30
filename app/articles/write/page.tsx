@@ -169,7 +169,7 @@ export default function ArticleWritePage() {
   // Loading state
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-a24-bg flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-a24-muted animate-spin" />
       </div>
     )
@@ -178,7 +178,7 @@ export default function ArticleWritePage() {
   // Not logged in - show login options
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-a24-bg flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-6">
           <Pixelbara pose="question" size={140} className="mx-auto mb-6" />
           <h1 className="text-2xl font-bold text-a24-text mb-2">

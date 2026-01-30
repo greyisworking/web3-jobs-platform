@@ -48,8 +48,8 @@ export default async function CompanyDashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <Pixelbara pose="question" size={120} />
-        <h2 className="text-xl font-bold text-white mt-6">Company profile not found</h2>
-        <p className="text-gray-400 mt-2">Please contact support</p>
+        <h2 className="text-xl font-bold text-a24-text mt-6">Company profile not found</h2>
+        <p className="text-a24-muted mt-2">Please contact support</p>
       </div>
     )
   }
@@ -61,16 +61,16 @@ export default async function CompanyDashboardPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-3xl font-bold text-a24-text">
             gm, {company.name}
           </h1>
-          <p className="text-gray-400 mt-1">
+          <p className="text-a24-muted mt-1">
             Your job posting overview
           </p>
         </div>
         <Link
           href="/company/dashboard/jobs/new"
-          className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors"
+          className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-a24-text font-medium transition-colors"
         >
           <Plus className="w-5 h-5" />
           Post New Job
@@ -108,9 +108,9 @@ export default async function CompanyDashboardPage() {
       {/* Recent Jobs & Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Jobs */}
-        <div className="lg:col-span-2 bg-gray-900/50 border border-gray-800 p-6">
+        <div className="lg:col-span-2 bg-a24-surface border border-a24-border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-white">Recent Job Posts</h2>
+            <h2 className="text-lg font-bold text-a24-text">Recent Job Posts</h2>
             <Link
               href="/company/dashboard/jobs"
               className="text-sm text-purple-400 hover:text-purple-300 flex items-center gap-1"
@@ -127,8 +127,8 @@ export default async function CompanyDashboardPage() {
                   className="flex items-center justify-between p-4 bg-gray-800/50 border border-gray-700"
                 >
                   <div>
-                    <h3 className="font-medium text-white">{job.title}</h3>
-                    <div className="flex items-center gap-4 mt-1 text-sm text-gray-400">
+                    <h3 className="font-medium text-a24-text">{job.title}</h3>
+                    <div className="flex items-center gap-4 mt-1 text-sm text-a24-muted">
                       <span className="flex items-center gap-1">
                         <Eye className="w-3 h-3" />
                         {job.view_count || 0} views
@@ -143,7 +143,7 @@ export default async function CompanyDashboardPage() {
                     className={`px-2 py-1 text-xs font-medium ${
                       job.isActive
                         ? 'bg-green-500/20 text-green-400'
-                        : 'bg-gray-500/20 text-gray-400'
+                        : 'bg-gray-500/20 text-a24-muted'
                     }`}
                   >
                     {job.isActive ? 'Active' : 'Inactive'}
@@ -154,10 +154,10 @@ export default async function CompanyDashboardPage() {
           ) : (
             <div className="text-center py-8">
               <Pixelbara pose="search" size={80} />
-              <p className="text-gray-400 mt-4">No jobs posted yet</p>
+              <p className="text-a24-muted mt-4">No jobs posted yet</p>
               <Link
                 href="/company/dashboard/jobs/new"
-                className="inline-block mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
+                className="inline-block mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-a24-text text-sm font-medium transition-colors"
               >
                 Post Your First Job
               </Link>
@@ -166,15 +166,15 @@ export default async function CompanyDashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-gray-900/50 border border-gray-800 p-6">
-          <h2 className="text-lg font-bold text-white mb-4">Quick Actions</h2>
+        <div className="bg-a24-surface border border-a24-border p-6">
+          <h2 className="text-lg font-bold text-a24-text mb-4">Quick Actions</h2>
           <div className="space-y-3">
             <Link
               href="/company/dashboard/jobs/new"
               className="block p-4 bg-purple-600/20 border border-purple-600/30 hover:bg-purple-600/30 transition-colors"
             >
               <h3 className="font-medium text-purple-400">Post New Job</h3>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-a24-muted mt-1">
                 Create a new job listing
               </p>
             </Link>
@@ -182,8 +182,8 @@ export default async function CompanyDashboardPage() {
               href="/company/dashboard/analytics"
               className="block p-4 bg-gray-800/50 border border-gray-700 hover:bg-gray-800 transition-colors"
             >
-              <h3 className="font-medium text-white">View Analytics</h3>
-              <p className="text-sm text-gray-400 mt-1">
+              <h3 className="font-medium text-a24-text">View Analytics</h3>
+              <p className="text-sm text-a24-muted mt-1">
                 See detailed performance stats
               </p>
             </Link>
@@ -191,8 +191,8 @@ export default async function CompanyDashboardPage() {
               href="/company/dashboard/settings"
               className="block p-4 bg-gray-800/50 border border-gray-700 hover:bg-gray-800 transition-colors"
             >
-              <h3 className="font-medium text-white">Company Settings</h3>
-              <p className="text-sm text-gray-400 mt-1">
+              <h3 className="font-medium text-a24-text">Company Settings</h3>
+              <p className="text-sm text-a24-muted mt-1">
                 Update your company profile
               </p>
             </Link>
@@ -215,15 +215,15 @@ function StatCard({
   subtext: string
 }) {
   return (
-    <div className="bg-gray-900/50 border border-gray-800 p-6">
+    <div className="bg-a24-surface border border-a24-border p-6">
       <div className="flex items-center gap-3 mb-3">
         <div className="p-2 bg-purple-600/20 text-purple-400">
           <Icon className="w-5 h-5" />
         </div>
-        <span className="text-sm text-gray-400">{label}</span>
+        <span className="text-sm text-a24-muted">{label}</span>
       </div>
-      <p className="text-3xl font-bold text-white">{value}</p>
-      <p className="text-sm text-gray-500 mt-1">{subtext}</p>
+      <p className="text-3xl font-bold text-a24-text">{value}</p>
+      <p className="text-sm text-a24-muted mt-1">{subtext}</p>
     </div>
   )
 }

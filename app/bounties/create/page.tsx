@@ -102,7 +102,7 @@ export default function CreateBountyPage() {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen bg-a24-bg">
         <div className="max-w-6xl mx-auto px-6">
           <SubpageHeader title="P O S T  B O U N T Y" />
         </div>

@@ -97,7 +97,7 @@ export default function CompanySettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-pulse text-gray-400">Loading...</div>
+        <div className="animate-pulse text-a24-muted">Loading...</div>
       </div>
     )
   }
@@ -106,8 +106,8 @@ export default function CompanySettingsPage() {
     <div className="max-w-3xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Company Settings</h1>
-        <p className="text-gray-400 text-sm mt-1">
+        <h1 className="text-2xl font-bold text-a24-text">Company Settings</h1>
+        <p className="text-a24-muted text-sm mt-1">
           Update your company profile information
         </p>
       </div>
@@ -115,12 +115,12 @@ export default function CompanySettingsPage() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Info */}
-        <div className="bg-gray-900/50 border border-gray-800 p-6 space-y-4">
+        <div className="bg-a24-surface border border-a24-border p-6 space-y-4">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-purple-600/20 text-purple-400">
               <Building2 className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-medium text-white">Company Profile</h2>
+            <h2 className="text-lg font-medium text-a24-text">Company Profile</h2>
           </div>
 
           <div>
@@ -132,7 +132,7 @@ export default function CompanySettingsPage() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
             />
           </div>
 
@@ -145,7 +145,7 @@ export default function CompanySettingsPage() {
               value={form.website}
               onChange={(e) => setForm({ ...form, website: e.target.value })}
               placeholder="https://your-company.com"
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
             />
           </div>
 
@@ -158,7 +158,7 @@ export default function CompanySettingsPage() {
               value={form.logo_url}
               onChange={(e) => setForm({ ...form, logo_url: e.target.value })}
               placeholder="https://your-company.com/logo.png"
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
             />
           </div>
 
@@ -171,7 +171,7 @@ export default function CompanySettingsPage() {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Tell candidates about your company..."
               rows={4}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none resize-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none resize-none"
             />
           </div>
 
@@ -183,7 +183,7 @@ export default function CompanySettingsPage() {
               <select
                 value={form.industry}
                 onChange={(e) => setForm({ ...form, industry: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white focus:border-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-purple-500 outline-none"
               >
                 <option value="">Select industry</option>
                 {INDUSTRIES.map((i) => (
@@ -198,7 +198,7 @@ export default function CompanySettingsPage() {
               <select
                 value={form.size}
                 onChange={(e) => setForm({ ...form, size: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white focus:border-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-purple-500 outline-none"
               >
                 <option value="">Select size</option>
                 {COMPANY_SIZES.map((s) => (
@@ -218,7 +218,7 @@ export default function CompanySettingsPage() {
                 value={form.location}
                 onChange={(e) => setForm({ ...form, location: e.target.value })}
                 placeholder="e.g., San Francisco, Remote"
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
               />
             </div>
             <div>
@@ -232,7 +232,7 @@ export default function CompanySettingsPage() {
                 placeholder="2020"
                 min="1900"
                 max={new Date().getFullYear()}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
               />
             </div>
           </div>
@@ -243,7 +243,7 @@ export default function CompanySettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-medium transition-colors"
+            className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-a24-text font-medium transition-colors"
           >
             <Save className="w-4 h-4" />
             {saving ? 'Saving...' : 'Save Changes'}

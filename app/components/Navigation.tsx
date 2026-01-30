@@ -52,7 +52,7 @@ function NavDropdown({ label, items, isActive }: NavDropdownProps) {
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-2 min-w-[160px] bg-gray-900 dark:bg-gray-950 border border-gray-800 shadow-lg shadow-neun-success/10 z-50">
+        <div className="absolute top-full left-0 mt-2 min-w-[160px] bg-a24-surface border border-a24-border shadow-lg shadow-neun-success/10 z-50">
           {items.map((item) => (
             <Link
               key={item.href}
@@ -60,7 +60,7 @@ function NavDropdown({ label, items, isActive }: NavDropdownProps) {
               className={`block px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] transition-colors ${
                 item.highlight
                   ? 'text-[#FF69B4] hover:text-[#FF1493] hover:bg-[#FF1493]/10'
-                  : 'text-gray-300 hover:text-neun-success hover:bg-neun-success/10'
+                  : 'text-a24-text hover:text-neun-success hover:bg-neun-success/10'
               }`}
               onClick={() => setOpen(false)}
             >
@@ -77,7 +77,7 @@ function MobileAccordion({ label, items, isActive, onClose }: NavDropdownProps &
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="border-b border-gray-800 last:border-b-0">
+    <div className="border-b border-a24-border last:border-b-0">
       <button
         onClick={() => setOpen(!open)}
         className={`w-full flex items-center justify-between py-3 text-[11px] uppercase tracking-[0.3em] font-light transition-colors ${
@@ -99,7 +99,7 @@ function MobileAccordion({ label, items, isActive, onClose }: NavDropdownProps &
               className={`py-2 text-[10px] uppercase tracking-[0.2em] transition-colors ${
                 item.highlight
                   ? 'text-[#FF69B4] hover:text-[#FF1493]'
-                  : 'text-gray-400 hover:text-neun-success'
+                  : 'text-a24-muted hover:text-neun-success'
               }`}
               onClick={onClose}
             >
@@ -144,10 +144,10 @@ function ProfileDropdown() {
       </button>
 
       {open && (
-        <div className="absolute top-full right-0 mt-2 min-w-[180px] bg-gray-900 dark:bg-gray-950 border border-gray-800 shadow-lg shadow-neun-success/10 z-50">
+        <div className="absolute top-full right-0 mt-2 min-w-[180px] bg-a24-surface border border-a24-border shadow-lg shadow-neun-success/10 z-50">
           <Link
             href="/profile"
-            className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-gray-300 hover:text-neun-success hover:bg-neun-success/10 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-a24-text hover:text-neun-success hover:bg-neun-success/10 transition-colors"
             onClick={() => setOpen(false)}
           >
             <User className="w-3.5 h-3.5" />
@@ -155,13 +155,13 @@ function ProfileDropdown() {
           </Link>
           <Link
             href="/settings"
-            className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-gray-300 hover:text-neun-success hover:bg-neun-success/10 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-a24-text hover:text-neun-success hover:bg-neun-success/10 transition-colors"
             onClick={() => setOpen(false)}
           >
             <Settings className="w-3.5 h-3.5" />
             Settings
           </Link>
-          <div className="border-t border-gray-800" />
+          <div className="border-t border-a24-border" />
           <button
             onClick={() => {
               disconnect()
@@ -275,7 +275,7 @@ export default function Navigation() {
 
         {/* Mobile Nav */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-a24-border dark:border-a24-dark-border bg-gray-900/95 dark:bg-gray-950/95">
+          <div className="md:hidden border-t border-a24-border dark:border-a24-dark-border bg-a24-surface/95">
             <nav className="max-w-7xl mx-auto px-6 py-2">
               <MobileAccordion
                 label="Jobs"
@@ -286,14 +286,14 @@ export default function Navigation() {
               <Link
                 href="/companies"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block py-3 border-b border-gray-800 ${linkClass(isActive('/companies'))}`}
+                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/companies'))}`}
               >
                 Companies
               </Link>
               <Link
                 href="/investors"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block py-3 border-b border-gray-800 ${linkClass(isActive('/investors'))}`}
+                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/investors'))}`}
               >
                 Investors
               </Link>

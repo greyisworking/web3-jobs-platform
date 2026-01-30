@@ -83,13 +83,13 @@ export default function NewJobPage() {
       <div className="mb-8">
         <Link
           href="/company/dashboard/jobs"
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4"
+          className="inline-flex items-center gap-2 text-a24-muted hover:text-a24-text transition-colors mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Jobs
         </Link>
-        <h1 className="text-2xl font-bold text-white">Post New Job</h1>
-        <p className="text-gray-400 text-sm mt-1">
+        <h1 className="text-2xl font-bold text-a24-text">Post New Job</h1>
+        <p className="text-a24-muted text-sm mt-1">
           Create a new job listing for your company
         </p>
       </div>
@@ -97,8 +97,8 @@ export default function NewJobPage() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Info */}
-        <div className="bg-gray-900/50 border border-gray-800 p-6 space-y-4">
-          <h2 className="text-lg font-medium text-white mb-4">Basic Information</h2>
+        <div className="bg-a24-surface border border-a24-border p-6 space-y-4">
+          <h2 className="text-lg font-medium text-a24-text mb-4">Basic Information</h2>
 
           <div>
             <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
@@ -110,7 +110,7 @@ export default function NewJobPage() {
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder="e.g., Senior Smart Contract Developer"
               required
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
             />
           </div>
 
@@ -125,7 +125,7 @@ export default function NewJobPage() {
                 onChange={(e) => setForm({ ...form, location: e.target.value })}
                 placeholder="e.g., Remote, Seoul, San Francisco"
                 required
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
               />
             </div>
             <div>
@@ -135,7 +135,7 @@ export default function NewJobPage() {
               <select
                 value={form.region}
                 onChange={(e) => setForm({ ...form, region: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white focus:border-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-purple-500 outline-none"
               >
                 {REGIONS.map((r) => (
                   <option key={r} value={r}>{r}</option>
@@ -152,7 +152,7 @@ export default function NewJobPage() {
               <select
                 value={form.type}
                 onChange={(e) => setForm({ ...form, type: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white focus:border-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-purple-500 outline-none"
               >
                 {JOB_TYPES.map((t) => (
                   <option key={t} value={t}>{t}</option>
@@ -166,7 +166,7 @@ export default function NewJobPage() {
               <select
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white focus:border-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-purple-500 outline-none"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>{c}</option>
@@ -184,14 +184,14 @@ export default function NewJobPage() {
               value={form.salary}
               onChange={(e) => setForm({ ...form, salary: e.target.value })}
               placeholder="e.g., $120k - $180k, Competitive"
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
             />
           </div>
         </div>
 
         {/* Description */}
-        <div className="bg-gray-900/50 border border-gray-800 p-6 space-y-4">
-          <h2 className="text-lg font-medium text-white mb-4">Job Details</h2>
+        <div className="bg-a24-surface border border-a24-border p-6 space-y-4">
+          <h2 className="text-lg font-medium text-a24-text mb-4">Job Details</h2>
 
           <div>
             <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
@@ -202,7 +202,7 @@ export default function NewJobPage() {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Describe the role, responsibilities, requirements..."
               rows={8}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none resize-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none resize-none"
             />
           </div>
 
@@ -215,7 +215,7 @@ export default function NewJobPage() {
               value={form.url}
               onChange={(e) => setForm({ ...form, url: e.target.value })}
               placeholder="https://your-company.com/careers/apply"
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
             />
             <p className="text-xs text-gray-500 mt-1">
               Leave empty to use default NEUN apply page
@@ -231,7 +231,7 @@ export default function NewJobPage() {
               value={form.tags}
               onChange={(e) => setForm({ ...form, tags: e.target.value })}
               placeholder="e.g., Solidity, DeFi, NFT, Web3 (comma separated)"
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
             />
           </div>
         </div>
@@ -240,14 +240,14 @@ export default function NewJobPage() {
         <div className="flex items-center justify-end gap-4">
           <Link
             href="/company/dashboard/jobs"
-            className="px-6 py-3 text-gray-400 hover:text-white transition-colors"
+            className="px-6 py-3 text-a24-muted hover:text-a24-text transition-colors"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-medium transition-colors"
+            className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-a24-text font-medium transition-colors"
           >
             <Save className="w-4 h-4" />
             {loading ? 'Posting...' : 'Post Job'}

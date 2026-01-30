@@ -116,7 +116,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen bg-a24-bg">
         <div className="max-w-6xl mx-auto px-6">
           <SubpageHeader title="B O U N T Y" />
         </div>
@@ -133,7 +133,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
 
   if (!bounty) {
     return (
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen bg-a24-bg">
         <div className="max-w-6xl mx-auto px-6">
           <SubpageHeader title="B O U N T Y" />
         </div>

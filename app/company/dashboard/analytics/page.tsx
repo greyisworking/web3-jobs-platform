@@ -95,7 +95,7 @@ export default function CompanyAnalyticsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-pulse text-gray-400">Loading analytics...</div>
+        <div className="animate-pulse text-a24-muted">Loading analytics...</div>
       </div>
     )
   }
@@ -105,8 +105,8 @@ export default function CompanyAnalyticsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Analytics</h1>
-          <p className="text-gray-400 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-a24-text">Analytics</h1>
+          <p className="text-a24-muted text-sm mt-1">
             Track your job posting performance
           </p>
         </div>
@@ -117,8 +117,8 @@ export default function CompanyAnalyticsPage() {
               onClick={() => setTimeRange(range)}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 timeRange === range
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-800 text-gray-400 hover:text-white'
+                  ? 'bg-purple-600 text-a24-text'
+                  : 'bg-a24-surface text-a24-muted hover:text-a24-text'
               }`}
             >
               {range === '7d' ? '7 Days' : range === '30d' ? '30 Days' : 'All Time'}
@@ -129,7 +129,7 @@ export default function CompanyAnalyticsPage() {
 
       {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gray-900/50 border border-gray-800 p-6">
+        <div className="bg-a24-surface border border-a24-border p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="p-2 bg-blue-500/20 text-blue-400">
               <Eye className="w-5 h-5" />
@@ -141,11 +141,11 @@ export default function CompanyAnalyticsPage() {
               </div>
             )}
           </div>
-          <p className="text-3xl font-bold text-white">{overall.totalViews.toLocaleString()}</p>
-          <p className="text-sm text-gray-400 mt-1">Total Views</p>
+          <p className="text-3xl font-bold text-a24-text">{overall.totalViews.toLocaleString()}</p>
+          <p className="text-sm text-a24-muted mt-1">Total Views</p>
         </div>
 
-        <div className="bg-gray-900/50 border border-gray-800 p-6">
+        <div className="bg-a24-surface border border-a24-border p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="p-2 bg-purple-500/20 text-purple-400">
               <Users className="w-5 h-5" />
@@ -157,60 +157,60 @@ export default function CompanyAnalyticsPage() {
               </div>
             )}
           </div>
-          <p className="text-3xl font-bold text-white">{overall.totalApplies.toLocaleString()}</p>
-          <p className="text-sm text-gray-400 mt-1">Total Applications</p>
+          <p className="text-3xl font-bold text-a24-text">{overall.totalApplies.toLocaleString()}</p>
+          <p className="text-sm text-a24-muted mt-1">Total Applications</p>
         </div>
 
-        <div className="bg-gray-900/50 border border-gray-800 p-6">
+        <div className="bg-a24-surface border border-a24-border p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="p-2 bg-green-500/20 text-green-400">
               <BarChart3 className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-3xl font-bold text-white">{overall.avgConversion.toFixed(1)}%</p>
-          <p className="text-sm text-gray-400 mt-1">Avg. Conversion Rate</p>
+          <p className="text-3xl font-bold text-a24-text">{overall.avgConversion.toFixed(1)}%</p>
+          <p className="text-sm text-a24-muted mt-1">Avg. Conversion Rate</p>
         </div>
       </div>
 
       {/* Job Performance Table */}
-      <div className="bg-gray-900/50 border border-gray-800 p-6">
-        <h2 className="text-lg font-bold text-white mb-4">Job Performance</h2>
+      <div className="bg-a24-surface border border-a24-border p-6">
+        <h2 className="text-lg font-bold text-a24-text mb-4">Job Performance</h2>
 
         {jobStats.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left border-b border-gray-800">
-                  <th className="pb-3 text-xs uppercase tracking-wider text-gray-500 font-medium">
+                <tr className="text-left border-b border-a24-border">
+                  <th className="pb-3 text-xs uppercase tracking-wider text-a24-muted font-medium">
                     Job Title
                   </th>
-                  <th className="pb-3 text-xs uppercase tracking-wider text-gray-500 font-medium text-right">
+                  <th className="pb-3 text-xs uppercase tracking-wider text-a24-muted font-medium text-right">
                     Views
                   </th>
-                  <th className="pb-3 text-xs uppercase tracking-wider text-gray-500 font-medium text-right">
+                  <th className="pb-3 text-xs uppercase tracking-wider text-a24-muted font-medium text-right">
                     Applications
                   </th>
-                  <th className="pb-3 text-xs uppercase tracking-wider text-gray-500 font-medium text-right">
+                  <th className="pb-3 text-xs uppercase tracking-wider text-a24-muted font-medium text-right">
                     Conversion
                   </th>
-                  <th className="pb-3 text-xs uppercase tracking-wider text-gray-500 font-medium text-right">
+                  <th className="pb-3 text-xs uppercase tracking-wider text-a24-muted font-medium text-right">
                     Status
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
                 {jobStats.map((job) => (
-                  <tr key={job.id} className="hover:bg-gray-800/30">
+                  <tr key={job.id} className="hover:bg-a24-surface/30">
                     <td className="py-4">
-                      <p className="text-white font-medium">{job.title}</p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-a24-text font-medium">{job.title}</p>
+                      <p className="text-xs text-a24-muted mt-1">
                         Posted {new Date(job.created_at).toLocaleDateString()}
                       </p>
                     </td>
-                    <td className="py-4 text-right text-white">
+                    <td className="py-4 text-right text-a24-text">
                       {job.view_count.toLocaleString()}
                     </td>
-                    <td className="py-4 text-right text-white">
+                    <td className="py-4 text-right text-a24-text">
                       {job.apply_count.toLocaleString()}
                     </td>
                     <td className="py-4 text-right">
@@ -220,7 +220,7 @@ export default function CompanyAnalyticsPage() {
                             ? 'text-green-400'
                             : job.conversion >= 2
                               ? 'text-yellow-400'
-                              : 'text-gray-400'
+                              : 'text-a24-muted'
                         }`}
                       >
                         {job.conversion.toFixed(1)}%
@@ -231,7 +231,7 @@ export default function CompanyAnalyticsPage() {
                         className={`px-2 py-1 text-xs font-medium ${
                           job.isActive
                             ? 'bg-green-500/20 text-green-400'
-                            : 'bg-gray-500/20 text-gray-400'
+                            : 'bg-gray-500/20 text-a24-muted'
                         }`}
                       >
                         {job.isActive ? 'Active' : 'Inactive'}
@@ -245,8 +245,8 @@ export default function CompanyAnalyticsPage() {
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Pixelbara pose="question" size={80} />
-            <p className="text-gray-400 mt-4">No job data available yet</p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-a24-muted mt-4">No job data available yet</p>
+            <p className="text-sm text-a24-muted mt-1">
               Post jobs to start tracking analytics
             </p>
           </div>

@@ -57,17 +57,17 @@ export default function CompanyLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-a24-bg flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-4">
             <Pixelbara pose="building" size={80} />
           </Link>
-          <h1 className="text-2xl font-bold text-white mb-2">
+          <h1 className="text-2xl font-bold text-a24-text mb-2">
             {mode === 'login' ? 'Company Login' : 'Create Company Account'}
           </h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-a24-muted text-sm">
             {mode === 'login'
               ? 'Manage your job postings'
               : 'Start hiring top web3 talent'}
@@ -75,7 +75,7 @@ export default function CompanyLoginPage() {
         </div>
 
         {/* Form */}
-        <div className="bg-gray-900/50 border border-gray-800 p-6">
+        <div className="bg-a24-surface border border-a24-border p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
@@ -93,7 +93,7 @@ export default function CompanyLoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="company@example.com"
                 required
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none transition-colors"
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-a24-text placeholder-gray-500 focus:border-purple-500 outline-none transition-colors"
               />
             </div>
 
@@ -108,7 +108,7 @@ export default function CompanyLoginPage() {
                 placeholder="********"
                 required
                 minLength={6}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 outline-none transition-colors"
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-a24-text placeholder-gray-500 focus:border-purple-500 outline-none transition-colors"
               />
             </div>
 
@@ -129,7 +129,7 @@ export default function CompanyLoginPage() {
           <div className="mt-4 text-center">
             <button
               onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-              className="text-sm text-gray-400 hover:text-white transition-colors"
+              className="text-sm text-a24-muted hover:text-a24-text transition-colors"
             >
               {mode === 'login'
                 ? "Don't have an account? Sign up"

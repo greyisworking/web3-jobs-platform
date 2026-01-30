@@ -279,7 +279,7 @@ export default function ArticleDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-a24-bg flex items-center justify-center">
         <div className="text-center">
           <Pixelbara pose="loading" size={120} className="mx-auto mb-4" />
           <p className="text-sm text-a24-muted">Loading...</p>
@@ -290,7 +290,7 @@ export default function ArticleDetailPage() {
 
   if (error || !article) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-a24-bg flex items-center justify-center">
         <div className="text-center">
           <Pixelbara pose="notfound" size={180} className="mx-auto mb-6" />
           <p className="text-2xl font-bold text-a24-text mb-2">Article not found</p>
