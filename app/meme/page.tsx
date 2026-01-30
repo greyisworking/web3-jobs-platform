@@ -306,22 +306,19 @@ export default function MemePage() {
         ctx.drawImage(img, x, y, pixelbaraDrawSize, pixelbaraDrawSize)
       }
 
-      // Calculate text positions relative to Pixelbara (compact layout)
-      const pixelbaraSizeRatioForText = pixelbaraSize / 500
-      const pixelbaraDrawSizeForText = Math.min(targetWidth, targetHeight) * pixelbaraSizeRatioForText * 0.8
-      const centerY = targetHeight / 2
-      const fontSize = targetWidth * 0.08 // Bigger font (was 0.05)
+      // Classic meme layout - text at comfortable distance from edges
+      const fontSize = targetWidth * 0.07 // Good readable size
 
-      // 3. Draw top text - right above Pixelbara
+      // 3. Draw top text - upper area with breathing room
       if (topText) {
-        const textY = centerY - (pixelbaraDrawSizeForText / 2) - fontSize * 0.8
-        drawMemeText(ctx, topText.toUpperCase(), targetWidth / 2, textY, targetWidth * 0.95, fontSize, textColor)
+        const textY = targetHeight * 0.12 // 12% from top
+        drawMemeText(ctx, topText.toUpperCase(), targetWidth / 2, textY, targetWidth * 0.9, fontSize, textColor)
       }
 
-      // 4. Draw bottom text - right below Pixelbara
+      // 4. Draw bottom text - lower area with breathing room
       if (bottomText) {
-        const textY = centerY + (pixelbaraDrawSizeForText / 2) + fontSize * 1.2
-        drawMemeText(ctx, bottomText.toUpperCase(), targetWidth / 2, textY, targetWidth * 0.95, fontSize, textColor)
+        const textY = targetHeight * 0.88 // 12% from bottom
+        drawMemeText(ctx, bottomText.toUpperCase(), targetWidth / 2, textY, targetWidth * 0.9, fontSize, textColor)
       }
 
       // 5. Draw watermark
@@ -393,19 +390,16 @@ export default function MemePage() {
         ctx.drawImage(img, x, y, pixelbaraDrawSize, pixelbaraDrawSize)
       }
 
-      // 3. Draw texts (compact layout - close to Pixelbara)
-      const pixelbaraSizeRatioForText = pixelbaraSize / 500
-      const pixelbaraDrawSizeForText = Math.min(targetWidth, targetHeight) * pixelbaraSizeRatioForText * 0.8
-      const centerY = targetHeight / 2
-      const fontSize = targetWidth * 0.08 // Bigger font
+      // 3. Draw texts (classic meme layout)
+      const fontSize = targetWidth * 0.07
 
       if (topText) {
-        const textY = centerY - (pixelbaraDrawSizeForText / 2) - fontSize * 0.8
-        drawMemeText(ctx, topText.toUpperCase(), targetWidth / 2, textY, targetWidth * 0.95, fontSize, textColor)
+        const textY = targetHeight * 0.12
+        drawMemeText(ctx, topText.toUpperCase(), targetWidth / 2, textY, targetWidth * 0.9, fontSize, textColor)
       }
       if (bottomText) {
-        const textY = centerY + (pixelbaraDrawSizeForText / 2) + fontSize * 1.2
-        drawMemeText(ctx, bottomText.toUpperCase(), targetWidth / 2, textY, targetWidth * 0.95, fontSize, textColor)
+        const textY = targetHeight * 0.88
+        drawMemeText(ctx, bottomText.toUpperCase(), targetWidth / 2, textY, targetWidth * 0.9, fontSize, textColor)
       }
 
       // 4. Watermark
@@ -492,7 +486,7 @@ export default function MemePage() {
           {/* LEFT: Canvas Preview */}
           {/* ════════════════════════════════════════════════════════ */}
           <div className="space-y-4">
-            {/* Preview Canvas - Compact layout matching download */}
+            {/* Preview Canvas - Classic meme layout */}
             <div
               className="relative flex flex-col items-center justify-center overflow-hidden mx-auto"
               style={{
@@ -505,55 +499,52 @@ export default function MemePage() {
                 imageRendering: 'pixelated',
               }}
             >
-              {/* Compact content group - text close to Pixelbara */}
-              <div className="flex flex-col items-center justify-center">
-                {/* Top text - right above Pixelbara */}
-                {topText && (
-                  <p
-                    className="text-center font-black uppercase leading-none mb-2 px-2"
-                    style={{
-                      fontSize: 'clamp(18px, 6vw, 40px)',
-                      color: textColor,
-                      fontFamily: 'Impact, "Arial Black", sans-serif',
-                      fontWeight: 900,
-                      textShadow: '3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 0 3px 0 #000, 0 -3px 0 #000, 3px 0 0 #000, -3px 0 0 #000',
-                      wordBreak: 'break-word',
-                      maxWidth: '95%',
-                    }}
-                  >
-                    {topText}
-                  </p>
-                )}
-
-                {/* Pixelbara - centered */}
-                <div
-                  ref={pixelbaraRef}
+              {/* Top text - upper area */}
+              {topText && (
+                <p
+                  className="absolute left-2 right-2 text-center font-black uppercase leading-tight"
                   style={{
-                    width: `${pixelbaraSize}px`,
-                    imageRendering: 'pixelated',
+                    top: '10%',
+                    fontSize: 'clamp(16px, 5vw, 35px)',
+                    color: textColor,
+                    fontFamily: 'Impact, "Arial Black", sans-serif',
+                    fontWeight: 900,
+                    textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 2px 0 0 #000, -2px 0 0 #000',
+                    wordBreak: 'break-word',
                   }}
                 >
-                  <Pixelbara pose={selectedPose} size={pixelbaraSize} />
-                </div>
+                  {topText}
+                </p>
+              )}
 
-                {/* Bottom text - right below Pixelbara */}
-                {bottomText && (
-                  <p
-                    className="text-center font-black uppercase leading-none mt-2 px-2"
-                    style={{
-                      fontSize: 'clamp(18px, 6vw, 40px)',
-                      color: textColor,
-                      fontFamily: 'Impact, "Arial Black", sans-serif',
-                      fontWeight: 900,
-                      textShadow: '3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 0 3px 0 #000, 0 -3px 0 #000, 3px 0 0 #000, -3px 0 0 #000',
-                      wordBreak: 'break-word',
-                      maxWidth: '95%',
-                    }}
-                  >
-                    {bottomText}
-                  </p>
-                )}
+              {/* Pixelbara - centered */}
+              <div
+                ref={pixelbaraRef}
+                style={{
+                  width: `${pixelbaraSize}px`,
+                  imageRendering: 'pixelated',
+                }}
+              >
+                <Pixelbara pose={selectedPose} size={pixelbaraSize} />
               </div>
+
+              {/* Bottom text - lower area */}
+              {bottomText && (
+                <p
+                  className="absolute left-2 right-2 text-center font-black uppercase leading-tight"
+                  style={{
+                    bottom: '10%',
+                    fontSize: 'clamp(16px, 5vw, 35px)',
+                    color: textColor,
+                    fontFamily: 'Impact, "Arial Black", sans-serif',
+                    fontWeight: 900,
+                    textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 2px 0 0 #000, -2px 0 0 #000',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {bottomText}
+                </p>
+              )}
 
               {/* Watermark */}
               <p
