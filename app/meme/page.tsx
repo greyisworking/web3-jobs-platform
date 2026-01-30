@@ -198,30 +198,31 @@ export default function MemePage() {
     setBottomText(preset.bottom)
   }, [])
 
-  // Download as PNG - WYSIWYG approach with quality options
+  // Download as PNG - WYSIWYG with explicit dimensions
   const handleDownload = useCallback(async () => {
     if (!canvasRef.current) return
 
     try {
       const { toPng } = await import('html-to-image')
 
-      // Get the actual rendered size
-      const rect = canvasRef.current.getBoundingClientRect()
-
-      // Calculate pixelRatio: base resolution * quality multiplier
-      // Standard: 1x, HD: 2x, Print: 3x (for 300dpi on ~10" print)
+      // Target output dimensions
       const targetWidth = currentSize.width * currentQuality.multiplier
-      const pixelRatio = targetWidth / rect.width
+      const targetHeight = currentSize.height * currentQuality.multiplier
 
       // Show loading toast for high-res
       if (currentQuality.multiplier > 1) {
         toast.loading("Generating high-res image...", { id: 'download' })
       }
 
+      // Force exact output dimensions with style override
       const dataUrl = await toPng(canvasRef.current, {
-        pixelRatio: pixelRatio,
+        width: targetWidth,
+        height: targetHeight,
+        style: {
+          width: `${targetWidth}px`,
+          height: `${targetHeight}px`,
+        },
         cacheBust: true,
-        // Transparent background preserved for PNG
         backgroundColor: isTransparent ? undefined : undefined,
       })
 
@@ -232,7 +233,7 @@ export default function MemePage() {
       link.click()
 
       toast.dismiss('download')
-      const resolution = `${Math.round(targetWidth)}x${Math.round(currentSize.height * currentQuality.multiplier)}`
+      const resolution = `${Math.round(targetWidth)}x${Math.round(targetHeight)}`
       toast.success(`Downloaded! (${resolution}px)`, { duration: 3000 })
     } catch (error) {
       console.error('Failed to download:', error)
@@ -241,23 +242,25 @@ export default function MemePage() {
     }
   }, [currentSize, currentQuality, isTransparent])
 
-  // Copy to clipboard - WYSIWYG approach
-  // Copy to clipboard with quality settings
+  // Copy to clipboard with explicit dimensions
   const handleCopy = useCallback(async () => {
     if (!canvasRef.current) return
 
     try {
       const { toBlob } = await import('html-to-image')
 
-      // Get the actual rendered size
-      const rect = canvasRef.current.getBoundingClientRect()
-
-      // Calculate pixelRatio with quality multiplier
+      // Target output dimensions
       const targetWidth = currentSize.width * currentQuality.multiplier
-      const pixelRatio = targetWidth / rect.width
+      const targetHeight = currentSize.height * currentQuality.multiplier
 
+      // Force exact output dimensions with style override
       const blob = await toBlob(canvasRef.current, {
-        pixelRatio: pixelRatio,
+        width: targetWidth,
+        height: targetHeight,
+        style: {
+          width: `${targetWidth}px`,
+          height: `${targetHeight}px`,
+        },
         cacheBust: true,
       })
 
@@ -293,8 +296,23 @@ export default function MemePage() {
     toast("spreading the word fr", { duration: 2000 })
   }, [topText, bottomText])
 
-  // Calculate aspect ratio for preview
+  // Calculate preview dimensions - explicit pixel sizes for reliable capture
   const aspectRatio = currentSize.width / currentSize.height
+  const previewMaxSize = 500
+
+  // Calculate preview dimensions maintaining aspect ratio
+  let previewWidth: number
+  let previewHeight: number
+
+  if (aspectRatio >= 1) {
+    // Square or landscape: constrain by width
+    previewWidth = previewMaxSize
+    previewHeight = previewMaxSize / aspectRatio
+  } else {
+    // Portrait: constrain by height
+    previewHeight = previewMaxSize
+    previewWidth = previewMaxSize * aspectRatio
+  }
 
   return (
     <div className="min-h-screen bg-a24-bg">
@@ -324,15 +342,14 @@ export default function MemePage() {
           {/* LEFT: Canvas Preview */}
           {/* ════════════════════════════════════════════════════════ */}
           <div className="space-y-4">
-            {/* Canvas - Crisp pixels, no gaps */}
+            {/* Canvas - Explicit pixel dimensions for reliable download */}
             <div
               ref={canvasRef}
               className="relative flex flex-col items-center justify-center overflow-hidden mx-auto"
               style={{
                 background: isTransparent ? 'repeating-conic-gradient(#333 0% 25%, #222 0% 50%) 50% / 20px 20px' : bg.value,
-                width: '100%',
-                maxWidth: aspectRatio >= 1 ? '500px' : `${500 * aspectRatio}px`,
-                aspectRatio: `${currentSize.width} / ${currentSize.height}`,
+                width: `${previewWidth}px`,
+                height: `${previewHeight}px`,
                 imageRendering: 'pixelated',
               }}
             >
