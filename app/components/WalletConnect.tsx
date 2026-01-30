@@ -5,6 +5,7 @@ import { useAccount, useConnect, useDisconnect, useEnsName } from 'wagmi'
 import { Wallet, LogOut, Copy, Check, ChevronDown, X, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import { getErrorForToast } from '@/lib/error-messages'
 
 // Truncate address for display
 export function truncateAddress(address: string): string {
@@ -40,7 +41,8 @@ export function WalletConnect() {
   useEffect(() => {
     if (connectError) {
       console.error('Connection error:', connectError)
-      toast.error(connectError.message || 'Failed to connect wallet')
+      const { title, description } = getErrorForToast(connectError)
+      toast.error(title, { description })
       setConnectingId(null)
     }
   }, [connectError])
@@ -70,7 +72,8 @@ export function WalletConnect() {
   const handleConnect = useCallback(async (connectorId: string) => {
     const selectedConnector = connectors.find(c => c.id === connectorId)
     if (!selectedConnector) {
-      toast.error('Connector not found')
+      const { title, description } = getErrorForToast(new Error('Connector not found'))
+      toast.error(title, { description })
       return
     }
 
@@ -87,7 +90,8 @@ export function WalletConnect() {
           },
           onError: (err) => {
             console.error('Connect error:', err)
-            toast.error(err.message || 'Connection failed')
+            const { title, description } = getErrorForToast(err)
+            toast.error(title, { description })
             setConnectingId(null)
           },
         }
@@ -105,7 +109,10 @@ export function WalletConnect() {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     })
-    if (error) toast.error(error.message)
+    if (error) {
+      const { title, description } = getErrorForToast(error)
+      toast.error(title, { description })
+    }
   }
 
   const handleKakaoLogin = async () => {
@@ -115,7 +122,10 @@ export function WalletConnect() {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     })
-    if (error) toast.error(error.message)
+    if (error) {
+      const { title, description } = getErrorForToast(error)
+      toast.error(title, { description })
+    }
   }
 
   if (!mounted) {
