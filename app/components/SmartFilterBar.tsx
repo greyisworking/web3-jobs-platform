@@ -146,24 +146,25 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
     <div className="mb-8 pb-4 border-b border-a24-border dark:border-a24-dark-border">
       {/* Web3 Filter Toggles */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
-        {/* Tier 1 VC Toggle */}
-        <div className="flex items-center justify-between py-3 px-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
-          <div>
-            <span className="text-xs font-medium uppercase tracking-[0.2em] text-a24-text dark:text-a24-dark-text">
-              Tier 1 VC
+        {/* VC Verified Toggle */}
+        <div className="flex items-center justify-between py-3 px-4 border border-amber-500/30 bg-amber-500/5">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px]">🏆</span>
+            <span className="text-xs font-medium uppercase tracking-[0.2em] text-amber-400">
+              VC Verified
             </span>
-            <span className="ml-2 text-[10px] text-a24-muted dark:text-a24-dark-muted">
-              VC-backed
+            <span className="text-[10px] text-amber-400/60">
+              only
             </span>
           </div>
           <button
             onClick={handleTier1Toggle}
             className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
               filters.tier1VCOnly
-                ? 'bg-a24-text dark:bg-a24-dark-text'
+                ? 'bg-amber-500'
                 : 'bg-a24-border dark:bg-a24-dark-border'
             }`}
-            aria-label="Toggle Tier 1 VC filter"
+            aria-label="Toggle VC Verified filter"
           >
             <span
               className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white dark:bg-a24-dark-bg transition-transform duration-200 ${
@@ -320,12 +321,12 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs text-a24-text dark:text-a24-dark-text border border-a24-border dark:border-a24-dark-border"
+                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs text-amber-400 border border-amber-500/30"
               >
-                Tier 1 VC Only
+                🏆 VC Verified Only
                 <button
                   onClick={() => clearFilter('tier1VCOnly')}
-                  className="hover:text-a24-accent transition-colors"
+                  className="hover:text-amber-300 transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>

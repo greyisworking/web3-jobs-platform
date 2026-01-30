@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { type TrustLevel, type TrustScore, TRUST_COMMENTS, quickTrustCheck } from '@/lib/trust-check'
+import { type TrustLevel, type TrustScore, TRUST_COMMENTS, quickTrustCheck, SIMPLE_TRUST_CHECKS, simpleCompanyTrustCheck, type SimpleTrustResult, TIER1_VCS } from '@/lib/trust-check'
 import { PixelThumbsUp, PixelThinking, PixelSweating, PixelRunning, PixelCheck, PixelX } from './PixelIcons'
 
 // ══════════════════════════════════════════════════════════
@@ -228,6 +228,100 @@ export function TrustCheckList({ score, className }: TrustCheckListProps) {
         </div>
       </div>
     </div>
+  )
+}
+
+// ══════════════════════════════════════════════════════════
+// Simple Trust Check List (for non-VC companies)
+// ══════════════════════════════════════════════════════════
+
+const SIMPLE_TRUST_CONFIG: Record<'verified' | 'partial' | 'unknown', {
+  emoji: string
+  dotColor: string
+  textColor: string
+}> = {
+  verified: {
+    emoji: '🟢',
+    dotColor: 'bg-emerald-500 dark:bg-emerald-400',
+    textColor: 'text-emerald-600 dark:text-emerald-400',
+  },
+  partial: {
+    emoji: '🟡',
+    dotColor: 'bg-amber-500 dark:bg-amber-400',
+    textColor: 'text-amber-600 dark:text-amber-400',
+  },
+  unknown: {
+    emoji: '🔴',
+    dotColor: 'bg-red-500 dark:bg-red-400',
+    textColor: 'text-red-600 dark:text-red-400',
+  },
+}
+
+interface SimpleTrustCheckListProps {
+  result: SimpleTrustResult
+  className?: string
+}
+
+export function SimpleTrustCheckList({ result, className }: SimpleTrustCheckListProps) {
+  const config = SIMPLE_TRUST_CONFIG[result.level]
+
+  return (
+    <div className={cn('space-y-3', className)}>
+      {/* Status header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-base">{config.emoji}</span>
+          <span className={cn('text-xs font-medium uppercase tracking-wider', config.textColor)}>
+            {result.level === 'verified' ? 'Verified' : result.level === 'partial' ? 'Partial' : 'Unknown'}
+          </span>
+          <span className="text-[10px] text-a24-muted dark:text-a24-dark-muted">
+            ({result.passedCount}/{result.totalCount})
+          </span>
+        </div>
+      </div>
+
+      {/* Comment */}
+      <p className={cn('text-[11px] italic', config.textColor)}>
+        &quot;{result.comment}&quot;
+      </p>
+
+      {/* Check items */}
+      <div className="space-y-1.5">
+        {result.checks.map((check) => {
+          const checkConfig = SIMPLE_TRUST_CHECKS.find(c => c.id === check.id)
+          return (
+            <div key={check.id} className="flex items-center gap-2 text-[11px]">
+              {check.passed ? (
+                <PixelCheck size={10} className="text-emerald-500 dark:text-emerald-400" />
+              ) : (
+                <PixelX size={10} className="text-a24-muted/40 dark:text-a24-dark-muted/40" />
+              )}
+              <span className={check.passed
+                ? 'text-a24-text dark:text-a24-dark-text'
+                : 'text-a24-muted/50 dark:text-a24-dark-muted/50'
+              }>
+                {checkConfig?.label}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Disclaimer */}
+      <p className="text-[9px] text-a24-muted/60 dark:text-a24-dark-muted/60 pt-2 border-t border-a24-border/50 dark:border-a24-dark-border/50">
+        this is for reference only. always DYOR!
+      </p>
+    </div>
+  )
+}
+
+/**
+ * Check if company has VC backing from tier 1 investors
+ */
+export function hasVCBacking(backers?: string[] | null): boolean {
+  if (!backers || backers.length === 0) return false
+  return backers.some((b) =>
+    TIER1_VCS.some((vc) => b.toLowerCase().includes(vc.toLowerCase()))
   )
 }
 

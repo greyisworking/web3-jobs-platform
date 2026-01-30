@@ -50,11 +50,10 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-tight tracking-tight text-a24-text dark:text-a24-dark-text mb-4 md:mb-6"
             >
-              Only from{' '}
               <span className="text-gradient-green">a16z</span>,{' '}
               <span className="text-gradient-green">Hashed</span>,{' '}
               <span className="text-gradient-green">Paradigm</span>{' '}
-              portfolios.
+              + top Web3 companies.
             </motion.h1>
 
             <motion.p

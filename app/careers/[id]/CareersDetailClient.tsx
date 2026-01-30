@@ -10,8 +10,9 @@ import { trackEvent } from '@/lib/analytics'
 import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import BookmarkButton from '@/app/components/BookmarkButton'
 import GlowBadge from '@/app/components/GlowBadge'
-import LinkedInButton from '@/app/components/LinkedInButton'
-import { TrustCheckList } from '@/app/components/TrustBadge'
+import { TrustCheckList, SimpleTrustCheckList, hasVCBacking } from '@/app/components/TrustBadge'
+import { simpleCompanyTrustCheck } from '@/lib/trust-check'
+import VCVerifiedBadge from '@/app/components/badges/VCVerifiedBadge'
 import { TokenInfoSection, useTokenData } from '@/app/components/TokenInfo'
 import { calculateTrustScore } from '@/lib/trust-check'
 import { findPriorityCompany } from '@/lib/priority-companies'
@@ -377,24 +378,32 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
               <BookmarkButton job={{ id: job.id, title: job.title, company: job.company }} />
             </div>
 
-            {/* LinkedIn search */}
-            <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
-              <LinkedInButton
-                company={job.company}
-                title={job.title}
-                location={job.location}
-                variant="outline"
-                className="w-full justify-center"
-              />
-            </div>
-
-            {/* Trust Check */}
-            <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
-              <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-3">
-                Trust Check
-              </h3>
-              <TrustCheckList score={trustScore} />
-            </div>
+            {/* Trust Check - Only show for non-VC verified companies */}
+            {hasVCBacking(job.backers) ? (
+              <div className="p-4 border border-amber-500/30 bg-amber-500/5">
+                <div className="flex items-center gap-2 mb-2">
+                  <VCVerifiedBadge />
+                </div>
+                <p className="text-[11px] text-amber-400/80">
+                  Backed by top-tier VC investors. ser this ones legit fr.
+                </p>
+              </div>
+            ) : (
+              <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
+                <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-3">
+                  Trust Check
+                </h3>
+                <SimpleTrustCheckList
+                  result={simpleCompanyTrustCheck({
+                    website: job.companyWebsite,
+                    twitter: undefined, // Would need to add these fields
+                    linkedin: undefined,
+                    foundedYear: undefined,
+                    teamDoxxed: trustScore.checks.find(c => c.id === 'doxxed')?.passed,
+                  })}
+                />
+              </div>
+            )}
 
             {/* Token/TVL Info */}
             {!tokenLoading && (tokenInfo || tvlInfo) && (
@@ -451,8 +460,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
               onClick={() => setShowReportModal(true)}
               className="w-full p-3 border border-a24-border dark:border-a24-dark-border text-[10px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted hover:text-red-500 hover:border-red-500/50 transition-colors flex items-center justify-center gap-2"
             >
-              <Flag className="w-3 h-3" />
-              Report Job
+              🚩 Report this company
             </button>
           </aside>
         </div>

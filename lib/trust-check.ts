@@ -179,10 +179,67 @@ const WARNING_KEYWORDS = [
 
 // Pixelbara comments for each trust level (Web3 degen style)
 export const TRUST_COMMENTS: Record<TrustLevel, string> = {
-  verified: 'ser this ones legit fr',
-  caution: 'anon team... idk man. dyor',
-  warning: 'giving rug energy ngl',
+  verified: 'looking good ser',
+  caution: 'some info missing... dyor',
+  warning: 'anon team... be careful',
   blacklisted: 'they rugged. i was there.',
+}
+
+// Simplified Trust Check Labels for non-VC companies
+export const SIMPLE_TRUST_CHECKS = [
+  { id: 'website', label: 'Official website' },
+  { id: 'social', label: 'Social media (Twitter/LinkedIn)' },
+  { id: 'operation', label: '1+ year operation' },
+  { id: 'team', label: 'Team info public' },
+] as const
+
+export type SimpleTrustCheckId = typeof SIMPLE_TRUST_CHECKS[number]['id']
+
+export interface SimpleTrustResult {
+  checks: { id: SimpleTrustCheckId; passed: boolean }[]
+  passedCount: number
+  totalCount: number
+  level: 'verified' | 'partial' | 'unknown'
+  comment: string
+}
+
+/**
+ * Simple trust check for non-VC companies
+ * Returns a simplified trust result with 4 checkpoints
+ */
+export function simpleCompanyTrustCheck(company: {
+  website?: string | null
+  twitter?: string | null
+  linkedin?: string | null
+  foundedYear?: number | null
+  teamDoxxed?: boolean
+}): SimpleTrustResult {
+  const currentYear = new Date().getFullYear()
+  const checks: { id: SimpleTrustCheckId; passed: boolean }[] = [
+    { id: 'website', passed: !!company.website },
+    { id: 'social', passed: !!(company.twitter || company.linkedin) },
+    { id: 'operation', passed: company.foundedYear ? (currentYear - company.foundedYear >= 1) : false },
+    { id: 'team', passed: company.teamDoxxed ?? false },
+  ]
+
+  const passedCount = checks.filter(c => c.passed).length
+  const totalCount = checks.length
+
+  let level: 'verified' | 'partial' | 'unknown'
+  let comment: string
+
+  if (passedCount === 4) {
+    level = 'verified'
+    comment = 'looking good ser'
+  } else if (passedCount >= 2) {
+    level = 'partial'
+    comment = 'some info missing... dyor'
+  } else {
+    level = 'unknown'
+    comment = 'anon team... be careful'
+  }
+
+  return { checks, passedCount, totalCount, level, comment }
 }
 
 // ══════════════════════════════════════════════════════════

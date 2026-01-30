@@ -9,10 +9,13 @@ import { trackEvent } from '@/lib/analytics'
 import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import BookmarkButton from './BookmarkButton'
 import { MiniPixelbara } from './Pixelbara'
-import { PixelStar } from './PixelIcons'
 import { MiniTrustBadge } from './TrustBadge'
+import VCVerifiedBadge from './badges/VCVerifiedBadge'
+import TrustVerifiedBadge from './badges/TrustVerifiedBadge'
+import UnverifiedBadge from './badges/UnverifiedBadge'
 import { Lock, Vote, Flag } from 'lucide-react'
 import { toast } from 'sonner'
+import { TIER1_VCS } from '@/lib/trust-check'
 
 function isNewJob(postedDate: Date | string | null | undefined): boolean {
   if (!postedDate) return false
@@ -72,25 +75,11 @@ function ReportButton({ jobId, jobTitle }: { jobId: string; jobTitle: string }) 
   )
 }
 
-function VCBadge({ backers }: { backers: string[] }) {
-  const [showTooltip, setShowTooltip] = useState(false)
-  const displayCount = Math.min(backers.length, 2)
-  const remaining = backers.length - displayCount
-  const tooltipText = backers.slice(0, displayCount).join(', ') + (remaining > 0 ? ` +${remaining}` : '')
-
-  return (
-    <span
-      className="relative inline-flex items-center ml-1.5"
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
-    >
-      <PixelStar className="text-amber-400" size={12} />
-      {showTooltip && (
-        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 text-[10px] whitespace-nowrap bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg rounded z-50">
-          Backed by {tooltipText}
-        </span>
-      )}
-    </span>
+// Check if company has VC backing from tier 1 investors
+function hasVCBacking(backers?: string[] | null): boolean {
+  if (!backers || backers.length === 0) return false
+  return backers.some((b) =>
+    TIER1_VCS.some((vc) => b.toLowerCase().includes(vc.toLowerCase()))
   )
 }
 
@@ -119,8 +108,14 @@ export default function JobCard({ job, index }: JobCardProps) {
         }}
         className="relative block p-4 sm:p-6 min-h-[160px] sm:h-[180px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-card-hover dark:hover:shadow-card-hover-dark hover:border-emerald-500/30 dark:hover:border-emerald-500/20 group flex flex-col overflow-hidden touch-target rounded-sm"
       >
-        {/* Von Restorff Effect: Urgent/Featured/NEW badges */}
-        <div className="absolute top-2 left-2 flex items-center gap-1.5">
+        {/* Von Restorff Effect: Urgent/Featured/NEW + Verification badges */}
+        <div className="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
+          {/* Verification Status Badge */}
+          {hasVCBacking(job.backers) ? (
+            <VCVerifiedBadge compact />
+          ) : (
+            <UnverifiedBadge compact />
+          )}
           {job.is_urgent && (
             <span className="badge-urgent px-1.5 py-0.5 font-bold text-[9px] uppercase tracking-wider rounded-sm">
               URGENT
@@ -184,9 +179,6 @@ export default function JobCard({ job, index }: JobCardProps) {
               <p className="text-[13px] font-medium uppercase tracking-[0.15em] text-a24-muted dark:text-a24-dark-muted leading-tight truncate">
                 {displayCompany}
               </p>
-              {job.backers && job.backers.length > 0 && (
-                <VCBadge backers={job.backers} />
-              )}
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation() }}>
