@@ -216,6 +216,11 @@ function PixelSvg({
   h: number
   dark: boolean
 }) {
+  // Group pixels by type for animation targeting
+  const eyePixels = pixels.filter(p => p.c === 'n')
+  const earPixels = pixels.filter(p => ['E', 'e', 'i'].includes(p.c))
+  const otherPixels = pixels.filter(p => p.c !== 'n' && !['E', 'e', 'i'].includes(p.c))
+
   return (
     <svg
       viewBox={`0 0 ${w} ${h}`}
@@ -227,9 +232,10 @@ function PixelSvg({
         shapeRendering: 'crispEdges',
       }}
     >
-      {pixels.map((p, i) => (
+      {/* Other body pixels */}
+      {otherPixels.map((p, i) => (
         <rect
-          key={i}
+          key={`body-${i}`}
           x={p.x}
           y={p.y}
           width={1.01}
@@ -238,6 +244,34 @@ function PixelSvg({
           style={{ shapeRendering: 'crispEdges' }}
         />
       ))}
+      {/* Ear pixels - with wiggle animation on hover */}
+      <g className="pixelbara-ears">
+        {earPixels.map((p, i) => (
+          <rect
+            key={`ear-${i}`}
+            x={p.x}
+            y={p.y}
+            width={1.01}
+            height={1.01}
+            fill={fill(dark, p.c)}
+            style={{ shapeRendering: 'crispEdges' }}
+          />
+        ))}
+      </g>
+      {/* Eye pixels - with blink animation */}
+      <g className="pixelbara-eyes">
+        {eyePixels.map((p, i) => (
+          <rect
+            key={`eye-${i}`}
+            x={p.x}
+            y={p.y}
+            width={1.01}
+            height={1.01}
+            fill={fill(dark, p.c)}
+            style={{ shapeRendering: 'crispEdges' }}
+          />
+        ))}
+      </g>
     </svg>
   )
 }
@@ -2018,7 +2052,7 @@ export default function Pixelbara({ pose, size = 180, className = '', clickable 
 
   return (
     <div
-      className={`relative inline-block select-none ${clickable ? 'cursor-pointer hover:scale-105 active:scale-95 transition-transform' : ''} ${className}`}
+      className={`relative inline-block select-none pixelbara-animated group ${clickable ? 'cursor-pointer hover:scale-105 active:scale-95 transition-transform' : ''} ${className}`}
       style={{
         width: size,
         imageRendering: 'pixelated',

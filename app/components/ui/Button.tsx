@@ -84,6 +84,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           'inline-flex items-center justify-center',
           'transition-all duration-200 ease-out',
           'focus:outline-none focus:ring-2 focus:ring-neun-primary focus:ring-offset-2 focus:ring-offset-a24-bg',
+          'btn-ripple', // Add ripple effect
           variantStyles[variant],
           sizeStyles[size],
           fullWidth && 'w-full',
