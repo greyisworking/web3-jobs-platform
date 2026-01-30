@@ -186,36 +186,31 @@ export default function MemePage() {
     setBottomText(preset.bottom)
   }, [])
 
-  // Download as PNG - fixed scaling to match preview exactly
+  // Download as PNG - WYSIWYG approach
   const handleDownload = useCallback(async () => {
     if (!canvasRef.current) return
 
     try {
       const { toPng } = await import('html-to-image')
 
-      // Get the actual rendered size of the canvas
+      // Get the actual rendered size
       const rect = canvasRef.current.getBoundingClientRect()
-      const scale = currentSize.width / rect.width
 
-      const options: Parameters<typeof toPng>[1] = {
-        width: currentSize.width,
-        height: currentSize.height,
-        pixelRatio: 1,
-        style: {
-          transform: `scale(${scale})`,
-          transformOrigin: 'top left',
-          width: `${rect.width}px`,
-          height: `${rect.height}px`,
-        },
+      // Calculate pixelRatio to achieve target resolution
+      // For 1:1 we want 1000px, for 9:16 we want 1080px width
+      const targetWidth = currentSize.width
+      const pixelRatio = targetWidth / rect.width
+
+      const dataUrl = await toPng(canvasRef.current, {
+        pixelRatio: pixelRatio,
         cacheBust: true,
-      }
-
-      // Handle transparent background
-      if (!isTransparent && !isGradient) {
-        options.backgroundColor = bg.value
-      }
-
-      const dataUrl = await toPng(canvasRef.current, options)
+        // Skip transparent pattern background for actual download
+        backgroundColor: isTransparent ? undefined : undefined,
+        filter: (node) => {
+          // Include all nodes
+          return true
+        },
+      })
 
       const link = document.createElement('a')
       link.download = `pixelbara-meme-${currentSize.id}-${Date.now()}.png`
@@ -227,29 +222,24 @@ export default function MemePage() {
       console.error('Failed to download:', error)
       toast("download failed... try screenshot bestie", { duration: 3000 })
     }
-  }, [bg, isGradient, isTransparent, currentSize])
+  }, [currentSize, isTransparent])
 
-  // Copy to clipboard - fixed scaling to match preview exactly
+  // Copy to clipboard - WYSIWYG approach
   const handleCopy = useCallback(async () => {
     if (!canvasRef.current) return
 
     try {
       const { toBlob } = await import('html-to-image')
 
-      // Get the actual rendered size of the canvas
+      // Get the actual rendered size
       const rect = canvasRef.current.getBoundingClientRect()
-      const scale = currentSize.width / rect.width
+
+      // Calculate pixelRatio to achieve target resolution
+      const targetWidth = currentSize.width
+      const pixelRatio = targetWidth / rect.width
 
       const blob = await toBlob(canvasRef.current, {
-        width: currentSize.width,
-        height: currentSize.height,
-        pixelRatio: 1,
-        style: {
-          transform: `scale(${scale})`,
-          transformOrigin: 'top left',
-          width: `${rect.width}px`,
-          height: `${rect.height}px`,
-        },
+        pixelRatio: pixelRatio,
         cacheBust: true,
       })
 
