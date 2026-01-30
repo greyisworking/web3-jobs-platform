@@ -17,6 +17,19 @@ export const jobSchema = z.object({
   sector: z.string().nullable().optional(),
   office_location: z.string().nullable().optional(),
   badges: z.array(z.string()).nullable().optional(),
+  // Enhanced job details
+  description: z.string().nullable().optional(),
+  requirements: z.string().nullable().optional(),
+  responsibilities: z.string().nullable().optional(),
+  benefits: z.string().nullable().optional(),
+  salaryMin: z.number().nullable().optional(),
+  salaryMax: z.number().nullable().optional(),
+  salaryCurrency: z.string().nullable().optional(),
+  deadline: z.date().nullable().optional(),
+  experienceLevel: z.string().nullable().optional(),
+  remoteType: z.string().nullable().optional(),
+  companyLogo: z.string().nullable().optional(),
+  companyWebsite: z.string().nullable().optional(),
 })
 
 export type JobInput = z.infer<typeof jobSchema>

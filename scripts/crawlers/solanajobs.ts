@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchHTML, delay } from '../utils'
+import { fetchHTML, delay, detectExperienceLevel, detectRemoteType } from '../utils'
 
 export async function crawlSolanaJobs(): Promise<number> {
   console.log('🚀 Starting Solana Jobs crawler...')
@@ -142,6 +142,23 @@ export async function crawlSolanaJobs(): Promise<number> {
         }
       }
 
+      // Extract enhanced details from Getro data
+      const description = job.description || job.descriptionHtml || job.content || null
+      const experienceLevel = description ? detectExperienceLevel(description) : null
+      const remoteType = job.workMode === 'remote' || job.isRemote ? 'Remote' : detectRemoteType(location)
+      const companyLogo = job.company?.logo || job.organization?.logo || job.logo || null
+      const companyWebsite = job.company?.website || job.organization?.website || null
+
+      // Salary from Getro (already parsed above)
+      let salaryMin = null
+      let salaryMax = null
+      let salaryCurrency = null
+      if (minCents && maxCents) {
+        salaryMin = minCents > 100_000 ? Math.round(minCents / 100) : minCents
+        salaryMax = maxCents > 100_000 ? Math.round(maxCents / 100) : maxCents
+        salaryCurrency = job.compensationCurrency || 'USD'
+      }
+
       const saved = await validateAndSaveJob(
         {
           title,
@@ -155,6 +172,15 @@ export async function crawlSolanaJobs(): Promise<number> {
           source: 'jobs.solana.com',
           region: 'Global',
           postedDate: job.created_at || job.createdAt ? new Date(job.created_at || job.createdAt) : new Date(),
+          // Enhanced job details
+          description,
+          experienceLevel,
+          remoteType,
+          companyLogo,
+          companyWebsite,
+          salaryMin,
+          salaryMax,
+          salaryCurrency,
         },
         'jobs.solana.com'
       )

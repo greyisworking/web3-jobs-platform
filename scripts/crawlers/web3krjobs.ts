@@ -241,6 +241,8 @@ export async function crawlWeb3KRJobs(): Promise<number> {
             source: 'web3kr.jobs',
             region: 'Korea',
             postedDate: new Date(),
+            // Enhanced fields (limited data from Notion board)
+            remoteType: 'Hybrid',
           },
           'web3kr.jobs'
         )

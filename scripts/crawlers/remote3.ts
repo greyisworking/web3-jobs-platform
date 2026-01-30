@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchXML, delay, cleanText } from '../utils'
+import { fetchXML, delay, cleanText, detectExperienceLevel, detectRemoteType } from '../utils'
 
 export async function crawlRemote3(): Promise<number> {
   console.log('🚀 Starting Remote3.co crawler...')
@@ -16,13 +16,23 @@ export async function crawlRemote3(): Promise<number> {
   console.log(`📦 Found ${items.length} jobs from Remote3.co RSS`)
 
   // Collect all entries synchronously from cheerio, then save async
-  const jobEntries: { title: string; company: string; link: string; pubDate: string }[] = []
+  const jobEntries: {
+    title: string
+    company: string
+    link: string
+    pubDate: string
+    description: string | null
+  }[] = []
 
   items.each((_, element) => {
     const $item = $(element)
     const rawTitle = cleanText($item.find('title').text())
     const link = cleanText($item.find('link').text())
     const pubDate = $item.find('pubDate').text()
+    // RSS feeds typically have description or content:encoded
+    const description = cleanText($item.find('description').text())
+      || cleanText($item.find('content\\:encoded').text())
+      || null
 
     if (!rawTitle || !link) return
 
@@ -35,12 +45,16 @@ export async function crawlRemote3(): Promise<number> {
       company = atMatch[2].trim()
     }
 
-    jobEntries.push({ title, company, link, pubDate })
+    jobEntries.push({ title, company, link, pubDate, description })
   })
 
   let savedCount = 0
   for (const job of jobEntries) {
     try {
+      // Extract enhanced details
+      const experienceLevel = job.description ? detectExperienceLevel(job.description) : null
+      const remoteType = detectRemoteType('Remote')
+
       const saved = await validateAndSaveJob(
         {
           title: job.title,
@@ -53,6 +67,10 @@ export async function crawlRemote3(): Promise<number> {
           source: 'remote3.co',
           region: 'Global',
           postedDate: job.pubDate ? new Date(job.pubDate) : new Date(),
+          // Enhanced job details
+          description: job.description,
+          experienceLevel,
+          remoteType: remoteType || 'Remote',
         },
         'remote3.co'
       )

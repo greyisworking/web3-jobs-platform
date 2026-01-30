@@ -18,6 +18,18 @@ export interface Job {
   badges?: string[] | null
   description?: string | null
   tags?: string | null
+  // Enhanced job details
+  requirements?: string | null
+  responsibilities?: string | null
+  benefits?: string | null
+  salaryMin?: number | null
+  salaryMax?: number | null
+  salaryCurrency?: string | null
+  deadline?: Date | null
+  experienceLevel?: string | null
+  remoteType?: string | null
+  companyLogo?: string | null
+  companyWebsite?: string | null
   // Web3 OG features
   token_gate?: TokenGate | null
   is_dao_job?: boolean

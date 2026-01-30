@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchHTML, delay } from '../utils'
+import { fetchHTML, delay, detectExperienceLevel, detectRemoteType } from '../utils'
 
 export async function crawlSuiJobs(): Promise<number> {
   console.log('🚀 Starting Sui Jobs crawler...')
@@ -131,6 +131,25 @@ export async function crawlSuiJobs(): Promise<number> {
         }
       }
 
+      // Extract enhanced details from Getro data
+      const description = job.description || job.descriptionHtml || job.content || null
+      const experienceLevel = description ? detectExperienceLevel(description) : null
+      const remoteType = job.workMode === 'remote' || job.isRemote ? 'Remote' : detectRemoteType(location)
+      const companyLogo = job.company?.logo || job.organization?.logo || job.logo || null
+      const companyWebsite = job.company?.website || job.organization?.website || null
+
+      // Salary from Getro
+      let salaryMin = null
+      let salaryMax = null
+      let salaryCurrency = null
+      if (job.compensationAmountMinCents || job.salary_min) {
+        const minCents = job.compensationAmountMinCents || job.salary_min
+        const maxCents = job.compensationAmountMaxCents || job.salary_max
+        salaryMin = minCents > 100_000 ? Math.round(minCents / 100) : minCents
+        salaryMax = maxCents ? (maxCents > 100_000 ? Math.round(maxCents / 100) : maxCents) : null
+        salaryCurrency = job.compensationCurrency || 'USD'
+      }
+
       const saved = await validateAndSaveJob(
         {
           title,
@@ -143,6 +162,15 @@ export async function crawlSuiJobs(): Promise<number> {
           source: 'jobs.sui.io',
           region: 'Global',
           postedDate: job.created_at || job.createdAt ? new Date(job.created_at || job.createdAt) : new Date(),
+          // Enhanced job details
+          description,
+          experienceLevel,
+          remoteType,
+          companyLogo,
+          companyWebsite,
+          salaryMin,
+          salaryMax,
+          salaryCurrency,
         },
         'jobs.sui.io'
       )

@@ -14,7 +14,7 @@ model Job {
   location    String
   type        String   // Full-time, Part-time, Contract, Remote
   category    String   // Engineering, Design, Marketing, etc.
-  description String?
+  description String?  // Full job description (HTML/Markdown)
   url         String   @unique
   salary      String?
   tags        String?  // JSON string array
@@ -27,6 +27,19 @@ model Job {
   status        String    @default("active")
   lastValidated DateTime?
 
+  // Enhanced job details (crawled from detail pages)
+  requirements     String?  // Required qualifications (HTML/Markdown)
+  responsibilities String?  // Job responsibilities (HTML/Markdown)
+  benefits         String?  // Benefits and perks (HTML/Markdown)
+  salaryMin        Int?     // Minimum salary (annual, USD)
+  salaryMax        Int?     // Maximum salary (annual, USD)
+  salaryCurrency   String?  // Currency code (USD, KRW, etc.)
+  deadline         DateTime? // Application deadline
+  experienceLevel  String?  // Junior, Mid, Senior, Lead
+  remoteType       String?  // Remote, Hybrid, Onsite
+  companyLogo      String?  // Company logo URL
+  companyWebsite   String?  // Company website URL
+
   // User-posted job fields
   postedBy      String?  // Wallet address of poster
   reportCount   Int      @default(0)
@@ -38,6 +51,7 @@ model Job {
   @@index([isActive])
   @@index([postedDate])
   @@index([postedBy])
+  @@index([experienceLevel])
 }
 
 model JobReport {

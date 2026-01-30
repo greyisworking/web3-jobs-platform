@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchJSON, delay } from '../utils'
+import { fetchJSON, delay, detectExperienceLevel, detectRemoteType } from '../utils'
 
 interface RemoteOKJob {
   slug?: string
@@ -17,6 +17,7 @@ interface RemoteOKJob {
   salary_min?: number
   salary_max?: number
   url?: string
+  original?: boolean
 }
 
 export async function crawlRemoteOK(): Promise<number> {
@@ -52,6 +53,12 @@ export async function crawlRemoteOK(): Promise<number> {
         salary = `$${job.salary_min.toLocaleString()}+`
       }
 
+      // Extract enhanced details
+      const description = job.description || null
+      const experienceLevel = description ? detectExperienceLevel(description) : null
+      const remoteType = detectRemoteType(job.location || 'Remote')
+      const companyLogo = job.company_logo || job.logo || null
+
       const saved = await validateAndSaveJob(
         {
           title: job.position,
@@ -65,6 +72,14 @@ export async function crawlRemoteOK(): Promise<number> {
           source: 'remoteok.com',
           region: 'Global',
           postedDate: job.date ? new Date(job.date) : new Date(),
+          // Enhanced job details
+          description,
+          salaryMin: job.salary_min || null,
+          salaryMax: job.salary_max || null,
+          salaryCurrency: job.salary_min ? 'USD' : null,
+          experienceLevel,
+          remoteType: remoteType || 'Remote',
+          companyLogo,
         },
         'remoteok.com'
       )

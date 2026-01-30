@@ -146,11 +146,49 @@ export default function JobDetailPageClient({ job }: JobDetailPageClientProps) {
         </div>
 
         {/* Salary */}
-        {job.salary && (
+        {(job.salary || job.salaryMin || job.salaryMax) && (
           <div className="py-4 border-t border-b border-a24-border dark:border-a24-dark-border">
             <p className="text-sm text-a24-text dark:text-a24-dark-text font-medium">
-              {job.salary}
+              {job.salaryMin && job.salaryMax ? (
+                <>
+                  {job.salaryCurrency || 'USD'} {job.salaryMin.toLocaleString()} - {job.salaryMax.toLocaleString()}/yr
+                </>
+              ) : job.salaryMin ? (
+                <>
+                  {job.salaryCurrency || 'USD'} {job.salaryMin.toLocaleString()}+/yr
+                </>
+              ) : (
+                job.salary
+              )}
             </p>
+            {job.experienceLevel && (
+              <p className="text-xs text-a24-muted dark:text-a24-dark-muted mt-1">
+                {job.experienceLevel} Level
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Company Info */}
+        {(job.companyLogo || job.companyWebsite) && (
+          <div className="flex items-center gap-4 py-4 border-b border-a24-border dark:border-a24-dark-border">
+            {job.companyLogo && (
+              <img
+                src={job.companyLogo}
+                alt={`${job.company} logo`}
+                className="w-12 h-12 object-contain rounded"
+              />
+            )}
+            {job.companyWebsite && (
+              <a
+                href={job.companyWebsite}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-neun-primary hover:underline"
+              >
+                Visit Company Website →
+              </a>
+            )}
           </div>
         )}
 
@@ -171,9 +209,49 @@ export default function JobDetailPageClient({ job }: JobDetailPageClientProps) {
             <h3 className="text-xs font-light uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
               Description
             </h3>
-            <p className="text-sm text-a24-text dark:text-a24-dark-text whitespace-pre-line leading-relaxed">
-              {job.description}
-            </p>
+            <div
+              className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: job.description }}
+            />
+          </div>
+        )}
+
+        {/* Requirements */}
+        {job.requirements && (
+          <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+            <h3 className="text-xs font-light uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+              Requirements
+            </h3>
+            <div
+              className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: job.requirements }}
+            />
+          </div>
+        )}
+
+        {/* Responsibilities */}
+        {job.responsibilities && (
+          <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+            <h3 className="text-xs font-light uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+              Responsibilities
+            </h3>
+            <div
+              className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: job.responsibilities }}
+            />
+          </div>
+        )}
+
+        {/* Benefits */}
+        {job.benefits && (
+          <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+            <h3 className="text-xs font-light uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-4">
+              Benefits & Perks
+            </h3>
+            <div
+              className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: job.benefits }}
+            />
           </div>
         )}
 

@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { delay } from '../utils'
+import { delay, detectExperienceLevel, detectRemoteType } from '../utils'
 
 interface AshbyJob {
   id: string
@@ -16,6 +16,18 @@ interface AshbyJob {
   isListed?: boolean
   locationName?: string
   secondaryLocations?: { locationName: string }[]
+  // Enhanced fields from Ashby API
+  descriptionHtml?: string
+  descriptionPlain?: string
+  compensation?: {
+    min?: number
+    max?: number
+    currency?: string
+    interval?: string
+  }
+  requirements?: string
+  responsibilities?: string
+  benefits?: string
 }
 
 interface AshbyResponse {
@@ -64,6 +76,11 @@ export async function crawlEthereumJobs(): Promise<number> {
         ? [...new Set(locationParts)].join(', ')
         : 'Remote'
 
+      // Extract enhanced details
+      const description = job.descriptionHtml || job.descriptionPlain || null
+      const experienceLevel = description ? detectExperienceLevel(description) : null
+      const remoteType = job.isRemote ? 'Remote' : detectRemoteType(location)
+
       const saved = await validateAndSaveJob(
         {
           title: job.title,
@@ -76,6 +93,16 @@ export async function crawlEthereumJobs(): Promise<number> {
           source: 'ethereum.foundation',
           region: 'Global',
           postedDate: job.publishedAt ? new Date(job.publishedAt) : new Date(),
+          // Enhanced job details
+          description,
+          requirements: job.requirements || null,
+          responsibilities: job.responsibilities || null,
+          benefits: job.benefits || null,
+          salaryMin: job.compensation?.min || null,
+          salaryMax: job.compensation?.max || null,
+          salaryCurrency: job.compensation?.currency || null,
+          experienceLevel,
+          remoteType,
         },
         'ethereum.foundation'
       )
