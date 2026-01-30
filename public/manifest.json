@@ -1,0 +1,116 @@
+{
+  "name": "NEUN - Web3 Careers",
+  "short_name": "NEUN",
+  "description": "Find Web3 jobs from top VC portfolio companies. Curated blockchain, DeFi, and crypto careers.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F172A",
+  "theme_color": "#22C55E",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.svg",
+      "sizes": "72x72",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-96x96.svg",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128x128.svg",
+      "sizes": "128x128",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144x144.svg",
+      "sizes": "144x144",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-152x152.svg",
+      "sizes": "152x152",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192x192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-384x384.svg",
+      "sizes": "384x384",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192x192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-maskable-512x512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "NEUN Desktop View"
+    },
+    {
+      "src": "/screenshots/mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "NEUN Mobile View"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse Jobs",
+      "short_name": "Jobs",
+      "description": "View all Web3 job listings",
+      "url": "/careers",
+      "icons": [{ "src": "/icons/shortcut-jobs.svg", "sizes": "96x96", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Post a Job",
+      "short_name": "Post",
+      "description": "Post a new job listing",
+      "url": "/post-job",
+      "icons": [{ "src": "/icons/shortcut-post.svg", "sizes": "96x96", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Companies",
+      "short_name": "Companies",
+      "description": "Browse Web3 companies",
+      "url": "/companies",
+      "icons": [{ "src": "/icons/shortcut-companies.svg", "sizes": "96x96", "type": "image/svg+xml" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

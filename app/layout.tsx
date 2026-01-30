@@ -7,6 +7,8 @@ import PageTransition from './components/PageTransition'
 import KonamiEasterEgg from './components/KonamiEasterEgg'
 import TouchGrassReminder from './components/TouchGrassReminder'
 import { Web3Provider } from './components/Web3Provider'
+import ServiceWorkerRegistration from './components/ServiceWorkerRegistration'
+import PWAInstallPrompt from './components/PWAInstallPrompt'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], weight: ['200', '300', '400', '500', '700'], display: 'swap', variable: '--font-body' })
@@ -66,10 +68,29 @@ export const metadata: Metadata = {
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION,
   },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'NEUN',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'msapplication-TileColor': '#22C55E',
+    'msapplication-tap-highlight': 'no',
+  },
 }
 
 export const viewport: Viewport = {
   viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#22C55E' },
+    { media: '(prefers-color-scheme: dark)', color: '#22C55E' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 }
 
 const themeScript = `
@@ -91,6 +112,15 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* PWA Apple icons */}
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.svg" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.svg" />
+        <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-192x192.svg" />
+        <link rel="icon" type="image/svg+xml" href="/icons/icon-96x96.svg" />
+        {/* Splash screens for iOS */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className={`${inter.variable} ${caveat.variable} ${pressStart.variable} ${inter.className}`}>
         <Web3Provider>
@@ -100,6 +130,8 @@ export default function RootLayout({
           {children}
           <KonamiEasterEgg />
           <TouchGrassReminder />
+          <ServiceWorkerRegistration />
+          <PWAInstallPrompt />
           <Toaster
             position="bottom-right"
             theme="system"
