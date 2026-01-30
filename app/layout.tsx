@@ -9,6 +9,7 @@ import TouchGrassReminder from './components/TouchGrassReminder'
 import { Web3Provider } from './components/Web3Provider'
 import ServiceWorkerRegistration from './components/ServiceWorkerRegistration'
 import PWAInstallPrompt from './components/PWAInstallPrompt'
+import ErrorBoundary from './components/ErrorBoundary'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], weight: ['200', '300', '400', '500', '700'], display: 'swap', variable: '--font-body' })
@@ -127,7 +128,9 @@ export default function RootLayout({
           <WebVitals />
           <PageTransition />
           <Navigation />
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
           <KonamiEasterEgg />
           <TouchGrassReminder />
           <ServiceWorkerRegistration />

@@ -130,7 +130,7 @@ export default function TransparencyPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 md:p-6 text-center card-hover-lift"
+            className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border rounded-lg p-4 md:p-6 text-center card-hover-lift"
           >
             <Vote className="w-6 h-6 md:w-8 md:h-8 text-blue-500 mx-auto mb-2" />
             <p className="text-2xl md:text-3xl font-bold text-a24-text dark:text-a24-dark-text">
@@ -143,7 +143,7 @@ export default function TransparencyPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 md:p-6 text-center card-hover-lift"
+            className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border rounded-lg p-4 md:p-6 text-center card-hover-lift"
           >
             <CheckCircle className="w-6 h-6 md:w-8 md:h-8 text-emerald-500 mx-auto mb-2" />
             <p className="text-2xl md:text-3xl font-bold text-a24-text dark:text-a24-dark-text">
@@ -156,7 +156,7 @@ export default function TransparencyPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 md:p-6 text-center card-hover-lift"
+            className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border rounded-lg p-4 md:p-6 text-center card-hover-lift"
           >
             <Ban className="w-6 h-6 md:w-8 md:h-8 text-red-500 mx-auto mb-2" />
             <p className="text-2xl md:text-3xl font-bold text-a24-text dark:text-a24-dark-text">
@@ -169,7 +169,7 @@ export default function TransparencyPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 md:p-6 text-center card-hover-lift"
+            className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border rounded-lg p-4 md:p-6 text-center card-hover-lift"
           >
             <Clock className="w-6 h-6 md:w-8 md:h-8 text-purple-500 mx-auto mb-2" />
             <p className="text-2xl md:text-3xl font-bold text-a24-text dark:text-a24-dark-text">
@@ -182,7 +182,7 @@ export default function TransparencyPage() {
 
       {/* Tabs */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
-        <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex flex-wrap gap-2 border-b border-a24-border dark:border-a24-dark-border">
           {[
             { id: 'votes', label: 'Community Votes', icon: Vote },
             { id: 'blacklist', label: 'Blacklist', icon: Ban },
@@ -261,10 +261,10 @@ export default function TransparencyPage() {
                 {blacklist.length === 0 ? (
                   <EmptyState message="No blacklisted addresses" />
                 ) : (
-                  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
+                  <div className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border rounded-lg overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="w-full">
-                        <thead className="bg-gray-50 dark:bg-gray-800/50">
+                        <thead className="bg-a24-bg dark:bg-a24-dark-bg/50">
                           <tr>
                             <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">
                               Address
@@ -277,9 +277,9 @@ export default function TransparencyPage() {
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                        <tbody className="divide-y divide-a24-border dark:divide-a24-dark-border">
                           {blacklist.map((entry, i) => (
-                            <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                            <tr key={i} className="hover:bg-a24-bg dark:hover:bg-a24-dark-bg/50">
                               <td className="px-4 py-3">
                                 <code className="text-xs sm:text-sm font-mono text-red-600 dark:text-red-400">
                                   <span className="hidden sm:inline">{entry.wallet}</span>
@@ -311,7 +311,7 @@ export default function TransparencyPage() {
                 {logs.length === 0 ? (
                   <EmptyState message="No activity yet" />
                 ) : (
-                  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg divide-y divide-gray-200 dark:divide-gray-800">
+                  <div className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border rounded-lg divide-y divide-a24-border dark:divide-a24-dark-border">
                     {logs.map((log, i) => (
                       <div key={i} className="flex items-start gap-3 p-4">
                         <div className="flex-shrink-0 mt-0.5">
@@ -369,7 +369,7 @@ function VoteRow({
   const notGuiltyPercent = totalVotes > 0 ? Math.round((vote.votesNotGuilty / totalVotes) * 100) : 0
 
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
+    <div className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border rounded-lg p-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div>
           <h3 className="font-bold text-a24-text dark:text-a24-dark-text">
@@ -393,7 +393,7 @@ function VoteRow({
         </span>
       </div>
 
-      <div className="flex h-2 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 mb-2">
+      <div className="flex h-2 rounded-full overflow-hidden bg-a24-border dark:bg-a24-dark-border mb-2">
         <div className="bg-red-500" style={{ width: `${guiltyPercent}%` }} />
         <div className="bg-emerald-500" style={{ width: `${notGuiltyPercent}%` }} />
       </div>
@@ -404,7 +404,7 @@ function VoteRow({
         <span>Total: {totalVotes} votes</span>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800 text-xs text-a24-muted dark:text-a24-dark-muted">
+      <div className="mt-3 pt-3 border-t border-a24-border dark:border-a24-dark-border text-xs text-a24-muted dark:text-a24-dark-muted">
         {vote.result
           ? `Ended: ${formatDate(vote.resultFinalizedAt || vote.votingEndsAt)}`
           : `Ends: ${formatDate(vote.votingEndsAt)}`

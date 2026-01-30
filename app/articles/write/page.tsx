@@ -192,7 +192,7 @@ export default function ArticleWritePage() {
             {/* Google Login */}
             <button
               onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-3 py-3.5 bg-white text-gray-900 text-sm font-medium hover:bg-gray-100 transition-colors"
+              className="w-full flex items-center justify-center gap-3 py-3.5 bg-white dark:bg-gray-100 text-gray-900 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-200 transition-colors"
             >
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
@@ -221,9 +221,9 @@ export default function ArticleWritePage() {
           </div>
 
           <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-gray-800" />
-            <span className="text-xs text-a24-muted uppercase tracking-wider">or</span>
-            <div className="flex-1 h-px bg-gray-800" />
+            <div className="flex-1 h-px bg-a24-border dark:bg-a24-dark-border" />
+            <span className="text-xs text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider">or</span>
+            <div className="flex-1 h-px bg-a24-border dark:bg-a24-dark-border" />
           </div>
 
           <Link

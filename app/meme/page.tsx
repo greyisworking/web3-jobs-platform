@@ -567,7 +567,7 @@ export default function MemePage() {
                       onClick={() => setDownloadSize(size.id)}
                       className={`flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold border transition-all ${
                         downloadSize === size.id
-                          ? 'bg-white text-black border-white'
+                          ? 'bg-a24-text dark:bg-a24-dark-text text-a24-bg dark:text-a24-dark-bg border-a24-text dark:border-a24-dark-text'
                           : 'bg-transparent text-a24-muted border-a24-border hover:border-a24-text'
                       }`}
                     >
@@ -611,7 +611,7 @@ export default function MemePage() {
             <div className="flex flex-wrap gap-2 justify-center">
               <button
                 onClick={handleDownload}
-                className="flex-1 min-w-[120px] max-w-[200px] flex items-center justify-center gap-2 px-4 py-3 bg-white text-black font-bold hover:bg-gray-200 transition-colors"
+                className="flex-1 min-w-[120px] max-w-[200px] flex items-center justify-center gap-2 px-4 py-3 bg-a24-text dark:bg-a24-dark-text text-a24-bg dark:text-a24-dark-bg font-bold hover:opacity-80 transition-colors"
               >
                 <Download className="w-4 h-4" />
                 Download
@@ -624,7 +624,7 @@ export default function MemePage() {
               </button>
               <button
                 onClick={handleTwitterShare}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-black text-white font-bold border border-a24-border hover:bg-gray-900 transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-a24-surface dark:bg-a24-dark-surface text-a24-text dark:text-a24-dark-text font-bold border border-a24-border dark:border-a24-dark-border hover:opacity-80 transition-colors"
               >
                 <Twitter className="w-4 h-4" />
               </button>
@@ -662,8 +662,8 @@ export default function MemePage() {
                     onClick={() => setSelectedPose(pose.id)}
                     className={`p-2 text-center border transition-all ${
                       selectedPose === pose.id
-                        ? 'bg-white text-black border-white'
-                        : 'bg-a24-surface/50 text-a24-text border-a24-border hover:border-gray-500'
+                        ? 'bg-a24-text dark:bg-a24-dark-text text-a24-bg dark:text-a24-dark-bg border-a24-text dark:border-a24-dark-text'
+                        : 'bg-a24-surface/50 text-a24-text dark:text-a24-dark-text border-a24-border dark:border-a24-dark-border hover:border-a24-muted'
                     }`}
                   >
                     <span className="text-[9px] block leading-tight">{pose.label}</span>
