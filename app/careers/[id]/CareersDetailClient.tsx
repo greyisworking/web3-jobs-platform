@@ -95,7 +95,8 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
   const [reportSubmitting, setReportSubmitting] = useState(false)
   const hasValidUrl = isValidUrl(job.url)
   const { address } = useAccount()
-  const isExpired = job.status === 'expired'
+  // Check if job is expired (isActive=false means expired)
+  const isExpired = job.isActive === false
 
   useEffect(() => {
     trackEvent('job_view', { job_id: job.id, title: job.title, company: job.company, source: 'page' })

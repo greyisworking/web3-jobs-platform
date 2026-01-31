@@ -9,21 +9,16 @@ export async function GET(request: Request) {
     const badge = searchParams.get('badge')
     const backer = searchParams.get('backer')
     const sector = searchParams.get('sector')
-    const includeExpired = searchParams.get('includeExpired') === 'true'
-
     const supabase = await createSupabaseServerClient()
 
+    // Only show active jobs (isActive=true)
+    // Note: status column doesn't exist in Supabase, we only use isActive
     let query = supabase
       .from('Job')
       .select('*')
       .eq('isActive', true)
       .order('postedDate', { ascending: false })
       .limit(500)
-
-    // Filter out expired jobs by default
-    if (!includeExpired) {
-      query = query.or('status.is.null,status.neq.expired')
-    }
 
     if (badge) {
       query = query.contains('badges', [badge])
