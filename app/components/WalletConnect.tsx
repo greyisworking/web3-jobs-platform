@@ -321,7 +321,12 @@ export function WalletConnect() {
             </p>
             <div className="space-y-1">
               <button
-                onClick={handleGoogleLogin}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleGoogleLogin()
+                }}
                 disabled={oauthLoading}
                 className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors disabled:opacity-50"
               >
@@ -339,7 +344,12 @@ export function WalletConnect() {
                 {oauthLoading && <Loader2 className="w-4 h-4 animate-spin" />}
               </button>
               <button
-                onClick={handleKakaoLogin}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleKakaoLogin()
+                }}
                 disabled={oauthLoading}
                 className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors disabled:opacity-50"
               >
