@@ -1,38 +1,104 @@
 /**
  * Check for expired jobs by validating URLs
- * Marks jobs as "expired" if their source URL returns 404
+ * Marks jobs as "expired" if their source URL returns 404 or contains closed text
  */
 
-import { PrismaClient } from '@prisma/client'
+import { createClient } from '@supabase/supabase-js'
 import axios from 'axios'
+import 'dotenv/config'
 
-const prisma = new PrismaClient()
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 // User agent to avoid being blocked
 const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+
+// Keywords that indicate a job is closed/expired
+const EXPIRED_KEYWORDS = [
+  'no longer available',
+  'no longer accepting',
+  'position has been filled',
+  'position is no longer',
+  'job has been filled',
+  'job is no longer',
+  'this job is closed',
+  'this position is closed',
+  'listing has expired',
+  'listing is no longer',
+  'application closed',
+  'applications closed',
+  'we are no longer accepting',
+  'role has been filled',
+  'vacancy has been filled',
+  'sorry, this job',
+  'job not found',
+  'page not found',
+  '404',
+  'oops! we can\'t find',
+  'this page doesn\'t exist',
+]
 
 // Delay helper
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 /**
- * Check if a URL is still valid (not 404)
+ * Check if page content indicates the job is closed
  */
-async function checkUrlStatus(url: string): Promise<{ isValid: boolean; statusCode: number | null }> {
+function hasExpiredText(html: string): boolean {
+  const lowerHtml = html.toLowerCase()
+  return EXPIRED_KEYWORDS.some(keyword => lowerHtml.includes(keyword.toLowerCase()))
+}
+
+/**
+ * Check if a URL is still valid (not 404) and job is still open
+ */
+async function checkUrlStatus(url: string): Promise<{ isValid: boolean; statusCode: number | null; reason?: string }> {
   try {
-    const response = await axios.head(url, {
+    // First try HEAD request
+    const headResponse = await axios.head(url, {
       timeout: 10000,
       headers: { 'User-Agent': USER_AGENT },
       maxRedirects: 5,
-      validateStatus: () => true, // Don't throw on any status
+      validateStatus: () => true,
     })
 
-    // 404, 410 (Gone), or 5xx errors = likely expired
-    const isValid = response.status < 400 || response.status === 403 // 403 might be rate limiting
-    return { isValid, statusCode: response.status }
+    // 404, 410 (Gone) = definitely expired
+    if (headResponse.status === 404 || headResponse.status === 410) {
+      return { isValid: false, statusCode: headResponse.status, reason: 'HTTP ' + headResponse.status }
+    }
+
+    // 5xx errors = server issue, keep as is
+    if (headResponse.status >= 500) {
+      return { isValid: true, statusCode: headResponse.status }
+    }
+
+    // For 200 responses, check page content for expired keywords
+    if (headResponse.status === 200) {
+      try {
+        const getResponse = await axios.get(url, {
+          timeout: 15000,
+          headers: { 'User-Agent': USER_AGENT },
+          maxRedirects: 5,
+          validateStatus: () => true,
+        })
+
+        if (typeof getResponse.data === 'string' && hasExpiredText(getResponse.data)) {
+          return { isValid: false, statusCode: 200, reason: 'Closed text detected' }
+        }
+      } catch {
+        // If GET fails, just use HEAD result
+      }
+    }
+
+    // Other statuses
+    const isValid = headResponse.status < 400 || headResponse.status === 403
+    return { isValid, statusCode: headResponse.status }
   } catch (error: any) {
-    // Network errors, timeouts - might be temporary, mark as unknown
+    // Network errors
     if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-      return { isValid: false, statusCode: null }
+      return { isValid: false, statusCode: null, reason: 'Connection failed' }
     }
     // Timeout or other errors - keep as is
     return { isValid: true, statusCode: null }
@@ -41,36 +107,24 @@ async function checkUrlStatus(url: string): Promise<{ isValid: boolean; statusCo
 
 /**
  * Check all active jobs for expiration
+ * Uses isActive field to mark expired jobs (sets isActive=false)
  */
-async function checkExpiredJobs(options: { limit?: number; daysOld?: number } = {}) {
-  const { limit = 100, daysOld = 7 } = options
+async function checkExpiredJobs(options: { limit?: number; all?: boolean } = {}) {
+  const { limit = 100 } = options
 
   console.log('🔍 Starting expired job check...\n')
 
-  // Get jobs that haven't been validated recently
-  const cutoffDate = new Date()
-  cutoffDate.setDate(cutoffDate.getDate() - daysOld)
+  const { data: jobs, error } = await supabase
+    .from('Job')
+    .select('id, url, title, company, source, postedDate')
+    .eq('isActive', true)
+    .order('postedDate', { ascending: true })
+    .limit(limit)
 
-  const jobs = await prisma.job.findMany({
-    where: {
-      status: { not: 'expired' },
-      isActive: true,
-      OR: [
-        { lastValidated: null },
-        { lastValidated: { lt: cutoffDate } },
-      ],
-    },
-    select: {
-      id: true,
-      url: true,
-      title: true,
-      company: true,
-      source: true,
-      postedDate: true,
-    },
-    orderBy: { postedDate: 'asc' }, // Check oldest first
-    take: limit,
-  })
+  if (error) {
+    console.error('Error fetching jobs:', error)
+    return { validCount: 0, expiredCount: 0, errorCount: 0, totalChecked: 0 }
+  }
 
   console.log(`📦 Found ${jobs.length} jobs to validate\n`)
 
@@ -83,27 +137,26 @@ async function checkExpiredJobs(options: { limit?: number; daysOld?: number } = 
     console.log(`[${i + 1}/${jobs.length}] ${job.title.substring(0, 40)}...`)
     console.log(`  🔗 ${job.url.substring(0, 60)}...`)
 
-    const { isValid, statusCode } = await checkUrlStatus(job.url)
+    const { isValid, statusCode, reason } = await checkUrlStatus(job.url)
 
     if (isValid) {
-      // Update lastValidated timestamp
-      await prisma.job.update({
-        where: { id: job.id },
-        data: { lastValidated: new Date() },
-      })
+      // Job is still valid
       console.log(`  ✅ Valid (${statusCode || 'OK'})`)
       validCount++
     } else {
-      // Mark as expired
-      await prisma.job.update({
-        where: { id: job.id },
-        data: {
-          status: 'expired',
-          lastValidated: new Date(),
-        },
-      })
-      console.log(`  ❌ Expired (${statusCode || 'ERROR'})`)
-      expiredCount++
+      // Mark as expired by setting isActive=false
+      const { error: updateError } = await supabase
+        .from('Job')
+        .update({ isActive: false })
+        .eq('id', job.id)
+
+      if (updateError) {
+        console.log(`  ⚠️ Update error: ${updateError.message}`)
+        errorCount++
+      } else {
+        console.log(`  ❌ Expired (${reason || statusCode || 'ERROR'}) → Deactivated`)
+        expiredCount++
+      }
     }
 
     // Rate limiting - wait between requests
@@ -121,21 +174,25 @@ async function checkExpiredJobs(options: { limit?: number; daysOld?: number } = 
 }
 
 /**
- * Get expired jobs count
+ * Get job statistics
  */
 async function getExpiredStats() {
-  const [total, active, expired] = await Promise.all([
-    prisma.job.count(),
-    prisma.job.count({ where: { status: 'active', isActive: true } }),
-    prisma.job.count({ where: { status: 'expired' } }),
+  const [totalResult, activeResult, inactiveResult] = await Promise.all([
+    supabase.from('Job').select('*', { count: 'exact', head: true }),
+    supabase.from('Job').select('*', { count: 'exact', head: true }).eq('isActive', true),
+    supabase.from('Job').select('*', { count: 'exact', head: true }).eq('isActive', false),
   ])
+
+  const total = totalResult.count || 0
+  const active = activeResult.count || 0
+  const inactive = inactiveResult.count || 0
 
   console.log('\n📊 Job Statistics:')
   console.log(`  Total: ${total}`)
   console.log(`  Active: ${active}`)
-  console.log(`  Expired: ${expired}`)
+  console.log(`  Inactive/Expired: ${inactive}`)
 
-  return { total, active, expired }
+  return { total, active, inactive }
 }
 
 // CLI arguments
@@ -144,15 +201,18 @@ const limit = args.includes('--limit') ? parseInt(args[args.indexOf('--limit') +
 const statsOnly = args.includes('--stats')
 
 async function main() {
-  try {
-    if (statsOnly) {
-      await getExpiredStats()
-    } else {
-      await checkExpiredJobs({ limit })
-      await getExpiredStats()
-    }
-  } finally {
-    await prisma.$disconnect()
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('❌ Missing Supabase credentials. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY')
+    process.exit(1)
+  }
+
+  console.log(`📡 Connected to Supabase: ${supabaseUrl}\n`)
+
+  if (statsOnly) {
+    await getExpiredStats()
+  } else {
+    await checkExpiredJobs({ limit })
+    await getExpiredStats()
   }
 }
 

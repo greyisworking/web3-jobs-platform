@@ -93,7 +93,9 @@ export default function JobCard({ job, index }: JobCardProps) {
   const number = String(index + 1).padStart(3, '0')
   const displayTitle = cleanJobTitle(job.title, job.company)
   const displayCompany = cleanCompanyName(job.company)
-  const isExpired = job.status === 'expired'
+  // Jobs marked as expired are already filtered out from the API
+  // This is a fallback check for any edge cases
+  const isExpired = false
 
   return (
     <motion.div

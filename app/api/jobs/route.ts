@@ -9,6 +9,7 @@ export async function GET(request: Request) {
     const badge = searchParams.get('badge')
     const backer = searchParams.get('backer')
     const sector = searchParams.get('sector')
+    const includeExpired = searchParams.get('includeExpired') === 'true'
 
     const supabase = await createSupabaseServerClient()
 
@@ -18,6 +19,11 @@ export async function GET(request: Request) {
       .eq('isActive', true)
       .order('postedDate', { ascending: false })
       .limit(500)
+
+    // Filter out expired jobs by default
+    if (!includeExpired) {
+      query = query.or('status.is.null,status.neq.expired')
+    }
 
     if (badge) {
       query = query.contains('badges', [badge])
