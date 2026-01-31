@@ -10,6 +10,9 @@ const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/146519777991459250
 // 3시간마다 크롤링
 const scheduleEvery3Hours = '0 */3 * * *' // Every 3 hours
 
+// 매일 새벽 4시에 만료 체크
+const scheduleDaily4AM = '0 4 * * *' // Every day at 4 AM
+
 async function sendDiscordNotification(title: string, description: string, color: number, fields?: any[]) {
   try {
     await axios.post(DISCORD_WEBHOOK_URL, {
@@ -86,6 +89,61 @@ cron.schedule(scheduleEvery3Hours, async () => {
 })
 
 console.log('✅ Crawl scheduled every 3 hours')
+
+// 매일 새벽 4시에 만료된 공고 체크
+cron.schedule(scheduleDaily4AM, async () => {
+  console.log(`\n⏰ [${new Date().toLocaleString()}] Starting expired job check...`)
+
+  const startTime = Date.now()
+
+  await sendDiscordNotification(
+    '🔍 Starting Expired Job Check',
+    'Validating job URLs...',
+    0x9b59b6 // Purple
+  )
+
+  try {
+    const { stdout, stderr } = await execAsync('npm run check:expired -- --limit 200')
+    console.log(stdout)
+
+    const duration = ((Date.now() - startTime) / 1000).toFixed(1)
+
+    // Parse results from stdout
+    const expiredMatch = stdout.match(/❌ Expired: (\d+)/)
+    const expiredCount = expiredMatch ? expiredMatch[1] : '0'
+
+    await sendDiscordNotification(
+      '✅ Expired Check Complete',
+      `Found ${expiredCount} expired jobs`,
+      0x9b59b6,
+      [
+        {
+          name: '⏱️ Duration',
+          value: `${duration} seconds`,
+          inline: true
+        },
+        {
+          name: '❌ Expired',
+          value: expiredCount,
+          inline: true
+        }
+      ]
+    )
+
+    if (stderr) console.error(stderr)
+    console.log('✅ Expired check completed!')
+  } catch (error: any) {
+    console.error('❌ Expired check failed:', error)
+
+    await sendDiscordNotification(
+      '❌ Expired Check Failed',
+      `Error: ${error.message || error}`,
+      0xff0000
+    )
+  }
+})
+
+console.log('✅ Expired check scheduled daily at 4 AM')
 
 // 서버 시작 시 한 번 실행
 console.log('\n🚀 Running initial crawl...\n')

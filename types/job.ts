@@ -12,6 +12,7 @@ export interface Job {
   source: string
   region: string
   postedDate: Date | null
+  status?: string // 'active' | 'expired' | 'closed'
   backers?: string[] | null
   sector?: string | null
   office_location?: string | null

@@ -9,6 +9,8 @@
     "lint": "next lint",
     "crawl": "tsx scripts/crawl.ts",
     "recrawl:descriptions": "tsx scripts/recrawl-descriptions.ts",
+    "check:expired": "tsx scripts/check-expired-jobs.ts",
+    "check:expired:stats": "tsx scripts/check-expired-jobs.ts --stats",
     "generate:og": "tsx scripts/generate-og-image.ts",
     "generate:favicons": "tsx scripts/generate-favicons.ts",
     "schedule": "tsx scripts/scheduler.ts",

@@ -95,6 +95,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
   const [reportSubmitting, setReportSubmitting] = useState(false)
   const hasValidUrl = isValidUrl(job.url)
   const { address } = useAccount()
+  const isExpired = job.status === 'expired'
 
   useEffect(() => {
     trackEvent('job_view', { job_id: job.id, title: job.title, company: job.company, source: 'page' })
@@ -391,7 +392,24 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
           {/* ── Right column: Sidebar ── */}
           <aside className="lg:sticky lg:top-20 lg:self-start space-y-4">
             {/* Apply Now CTA */}
-            {urlStatus === 'valid' ? (
+            {isExpired ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-center gap-2 w-full py-3 bg-gray-500/20 text-gray-400 text-[11px] font-light uppercase tracking-[0.35em] border border-gray-500/30">
+                  <AlertTriangle className="w-4 h-4" />
+                  이 공고는 마감되었습니다
+                </div>
+                <a
+                  href={`https://www.google.com/search?q=${encodeURIComponent(`${job.company} careers ${job.title}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackEvent('job_search_fallback', { job_id: job.id, company: job.company })}
+                  className="group flex items-center justify-center gap-2 w-full py-2.5 border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text text-[10px] font-light uppercase tracking-[0.25em] hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  Search Similar Jobs
+                </a>
+              </div>
+            ) : urlStatus === 'valid' ? (
               <a
                 href={job.url}
                 target="_blank"
@@ -632,7 +650,24 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
 
       {/* Mobile fixed bottom Apply button */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-a24-surface dark:bg-a24-dark-surface border-t border-a24-border dark:border-a24-dark-border p-4">
-        {urlStatus === 'valid' ? (
+        {isExpired ? (
+          <div className="flex gap-2">
+            <div className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-500/20 text-gray-400 text-[10px] uppercase tracking-wider">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              마감됨
+            </div>
+            <a
+              href={`https://www.google.com/search?q=${encodeURIComponent(`${job.company} careers ${job.title}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent('job_search_fallback', { job_id: job.id, company: job.company })}
+              className="flex-1 flex items-center justify-center gap-2 py-3 bg-a24-text dark:bg-a24-dark-text text-a24-surface dark:text-a24-dark-bg text-[10px] uppercase tracking-wider"
+            >
+              <Search className="w-3.5 h-3.5" />
+              Search
+            </a>
+          </div>
+        ) : urlStatus === 'valid' ? (
           <a
             href={job.url}
             target="_blank"
