@@ -9,13 +9,11 @@ import { trackEvent } from '@/lib/analytics'
 import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import BookmarkButton from './BookmarkButton'
 import { MiniPixelbara } from './Pixelbara'
-import { MiniTrustBadge } from './TrustBadge'
 import VCVerifiedBadge from './badges/VCVerifiedBadge'
 import TrustVerifiedBadge from './badges/TrustVerifiedBadge'
-import UnverifiedBadge from './badges/UnverifiedBadge'
 import { Lock, Vote, Flag } from 'lucide-react'
 import { toast } from 'sonner'
-import { TIER1_VCS } from '@/lib/trust-check'
+import { TIER1_VCS, TRUSTED_JOB_SOURCES } from '@/lib/trust-check'
 
 function isNewJob(postedDate: Date | string | null | undefined): boolean {
   if (!postedDate) return false
@@ -83,6 +81,12 @@ function hasVCBacking(backers?: string[] | null): boolean {
   )
 }
 
+// Check if job source is trusted (crawled from established job boards)
+function isTrustedJobSource(source: string): boolean {
+  const sourceLower = source.toLowerCase()
+  return TRUSTED_JOB_SOURCES.some(s => sourceLower.includes(s.toLowerCase()))
+}
+
 export default function JobCard({ job, index }: JobCardProps) {
   const { opacity, isFading } = useDecayEffect(job.postedDate)
   const [hovered, setHovered] = useState(false)
@@ -110,12 +114,12 @@ export default function JobCard({ job, index }: JobCardProps) {
       >
         {/* Von Restorff Effect: Urgent/Featured/NEW + Verification badges */}
         <div className="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
-          {/* Verification Status Badge */}
+          {/* Verification Status Badge - No warnings on cards */}
           {hasVCBacking(job.backers) ? (
             <VCVerifiedBadge compact />
-          ) : (
-            <UnverifiedBadge compact />
-          )}
+          ) : isTrustedJobSource(job.source) ? (
+            <TrustVerifiedBadge compact />
+          ) : null}
           {job.is_urgent && (
             <span className="badge-urgent px-1.5 py-0.5 font-bold text-[9px] uppercase tracking-wider rounded-sm">
               URGENT
@@ -154,14 +158,11 @@ export default function JobCard({ job, index }: JobCardProps) {
           )}
         </div>
 
-        {/* Trust badge + Mini pixelbara on hover */}
+        {/* Mini pixelbara on hover */}
         {hovered && (
           <>
-            <div className="absolute bottom-2 right-2 flex items-center gap-2">
-              <MiniTrustBadge backers={job.backers} companyName={job.company} />
-              <div className="opacity-30">
-                <MiniPixelbara />
-              </div>
+            <div className="absolute bottom-2 right-2 opacity-30">
+              <MiniPixelbara />
             </div>
             <span className="absolute top-1 right-10 text-[9px] text-a24-muted/50 dark:text-a24-dark-muted/50 italic pointer-events-none">
               it&apos;s giving... job

@@ -11,7 +11,9 @@ import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import BookmarkButton from '@/app/components/BookmarkButton'
 import GlowBadge from '@/app/components/GlowBadge'
 import { TrustCheckList, SimpleTrustCheckList, hasVCBacking } from '@/app/components/TrustBadge'
-import { simpleCompanyTrustCheck } from '@/lib/trust-check'
+import { simpleCompanyTrustCheck, isTrustedSource, isUserPostedJob } from '@/lib/trust-check'
+import TrustVerifiedBadge from '@/app/components/badges/TrustVerifiedBadge'
+import UnverifiedBadge from '@/app/components/badges/UnverifiedBadge'
 import VCVerifiedBadge from '@/app/components/badges/VCVerifiedBadge'
 import { TokenInfoSection, useTokenData } from '@/app/components/TokenInfo'
 import { calculateTrustScore } from '@/lib/trust-check'
@@ -462,8 +464,9 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
               <BookmarkButton job={{ id: job.id, title: job.title, company: job.company }} />
             </div>
 
-            {/* Trust Check - Only show for non-VC verified companies */}
+            {/* Trust Status - Different display based on verification level */}
             {hasVCBacking(job.backers) ? (
+              // VC Portfolio Company - No warnings needed
               <div className="p-4 border border-amber-500/30 bg-amber-500/5">
                 <div className="flex items-center gap-2 mb-2">
                   <VCVerifiedBadge />
@@ -472,20 +475,45 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                   Backed by top-tier VC investors. ser this ones legit fr.
                 </p>
               </div>
-            ) : (
-              <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
+            ) : isTrustedSource(job.source) ? (
+              // Crawled from trusted job board - Verified
+              <div className="p-4 border border-emerald-500/30 bg-emerald-500/5">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrustVerifiedBadge />
+                </div>
+                <p className="text-[11px] text-emerald-400/80">
+                  Sourced from {job.source}. established job board, looking good ser.
+                </p>
+              </div>
+            ) : isUserPostedJob(job.source) ? (
+              // User-posted job - Show warning and trust check
+              <div className="p-4 border border-red-500/30 bg-red-500/5">
+                <div className="flex items-center gap-2 mb-3">
+                  <UnverifiedBadge />
+                  <span className="text-[10px] text-red-400/80">User posted job</span>
+                </div>
                 <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-3">
                   Trust Check
                 </h3>
                 <SimpleTrustCheckList
                   result={simpleCompanyTrustCheck({
                     website: job.companyWebsite,
-                    twitter: undefined, // Would need to add these fields
+                    twitter: undefined,
                     linkedin: undefined,
                     foundedYear: undefined,
                     teamDoxxed: trustScore.checks.find(c => c.id === 'doxxed')?.passed,
                   })}
                 />
+              </div>
+            ) : (
+              // Other sources - Show as verified (trusted by default)
+              <div className="p-4 border border-emerald-500/30 bg-emerald-500/5">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrustVerifiedBadge />
+                </div>
+                <p className="text-[11px] text-emerald-400/80">
+                  Sourced from {job.source}. looking good ser.
+                </p>
               </div>
             )}
 

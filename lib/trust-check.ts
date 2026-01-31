@@ -49,6 +49,35 @@ export const TIER1_VCS = [
   'Binance Labs',
 ]
 
+// Trusted job sources (crawled from established job boards)
+export const TRUSTED_JOB_SOURCES = [
+  'web3.career',
+  'remoteok.com',
+  'remote3.co',
+  'jobs.solana.com',
+  'jobs.sui.io',
+  'ethereum.foundation',
+  'web3krjobs',
+  'cryptocurrencyjobs.co',
+  'crypto.jobs',
+  'blocktribe.com',
+]
+
+/**
+ * Check if job source is a trusted crawled source
+ */
+export function isTrustedSource(source: string): boolean {
+  const sourceLower = source.toLowerCase()
+  return TRUSTED_JOB_SOURCES.some(s => sourceLower.includes(s.toLowerCase()))
+}
+
+/**
+ * Check if job is user-posted (not from trusted crawled sources)
+ */
+export function isUserPostedJob(source: string): boolean {
+  return source === 'user' || source === 'post-job' || source === 'direct'
+}
+
 // ══════════════════════════════════════════════════════════
 // Major Corporation Subsidiaries (Auto VERIFIED)
 // ══════════════════════════════════════════════════════════
