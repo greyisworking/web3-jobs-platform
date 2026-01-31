@@ -15,29 +15,16 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 // User agent to avoid being blocked
 const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
-// Keywords that indicate a job is closed/expired
+// Keywords that STRONGLY indicate a job is closed/expired
+// Be conservative to avoid false positives
 const EXPIRED_KEYWORDS = [
-  'no longer available',
-  'no longer accepting',
-  'position has been filled',
-  'position is no longer',
-  'job has been filled',
-  'job is no longer',
-  'this job is closed',
-  'this position is closed',
-  'listing has expired',
-  'listing is no longer',
-  'application closed',
-  'applications closed',
-  'we are no longer accepting',
-  'role has been filled',
-  'vacancy has been filled',
+  'this job is no longer available',
+  'this position has been filled',
+  'this job has been closed',
+  'this role has been filled',
+  'no longer accepting applications',
+  'job not found',  // Ashby, Lever specific
   'sorry, this job',
-  'job not found',
-  'page not found',
-  '404',
-  'oops! we can\'t find',
-  'this page doesn\'t exist',
 ]
 
 // Delay helper
