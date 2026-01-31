@@ -102,29 +102,65 @@ export function WalletConnect() {
     }
   }, [connect, connectors])
 
+  const [oauthLoading, setOauthLoading] = useState(false)
+
   const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-    if (error) {
-      const { title, description } = getErrorForToast(error)
-      toast.error(title, { description })
+    setOauthLoading(true)
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      console.log('Google OAuth response:', { data, error })
+      if (error) {
+        const { title, description } = getErrorForToast(error)
+        toast.error(title, { description })
+        setOauthLoading(false)
+        return
+      }
+      // If no redirect URL returned, OAuth provider is not configured
+      if (!data?.url) {
+        toast.error('Google OAuth 미설정', {
+          description: 'Supabase 대시보드에서 Google provider를 활성화하세요.'
+        })
+        setOauthLoading(false)
+      }
+      // If successful, browser will redirect to Google - no need to reset loading
+    } catch (err) {
+      console.error('Google OAuth error:', err)
+      toast.error('Google 로그인 오류', { description: '다시 시도해주세요.' })
+      setOauthLoading(false)
     }
   }
 
   const handleKakaoLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'kakao',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-    if (error) {
-      const { title, description } = getErrorForToast(error)
-      toast.error(title, { description })
+    setOauthLoading(true)
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'kakao',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      console.log('Kakao OAuth response:', { data, error })
+      if (error) {
+        const { title, description } = getErrorForToast(error)
+        toast.error(title, { description })
+        setOauthLoading(false)
+        return
+      }
+      if (!data?.url) {
+        toast.error('Kakao OAuth 미설정', {
+          description: 'Supabase 대시보드에서 Kakao provider를 활성화하세요.'
+        })
+        setOauthLoading(false)
+      }
+    } catch (err) {
+      console.error('Kakao OAuth error:', err)
+      toast.error('Kakao 로그인 오류', { description: '다시 시도해주세요.' })
+      setOauthLoading(false)
     }
   }
 
@@ -281,7 +317,8 @@ export function WalletConnect() {
             <div className="space-y-1">
               <button
                 onClick={handleGoogleLogin}
-                className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors"
+                disabled={oauthLoading}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors disabled:opacity-50"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -291,13 +328,15 @@ export function WalletConnect() {
                 </svg>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-a24-text dark:text-a24-dark-text">
-                    Google
+                    {oauthLoading ? '로그인 중...' : 'Google'}
                   </p>
                 </div>
+                {oauthLoading && <Loader2 className="w-4 h-4 animate-spin" />}
               </button>
               <button
                 onClick={handleKakaoLogin}
-                className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors"
+                disabled={oauthLoading}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors disabled:opacity-50"
               >
                 <div className="w-5 h-5 bg-[#FEE500] rounded flex items-center justify-center">
                   <svg width="12" height="12" viewBox="0 0 18 18" fill="none">
@@ -311,9 +350,10 @@ export function WalletConnect() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-a24-text dark:text-a24-dark-text">
-                    Kakao
+                    {oauthLoading ? '로그인 중...' : 'Kakao'}
                   </p>
                 </div>
+                {oauthLoading && <Loader2 className="w-4 h-4 animate-spin" />}
               </button>
             </div>
           </div>
