@@ -93,9 +93,8 @@ const htmlContent = `
     body {
       width: ${OG_WIDTH}px;
       height: ${OG_HEIGHT}px;
-      background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+      background: #0F172A;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       font-family: 'Press Start 2P', monospace;
@@ -103,130 +102,50 @@ const htmlContent = `
       overflow: hidden;
     }
 
-    /* Grid pattern overlay */
-    body::before {
-      content: '';
+    /* Subtle glow effect */
+    .glow {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image:
-        linear-gradient(rgba(34, 197, 94, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(34, 197, 94, 0.03) 1px, transparent 1px);
-      background-size: 20px 20px;
-      pointer-events: none;
-    }
-
-    /* Glow effects */
-    .glow-top {
-      position: absolute;
-      top: -100px;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 300px;
-      background: radial-gradient(ellipse, rgba(34, 197, 94, 0.15) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      width: 500px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(34, 197, 94, 0.08) 0%, transparent 70%);
       pointer-events: none;
     }
 
     .content {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 24px;
+      gap: 48px;
       z-index: 1;
     }
 
-    .logo-section {
-      display: flex;
-      align-items: center;
-      gap: 32px;
-    }
-
     .pixelbara {
-      width: 200px;
+      width: 280px;
       height: auto;
-      filter: drop-shadow(0 0 20px rgba(34, 197, 94, 0.3));
+      filter: drop-shadow(0 0 30px rgba(34, 197, 94, 0.2));
     }
 
     .neun-logo {
-      font-size: 72px;
+      font-size: 96px;
       color: #22C55E;
       text-shadow:
-        0 0 40px rgba(34, 197, 94, 0.5),
-        0 0 80px rgba(34, 197, 94, 0.3);
-      letter-spacing: 8px;
+        0 0 60px rgba(34, 197, 94, 0.4),
+        0 0 120px rgba(34, 197, 94, 0.2);
+      letter-spacing: 12px;
     }
-
-    .tagline {
-      font-size: 24px;
-      color: #F8FAFC;
-      text-align: center;
-      letter-spacing: 2px;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-    }
-
-    .vc-badges {
-      display: flex;
-      gap: 16px;
-      margin-top: 8px;
-    }
-
-    .vc-badge {
-      font-size: 14px;
-      color: #22C55E;
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      padding: 8px 16px;
-    }
-
-    .footer {
-      position: absolute;
-      bottom: 24px;
-      font-size: 12px;
-      color: #64748B;
-      letter-spacing: 1px;
-    }
-
-    .corner-accent {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      border: 2px solid rgba(34, 197, 94, 0.3);
-    }
-
-    .corner-tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
-    .corner-tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
-    .corner-bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
-    .corner-br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
   </style>
 </head>
 <body>
-  <div class="glow-top"></div>
-  <div class="corner-accent corner-tl"></div>
-  <div class="corner-accent corner-tr"></div>
-  <div class="corner-accent corner-bl"></div>
-  <div class="corner-accent corner-br"></div>
+  <div class="glow"></div>
 
   <div class="content">
-    <div class="logo-section">
-      <div class="pixelbara">
-        ${generatePixelbaraSVG()}
-      </div>
-      <div class="neun-logo">NEUN</div>
+    <div class="pixelbara">
+      ${generatePixelbaraSVG()}
     </div>
-
-    <div class="tagline">Web3 Careers from Top VC Portfolios</div>
-
-    <div class="vc-badges">
-      <span class="vc-badge">a16z</span>
-      <span class="vc-badge">Hashed</span>
-      <span class="vc-badge">Paradigm</span>
-    </div>
+    <div class="neun-logo">NEUN</div>
   </div>
-
-  <div class="footer">neun.wtf — no cap. only legit jobs.</div>
 </body>
 </html>
 `
