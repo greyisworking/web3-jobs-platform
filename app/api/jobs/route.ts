@@ -63,7 +63,15 @@ export async function GET(request: Request) {
       sources,
     }
 
-    return NextResponse.json({ jobs: jobList, stats })
+    // Return with cache headers for CDN/browser caching
+    return NextResponse.json(
+      { jobs: jobList, stats },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        },
+      }
+    )
   } catch (error) {
     console.error('API Error:', error)
     return NextResponse.json({ jobs: [], stats: { total: 0, global: 0, korea: 0, sources: [] } })

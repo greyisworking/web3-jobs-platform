@@ -3,71 +3,64 @@
 import useSWR from 'swr'
 import type { Job } from '@/types/job'
 
+interface Stats {
+  total: number
+  global: number
+  korea: number
+  sources: { source: string; _count: number }[]
+}
+
 interface JobsResponse {
   jobs: Job[]
-  stats: {
-    total: number
-    global: number
-    korea: number
-    sources: { source: string; _count: number }[]
-  }
+  stats: Stats
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
-
-// SWR configuration for jobs - cache for 5 minutes, revalidate on focus
-const swrOptions = {
-  revalidateOnFocus: true,
-  revalidateOnReconnect: true,
-  dedupingInterval: 60000, // Dedupe requests within 1 minute
-  refreshInterval: 300000, // Auto refresh every 5 minutes
-}
+const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 /**
- * Hook to fetch all jobs with SWR caching
+ * Hook for fetching jobs with SWR caching
+ * - Caches data for 5 minutes
+ * - Revalidates on focus
+ * - Deduplicates requests
  */
 export function useJobs() {
   const { data, error, isLoading, mutate } = useSWR<JobsResponse>(
     '/api/jobs',
     fetcher,
-    swrOptions
+    {
+      revalidateOnFocus: false, // Don't refetch on window focus
+      revalidateOnReconnect: true, // Refetch on reconnect
+      dedupingInterval: 60000, // Dedupe requests within 1 minute
+      refreshInterval: 300000, // Refresh every 5 minutes
+      keepPreviousData: true, // Keep old data while fetching new
+    }
   )
 
   return {
-    jobs: data?.jobs || [],
-    stats: data?.stats || { total: 0, global: 0, korea: 0, sources: [] },
+    jobs: data?.jobs ?? [],
+    stats: data?.stats ?? { total: 0, global: 0, korea: 0, sources: [] },
     isLoading,
-    isError: error,
+    isError: !!error,
     mutate,
   }
 }
 
 /**
- * Hook to fetch a single job by ID
+ * Hook for fetching a single job
  */
-export function useJob(id: string | null) {
-  const { data, error, isLoading } = useSWR<{ job: Job }>(
+export function useJob(id: string) {
+  const { data, error, isLoading } = useSWR<Job>(
     id ? `/api/jobs/${id}` : null,
     fetcher,
     {
-      ...swrOptions,
-      revalidateOnFocus: false, // Don't revalidate single job on focus
+      revalidateOnFocus: false,
+      dedupingInterval: 60000,
     }
   )
 
   return {
-    job: data?.job || null,
+    job: data,
     isLoading,
-    isError: error,
+    isError: !!error,
   }
 }
-
-/**
- * Prefetch jobs for better UX
- */
-export function prefetchJobs() {
-  // Trigger a prefetch by calling the API
-  fetch('/api/jobs').then((res) => res.json())
-}
-
-export default useJobs

@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo, Suspense } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import type { Job } from '@/types/job'
+import { useJobs } from '@/hooks/useJobs'
 import SmartFilterBar, { SmartFilters } from '../components/SmartFilterBar'
 import SearchWithSuggestions from '../components/SearchWithSuggestions'
 import JobCard from '../components/JobCard'
@@ -15,23 +16,10 @@ import Footer from '../components/Footer'
 
 const PAGE_SIZE = 12
 
-interface Stats {
-  total: number
-  global: number
-  korea: number
-  sources: { source: string; _count: number }[]
-}
-
 function CareersContent() {
-  const [jobs, setJobs] = useState<Job[]>([])
+  // Use SWR for caching and deduplication
+  const { jobs, stats, isLoading } = useJobs()
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([])
-  const [stats, setStats] = useState<Stats>({
-    total: 0,
-    global: 0,
-    korea: 0,
-    sources: [],
-  })
-  const [loading, setLoading] = useState(true)
   const [selectedVC, setSelectedVC] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [smartFilters, setSmartFilters] = useState<SmartFilters>({
@@ -46,28 +34,17 @@ function CareersContent() {
   })
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
+  // Update filtered jobs when jobs data changes
   useEffect(() => {
-    fetchJobs()
-  }, [])
+    if (jobs.length > 0) {
+      setFilteredJobs(jobs)
+    }
+  }, [jobs])
 
   // Reset visible count when filters change
   useEffect(() => {
     setVisibleCount(PAGE_SIZE)
   }, [filteredJobs])
-
-  const fetchJobs = async () => {
-    try {
-      const response = await fetch('/api/jobs')
-      const data = await response.json()
-      setJobs(data.jobs)
-      setFilteredJobs(data.jobs)
-      setStats(data.stats)
-    } catch (error) {
-      console.error('Failed to fetch jobs:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const vcCounts = useMemo(() => {
     const counts: Record<string, number> = {}
@@ -135,7 +112,7 @@ function CareersContent() {
   const visibleJobs = filteredJobs.slice(0, visibleCount)
   const hasMore = visibleCount < filteredJobs.length
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
         <main className="max-w-6xl mx-auto px-6 pt-24 pb-12">
