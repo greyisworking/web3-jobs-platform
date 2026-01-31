@@ -41,14 +41,18 @@ export default function LoginPage() {
         provider: 'kakao',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          skipBrowserRedirect: true,
         },
       })
       console.log('Kakao OAuth response:', { data, error })
       if (error) {
         setError(error.message)
         setLoading(false)
+        return
       }
-      if (!error && !data?.url) {
+      if (data?.url) {
+        window.location.href = data.url
+      } else {
         setError('Kakao OAuth가 설정되지 않았습니다.')
         setLoading(false)
       }
@@ -132,15 +136,19 @@ export default function LoginPage() {
                 provider: 'google',
                 options: {
                   redirectTo: `${window.location.origin}/auth/callback`,
+                  skipBrowserRedirect: true,
                 },
               })
               console.log('Google OAuth response:', { data, error })
               if (error) {
                 setError(error.message)
                 setLoading(false)
+                return
               }
-              // If no error and no redirect happened, show message
-              if (!error && !data?.url) {
+              // Manually redirect to OAuth URL
+              if (data?.url) {
+                window.location.href = data.url
+              } else {
                 setError('Google OAuth가 설정되지 않았습니다. Supabase 대시보드에서 Google provider를 활성화하세요.')
                 setLoading(false)
               }

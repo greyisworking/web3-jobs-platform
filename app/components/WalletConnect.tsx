@@ -111,6 +111,7 @@ export function WalletConnect() {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          skipBrowserRedirect: true, // Handle redirect manually
         },
       })
       console.log('Google OAuth response:', { data, error })
@@ -120,14 +121,15 @@ export function WalletConnect() {
         setOauthLoading(false)
         return
       }
-      // If no redirect URL returned, OAuth provider is not configured
-      if (!data?.url) {
+      // Manually redirect to OAuth URL
+      if (data?.url) {
+        window.location.href = data.url
+      } else {
         toast.error('Google OAuth 미설정', {
           description: 'Supabase 대시보드에서 Google provider를 활성화하세요.'
         })
         setOauthLoading(false)
       }
-      // If successful, browser will redirect to Google - no need to reset loading
     } catch (err) {
       console.error('Google OAuth error:', err)
       toast.error('Google 로그인 오류', { description: '다시 시도해주세요.' })
@@ -142,6 +144,7 @@ export function WalletConnect() {
         provider: 'kakao',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          skipBrowserRedirect: true,
         },
       })
       console.log('Kakao OAuth response:', { data, error })
@@ -151,7 +154,9 @@ export function WalletConnect() {
         setOauthLoading(false)
         return
       }
-      if (!data?.url) {
+      if (data?.url) {
+        window.location.href = data.url
+      } else {
         toast.error('Kakao OAuth 미설정', {
           description: 'Supabase 대시보드에서 Kakao provider를 활성화하세요.'
         })

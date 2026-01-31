@@ -9,6 +9,20 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
+  // Ignore unused wagmi connector dependencies
+  webpack: (config) => {
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      '@react-native-async-storage/async-storage': false,
+      '@base-org/account': false,
+      '@gemini-wallet/core': false,
+      'porto/internal': false,
+      'porto': false,
+      '@safe-global/safe-apps-sdk': false,
+      '@safe-global/safe-apps-provider': false,
+    }
+    return config
+  },
   images: {
     remotePatterns: [
       {
