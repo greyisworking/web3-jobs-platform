@@ -10,6 +10,7 @@
     "crawl": "tsx scripts/crawl.ts",
     "recrawl:descriptions": "tsx scripts/recrawl-descriptions.ts",
     "generate:og": "tsx scripts/generate-og-image.ts",
+    "generate:favicons": "tsx scripts/generate-favicons.ts",
     "schedule": "tsx scripts/scheduler.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run schedule\"",
     "db:push": "prisma db push",

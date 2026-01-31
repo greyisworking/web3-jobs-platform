@@ -114,12 +114,13 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        {/* PWA Apple icons */}
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.svg" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.svg" />
-        <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-192x192.svg" />
-        <link rel="icon" type="image/svg+xml" href="/icons/icon-96x96.svg" />
+        {/* Favicons */}
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+        {/* Apple Touch Icons */}
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         {/* Splash screens for iOS */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
