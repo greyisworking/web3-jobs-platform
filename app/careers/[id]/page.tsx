@@ -4,6 +4,10 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import type { Job } from '@/types/job'
 import CareersDetailClient from './CareersDetailClient'
 
+// Force dynamic rendering to always fetch fresh data
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 interface PageProps {
   params: Promise<{ id: string }>
 }
