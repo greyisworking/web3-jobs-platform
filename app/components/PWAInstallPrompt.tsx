@@ -46,10 +46,12 @@ export default function PWAInstallPrompt() {
 
     // Listen for beforeinstallprompt event (Chrome, Edge, etc.)
     const handleBeforeInstall = (e: Event) => {
+      console.log('🔥 beforeinstallprompt fired!')
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       // Only show banner on mobile devices
       if (isMobile()) {
+        console.log('📱 Mobile detected, showing banner')
         setTimeout(() => setShowBanner(true), 3000)
       }
     }
@@ -67,7 +69,11 @@ export default function PWAInstallPrompt() {
   }, [])
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return
+    console.log('🎯 Install clicked, deferredPrompt:', deferredPrompt)
+    if (!deferredPrompt) {
+      console.log('❌ No deferredPrompt available!')
+      return
+    }
 
     await deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
