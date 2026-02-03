@@ -9,6 +9,13 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
+// Check if mobile device
+const isMobile = () => {
+  if (typeof window === 'undefined') return false
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    || window.innerWidth <= 768
+}
+
 export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showBanner, setShowBanner] = useState(false)
@@ -41,14 +48,16 @@ export default function PWAInstallPrompt() {
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
-      // Delay showing banner for better UX
-      setTimeout(() => setShowBanner(true), 3000)
+      // Only show banner on mobile devices
+      if (isMobile()) {
+        setTimeout(() => setShowBanner(true), 3000)
+      }
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall)
 
-    // For iOS, show banner after delay if not standalone
-    if (iOS) {
+    // For iOS, show banner after delay if not standalone (mobile only)
+    if (iOS && isMobile()) {
       setTimeout(() => setShowBanner(true), 5000)
     }
 
