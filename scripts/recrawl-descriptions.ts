@@ -50,9 +50,16 @@ function cleanDescription(text: string): string {
     /recommended\s*(?:jobs?|for you)\s*[:\n]?[\s\S]*?(?=\n\n|\z)/gi,
     /you\s*(?:may|might)\s*(?:also\s*)?like[\s\S]*?(?=\n\n|\z)/gi,
     /more\s*jobs?\s*(?:at|from|like)[\s\S]*?(?=\n\n|\z)/gi,
+    // Share/social patterns (remoteok, etc.)
+    /share\s*this\s*job:?\s*/gi,
+    /get\s*a\s*\w+\.?\w*\s*short\s*link/gi,
+    /(?:^|\n)\s*\w+\.com\s*(?:\n|$)/gim,
+    // "Company is hiring" patterns
+    /\w+\s+is\s+hiring\s+a\s*\n/gi,
+    /remote\s+\w+\s*\n\s*\n/gi,
     // Navigation elements
     /(?:^|\n)\s*(?:home|about|contact|login|sign\s*(?:in|up)|register|apply\s*now|back\s*to)\s*(?:\n|$)/gim,
-    /(?:^|\n)\s*(?:share|tweet|post|email)\s*(?:this)?(?:\s*job)?(?:\n|$)/gim,
+    /(?:^|\n)\s*(?:share|tweet|post|email)\s*(?:this)?(?:\s*job)?:?\s*(?:\n|$)/gim,
     // Social sharing
     /share\s*(?:on|via)\s*(?:twitter|facebook|linkedin|email)[\s\S]*?(?:\n|$)/gi,
     /follow\s*us\s*(?:on)?[\s\S]*?(?:\n|$)/gi,
@@ -87,6 +94,10 @@ function cleanDescription(text: string): string {
     /(?:advertisement|sponsored|promoted)[\s\S]*?(?:\n\n|\z)/gi,
     // Empty bullet points
     /^•\s*$/gm,
+    // Backslash n (literal)
+    /\\n/g,
+    // Email pattern cleanup
+    /\[email\s*protected\]/gi,
     // Excessive spacing
     /\n{4,}/g,
   ]
