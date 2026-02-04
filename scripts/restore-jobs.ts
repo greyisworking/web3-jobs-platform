@@ -107,6 +107,7 @@ async function restoreJobs() {
     .select('id, title, company, url')
     .eq('isActive', false)
     .order('postedDate', { ascending: false })
+    .order('crawledAt', { ascending: false })
 
   if (error) {
     console.error('Error fetching jobs:', error)

@@ -106,6 +106,7 @@ async function checkExpiredJobs(options: { limit?: number; all?: boolean } = {})
     .select('id, url, title, company, source, postedDate')
     .eq('isActive', true)
     .order('postedDate', { ascending: true })
+    .order('crawledAt', { ascending: false })
     .limit(limit)
 
   if (error) {

@@ -18,6 +18,7 @@ export async function GET(request: Request) {
       .select('*')
       .eq('isActive', true)
       .order('postedDate', { ascending: false })
+      .order('crawledAt', { ascending: false })
       .limit(500)
 
     if (badge) {

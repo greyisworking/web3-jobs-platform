@@ -347,6 +347,7 @@ async function recrawlDescriptions(options: { limit?: number; all?: boolean } = 
     .select('id, url, source, title, company, description')
     .eq('isActive', true)
     .order('postedDate', { ascending: false })
+    .order('crawledAt', { ascending: false })
 
   if (!all) {
     // Only get jobs without descriptions
