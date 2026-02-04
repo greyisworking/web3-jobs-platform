@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://web3jobs.kr'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.neun.wtf'
 
   const cookieStore = await cookies()
   const supabase = createServerClient(
