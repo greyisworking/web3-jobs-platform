@@ -49,17 +49,15 @@ export default function PWAInstallPrompt() {
       console.log('🔥 beforeinstallprompt fired!')
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
-      // Only show banner on mobile devices
-      if (isMobile()) {
-        console.log('📱 Mobile detected, showing banner')
-        setTimeout(() => setShowBanner(true), 3000)
-      }
+      // Show banner on both mobile and desktop
+      console.log('📱 Showing install banner')
+      setTimeout(() => setShowBanner(true), 3000)
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall)
 
-    // For iOS, show banner after delay if not standalone (mobile only)
-    if (iOS && isMobile()) {
+    // For iOS, show banner after delay if not standalone
+    if (iOS) {
       setTimeout(() => setShowBanner(true), 5000)
     }
 
