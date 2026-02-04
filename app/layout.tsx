@@ -119,8 +119,9 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
         {/* Apple Touch Icons */}
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" href="/icon-180x180.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icon-180x180.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png" />
         {/* iOS PWA meta tags */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
