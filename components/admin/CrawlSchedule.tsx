@@ -40,19 +40,19 @@ export function CrawlSchedule() {
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
           <CalendarClock className="h-5 w-5" />
-          Crawl Schedule
+          크롤링 스케줄
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2 text-sm">
           <Clock className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">Every 3 hours</span>
+          <span className="font-medium">3시간마다</span>
           <span className="text-muted-foreground">(cron: 0 */3 * * *)</span>
         </div>
 
         {lastRun && (
           <div className="text-sm">
-            <span className="text-muted-foreground">Last run: </span>
+            <span className="text-muted-foreground">마지막 실행: </span>
             <span className="font-medium">
               {new Date(lastRun.started_at).toLocaleString()}
             </span>
@@ -73,7 +73,7 @@ export function CrawlSchedule() {
 
         <div>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            Next 5 Scheduled Runs (UTC)
+            다음 5개 예정 실행 (UTC)
           </p>
           <ul className="space-y-1">
             {nextRuns.map((time, i) => (

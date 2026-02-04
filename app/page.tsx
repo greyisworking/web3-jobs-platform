@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
@@ -16,9 +16,28 @@ import Footer from './components/Footer'
 
 const FEATURED_COUNT = 6
 
+// Custom hook to get viewport size for conditional rendering
+function useViewportSize() {
+  const [size, setSize] = useState<'sm' | 'md' | 'lg'>('lg')
+
+  useEffect(() => {
+    const updateSize = () => {
+      if (window.innerWidth >= 1024) setSize('lg')
+      else if (window.innerWidth >= 768) setSize('md')
+      else setSize('sm')
+    }
+    updateSize()
+    window.addEventListener('resize', updateSize)
+    return () => window.removeEventListener('resize', updateSize)
+  }, [])
+
+  return size
+}
+
 export default function Home() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
+  const viewportSize = useViewportSize()
 
   useEffect(() => {
     fetch('/api/jobs')
@@ -96,9 +115,14 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="flex-shrink-0 animate-float"
           >
-            <Pixelbara pose="heroLaptop" size={480} clickable suppressHover className="hidden lg:block animate-pixel-blink" />
-            <Pixelbara pose="heroLaptop" size={360} clickable suppressHover className="hidden md:block lg:hidden animate-pixel-blink" />
-            <Pixelbara pose="heroLaptop" size={240} clickable suppressHover className="block md:hidden animate-pixel-blink" />
+            {/* Render only one Pixelbara based on viewport size */}
+            <Pixelbara
+              pose="heroLaptop"
+              size={viewportSize === 'lg' ? 480 : viewportSize === 'md' ? 360 : 240}
+              clickable
+              suppressHover
+              className="animate-pixel-blink"
+            />
           </motion.div>
         </motion.div>
       </section>

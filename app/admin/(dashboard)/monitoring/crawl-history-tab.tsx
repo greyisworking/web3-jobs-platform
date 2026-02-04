@@ -31,7 +31,7 @@ export function MonitoringCrawlHistoryTab() {
   return (
     <div className="space-y-4 mt-4">
       <p className="text-xs text-muted-foreground">
-        Auto-refreshes every 30 seconds
+        30초마다 자동 새로고침
       </p>
 
       {isLoading ? (
@@ -46,13 +46,13 @@ export function MonitoringCrawlHistoryTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-44">Started At</TableHead>
-                  <TableHead className="w-44">Completed At</TableHead>
-                  <TableHead className="w-24">Status</TableHead>
-                  <TableHead className="w-32">Crawler</TableHead>
-                  <TableHead className="w-24">Found</TableHead>
-                  <TableHead className="w-24">Saved</TableHead>
-                  <TableHead className="w-24">Errors</TableHead>
+                  <TableHead className="w-44">시작 시간</TableHead>
+                  <TableHead className="w-44">완료 시간</TableHead>
+                  <TableHead className="w-24">상태</TableHead>
+                  <TableHead className="w-32">크롤러</TableHead>
+                  <TableHead className="w-24">발견</TableHead>
+                  <TableHead className="w-24">저장</TableHead>
+                  <TableHead className="w-24">오류</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -62,7 +62,7 @@ export function MonitoringCrawlHistoryTab() {
                       colSpan={7}
                       className="text-center py-8 text-muted-foreground"
                     >
-                      No crawl runs recorded
+                      크롤링 기록 없음
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -105,7 +105,7 @@ export function MonitoringCrawlHistoryTab() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                Page {page} of {totalPages} ({total} total)
+                {page} / {totalPages} 페이지 (총 {total}개)
               </p>
               <div className="flex gap-2">
                 <Button
@@ -114,7 +114,7 @@ export function MonitoringCrawlHistoryTab() {
                   disabled={page <= 1}
                   onClick={() => setPage(page - 1)}
                 >
-                  Previous
+                  이전
                 </Button>
                 <Button
                   variant="outline"
@@ -122,7 +122,7 @@ export function MonitoringCrawlHistoryTab() {
                   disabled={page >= totalPages}
                   onClick={() => setPage(page + 1)}
                 >
-                  Next
+                  다음
                 </Button>
               </div>
             </div>

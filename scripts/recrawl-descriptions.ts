@@ -8,6 +8,7 @@ import { createClient } from '@supabase/supabase-js'
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 import 'dotenv/config'
+import { cleanDescriptionText } from '../lib/clean-description'
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -36,93 +37,38 @@ function cleanText(text: string): string {
   return text.replace(/\s+/g, ' ').trim()
 }
 
-/**
- * Deep clean description to remove junk content
- */
-function cleanDescription(text: string): string {
-  if (!text) return ''
-
-  // Remove common UI/navigation patterns
-  const junkPatterns = [
-    // Similar/Related jobs sections
-    /similar\s*jobs?\s*[:\n]?[\s\S]*?(?=\n\n|\z)/gi,
-    /related\s*jobs?\s*[:\n]?[\s\S]*?(?=\n\n|\z)/gi,
-    /recommended\s*(?:jobs?|for you)\s*[:\n]?[\s\S]*?(?=\n\n|\z)/gi,
-    /you\s*(?:may|might)\s*(?:also\s*)?like[\s\S]*?(?=\n\n|\z)/gi,
-    /more\s*jobs?\s*(?:at|from|like)[\s\S]*?(?=\n\n|\z)/gi,
-    // Share/social patterns (remoteok, etc.)
-    /share\s*this\s*job:?\s*/gi,
-    /get\s*a\s*\w+\.?\w*\s*short\s*link/gi,
-    /(?:^|\n)\s*\w+\.com\s*(?:\n|$)/gim,
-    // "Company is hiring" patterns
-    /\w+\s+is\s+hiring\s+a\s*\n/gi,
-    /remote\s+\w+\s*\n\s*\n/gi,
-    // Navigation elements
-    /(?:^|\n)\s*(?:home|about|contact|login|sign\s*(?:in|up)|register|apply\s*now|back\s*to)\s*(?:\n|$)/gim,
-    /(?:^|\n)\s*(?:share|tweet|post|email)\s*(?:this)?(?:\s*job)?:?\s*(?:\n|$)/gim,
-    // Social sharing
-    /share\s*(?:on|via)\s*(?:twitter|facebook|linkedin|email)[\s\S]*?(?:\n|$)/gi,
-    /follow\s*us\s*(?:on)?[\s\S]*?(?:\n|$)/gi,
-    // Cookie/privacy notices
-    /(?:we\s*use\s*cookies|cookie\s*policy|privacy\s*policy)[\s\S]*?(?:\n\n|\z)/gi,
-    /(?:accept|decline)\s*(?:all\s*)?cookies?/gi,
-    // JavaScript artifacts
-    /function\s*\([^)]*\)\s*\{[^}]*\}/g,
-    /var\s+\w+\s*=\s*[^;]+;/g,
-    /const\s+\w+\s*=\s*[^;]+;/g,
-    /let\s+\w+\s*=\s*[^;]+;/g,
-    /\$\([^)]+\)\./g,
-    /document\.\w+/g,
-    /window\.\w+/g,
-    /addEventListener\([^)]+\)/g,
-    /querySelector\([^)]+\)/g,
-    // CSS artifacts
-    /@media\s*\([^)]+\)\s*\{[^}]*\}/g,
-    /\.[a-z_-]+\s*\{[^}]*\}/gi,
-    // HTML entities that weren't converted
-    /&[a-z]+;/gi,
-    /&#\d+;/g,
-    // Loading/spinner text
-    /loading\.{3,}/gi,
-    /please\s*wait/gi,
-    // Footer boilerplate
-    /(?:^|\n)©\s*\d{4}[\s\S]*?(?:\n\n|\z)/gi,
-    /all\s*rights?\s*reserved/gi,
-    // Form elements text
-    /(?:^|\n)\s*(?:submit|cancel|reset|clear)\s*(?:\n|$)/gim,
-    // Ads patterns
-    /(?:advertisement|sponsored|promoted)[\s\S]*?(?:\n\n|\z)/gi,
-    // Empty bullet points
-    /^•\s*$/gm,
-    // Backslash n (literal)
-    /\\n/g,
-    // Email pattern cleanup
-    /\[email\s*protected\]/gi,
-    // Excessive spacing
-    /\n{4,}/g,
-  ]
-
-  let cleaned = text
-
-  for (const pattern of junkPatterns) {
-    cleaned = cleaned.replace(pattern, '\n\n')
-  }
-
-  // Final cleanup
-  cleaned = cleaned
-    .replace(/\n{3,}/g, '\n\n')  // Max 2 newlines
-    .replace(/^\s+|\s+$/g, '')    // Trim
-    .replace(/[ \t]+/g, ' ')      // Normalize spaces
-
-  return cleaned
-}
+// cleanDescription removed — now using shared cleanDescriptionText() from lib/clean-description.ts
 
 function extractHTML($element: cheerio.Cheerio<any>, $: cheerio.CheerioAPI): string {
   if (!$element.length) return ''
 
   // Clone to avoid modifying original
   const clone = $element.clone()
-  clone.find('script, style, noscript, nav, header, footer').remove()
+  clone.find('script, style, noscript, iframe, svg, nav, header, footer').remove()
+
+  // Remove source-site noise elements
+  const noiseSelectors = [
+    '[class*="related"]', '[class*="recommended"]', '[class*="similar"]',
+    '[class*="share"]', '[class*="social"]', '[class*="sharing"]',
+    '[class*="salary-comp"]', '[class*="salary-range"]', '[class*="salary-info"]',
+    '[class*="average-salary"]', '[class*="compensation-data"]',
+    '[class*="candidate"]', '[class*="profile-card"]',
+    '[class*="chat"]', '[class*="interview"]', '[class*="cover-letter"]',
+    '[class*="trust"]', '[class*="verified-badge"]', '[class*="verification"]',
+    '[class*="cookie"]', '[class*="consent"]',
+    '[class*="newsletter"]', '[class*="subscribe"]', '[class*="signup"]',
+    '[class*="sidebar"]', '[class*="widget"]',
+    '[class*="report"]', '[class*="flag"]',
+    '[class*="bookmark"]', '[class*="save-job"]',
+    '[class*="apply-section"]', '[class*="apply-btn"]',
+    '[class*="comment"]', '[class*="discussion"]',
+    '[class*="pagination"]', '[class*="pager"]',
+    '[class*="ad-"]', '[class*="advert"]', '[class*="promo"]',
+    '[class*="banner"]', '[class*="sponsored"]',
+  ]
+  for (const sel of noiseSelectors) {
+    clone.find(sel).remove()
+  }
 
   let html = clone.html() || ''
 
@@ -471,7 +417,7 @@ async function recrawlDescriptions(options: { limit?: number; all?: boolean } = 
 
       if (details.description && details.description.length > 50) {
         // Clean the description to remove junk
-        const cleanedDesc = cleanDescription(details.description)
+        const cleanedDesc = cleanDescriptionText(details.description)
 
         // Only update description field (other fields may not exist in Supabase schema)
         const updateData: any = {

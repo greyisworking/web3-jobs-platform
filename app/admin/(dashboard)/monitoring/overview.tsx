@@ -27,7 +27,7 @@ export function MonitoringOverview() {
       {/* Recent Errors */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Recent Errors</CardTitle>
+          <CardTitle className="text-base">최근 오류</CardTitle>
         </CardHeader>
         <CardContent>
           {errorsLoading ? (
@@ -37,7 +37,7 @@ export function MonitoringOverview() {
               ))}
             </div>
           ) : recentErrors.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No recent errors</p>
+            <p className="text-sm text-muted-foreground">최근 오류 없음</p>
           ) : (
             <div className="space-y-2">
               {recentErrors.map((log) => (
@@ -65,7 +65,7 @@ export function MonitoringOverview() {
       {/* Proxy Summary */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Proxy Summary</CardTitle>
+          <CardTitle className="text-base">프록시 요약</CardTitle>
         </CardHeader>
         <CardContent>
           {proxiesLoading ? (
@@ -76,7 +76,7 @@ export function MonitoringOverview() {
             </div>
           ) : proxies.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No proxies configured
+              프록시 미설정
             </p>
           ) : (
             <div className="space-y-2">
@@ -85,23 +85,23 @@ export function MonitoringOverview() {
                   <p className="text-2xl font-bold text-green-600">
                     {proxies.filter((p) => p.status === 'active').length}
                   </p>
-                  <p className="text-xs text-muted-foreground">Active</p>
+                  <p className="text-xs text-muted-foreground">활성</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-yellow-500">
                     {proxies.filter((p) => p.status === 'slow').length}
                   </p>
-                  <p className="text-xs text-muted-foreground">Slow</p>
+                  <p className="text-xs text-muted-foreground">느림</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-red-600">
                     {proxies.filter((p) => p.status === 'blocked').length}
                   </p>
-                  <p className="text-xs text-muted-foreground">Blocked</p>
+                  <p className="text-xs text-muted-foreground">차단</p>
                 </div>
               </div>
               <p className="text-xs text-muted-foreground text-center mt-2">
-                Avg latency:{' '}
+                평균 지연시간:{' '}
                 {Math.round(
                   proxies.reduce(
                     (sum, p) => sum + (p.latency_ms ?? 0),
@@ -118,7 +118,7 @@ export function MonitoringOverview() {
       {/* Recent Crawl Runs */}
       <Card className="lg:col-span-2">
         <CardHeader>
-          <CardTitle className="text-base">Recent Crawl Runs</CardTitle>
+          <CardTitle className="text-base">최근 크롤링 실행</CardTitle>
         </CardHeader>
         <CardContent>
           {runsLoading ? (
@@ -128,7 +128,7 @@ export function MonitoringOverview() {
               ))}
             </div>
           ) : recentRuns.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No crawl runs yet</p>
+            <p className="text-sm text-muted-foreground">크롤링 기록 없음</p>
           ) : (
             <div className="space-y-2">
               {recentRuns.map((run) => (
@@ -151,10 +151,10 @@ export function MonitoringOverview() {
                     <span>{run.crawler_name || 'all'}</span>
                   </div>
                   <div className="flex items-center gap-4 text-muted-foreground">
-                    <span>{run.jobs_saved} saved</span>
+                    <span>{run.jobs_saved}개 저장</span>
                     {run.errors_count > 0 && (
                       <span className="text-destructive">
-                        {run.errors_count} errors
+                        {run.errors_count}개 오류
                       </span>
                     )}
                     <span className="text-xs">

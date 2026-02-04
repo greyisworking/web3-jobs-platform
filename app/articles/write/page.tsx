@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Eye, Loader2, X, Plus, Wallet, Shield } from 'lucide-react'
+import { toast } from 'sonner'
 import { useAccount, useEnsName } from 'wagmi'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import type { User } from '@supabase/supabase-js'
@@ -95,12 +96,12 @@ export default function ArticleWritePage() {
 
   const handleSubmit = async (publish: boolean) => {
     if (!form.title || !form.content) {
-      alert('Title and content are required')
+      toast.error('Fill in title & content first! 🦫')
       return
     }
 
     if (!user) {
-      alert('Please log in to write articles')
+      toast.error('Log in to write, ser! 🔐')
       return
     }
 
@@ -142,7 +143,7 @@ export default function ArticleWritePage() {
       const data = await res.json()
       router.push(`/articles/${data.article.slug}`)
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to create article')
+      toast.error(error instanceof Error ? error.message : 'Something went wrong... NGMI 😢')
     } finally {
       setLoading(false)
     }
@@ -458,27 +459,35 @@ export default function ArticleWritePage() {
                 </div>
               </div>
 
-              {/* Wallet Connection - Optional Benefits */}
+              {/* Wallet Connection - Clearly Optional */}
               {!isConnected && (
-                <div className="border border-purple-500/30 bg-purple-500/5 p-5">
-                  <h3 className="text-xs uppercase tracking-wider text-purple-400 mb-3 font-medium flex items-center gap-2">
-                    <Wallet className="w-3.5 h-3.5" />
-                    Connect Wallet
-                  </h3>
-                  <p className="text-xs text-a24-muted mb-4">
-                    Optional: Connect wallet for additional benefits
+                <div className="border border-dashed border-purple-500/20 bg-purple-500/5 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xs uppercase tracking-wider text-purple-400 font-medium flex items-center gap-2">
+                      <Wallet className="w-3.5 h-3.5" />
+                      Wallet
+                    </h3>
+                    <span className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider font-medium bg-gray-800 text-gray-400 rounded">
+                      Optional
+                    </span>
+                  </div>
+                  <p className="text-xs text-a24-muted mb-1">
+                    You can publish articles without a wallet.
                   </p>
-                  <ul className="space-y-2 text-xs text-a24-muted mb-4">
+                  <p className="text-[11px] text-a24-muted/60 mb-4">
+                    Connect for extra Web3 perks:
+                  </p>
+                  <ul className="space-y-2 text-xs text-a24-muted/70 mb-4">
                     <li className="flex items-center gap-2">
-                      <Shield className="w-3 h-3 text-purple-400" />
+                      <Shield className="w-3 h-3 text-purple-400/60" />
                       On-chain reputation badges
                     </li>
                     <li className="flex items-center gap-2">
-                      <Shield className="w-3 h-3 text-purple-400" />
+                      <Shield className="w-3 h-3 text-purple-400/60" />
                       POAP for published articles
                     </li>
                     <li className="flex items-center gap-2">
-                      <Shield className="w-3 h-3 text-purple-400" />
+                      <Shield className="w-3 h-3 text-purple-400/60" />
                       ENS name display
                     </li>
                   </ul>
@@ -491,7 +500,7 @@ export default function ArticleWritePage() {
                 <Web3Badges address={address} showSync compact />
               )}
 
-              {/* Writing Guide */}
+              {/* Writing Guide - Web3 style */}
               <div className="border border-a24-border p-5">
                 <h3 className="text-xs uppercase tracking-wider text-a24-muted mb-4 font-medium">
                   Writing Guide
@@ -499,23 +508,23 @@ export default function ArticleWritePage() {
                 <ul className="space-y-3 text-xs text-a24-muted">
                   <li className="flex items-start gap-2">
                     <span className="text-purple-400">01</span>
-                    <span>Keep titles concise and clear</span>
+                    <span>Short & punchy titles. WAGMI vibes only 🔥</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-purple-400">02</span>
-                    <span>Add a cover image for visual impact</span>
+                    <span>Add a cover image. First impressions matter 👀</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-purple-400">03</span>
-                    <span>Use relevant tags to help discovery</span>
+                    <span>Tag it right. Help frens discover your alpha 🏷️</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-purple-400">04</span>
-                    <span>Structure with headings</span>
+                    <span>Structure with headings. Few understand 🧠</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-purple-400">05</span>
-                    <span>Proofread before publishing</span>
+                    <span>Double-check before mint! No rugs ✅</span>
                   </li>
                 </ul>
               </div>

@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { fetchJSON, delay, detectExperienceLevel, detectRemoteType } from '../utils'
+import { cleanDescriptionText } from '../../lib/clean-description'
 
 interface RemoteOKJob {
   slug?: string
@@ -53,8 +54,8 @@ export async function crawlRemoteOK(): Promise<number> {
         salary = `$${job.salary_min.toLocaleString()}+`
       }
 
-      // Extract enhanced details
-      const description = job.description || null
+      // Extract enhanced details – clean HTML noise from JSON descriptions
+      const description = job.description ? cleanDescriptionText(job.description) || null : null
       const experienceLevel = description ? detectExperienceLevel(description) : null
       const remoteType = detectRemoteType(job.location || 'Remote')
       const companyLogo = job.company_logo || job.logo || null

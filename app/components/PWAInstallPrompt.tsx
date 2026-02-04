@@ -60,8 +60,8 @@ export default function PWAInstallPrompt() {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall)
 
-    // For iOS, show banner after delay if not standalone
-    if (iOS) {
+    // For iOS, show banner after delay if not standalone AND on mobile
+    if (iOS && isMobile()) {
       setTimeout(() => setShowBanner(true), 5000)
     }
 

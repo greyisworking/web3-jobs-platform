@@ -62,7 +62,7 @@ export function MonitoringProxiesTab() {
   return (
     <div className="space-y-4 mt-4">
       <p className="text-xs text-muted-foreground">
-        Auto-refreshes every 10 seconds
+        10초마다 자동 새로고침
       </p>
 
       {isLoading ? (
@@ -76,7 +76,7 @@ export function MonitoringProxiesTab() {
           {chartData.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Latency Overview</CardTitle>
+                <CardTitle className="text-base">지연시간 개요</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={220}>
@@ -102,12 +102,12 @@ export function MonitoringProxiesTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Proxy URL</TableHead>
-                  <TableHead className="w-24">Status</TableHead>
-                  <TableHead className="w-40">Latency</TableHead>
-                  <TableHead className="w-32">Success Rate</TableHead>
-                  <TableHead className="w-28">Requests</TableHead>
-                  <TableHead className="w-40">Last Checked</TableHead>
+                  <TableHead>프록시 URL</TableHead>
+                  <TableHead className="w-24">상태</TableHead>
+                  <TableHead className="w-40">지연시간</TableHead>
+                  <TableHead className="w-32">성공률</TableHead>
+                  <TableHead className="w-28">요청 수</TableHead>
+                  <TableHead className="w-40">마지막 확인</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -117,7 +117,7 @@ export function MonitoringProxiesTab() {
                       colSpan={6}
                       className="text-center py-8 text-muted-foreground"
                     >
-                      No proxies configured
+                      프록시 미설정
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -159,7 +159,7 @@ export function MonitoringProxiesTab() {
                         {proxy.total_requests}
                         {proxy.failed_requests > 0 && (
                           <span className="text-destructive ml-1">
-                            ({proxy.failed_requests} failed)
+                            ({proxy.failed_requests}개 실패)
                           </span>
                         )}
                       </TableCell>

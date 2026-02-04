@@ -28,22 +28,22 @@ interface NavSection {
 
 const navSections: NavSection[] = [
   {
-    title: 'General',
+    title: '일반',
     items: [
-      { href: '/admin', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" /> },
-      { href: '/admin/moderation', label: 'Moderation', icon: <Flag className="h-4 w-4" /> },
-      { href: '/admin/jobs/pending', label: 'Pending Jobs', icon: <Clock className="h-4 w-4" /> },
-      { href: '/admin/jobs/duplicates', label: 'Duplicates', icon: <CopyCheck className="h-4 w-4" /> },
-      { href: '/admin/errors', label: 'Error Logs', icon: <AlertCircle className="h-4 w-4" /> },
+      { href: '/admin', label: '대시보드', icon: <LayoutDashboard className="h-4 w-4" /> },
+      { href: '/admin/moderation', label: '콘텐츠 관리', icon: <Flag className="h-4 w-4" /> },
+      { href: '/admin/jobs/pending', label: '검토 대기', icon: <Clock className="h-4 w-4" /> },
+      { href: '/admin/jobs/duplicates', label: '중복 공고', icon: <CopyCheck className="h-4 w-4" /> },
+      { href: '/admin/errors', label: '오류 기록', icon: <AlertCircle className="h-4 w-4" /> },
     ],
   },
   {
-    title: 'Monitoring',
+    title: '모니터링',
     items: [
-      { href: '/admin/monitoring', label: 'Overview', icon: <Activity className="h-4 w-4" /> },
-      { href: '/admin/monitoring/errors', label: 'Error Dashboard', icon: <Shield className="h-4 w-4" /> },
-      { href: '/admin/monitoring/proxies', label: 'Proxy Status', icon: <Radio className="h-4 w-4" /> },
-      { href: '/admin/analytics', label: 'Analytics', icon: <BarChart3 className="h-4 w-4" /> },
+      { href: '/admin/monitoring', label: '전체 현황', icon: <Activity className="h-4 w-4" /> },
+      { href: '/admin/monitoring/errors', label: '오류 대시보드', icon: <Shield className="h-4 w-4" /> },
+      { href: '/admin/monitoring/proxies', label: '프록시 상태', icon: <Radio className="h-4 w-4" /> },
+      { href: '/admin/analytics', label: '통계', icon: <BarChart3 className="h-4 w-4" /> },
     ],
   },
 ]
@@ -54,7 +54,7 @@ export function Sidebar() {
   return (
     <aside className="w-64 border-r bg-card min-h-screen p-4">
       <div className="mb-8">
-        <h2 className="text-lg font-bold px-2">Admin Dashboard</h2>
+        <h2 className="text-lg font-bold px-2">관리자 대시보드</h2>
       </div>
       <nav className="space-y-6">
         {navSections.map((section) => (

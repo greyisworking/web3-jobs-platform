@@ -2,6 +2,7 @@ import type { CheerioAPI } from 'cheerio'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { fetchHTML, delay, cleanText, extractHTML, parseSalary, detectExperienceLevel, detectRemoteType } from '../utils'
+import { cleanDescriptionText } from '../../lib/clean-description'
 
 interface JobData {
   title: string
@@ -40,7 +41,8 @@ async function fetchJobDetails(jobUrl: string): Promise<Partial<JobData>> {
     // Job description - main content area
     const descriptionEl = $('.job-description, .job-content, [class*="description"], article')
     if (descriptionEl.length) {
-      details.description = extractHTML(descriptionEl.first(), $)
+      const raw = extractHTML(descriptionEl.first(), $)
+      details.description = cleanDescriptionText(raw)
     }
 
     // Look for sections with common headers

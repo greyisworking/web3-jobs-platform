@@ -16,7 +16,7 @@ export function CrawlerControl() {
   const runCrawler = async () => {
     setStatus('running')
     setOutput('')
-    setMessage('Starting crawler...')
+    setMessage('크롤러 시작 중...')
 
     try {
       const res = await fetch('/api/admin/crawler/run', { method: 'POST' })
@@ -33,7 +33,7 @@ export function CrawlerControl() {
       setOutput(data.output || '')
     } catch (err) {
       setStatus('failed')
-      setMessage('Network error - could not reach server')
+      setMessage('네트워크 오류 - 서버에 연결할 수 없습니다')
     }
   }
 
@@ -45,16 +45,16 @@ export function CrawlerControl() {
   }
 
   const statusLabel = {
-    idle: 'Idle',
-    running: 'Running...',
-    success: 'Success',
-    failed: 'Failed',
+    idle: '대기 중',
+    running: '실행 중...',
+    success: '성공',
+    failed: '실패',
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Crawler Control</CardTitle>
+        <CardTitle className="text-lg">크롤러 제어</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-4">
@@ -68,7 +68,7 @@ export function CrawlerControl() {
             ) : (
               <Play className="h-4 w-4" />
             )}
-            Run Crawler Now
+            크롤러 실행
           </Button>
           <div className="flex items-center gap-2 text-sm">
             {statusIcon[status]}

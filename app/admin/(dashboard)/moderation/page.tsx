@@ -87,16 +87,16 @@ export default function ModerationPage() {
         body: JSON.stringify({ jobId, hide: !currentlyHidden }),
       })
       if (!res.ok) throw new Error('Failed to update')
-      toast.success(currentlyHidden ? 'Job restored' : 'Job hidden')
+      toast.success(currentlyHidden ? '공고가 복원되었습니다' : '공고가 숨김 처리되었습니다')
       fetchData()
     } catch {
-      toast.error('Failed to update job visibility')
+      toast.error('공고 상태 변경에 실패했습니다')
     }
   }
 
   const addToBlacklist = async () => {
     if (!newWallet || !/^0x[a-fA-F0-9]{40}$/.test(newWallet)) {
-      toast.error('Invalid wallet address')
+      toast.error('유효하지 않은 지갑 주소입니다')
       return
     }
     try {
@@ -106,12 +106,12 @@ export default function ModerationPage() {
         body: JSON.stringify({ wallet: newWallet, reason: newReason }),
       })
       if (!res.ok) throw new Error('Failed to add')
-      toast.success('Wallet added to blacklist')
+      toast.success('지갑이 차단 목록에 추가되었습니다')
       setNewWallet('')
       setNewReason('')
       fetchData()
     } catch {
-      toast.error('Failed to add wallet')
+      toast.error('지갑 추가에 실패했습니다')
     }
   }
 
@@ -123,19 +123,19 @@ export default function ModerationPage() {
         body: JSON.stringify({ wallet }),
       })
       if (!res.ok) throw new Error('Failed to remove')
-      toast.success('Wallet removed from blacklist')
+      toast.success('지갑이 차단 목록에서 삭제되었습니다')
       fetchData()
     } catch {
-      toast.error('Failed to remove wallet')
+      toast.error('지갑 삭제에 실패했습니다')
     }
   }
 
   const truncateAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
 
   const tabs = [
-    { id: 'jobs' as TabType, label: 'Jobs', icon: Briefcase },
-    { id: 'reports' as TabType, label: 'Reports', icon: Flag },
-    { id: 'blacklist' as TabType, label: 'Blacklist', icon: Ban },
+    { id: 'jobs' as TabType, label: '공고', icon: Briefcase },
+    { id: 'reports' as TabType, label: '신고', icon: Flag },
+    { id: 'blacklist' as TabType, label: '차단 목록', icon: Ban },
   ]
 
   return (
@@ -145,8 +145,8 @@ export default function ModerationPage() {
         <div className="flex items-center gap-4">
           <Pixelbara pose="building" size={60} />
           <div>
-            <h1 className="text-2xl font-bold">Moderation</h1>
-            <p className="text-sm text-muted-foreground">admin mode activated -_-</p>
+            <h1 className="text-2xl font-bold">콘텐츠 관리</h1>
+            <p className="text-sm text-muted-foreground">관리자 모드 활성화 -_-</p>
           </div>
         </div>
         <button
@@ -154,7 +154,7 @@ export default function ModerationPage() {
           className="flex items-center gap-2 px-3 py-2 text-sm border rounded hover:bg-accent transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
-          Refresh
+          새로고침
         </button>
       </div>
 
@@ -187,24 +187,24 @@ export default function ModerationPage() {
           {activeTab === 'jobs' && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Manage user-posted jobs. Jobs with high report counts may need review.
+                사용자가 등록한 공고를 관리합니다. 신고가 많은 공고는 검토가 필요합니다.
               </p>
               <div className="border rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-left px-4 py-3 font-medium">Job</th>
-                      <th className="text-left px-4 py-3 font-medium">Posted By</th>
-                      <th className="text-left px-4 py-3 font-medium">Reports</th>
-                      <th className="text-left px-4 py-3 font-medium">Status</th>
-                      <th className="text-left px-4 py-3 font-medium">Actions</th>
+                      <th className="text-left px-4 py-3 font-medium">공고</th>
+                      <th className="text-left px-4 py-3 font-medium">등록자</th>
+                      <th className="text-left px-4 py-3 font-medium">신고</th>
+                      <th className="text-left px-4 py-3 font-medium">상태</th>
+                      <th className="text-left px-4 py-3 font-medium">작업</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
                     {jobs.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                          No user-posted jobs yet
+                          사용자 등록 공고 없음
                         </td>
                       </tr>
                     ) : (
@@ -237,12 +237,12 @@ export default function ModerationPage() {
                             {job.isHidden ? (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-500/10 text-red-500 rounded text-xs">
                                 <EyeOff className="w-3 h-3" />
-                                Hidden
+                                숨김
                               </span>
                             ) : (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/10 text-green-500 rounded text-xs">
                                 <Eye className="w-3 h-3" />
-                                Visible
+                                공개
                               </span>
                             )}
                           </td>
@@ -255,7 +255,7 @@ export default function ModerationPage() {
                                   : 'bg-red-500/10 text-red-500 hover:bg-red-500/20'
                               }`}
                             >
-                              {job.isHidden ? 'Restore' : 'Hide'}
+                              {job.isHidden ? '복원' : '숨기기'}
                             </button>
                           </td>
                         </tr>
@@ -271,24 +271,24 @@ export default function ModerationPage() {
           {activeTab === 'reports' && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Review job reports from users. Jobs with 5+ reports are auto-hidden.
+                사용자 신고를 검토합니다. 5회 이상 신고된 공고는 자동으로 숨김 처리됩니다.
               </p>
               <div className="border rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-left px-4 py-3 font-medium">Job</th>
-                      <th className="text-left px-4 py-3 font-medium">Reason</th>
-                      <th className="text-left px-4 py-3 font-medium">Reporter</th>
-                      <th className="text-left px-4 py-3 font-medium">Date</th>
-                      <th className="text-left px-4 py-3 font-medium">Actions</th>
+                      <th className="text-left px-4 py-3 font-medium">공고</th>
+                      <th className="text-left px-4 py-3 font-medium">사유</th>
+                      <th className="text-left px-4 py-3 font-medium">신고자</th>
+                      <th className="text-left px-4 py-3 font-medium">날짜</th>
+                      <th className="text-left px-4 py-3 font-medium">작업</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
                     {reports.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                          No reports yet
+                          신고 내역 없음
                         </td>
                       </tr>
                     ) : (
@@ -321,11 +321,11 @@ export default function ModerationPage() {
                                 onClick={() => toggleJobVisibility(report.job!.id, false)}
                                 className="px-3 py-1 text-xs bg-red-500/10 text-red-500 rounded hover:bg-red-500/20 transition-colors"
                               >
-                                Hide Job
+                                숨기기
                               </button>
                             )}
                             {report.job?.isHidden && (
-                              <span className="text-xs text-muted-foreground">Already hidden</span>
+                              <span className="text-xs text-muted-foreground">이미 숨김 처리됨</span>
                             )}
                           </td>
                         </tr>
@@ -341,7 +341,7 @@ export default function ModerationPage() {
           {activeTab === 'blacklist' && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Blocked wallets cannot post jobs. Auto-blacklisted after 3 hidden jobs.
+                차단된 지갑은 공고를 등록할 수 없습니다. 3개 공고가 숨김 처리되면 자동 차단됩니다.
               </p>
 
               {/* Add wallet form */}
@@ -357,7 +357,7 @@ export default function ModerationPage() {
                   type="text"
                   value={newReason}
                   onChange={(e) => setNewReason(e.target.value)}
-                  placeholder="Reason (optional)"
+                  placeholder="사유 (선택)"
                   className="flex-1 max-w-xs px-3 py-2 text-sm border rounded bg-background"
                 />
                 <button
@@ -365,7 +365,7 @@ export default function ModerationPage() {
                   className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
-                  Add
+                  추가
                 </button>
               </div>
 
@@ -373,17 +373,17 @@ export default function ModerationPage() {
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-left px-4 py-3 font-medium">Wallet</th>
-                      <th className="text-left px-4 py-3 font-medium">Reason</th>
-                      <th className="text-left px-4 py-3 font-medium">Date Added</th>
-                      <th className="text-left px-4 py-3 font-medium">Actions</th>
+                      <th className="text-left px-4 py-3 font-medium">지갑</th>
+                      <th className="text-left px-4 py-3 font-medium">사유</th>
+                      <th className="text-left px-4 py-3 font-medium">추가일</th>
+                      <th className="text-left px-4 py-3 font-medium">작업</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
                     {blacklist.length === 0 ? (
                       <tr>
                         <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
-                          No blocked wallets
+                          차단된 지갑 없음
                         </td>
                       </tr>
                     ) : (
@@ -402,7 +402,7 @@ export default function ModerationPage() {
                               className="flex items-center gap-1 px-3 py-1 text-xs text-red-500 hover:bg-red-500/10 rounded transition-colors"
                             >
                               <Trash2 className="w-3 h-3" />
-                              Remove
+                              삭제
                             </button>
                           </td>
                         </tr>

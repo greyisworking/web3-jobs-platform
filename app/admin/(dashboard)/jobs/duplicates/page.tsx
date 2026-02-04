@@ -79,23 +79,23 @@ export default function DuplicatesPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold">Duplicate Detection</h1>
-        <p className="text-muted-foreground">Scanning for duplicates...</p>
+        <h1 className="text-2xl font-bold">중복 감지</h1>
+        <p className="text-muted-foreground">중복 공고 검색 중...</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Duplicate Detection</h1>
+      <h1 className="text-2xl font-bold">중복 감지</h1>
       <p className="text-sm text-muted-foreground">
-        Found {groups.length} duplicate group(s)
+        {groups.length}개의 중복 그룹 발견
       </p>
 
       {groups.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
-            No duplicates found
+            중복 공고 없음
           </CardContent>
         </Card>
       ) : (
@@ -111,11 +111,11 @@ export default function DuplicatesPage() {
             >
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">
-                  {group.jobs[0].company} - {group.jobs.length} similar jobs
+                  {group.jobs[0].company} - {group.jobs.length}개 유사 공고
                 </CardTitle>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary">
-                    {group.similarity}% similar
+                    {group.similarity}% 유사
                   </Badge>
                   <span className="text-sm text-muted-foreground">
                     {expandedGroup === group.key ? '[-]' : '[+]'}
@@ -153,7 +153,7 @@ export default function DuplicatesPage() {
                           size="sm"
                           onClick={() => openMergeDialog(job, group)}
                         >
-                          Keep This
+                          선택
                         </Button>
                       </div>
                     </div>
@@ -171,7 +171,7 @@ export default function DuplicatesPage() {
                       })
                     }
                   >
-                    Mark as Different
+                    다른 공고로 표시
                   </Button>
                 </div>
               </CardContent>
@@ -183,9 +183,9 @@ export default function DuplicatesPage() {
       <ConfirmDialog
         open={mergeDialog.open}
         onOpenChange={(open) => setMergeDialog({ ...mergeDialog, open })}
-        title="Merge Duplicates"
-        description={`Keep selected job and delete ${mergeDialog.deleteIds.length} duplicate(s)? Tags will be merged.`}
-        confirmLabel="Merge"
+        title="중복 병합"
+        description={`선택한 공고를 유지하고 ${mergeDialog.deleteIds.length}개 중복 공고를 삭제합니다. 태그는 병합됩니다.`}
+        confirmLabel="병합"
         onConfirm={handleMerge}
         loading={actionLoading}
       />
@@ -193,9 +193,9 @@ export default function DuplicatesPage() {
       <ConfirmDialog
         open={markDialog.open}
         onOpenChange={(open) => setMarkDialog({ ...markDialog, open })}
-        title="Mark as Different"
-        description="Approve all jobs in this group to mark them as not duplicates?"
-        confirmLabel="Mark as Different"
+        title="다른 공고로 표시"
+        description="이 그룹의 모든 공고를 중복이 아닌 것으로 승인합니다."
+        confirmLabel="확인"
         onConfirm={handleMarkDifferent}
         loading={actionLoading}
       />

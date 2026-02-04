@@ -32,13 +32,14 @@ const cardVariants = {
 
 function ReportButton({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
   const [showTooltip, setShowTooltip] = useState(false)
+  const [showReportMenu, setShowReportMenu] = useState(false)
 
-  const handleReport = async (e: React.MouseEvent) => {
+  const reportReasons = ['Spam', 'Scam/Fraud', 'Expired', 'Inappropriate', 'Duplicate']
+
+  const handleReport = async (e: React.MouseEvent, reason: string) => {
     e.preventDefault()
     e.stopPropagation()
-
-    const reason = window.prompt('Report reason (spam, scam, inappropriate, etc.):')
-    if (!reason) return
+    setShowReportMenu(false)
 
     try {
       await fetch('/api/jobs/report', {
@@ -46,34 +47,54 @@ function ReportButton({ jobId, jobTitle }: { jobId: string; jobTitle: string }) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jobId, reason }),
       })
-      toast.success('Report submitted. Thank you!')
+      toast.success('Report submitted. Thanks fren! 🙏')
     } catch {
-      toast.error('Failed to submit report')
+      toast.error('Report failed... try again 😢')
     }
   }
 
+  const toggleMenu = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setShowReportMenu(!showReportMenu)
+  }
+
   return (
-    <button
-      onClick={handleReport}
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
-      className="relative p-1 text-a24-muted/40 hover:text-red-500 transition-colors"
-      aria-label="Report this job"
-    >
-      <Flag className="w-3 h-3" />
-      {showTooltip && (
-        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-0.5 text-[9px] whitespace-nowrap bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg rounded z-50">
-          Report
-        </span>
+    <div className="relative">
+      <button
+        onClick={toggleMenu}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        className="relative p-1 text-a24-muted/40 hover:text-red-500 transition-colors"
+        aria-label="Report this job"
+      >
+        <Flag className="w-3 h-3" />
+        {showTooltip && !showReportMenu && (
+          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-0.5 text-[9px] whitespace-nowrap bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg rounded z-50">
+            Report
+          </span>
+        )}
+      </button>
+      {showReportMenu && (
+        <div className="absolute bottom-full right-0 mb-1 w-32 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border shadow-lg z-50">
+          {reportReasons.map((reason) => (
+            <button
+              key={reason}
+              onClick={(e) => handleReport(e, reason)}
+              className="w-full px-3 py-1.5 text-left text-[10px] text-a24-muted hover:text-a24-text hover:bg-a24-border/50 transition-colors"
+            >
+              {reason}
+            </button>
+          ))}
+        </div>
       )}
-    </button>
+    </div>
   )
 }
 
 export default function JobCard({ job, index }: JobCardProps) {
   const { opacity, isFading } = useDecayEffect(job.postedDate)
   const [hovered, setHovered] = useState(false)
-  const number = String(index + 1).padStart(3, '0')
   const displayTitle = cleanJobTitle(job.title, job.company)
   const displayCompany = cleanCompanyName(job.company)
   // Jobs marked as expired are already filtered out from the API
@@ -112,24 +133,21 @@ export default function JobCard({ job, index }: JobCardProps) {
           </div>
         )}
 
-        {/* Von Restorff Effect: Urgent/Featured/NEW badges only (no verification badges on cards) */}
-        <div className="absolute top-2 right-24 flex items-center gap-1.5">
-          {job.is_urgent && (
-            <span className="badge-urgent px-1.5 py-0.5 font-bold text-[9px] uppercase tracking-wider rounded-sm">
-              URGENT
-            </span>
-          )}
-          {job.is_featured && (
-            <span className="badge-recommended px-1.5 py-0.5 font-bold text-[9px] uppercase tracking-wider rounded-sm">
-              FEATURED
-            </span>
-          )}
-          {isNewJob(job.postedDate) && !job.is_urgent && !job.is_featured && (
-            <span className="badge-new-emphasis px-1.5 py-0.5 border border-neun-primary/50 text-[9px] uppercase tracking-wider rounded-sm">
-              NEW
-            </span>
-          )}
-        </div>
+        {/* Von Restorff Effect: Urgent/Featured badges only */}
+        {(job.is_urgent || job.is_featured) && (
+          <div className="absolute top-2 right-24 flex items-center gap-1.5">
+            {job.is_urgent && (
+              <span className="badge-urgent px-1.5 py-0.5 font-bold text-[9px] uppercase tracking-wider rounded-sm">
+                URGENT
+              </span>
+            )}
+            {job.is_featured && (
+              <span className="badge-recommended px-1.5 py-0.5 font-bold text-[9px] uppercase tracking-wider rounded-sm">
+                FEATURED
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Token Gate & DAO badges */}
         <div className="absolute top-2 right-12 flex items-center gap-1">
@@ -164,17 +182,18 @@ export default function JobCard({ job, index }: JobCardProps) {
           </>
         )}
 
-        {/* Number + Company */}
+        {/* Company + Actions */}
         <div className="flex items-start justify-between mb-2">
-          <div className="flex items-baseline gap-3 min-w-0 mr-2">
-            <span className="text-[10px] font-light text-a24-muted/40 dark:text-a24-dark-muted/40 tracking-wider flex-shrink-0">
-              {number}
-            </span>
-            <div className="flex items-center min-w-0">
-              <p className="text-[13px] font-medium uppercase tracking-[0.15em] text-a24-muted dark:text-a24-dark-muted leading-tight truncate">
-                {displayCompany}
-              </p>
-            </div>
+          <div className="flex items-center min-w-0 mr-2">
+            <p className="text-[13px] font-medium uppercase tracking-[0.15em] text-a24-muted dark:text-a24-dark-muted leading-tight truncate">
+              {displayCompany}
+            </p>
+            {/* NEW badge inline with company */}
+            {isNewJob(job.postedDate) && !job.is_urgent && !job.is_featured && (
+              <span className="ml-2 badge-new-emphasis px-1.5 py-0.5 border border-neun-primary/50 text-[9px] uppercase tracking-wider rounded-sm flex-shrink-0">
+                NEW
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation() }}>
             <ReportButton jobId={job.id} jobTitle={job.title} />

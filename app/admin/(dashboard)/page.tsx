@@ -37,23 +37,23 @@ export default async function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <h1 className="text-2xl font-bold">대시보드</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Total Jobs"
+          title="전체 공고"
           value={totalJobs ?? 0}
-          description="All jobs in database"
+          description="데이터베이스에 있는 모든 공고"
         />
         <StatCard
-          title="Active"
+          title="활성 공고"
           value={activeJobs ?? 0}
-          description="Published jobs"
+          description="현재 공개 중인 공고"
         />
         <StatCard
-          title="Inactive"
+          title="비활성 공고"
           value={inactiveJobs ?? 0}
-          description="Hidden jobs"
+          description="숨김 처리된 공고"
         />
       </div>
 
@@ -63,35 +63,35 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Recent Errors (24h)</CardTitle>
+            <CardTitle className="text-lg">최근 오류 (24시간)</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{recentErrors ?? 0}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Failed crawl attempts in the last 24 hours
+              지난 24시간 동안 발생한 크롤링 오류 수
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Quick Actions</CardTitle>
+            <CardTitle className="text-lg">빠른 작업</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <Button asChild className="w-full justify-start" variant="outline">
-              <Link href="/admin/jobs/pending">Review Pending Jobs</Link>
+              <Link href="/admin/jobs/pending">대기 중인 공고 검토</Link>
             </Button>
             <Button asChild className="w-full justify-start" variant="outline">
-              <Link href="/admin/jobs/duplicates">Check Duplicates</Link>
+              <Link href="/admin/jobs/duplicates">중복 공고 확인</Link>
             </Button>
             <Button asChild className="w-full justify-start" variant="outline">
-              <Link href="/admin/errors">View Error Logs</Link>
+              <Link href="/admin/errors">오류 기록 보기</Link>
             </Button>
             <Button asChild className="w-full justify-start" variant="outline">
-              <Link href="/admin/monitoring">System Monitoring</Link>
+              <Link href="/admin/monitoring">시스템 모니터링</Link>
             </Button>
             <Button asChild className="w-full justify-start" variant="outline">
-              <Link href="/admin/analytics">Search Analytics</Link>
+              <Link href="/admin/analytics">검색 통계</Link>
             </Button>
           </CardContent>
         </Card>

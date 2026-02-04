@@ -56,19 +56,19 @@ export function MonitoringErrorsTab() {
         <div className="w-40">
           <Select value={level} onValueChange={(v) => { setLevel(v); setPage(1) }}>
             <SelectTrigger>
-              <SelectValue placeholder="Severity" />
+              <SelectValue placeholder="심각도" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Levels</SelectItem>
-              <SelectItem value="CRITICAL">Critical</SelectItem>
-              <SelectItem value="ERROR">Error</SelectItem>
-              <SelectItem value="WARN">Warning</SelectItem>
-              <SelectItem value="INFO">Info</SelectItem>
+              <SelectItem value="all">전체</SelectItem>
+              <SelectItem value="CRITICAL">심각</SelectItem>
+              <SelectItem value="ERROR">오류</SelectItem>
+              <SelectItem value="WARN">경고</SelectItem>
+              <SelectItem value="INFO">정보</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <Input
-          placeholder="Search keyword..."
+          placeholder="키워드 검색..."
           value={keyword}
           onChange={(e) => { setKeyword(e.target.value); setPage(1) }}
           className="w-60"
@@ -88,7 +88,7 @@ export function MonitoringErrorsTab() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Auto-refreshes every 30 seconds
+        30초마다 자동 새로고침
       </p>
 
       {isLoading ? (
@@ -103,18 +103,18 @@ export function MonitoringErrorsTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-44">Timestamp</TableHead>
-                  <TableHead className="w-24">Level</TableHead>
-                  <TableHead className="w-32">Crawler</TableHead>
-                  <TableHead>Message</TableHead>
-                  <TableHead className="w-20">Details</TableHead>
+                  <TableHead className="w-44">시간</TableHead>
+                  <TableHead className="w-24">레벨</TableHead>
+                  <TableHead className="w-32">크롤러</TableHead>
+                  <TableHead>메시지</TableHead>
+                  <TableHead className="w-20">상세</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {logs.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      No error logs found
+                      오류 기록 없음
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -146,7 +146,7 @@ export function MonitoringErrorsTab() {
                                 )
                               }
                             >
-                              {expandedId === log.id ? 'Hide' : 'Show'}
+                              {expandedId === log.id ? '숨김' : '보기'}
                             </Button>
                           )}
                         </TableCell>
@@ -170,7 +170,7 @@ export function MonitoringErrorsTab() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                Page {page} of {totalPages} ({total} total)
+                {page} / {totalPages} 페이지 (총 {total}개)
               </p>
               <div className="flex gap-2">
                 <Button
@@ -179,7 +179,7 @@ export function MonitoringErrorsTab() {
                   disabled={page <= 1}
                   onClick={() => setPage(page - 1)}
                 >
-                  Previous
+                  이전
                 </Button>
                 <Button
                   variant="outline"
@@ -187,7 +187,7 @@ export function MonitoringErrorsTab() {
                   disabled={page >= totalPages}
                   onClick={() => setPage(page + 1)}
                 >
-                  Next
+                  다음
                 </Button>
               </div>
             </div>

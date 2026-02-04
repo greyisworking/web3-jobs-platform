@@ -56,28 +56,28 @@ export default function ErrorLogsPage() {
   const columns: Column<ErrorLog>[] = [
     {
       key: 'createdAt',
-      header: 'Timestamp',
+      header: '시간',
       sortable: true,
       render: (log) => new Date(log.createdAt).toLocaleString(),
     },
     {
       key: 'status',
-      header: 'Status',
+      header: '상태',
       render: (log) => (
         <Badge variant={log.status === 'failed' ? 'destructive' : 'secondary'}>
-          {log.status}
+          {log.status === 'failed' ? '실패' : log.status}
         </Badge>
       ),
     },
-    { key: 'source', header: 'Crawler', sortable: true },
+    { key: 'source', header: '크롤러', sortable: true },
     {
       key: 'jobCount',
-      header: 'Jobs',
+      header: '공고 수',
       render: (log) => String(log.jobCount),
     },
     {
       key: 'error',
-      header: 'Error Message',
+      header: '오류 메시지',
       render: (log) =>
         log.error ? (
           <span className="text-sm text-destructive truncate max-w-xs block">
@@ -92,28 +92,28 @@ export default function ErrorLogsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Error Logs</h1>
+      <h1 className="text-2xl font-bold">오류 기록</h1>
 
       <div className="flex gap-4">
         <div className="w-48">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder="상태 필터" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="failed">Failed</SelectItem>
-              <SelectItem value="success">Success</SelectItem>
+              <SelectItem value="all">전체 상태</SelectItem>
+              <SelectItem value="failed">실패</SelectItem>
+              <SelectItem value="success">성공</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="w-48">
           <Select value={sourceFilter} onValueChange={setSourceFilter}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by crawler" />
+              <SelectValue placeholder="크롤러 필터" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Crawlers</SelectItem>
+              <SelectItem value="all">전체 크롤러</SelectItem>
               {sources.map((s) => (
                 <SelectItem key={s} value={s}>
                   {s}
@@ -125,7 +125,7 @@ export default function ErrorLogsPage() {
       </div>
 
       {loading ? (
-        <p className="text-muted-foreground">Loading...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : (
         <DataTable
           data={logs}

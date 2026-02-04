@@ -16,17 +16,17 @@ export default function MonitoringPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">System Monitoring</h1>
+      <h1 className="text-2xl font-bold">시스템 모니터링</h1>
 
       <SummaryCards stats={stats} isLoading={statsLoading} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="errors">Errors</TabsTrigger>
-          <TabsTrigger value="proxies">Proxies</TabsTrigger>
-          <TabsTrigger value="crawl-history">Crawl History</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="overview">전체 현황</TabsTrigger>
+          <TabsTrigger value="errors">오류</TabsTrigger>
+          <TabsTrigger value="proxies">프록시</TabsTrigger>
+          <TabsTrigger value="crawl-history">크롤링 기록</TabsTrigger>
+          <TabsTrigger value="analytics">통계</TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
           <MonitoringOverview />

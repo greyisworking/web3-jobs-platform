@@ -1,16 +1,33 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import Link from '@tiptap/extension-link'
+import Image from '@tiptap/extension-image'
+import Youtube from '@tiptap/extension-youtube'
+import Underline from '@tiptap/extension-underline'
+import { TextStyle } from '@tiptap/extension-text-style'
+import Color from '@tiptap/extension-color'
+import Placeholder from '@tiptap/extension-placeholder'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import {
   Bold,
   Italic,
-  Underline,
-  Link,
+  Underline as UnderlineIcon,
+  Link as LinkIcon,
   Quote,
-  Image,
+  Image as ImageIcon,
   Video,
   Palette,
+  List,
+  ListOrdered,
+  Heading2,
+  Upload,
+  Loader2,
+  X,
 } from 'lucide-react'
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import { toast } from 'sonner'
 
 interface RichTextEditorProps {
   value: string
@@ -31,78 +48,216 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   const [linkUrl, setLinkUrl] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const supabase = createSupabaseBrowserClient()
 
-  const execCommand = useCallback((command: string, value?: string) => {
-    document.execCommand(command, false, value)
-  }, [])
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: {
+          levels: [2, 3],
+        },
+      }),
+      Underline,
+      TextStyle,
+      Color,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-purple-400 underline',
+        },
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          class: 'max-w-full h-auto my-4 rounded',
+        },
+      }),
+      Youtube.configure({
+        HTMLAttributes: {
+          class: 'w-full aspect-video my-4',
+        },
+      }),
+      Placeholder.configure({
+        placeholder: placeholder || 'Write your article...',
+      }),
+    ],
+    content: value,
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML())
+    },
+    editorProps: {
+      attributes: {
+        class: 'min-h-[400px] p-4 bg-a24-bg dark:bg-a24-dark-bg text-a24-text dark:text-a24-dark-text focus:outline-none prose prose-sm dark:prose-invert max-w-none',
+      },
+    },
+  })
 
-  const handleBold = () => execCommand('bold')
-  const handleItalic = () => execCommand('italic')
-  const handleUnderline = () => execCommand('underline')
-  const handleQuote = () => execCommand('formatBlock', 'blockquote')
+  // Sync external value changes
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value)
+    }
+  }, [value, editor])
 
-  const handleColor = (color: string) => {
-    execCommand('foreColor', color)
-    setShowColorPicker(false)
-  }
-
-  const handleLink = () => {
-    if (linkUrl) {
-      execCommand('createLink', linkUrl)
+  const handleLink = useCallback(() => {
+    if (linkUrl && editor) {
+      editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run()
       setLinkUrl('')
     }
     setShowLinkInput(false)
-  }
+  }, [linkUrl, editor])
 
-  const handleImage = () => {
-    if (imageUrl) {
-      execCommand('insertImage', imageUrl)
+  const handleImage = useCallback(() => {
+    if (imageUrl && editor) {
+      editor.chain().focus().setImage({ src: imageUrl }).run()
       setImageUrl('')
     }
     setShowImageInput(false)
-  }
+  }, [imageUrl, editor])
 
-  const handleVideo = () => {
-    if (videoUrl) {
-      // Insert video iframe
-      const iframe = `<div class="video-wrapper"><iframe src="${videoUrl.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe></div>`
-      execCommand('insertHTML', iframe)
+  const handleVideo = useCallback(() => {
+    if (videoUrl && editor) {
+      editor.chain().focus().setYoutubeVideo({ src: videoUrl }).run()
       setVideoUrl('')
     }
     setShowVideoInput(false)
-  }
+  }, [videoUrl, editor])
 
-  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-    onChange(e.currentTarget.innerHTML)
+  const handleImageUpload = useCallback(async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('Only image files allowed! 🦫')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image too large! Max 5MB 📦')
+      return
+    }
+
+    setUploading(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+      const filePath = `articles/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('images')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('images')
+        .getPublicUrl(filePath)
+
+      if (editor) {
+        editor.chain().focus().setImage({ src: publicUrl }).run()
+      }
+      toast.success('Image uploaded! GM fren ☀️')
+    } catch (error) {
+      console.error('Upload error:', error)
+      toast.error('Upload failed... NGMI 😢')
+    } finally {
+      setUploading(false)
+    }
+  }, [editor, supabase.storage])
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      handleImageUpload(file)
+    }
+    e.target.value = ''
+  }, [handleImageUpload])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    const file = e.dataTransfer.files[0]
+    if (file && file.type.startsWith('image/')) {
+      handleImageUpload(file)
+    }
+  }, [handleImageUpload])
+
+  const handleColor = useCallback((color: string) => {
+    editor?.chain().focus().setColor(color).run()
+    setShowColorPicker(false)
+  }, [editor])
+
+  if (!editor) {
+    return (
+      <div className="border border-a24-border dark:border-a24-dark-border min-h-[400px] flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-a24-muted" />
+      </div>
+    )
   }
 
   return (
-    <div className="border border-a24-border dark:border-a24-dark-border">
+    <div
+      className="border border-a24-border dark:border-a24-dark-border"
+      onDrop={handleDrop}
+      onDragOver={(e) => e.preventDefault()}
+    >
       {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2 border-b border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
+      <div className="flex flex-wrap items-center gap-1 p-2 border-b border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
         <button
           type="button"
-          onClick={handleBold}
-          className="p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors"
-          title="Bold"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={`p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors ${editor.isActive('bold') ? 'bg-a24-border dark:bg-a24-dark-border' : ''}`}
+          title="Bold (Ctrl+B)"
         >
           <Bold className="w-4 h-4" />
         </button>
         <button
           type="button"
-          onClick={handleItalic}
-          className="p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors"
-          title="Italic"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={`p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors ${editor.isActive('italic') ? 'bg-a24-border dark:bg-a24-dark-border' : ''}`}
+          title="Italic (Ctrl+I)"
         >
           <Italic className="w-4 h-4" />
         </button>
         <button
           type="button"
-          onClick={handleUnderline}
-          className="p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors"
-          title="Underline"
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className={`p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors ${editor.isActive('underline') ? 'bg-a24-border dark:bg-a24-dark-border' : ''}`}
+          title="Underline (Ctrl+U)"
         >
-          <Underline className="w-4 h-4" />
+          <UnderlineIcon className="w-4 h-4" />
+        </button>
+
+        <div className="w-px h-5 bg-a24-border dark:bg-a24-dark-border mx-1" />
+
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className={`p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-a24-border dark:bg-a24-dark-border' : ''}`}
+          title="Heading"
+        >
+          <Heading2 className="w-4 h-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={`p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors ${editor.isActive('bulletList') ? 'bg-a24-border dark:bg-a24-dark-border' : ''}`}
+          title="Bullet List"
+        >
+          <List className="w-4 h-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={`p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors ${editor.isActive('orderedList') ? 'bg-a24-border dark:bg-a24-dark-border' : ''}`}
+          title="Numbered List"
+        >
+          <ListOrdered className="w-4 h-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          className={`p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors ${editor.isActive('blockquote') ? 'bg-a24-border dark:bg-a24-dark-border' : ''}`}
+          title="Quote"
+        >
+          <Quote className="w-4 h-4" />
         </button>
 
         <div className="w-px h-5 bg-a24-border dark:bg-a24-dark-border mx-1" />
@@ -123,7 +278,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                   key={color}
                   type="button"
                   onClick={() => handleColor(color)}
-                  className="w-6 h-6 border border-a24-border dark:border-a24-dark-border"
+                  className="w-6 h-6 border border-a24-border dark:border-a24-dark-border hover:scale-110 transition-transform"
                   style={{ backgroundColor: color }}
                 />
               ))}
@@ -137,10 +292,10 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           <button
             type="button"
             onClick={() => setShowLinkInput(!showLinkInput)}
-            className="p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors"
+            className={`p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors ${editor.isActive('link') ? 'bg-a24-border dark:bg-a24-dark-border' : ''}`}
             title="Insert Link"
           >
-            <Link className="w-4 h-4" />
+            <LinkIcon className="w-4 h-4" />
           </button>
           {showLinkInput && (
             <div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border z-50 flex gap-2">
@@ -148,30 +303,27 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 type="url"
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
-                placeholder="https://"
-                className="px-2 py-1 text-sm border border-a24-border dark:border-a24-dark-border bg-transparent w-48"
+                placeholder="https://example.com"
+                className="px-2 py-1 text-sm border border-a24-border dark:border-a24-dark-border bg-transparent w-56"
+                onKeyDown={(e) => e.key === 'Enter' && handleLink()}
               />
               <button
                 type="button"
                 onClick={handleLink}
-                className="px-2 py-1 text-xs bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg"
+                className="px-2 py-1 text-xs bg-purple-600 text-white hover:bg-purple-700"
               >
-                Insert
+                Add
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowLinkInput(false)}
+                className="px-1 py-1 text-a24-muted hover:text-a24-text"
+              >
+                <X className="w-4 h-4" />
               </button>
             </div>
           )}
         </div>
-
-        <button
-          type="button"
-          onClick={handleQuote}
-          className="p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors"
-          title="Quote"
-        >
-          <Quote className="w-4 h-4" />
-        </button>
-
-        <div className="w-px h-5 bg-a24-border dark:bg-a24-dark-border mx-1" />
 
         <div className="relative">
           <button
@@ -179,26 +331,53 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
             onClick={() => setShowImageInput(!showImageInput)}
             className="p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors"
             title="Insert Image"
-            aria-label="Insert Image"
           >
-            <Image className="w-4 h-4" />
+            <ImageIcon className="w-4 h-4" />
           </button>
           {showImageInput && (
-            <div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border z-50 flex gap-2">
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="Image URL"
-                className="px-2 py-1 text-sm border border-a24-border dark:border-a24-dark-border bg-transparent w-48"
-              />
+            <div className="absolute top-full left-0 mt-1 p-3 bg-white dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border z-50 w-72 space-y-3">
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="Image URL"
+                  className="flex-1 px-2 py-1 text-sm border border-a24-border dark:border-a24-dark-border bg-transparent"
+                  onKeyDown={(e) => e.key === 'Enter' && handleImage()}
+                />
+                <button
+                  type="button"
+                  onClick={handleImage}
+                  className="px-2 py-1 text-xs bg-purple-600 text-white hover:bg-purple-700"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-px bg-a24-border" />
+                <span className="text-xs text-a24-muted">or</span>
+                <div className="flex-1 h-px bg-a24-border" />
+              </div>
               <button
                 type="button"
-                onClick={handleImage}
-                className="px-2 py-1 text-xs bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 border border-dashed border-a24-border hover:border-purple-500 text-sm text-a24-muted hover:text-a24-text transition-colors"
               >
-                Insert
+                {uploading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Upload className="w-4 h-4" />
+                )}
+                {uploading ? 'Uploading...' : 'Upload Image'}
               </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
             </div>
           )}
         </div>
@@ -208,7 +387,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
             type="button"
             onClick={() => setShowVideoInput(!showVideoInput)}
             className="p-2 hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors"
-            title="Insert Video"
+            title="Insert YouTube Video"
           >
             <Video className="w-4 h-4" />
           </button>
@@ -218,15 +397,23 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 type="url"
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="YouTube URL"
-                className="px-2 py-1 text-sm border border-a24-border dark:border-a24-dark-border bg-transparent w-48"
+                placeholder="https://youtube.com/watch?v=..."
+                className="px-2 py-1 text-sm border border-a24-border dark:border-a24-dark-border bg-transparent w-64"
+                onKeyDown={(e) => e.key === 'Enter' && handleVideo()}
               />
               <button
                 type="button"
                 onClick={handleVideo}
-                className="px-2 py-1 text-xs bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg"
+                className="px-2 py-1 text-xs bg-purple-600 text-white hover:bg-purple-700"
               >
-                Insert
+                Add
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowVideoInput(false)}
+                className="px-1 py-1 text-a24-muted hover:text-a24-text"
+              >
+                <X className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -234,39 +421,44 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       </div>
 
       {/* Editor */}
-      <div
-        contentEditable
-        onInput={handleInput}
-        dangerouslySetInnerHTML={{ __html: value }}
-        data-placeholder={placeholder || 'Write your article...'}
-        className="min-h-[400px] p-4 bg-a24-bg dark:bg-a24-dark-bg text-a24-text dark:text-a24-dark-text focus:outline-none prose prose-sm dark:prose-invert max-w-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-a24-muted [&:empty]:before:dark:text-a24-dark-muted"
-      />
+      <EditorContent editor={editor} />
 
       <style jsx global>{`
-        .video-wrapper {
-          position: relative;
-          padding-bottom: 56.25%;
+        .ProseMirror p.is-editor-empty:first-child::before {
+          color: #6B7280;
+          content: attr(data-placeholder);
+          float: left;
           height: 0;
-          margin: 1rem 0;
+          pointer-events: none;
         }
-        .video-wrapper iframe {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-        }
-        [contenteditable] blockquote {
-          border-left: 3px solid #6B7280;
+        .ProseMirror blockquote {
+          border-left: 3px solid #8B5CF6;
           padding-left: 1rem;
           margin: 1rem 0;
-          color: #6B7280;
+          color: #9CA3AF;
           font-style: italic;
         }
-        [contenteditable] img {
+        .ProseMirror img {
           max-width: 100%;
           height: auto;
           margin: 1rem 0;
+        }
+        .ProseMirror h2 {
+          font-size: 1.5rem;
+          font-weight: 600;
+          margin: 1.5rem 0 0.5rem;
+        }
+        .ProseMirror h3 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin: 1.25rem 0 0.5rem;
+        }
+        .ProseMirror ul, .ProseMirror ol {
+          padding-left: 1.5rem;
+          margin: 0.5rem 0;
+        }
+        .ProseMirror li {
+          margin: 0.25rem 0;
         }
       `}</style>
     </div>

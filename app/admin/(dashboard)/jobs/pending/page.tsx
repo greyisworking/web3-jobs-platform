@@ -96,17 +96,17 @@ export default function PendingJobsPage() {
   }
 
   const columns: Column<JobWithStatus>[] = [
-    { key: 'title', header: 'Title', sortable: true },
-    { key: 'company', header: 'Company', sortable: true },
-    { key: 'location', header: 'Location' },
+    { key: 'title', header: '제목', sortable: true },
+    { key: 'company', header: '회사', sortable: true },
+    { key: 'location', header: '위치' },
     {
       key: 'sector',
-      header: 'Sector',
+      header: '섹터',
       render: (job) => job.sector || '-',
     },
     {
       key: 'backers',
-      header: 'Backers',
+      header: '투자자',
       render: (job) =>
         job.backers && job.backers.length > 0
           ? job.backers.join(', ')
@@ -114,7 +114,7 @@ export default function PendingJobsPage() {
     },
     {
       key: 'badges',
-      header: 'Badges',
+      header: '배지',
       render: (job) =>
         job.badges && job.badges.length > 0 ? (
           <div className="flex flex-wrap gap-1">
@@ -136,17 +136,17 @@ export default function PendingJobsPage() {
     },
     {
       key: 'salary',
-      header: 'Salary',
+      header: '연봉',
       render: (job) => job.salary || '-',
     },
     {
       key: 'source',
-      header: 'Source',
+      header: '출처',
       render: (job) => <Badge variant="secondary">{job.source}</Badge>,
     },
     {
       key: 'crawledAt',
-      header: 'Crawled',
+      header: '수집일',
       sortable: true,
       render: (job) => new Date(job.crawledAt).toLocaleDateString(),
     },
@@ -155,7 +155,7 @@ export default function PendingJobsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Pending Jobs</h1>
+        <h1 className="text-2xl font-bold">검토 대기 공고</h1>
         {selectedIds.size > 0 && (
           <div className="flex gap-2">
             <Button
@@ -163,7 +163,7 @@ export default function PendingJobsPage() {
               variant="outline"
               onClick={() => setShowBadgeDialog(true)}
             >
-              Assign Badges ({selectedIds.size})
+              배지 할당 ({selectedIds.size})
             </Button>
             <Button
               size="sm"
@@ -171,7 +171,7 @@ export default function PendingJobsPage() {
                 openDialog('approve', [...selectedIds])
               }
             >
-              Approve ({selectedIds.size})
+              승인 ({selectedIds.size})
             </Button>
             <Button
               size="sm"
@@ -180,7 +180,7 @@ export default function PendingJobsPage() {
                 openDialog('reject', [...selectedIds])
               }
             >
-              Reject ({selectedIds.size})
+              거절 ({selectedIds.size})
             </Button>
             <Button
               size="sm"
@@ -189,14 +189,14 @@ export default function PendingJobsPage() {
                 openDialog('delete', [...selectedIds])
               }
             >
-              Delete ({selectedIds.size})
+              삭제 ({selectedIds.size})
             </Button>
           </div>
         )}
       </div>
 
       {loading ? (
-        <p className="text-muted-foreground">Loading...</p>
+        <p className="text-muted-foreground">로딩 중...</p>
       ) : (
         <DataTable
           data={jobs}
@@ -216,14 +216,14 @@ export default function PendingJobsPage() {
                 variant="ghost"
                 onClick={() => openDialog('approve', [job.id])}
               >
-                Approve
+                승인
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => openDialog('reject', [job.id])}
               >
-                Reject
+                거절
               </Button>
               <Button
                 size="sm"
@@ -231,7 +231,7 @@ export default function PendingJobsPage() {
                 className="text-destructive"
                 onClick={() => openDialog('delete', [job.id])}
               >
-                Delete
+                삭제
               </Button>
             </div>
           )}
@@ -256,10 +256,10 @@ export default function PendingJobsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-              Assign Badges
+              배지 할당
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              Assigning to {selectedIds.size} job{selectedIds.size !== 1 ? 's' : ''}
+              {selectedIds.size}개 공고에 할당
             </p>
             <div className="space-y-3">
               {BADGE_VALUES.map((badge) => {
@@ -289,14 +289,14 @@ export default function PendingJobsPage() {
                 onClick={() => setShowBadgeDialog(false)}
                 className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
               >
-                Cancel
+                취소
               </button>
               <button
                 onClick={assignBadges}
                 disabled={badgeAssigning}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg transition"
               >
-                {badgeAssigning ? 'Assigning...' : 'Assign'}
+                {badgeAssigning ? '할당 중...' : '할당'}
               </button>
             </div>
           </div>

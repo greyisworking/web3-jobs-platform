@@ -31,14 +31,14 @@ export function MonitoringAnalyticsTab() {
   return (
     <div className="space-y-4 mt-4">
       <div className="flex gap-3 items-center">
-        <span className="text-sm text-muted-foreground">Date range:</span>
+        <span className="text-sm text-muted-foreground">기간:</span>
         <Input
           type="date"
           value={dateFrom}
           onChange={(e) => setDateFrom(e.target.value)}
           className="w-40"
         />
-        <span className="text-sm text-muted-foreground">to</span>
+        <span className="text-sm text-muted-foreground">~</span>
         <Input
           type="date"
           value={dateTo}
@@ -46,7 +46,7 @@ export function MonitoringAnalyticsTab() {
           className="w-40"
         />
         <span className="text-sm text-muted-foreground">
-          {data.totalSearches} searches
+          총 {data.totalSearches}회 검색
         </span>
       </div>
 
@@ -69,13 +69,13 @@ export function MonitoringAnalyticsTab() {
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Search className="h-4 w-4" />
-                Top 10 Search Keywords
+                인기 검색어 Top 10
               </CardTitle>
             </CardHeader>
             <CardContent>
               {data.topQueries.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-8 text-center">
-                  No search data yet
+                  검색 데이터 없음
                 </p>
               ) : (
                 <ResponsiveContainer width="100%" height={280}>
@@ -108,13 +108,13 @@ export function MonitoringAnalyticsTab() {
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
-                Search Trends
+                검색 트렌드
               </CardTitle>
             </CardHeader>
             <CardContent>
               {data.trends.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-8 text-center">
-                  No trend data yet
+                  트렌드 데이터 없음
                 </p>
               ) : (
                 <ResponsiveContainer width="100%" height={280}>
@@ -140,13 +140,13 @@ export function MonitoringAnalyticsTab() {
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Code className="h-4 w-4" />
-                Popular Tech Stacks
+                인기 기술 스택
               </CardTitle>
             </CardHeader>
             <CardContent>
               {data.techStacks.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-8 text-center">
-                  No tech stack data yet
+                  기술 스택 데이터 없음
                 </p>
               ) : (
                 <div className="flex flex-wrap gap-2">

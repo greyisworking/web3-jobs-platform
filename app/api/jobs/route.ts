@@ -19,7 +19,7 @@ export async function GET(request: Request) {
       .eq('isActive', true)
       .order('postedDate', { ascending: false })
       .order('crawledAt', { ascending: false })
-      .limit(500)
+      .limit(300)
 
     if (badge) {
       query = query.contains('badges', [badge])

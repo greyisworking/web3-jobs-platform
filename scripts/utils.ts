@@ -62,21 +62,50 @@ export function extractDomain(url: string): string {
 }
 
 /**
- * Extract clean HTML content preserving structure
+ * Extract clean HTML content preserving structure.
+ * Removes noise elements (ads, related jobs, sidebars, etc.) before extraction.
  */
 export function extractHTML($element: cheerio.Cheerio<any>, $: cheerio.CheerioAPI): string {
   if (!$element.length) return ''
 
-  // Remove script and style tags
-  $element.find('script, style, noscript').remove()
+  // Clone to avoid mutating original
+  const clone = $element.clone()
+
+  // Remove standard noise elements
+  clone.find('script, style, noscript, iframe, svg, nav, header, footer').remove()
+
+  // Remove source-site noise: related jobs, salary widgets, profiles, sharing, etc.
+  const noiseSelectors = [
+    '[class*="related"]', '[class*="recommended"]', '[class*="similar"]',
+    '[class*="share"]', '[class*="social"]', '[class*="sharing"]',
+    '[class*="salary-comp"]', '[class*="salary-range"]', '[class*="salary-info"]',
+    '[class*="average-salary"]', '[class*="compensation-data"]',
+    '[class*="candidate"]', '[class*="profile-card"]',
+    '[class*="chat"]', '[class*="interview"]', '[class*="cover-letter"]',
+    '[class*="trust"]', '[class*="verified-badge"]', '[class*="verification"]',
+    '[class*="cookie"]', '[class*="consent"]', '[class*="gdpr"]',
+    '[class*="newsletter"]', '[class*="subscribe"]', '[class*="signup"]',
+    '[class*="sidebar"]', '[class*="widget"]',
+    '[class*="report"]', '[class*="flag"]',
+    '[class*="bookmark"]', '[class*="save-job"]',
+    '[class*="apply-section"]', '[class*="apply-btn"]',
+    '[class*="comment"]', '[class*="discussion"]',
+    '[class*="pagination"]', '[class*="pager"]',
+    '[class*="ad-"]', '[class*="advert"]', '[class*="promo"]',
+    '[class*="banner"]', '[class*="sponsored"]',
+  ]
+  for (const sel of noiseSelectors) {
+    clone.find(sel).remove()
+  }
 
   // Get HTML and clean it
-  let html = $element.html() || ''
+  let html = clone.html() || ''
 
   // Convert to cleaner format
   html = html
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/div>/gi, '\n')
     .replace(/<\/li>/gi, '\n')
     .replace(/<li>/gi, '• ')
     .replace(/<\/h[1-6]>/gi, '\n\n')
