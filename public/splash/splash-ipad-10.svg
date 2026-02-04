@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1620" height="2160" viewBox="0 0 1620 2160">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F172A"/>
+      <stop offset="100%" style="stop-color:#1E293B"/>
+    </linearGradient>
+  </defs>
+  <rect width="1620" height="2160" fill="url(#bg)"/>
+  <text x="50%" y="45%" text-anchor="middle" fill="#22C55E" font-family="system-ui, -apple-system, sans-serif" font-size="130" font-weight="700">NEUN</text>
+  <text x="50%" y="52%" text-anchor="middle" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="41">Web3 Careers</text>
+</svg>
