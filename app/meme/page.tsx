@@ -556,48 +556,44 @@ export default function MemePage() {
             </div>
 
             {/* Download Options: Size + Quality */}
-            <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4">
+            <div className="flex flex-wrap justify-center gap-2">
               {/* Aspect Ratio */}
-              <div className="flex justify-center gap-1">
-                {DOWNLOAD_SIZES.map((size) => {
-                  const Icon = size.icon
-                  return (
-                    <button
-                      key={size.id}
-                      onClick={() => setDownloadSize(size.id)}
-                      className={`flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold border transition-all ${
-                        downloadSize === size.id
-                          ? 'bg-a24-text dark:bg-a24-dark-text text-a24-bg dark:text-a24-dark-bg border-a24-text dark:border-a24-dark-text'
-                          : 'bg-transparent text-a24-muted border-a24-border hover:border-a24-text'
-                      }`}
-                    >
-                      <Icon className="w-3 h-3" />
-                      {size.label}
-                    </button>
-                  )
-                })}
-              </div>
-
-              {/* Quality / Resolution */}
-              <div className="flex justify-center gap-1">
-                {QUALITY_OPTIONS.map((q) => (
+              {DOWNLOAD_SIZES.map((size) => {
+                const Icon = size.icon
+                return (
                   <button
-                    key={q.id}
-                    onClick={() => setQuality(q.id)}
-                    className={`flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold border transition-all ${
-                      quality === q.id
-                        ? q.id === 'print'
-                          ? 'bg-purple-600 text-white border-purple-600'
-                          : 'bg-neun-success text-black border-neun-success'
+                    key={size.id}
+                    onClick={() => setDownloadSize(size.id)}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-bold border transition-all ${
+                      downloadSize === size.id
+                        ? 'bg-a24-text dark:bg-a24-dark-text text-a24-bg dark:text-a24-dark-bg border-a24-text dark:border-a24-dark-text'
                         : 'bg-transparent text-a24-muted border-a24-border hover:border-a24-text'
                     }`}
-                    title={q.desc}
                   >
-                    {q.id === 'print' ? <Printer className="w-3 h-3" /> : null}
-                    {q.label}
+                    <Icon className="w-3 h-3" />
+                    {size.label}
                   </button>
-                ))}
-              </div>
+                )
+              })}
+              <span className="hidden sm:inline text-a24-muted/30">|</span>
+              {/* Quality / Resolution */}
+              {QUALITY_OPTIONS.map((q) => (
+                <button
+                  key={q.id}
+                  onClick={() => setQuality(q.id)}
+                  className={`flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-bold border transition-all ${
+                    quality === q.id
+                      ? q.id === 'print'
+                        ? 'bg-purple-600 text-white border-purple-600'
+                        : 'bg-neun-success text-black border-neun-success'
+                      : 'bg-transparent text-a24-muted border-a24-border hover:border-a24-text'
+                  }`}
+                  title={q.desc}
+                >
+                  {q.id === 'print' ? <Printer className="w-3 h-3" /> : null}
+                  {q.label}
+                </button>
+              ))}
             </div>
 
             {/* Resolution info */}
@@ -608,32 +604,34 @@ export default function MemePage() {
             </p>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="grid grid-cols-4 gap-2 max-w-md mx-auto">
               <button
                 onClick={handleDownload}
-                className="flex-1 min-w-[120px] max-w-[200px] flex items-center justify-center gap-2 px-4 py-3 bg-a24-text dark:bg-a24-dark-text text-a24-bg dark:text-a24-dark-bg font-bold hover:opacity-80 transition-colors"
+                className="col-span-2 flex items-center justify-center gap-2 px-3 py-2.5 bg-a24-text dark:bg-a24-dark-text text-a24-bg dark:text-a24-dark-bg text-sm font-bold hover:opacity-80 transition-colors"
               >
                 <Download className="w-4 h-4" />
                 Download
               </button>
               <button
                 onClick={handleCopy}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-a24-surface text-white font-bold hover:bg-gray-700 transition-colors"
+                className="flex items-center justify-center px-3 py-2.5 bg-a24-surface text-white font-bold hover:bg-gray-700 transition-colors"
               >
                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </button>
-              <button
-                onClick={handleTwitterShare}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-a24-surface dark:bg-a24-dark-surface text-a24-text dark:text-a24-dark-text font-bold border border-a24-border dark:border-a24-dark-border hover:opacity-80 transition-colors"
-              >
-                <Twitter className="w-4 h-4" />
-              </button>
-              <button
-                onClick={handleTelegramShare}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-[#0088cc] text-white font-bold hover:bg-[#0077b5] transition-colors"
-              >
-                <PixelSend size={16} />
-              </button>
+              <div className="flex gap-1">
+                <button
+                  onClick={handleTwitterShare}
+                  className="flex-1 flex items-center justify-center px-2 py-2.5 bg-a24-surface dark:bg-a24-dark-surface text-a24-text dark:text-a24-dark-text font-bold border border-a24-border dark:border-a24-dark-border hover:opacity-80 transition-colors"
+                >
+                  <Twitter className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleTelegramShare}
+                  className="flex-1 flex items-center justify-center px-2 py-2.5 bg-[#0088cc] text-white font-bold hover:bg-[#0077b5] transition-colors"
+                >
+                  <PixelSend size={16} />
+                </button>
+              </div>
             </div>
           </div>
 

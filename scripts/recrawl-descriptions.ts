@@ -36,6 +36,76 @@ function cleanText(text: string): string {
   return text.replace(/\s+/g, ' ').trim()
 }
 
+/**
+ * Deep clean description to remove junk content
+ */
+function cleanDescription(text: string): string {
+  if (!text) return ''
+
+  // Remove common UI/navigation patterns
+  const junkPatterns = [
+    // Similar/Related jobs sections
+    /similar\s*jobs?\s*[:\n]?[\s\S]*?(?=\n\n|\z)/gi,
+    /related\s*jobs?\s*[:\n]?[\s\S]*?(?=\n\n|\z)/gi,
+    /recommended\s*(?:jobs?|for you)\s*[:\n]?[\s\S]*?(?=\n\n|\z)/gi,
+    /you\s*(?:may|might)\s*(?:also\s*)?like[\s\S]*?(?=\n\n|\z)/gi,
+    /more\s*jobs?\s*(?:at|from|like)[\s\S]*?(?=\n\n|\z)/gi,
+    // Navigation elements
+    /(?:^|\n)\s*(?:home|about|contact|login|sign\s*(?:in|up)|register|apply\s*now|back\s*to)\s*(?:\n|$)/gim,
+    /(?:^|\n)\s*(?:share|tweet|post|email)\s*(?:this)?(?:\s*job)?(?:\n|$)/gim,
+    // Social sharing
+    /share\s*(?:on|via)\s*(?:twitter|facebook|linkedin|email)[\s\S]*?(?:\n|$)/gi,
+    /follow\s*us\s*(?:on)?[\s\S]*?(?:\n|$)/gi,
+    // Cookie/privacy notices
+    /(?:we\s*use\s*cookies|cookie\s*policy|privacy\s*policy)[\s\S]*?(?:\n\n|\z)/gi,
+    /(?:accept|decline)\s*(?:all\s*)?cookies?/gi,
+    // JavaScript artifacts
+    /function\s*\([^)]*\)\s*\{[^}]*\}/g,
+    /var\s+\w+\s*=\s*[^;]+;/g,
+    /const\s+\w+\s*=\s*[^;]+;/g,
+    /let\s+\w+\s*=\s*[^;]+;/g,
+    /\$\([^)]+\)\./g,
+    /document\.\w+/g,
+    /window\.\w+/g,
+    /addEventListener\([^)]+\)/g,
+    /querySelector\([^)]+\)/g,
+    // CSS artifacts
+    /@media\s*\([^)]+\)\s*\{[^}]*\}/g,
+    /\.[a-z_-]+\s*\{[^}]*\}/gi,
+    // HTML entities that weren't converted
+    /&[a-z]+;/gi,
+    /&#\d+;/g,
+    // Loading/spinner text
+    /loading\.{3,}/gi,
+    /please\s*wait/gi,
+    // Footer boilerplate
+    /(?:^|\n)©\s*\d{4}[\s\S]*?(?:\n\n|\z)/gi,
+    /all\s*rights?\s*reserved/gi,
+    // Form elements text
+    /(?:^|\n)\s*(?:submit|cancel|reset|clear)\s*(?:\n|$)/gim,
+    // Ads patterns
+    /(?:advertisement|sponsored|promoted)[\s\S]*?(?:\n\n|\z)/gi,
+    // Empty bullet points
+    /^•\s*$/gm,
+    // Excessive spacing
+    /\n{4,}/g,
+  ]
+
+  let cleaned = text
+
+  for (const pattern of junkPatterns) {
+    cleaned = cleaned.replace(pattern, '\n\n')
+  }
+
+  // Final cleanup
+  cleaned = cleaned
+    .replace(/\n{3,}/g, '\n\n')  // Max 2 newlines
+    .replace(/^\s+|\s+$/g, '')    // Trim
+    .replace(/[ \t]+/g, ' ')      // Normalize spaces
+
+  return cleaned
+}
+
 function extractHTML($element: cheerio.Cheerio<any>, $: cheerio.CheerioAPI): string {
   if (!$element.length) return ''
 
@@ -389,9 +459,12 @@ async function recrawlDescriptions(options: { limit?: number; all?: boolean } = 
       const details = await fetchJobDetailsFromUrl(job.url, job.source)
 
       if (details.description && details.description.length > 50) {
+        // Clean the description to remove junk
+        const cleanedDesc = cleanDescription(details.description)
+
         // Only update description field (other fields may not exist in Supabase schema)
         const updateData: any = {
-          description: details.description.substring(0, 10000), // Limit size
+          description: cleanedDesc.substring(0, 10000), // Limit size
         }
 
         const { error: updateError } = await supabase

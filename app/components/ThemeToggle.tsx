@@ -100,9 +100,9 @@ export default function ThemeToggle() {
       aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
       className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-a24-surface dark:hover:bg-a24-dark-surface hover:scale-110 active:scale-95 transition-all touch-target-44"
     >
-      {/* Show current mode: Moon for dark, Sun for light */}
+      {/* Show what you'll switch TO: Sun for dark mode (switch to light), Moon for light mode (switch to dark) */}
       <div className="w-7 h-7 flex items-center justify-center">
-        {dark ? <PixelMoon /> : <PixelSun />}
+        {dark ? <PixelSun /> : <PixelMoon />}
       </div>
     </button>
   )

@@ -8,68 +8,63 @@ export default function Footer() {
   return (
     <footer className="border-t border-a24-border dark:border-a24-dark-border">
       <div className="max-w-6xl mx-auto px-6 py-10">
-        {/* Main Links Row */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+        {/* Main Links Row - grid for mobile, flex for desktop */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:flex md:flex-row md:items-center md:justify-between gap-4 md:gap-6 mb-8">
           {/* Primary Nav */}
-          <div className="flex flex-wrap items-center gap-6">
-            <Link
-              href="/careers"
-              className="text-[11px] uppercase tracking-[0.25em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
-            >
-              Jobs
-            </Link>
-            <Link
-              href="/companies"
-              className="text-[11px] uppercase tracking-[0.25em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
-            >
-              Companies
-            </Link>
-            <Link
-              href="/investors"
-              className="text-[11px] uppercase tracking-[0.25em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
-            >
-              Investors
-            </Link>
-            <Link
-              href="/articles"
-              className="text-[11px] uppercase tracking-[0.25em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
-            >
-              Articles
-            </Link>
-          </div>
-
+          <Link
+            href="/careers"
+            className="text-[11px] uppercase tracking-[0.2em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+          >
+            Jobs
+          </Link>
+          <Link
+            href="/companies"
+            className="text-[11px] uppercase tracking-[0.2em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+          >
+            Companies
+          </Link>
+          <Link
+            href="/investors"
+            className="text-[11px] uppercase tracking-[0.2em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+          >
+            Investors
+          </Link>
+          <Link
+            href="/articles"
+            className="text-[11px] uppercase tracking-[0.2em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+          >
+            Articles
+          </Link>
           {/* Secondary Nav */}
-          <div className="flex flex-wrap items-center gap-6">
-            <Link
-              href="/meme"
-              className="text-[11px] uppercase tracking-[0.25em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
-            >
-              Meme Generator
-            </Link>
-            <Link
-              href="/about/story"
-              className="text-[11px] uppercase tracking-[0.25em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
-            >
-              About
-            </Link>
-            <Link
-              href="/terms"
-              className="text-[11px] uppercase tracking-[0.25em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
-            >
-              Terms
-            </Link>
-            <Link
-              href="/privacy"
-              className="text-[11px] uppercase tracking-[0.25em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
-            >
-              Privacy
-            </Link>
-          </div>
+          <Link
+            href="/meme"
+            className="text-[11px] uppercase tracking-[0.2em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+          >
+            Meme
+          </Link>
+          <Link
+            href="/about/story"
+            className="text-[11px] uppercase tracking-[0.2em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+          >
+            About
+          </Link>
+          <Link
+            href="/terms"
+            className="text-[11px] uppercase tracking-[0.2em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+          >
+            Terms
+          </Link>
+          <Link
+            href="/privacy"
+            className="text-[11px] uppercase tracking-[0.2em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+          >
+            Privacy
+          </Link>
         </div>
 
         {/* Social + Copyright Row */}
         <div className="pt-6 border-t border-a24-border/50 dark:border-a24-dark-border/50">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
             {/* Logo + Pixelbara */}
             <div className="flex items-center gap-2">
               <span className="text-xs font-extralight uppercase tracking-[0.5em] text-a24-text dark:text-a24-dark-text">

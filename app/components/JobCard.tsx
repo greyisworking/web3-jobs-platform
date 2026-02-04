@@ -9,11 +9,8 @@ import { trackEvent } from '@/lib/analytics'
 import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import BookmarkButton from './BookmarkButton'
 import { MiniPixelbara } from './Pixelbara'
-import VCVerifiedBadge from './badges/VCVerifiedBadge'
-import TrustVerifiedBadge from './badges/TrustVerifiedBadge'
 import { Lock, Vote, Flag } from 'lucide-react'
 import { toast } from 'sonner'
-import { TIER1_VCS, TRUSTED_JOB_SOURCES } from '@/lib/trust-check'
 
 function isNewJob(postedDate: Date | string | null | undefined): boolean {
   if (!postedDate) return false
@@ -73,20 +70,6 @@ function ReportButton({ jobId, jobTitle }: { jobId: string; jobTitle: string }) 
   )
 }
 
-// Check if company has VC backing from tier 1 investors
-function hasVCBacking(backers?: string[] | null): boolean {
-  if (!backers || backers.length === 0) return false
-  return backers.some((b) =>
-    TIER1_VCS.some((vc) => b.toLowerCase().includes(vc.toLowerCase()))
-  )
-}
-
-// Check if job source is trusted (crawled from established job boards)
-function isTrustedJobSource(source: string): boolean {
-  const sourceLower = source.toLowerCase()
-  return TRUSTED_JOB_SOURCES.some(s => sourceLower.includes(s.toLowerCase()))
-}
-
 export default function JobCard({ job, index }: JobCardProps) {
   const { opacity, isFading } = useDecayEffect(job.postedDate)
   const [hovered, setHovered] = useState(false)
@@ -129,14 +112,8 @@ export default function JobCard({ job, index }: JobCardProps) {
           </div>
         )}
 
-        {/* Von Restorff Effect: Urgent/Featured/NEW + Verification badges */}
-        <div className="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
-          {/* Verification Status Badge - No warnings on cards */}
-          {!isExpired && hasVCBacking(job.backers) ? (
-            <VCVerifiedBadge compact />
-          ) : !isExpired && isTrustedJobSource(job.source) ? (
-            <TrustVerifiedBadge compact />
-          ) : null}
+        {/* Von Restorff Effect: Urgent/Featured/NEW badges only (no verification badges on cards) */}
+        <div className="absolute top-2 right-24 flex items-center gap-1.5">
           {job.is_urgent && (
             <span className="badge-urgent px-1.5 py-0.5 font-bold text-[9px] uppercase tracking-wider rounded-sm">
               URGENT
