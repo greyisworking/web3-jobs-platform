@@ -26,7 +26,7 @@ export default function CompanyLoginPage() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/company/dashboard`,
+            emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/company/dashboard`,
           },
         })
         if (signUpError) throw signUpError

@@ -153,7 +153,7 @@ export default function ArticleWritePage() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/articles/write`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=/articles/write`,
       },
     })
   }
@@ -162,7 +162,7 @@ export default function ArticleWritePage() {
     await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/articles/write`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=/articles/write`,
       },
     })
   }
