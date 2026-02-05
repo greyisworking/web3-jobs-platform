@@ -118,11 +118,11 @@ function CareersContent() {
         <main className="max-w-6xl mx-auto px-6 pt-24 pb-12">
           <div className="flex flex-col items-center justify-center py-16">
             <Pixelbara pose="careers" size={160} />
-            <p className="mt-4 text-sm font-medium text-a24-muted dark:text-a24-dark-muted tracking-wide">
+            <p className="mt-4 text-sm font-light text-a24-muted dark:text-a24-dark-muted tracking-wide">
               searching for that bag...
             </p>
           </div>
-          <JobCardSkeletonGrid count={9} />
+          <JobCardSkeletonGrid count={9} showLoader={false} />
         </main>
       </div>
     )
@@ -229,7 +229,7 @@ export default function CareersPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
         <main className="max-w-6xl mx-auto px-6 py-12">
-          <JobCardSkeletonGrid count={9} />
+          <JobCardSkeletonGrid count={9} showLoader={false} />
         </main>
       </div>
     }>

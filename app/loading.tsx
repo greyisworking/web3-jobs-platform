@@ -25,20 +25,6 @@ function PixelProgressBar({ progress }: { progress: number }) {
   )
 }
 
-// Animated dots
-function LoadingDots() {
-  const [dots, setDots] = useState('')
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDots(prev => prev.length >= 3 ? '' : prev + '.')
-    }, 400)
-    return () => clearInterval(interval)
-  }, [])
-
-  return <span className="inline-block w-6 text-left">{dots}</span>
-}
-
 export default function Loading() {
   const [progress, setProgress] = useState(0)
   const [blink, setBlink] = useState(false)
@@ -63,6 +49,13 @@ export default function Loading() {
     return () => clearInterval(interval)
   }, [])
 
+  const message =
+    progress < 30
+      ? 'searching for that bag...'
+      : progress < 70
+        ? 'almost there ser...'
+        : 'lfg! 🚀'
+
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg flex flex-col items-center justify-center">
       {/* Pixelbara with blink effect */}
@@ -72,21 +65,13 @@ export default function Loading() {
 
       {/* Loading text */}
       <p className="mt-6 text-sm text-a24-muted dark:text-a24-dark-muted tracking-wide font-mono">
-        loading alpha<LoadingDots />
+        {message}
       </p>
 
       {/* Pixel progress bar */}
       <div className="mt-4">
         <PixelProgressBar progress={progress} />
       </div>
-
-      {/* Random web3 loading message */}
-      <p className="mt-3 text-xs text-a24-muted/60 dark:text-a24-dark-muted/60 font-mono">
-        {progress < 30 && 'connecting to blockchain...'}
-        {progress >= 30 && progress < 60 && 'fetching on-chain data...'}
-        {progress >= 60 && progress < 90 && 'decrypting alpha...'}
-        {progress >= 90 && 'almost wagmi...'}
-      </p>
     </div>
   )
 }

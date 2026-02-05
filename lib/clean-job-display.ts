@@ -23,18 +23,27 @@ const NOISE_PATTERNS: RegExp[] = [
   /action="[^"]*"\s*accept-charset[\s\S]*/g,
   /data-\w+(?:-\w+)*="[^"]*"/g,
 
-  // ── Share / Social ──
+  // ── Share / Social / Bookmark (standalone words on their own line) ──
   /Share\s*(?:this\s*)?(?:job|position)?[\s\S]*?(?:Twitter|Facebook|LinkedIn|Telegram|URL|Email|X)[\s\S]*?(?:\n|$)/gi,
   /(?:^|\n)\s*(?:Share|Tweet|Post)\s*\n/gim,
   /(?:^|\n)\s*URL\s*\n/gim,
   /(?:^|\n)\s*(?:Twitter|LinkedIn|Telegram|Bookmark)\s*$/gim,
+  // Standalone "Apply Now", "Share", "Bookmark" on their own line
+  /^\s*Apply\s*Now\s*$/gim,
+  /^\s*Share\s*$/gim,
+  /^\s*Bookmark\s*$/gim,
 
   // ── Trust / Verification ──
   /VERIFIED[\s\S]*?(?:Trust Check|passed|looking good)[\s\S]*?(?:\n|$)/gi,
   /Trust\s*Check\s*passed/gi,
+  /VERIFIED\s*Trust\s*Check\s*passed/gi,
 
   // ── Report ──
   /Report\s*(?:this\s*)?(?:company|job|listing)[\s\S]*?(?:\n|$)/gi,
+
+  // ── Sourced from web3.career / source attribution ──
+  /Sourced\s*from\s*web3\.career[\s\S]*?(?:\n|$)/gi,
+  /Sourced\s*from\s*[\w.]+[\s\S]*?(?:\n|$)/gi,
 
   // ── Email noise ──
   /\[email(?:\s*protected)?\]/gi,
@@ -74,6 +83,150 @@ const DUPLICATE_SECTION_HEADINGS = [
   /(?:^|\n)\s*(?:#{1,3}\s*)?Responsibilities?\s*:?\s*\n/gi,
 ]
 
+// ── Section headings that deserve a double line break before them ──
+const SECTION_HEADINGS = [
+  'About (?:the |Us|Company)',
+  'Key Responsibilities',
+  'Qualifications',
+  'Requirements',
+  'Responsibilities',
+  'Benefits',
+  'What (?:You\'ll|We) (?:Do|Offer|Need|Bring|Expect)',
+  'Who (?:You Are|We Are|Are We)',
+  'How (?:to Apply|You\'ll)',
+  'Why (?:Join|Work)',
+  'Job (?:Description|Summary|Requirements)',
+  'Role (?:Summary|Overview|Description)',
+  'Our (?:Team|Mission|Values|Culture)',
+  'Your (?:Role|Responsibilities|Impact)',
+  'Preferred (?:Qualifications|Skills)',
+  'Required (?:Qualifications|Skills)',
+  'Nice to Have',
+  'Bonus Points',
+  'Perks',
+  'Compensation',
+]
+
+// ── Sentence-start patterns that should be on their own line ──
+const SENTENCE_STARTERS = [
+  'Deep knowledge of',
+  'Experience (?:administering|with|in|managing|building|designing|developing|deploying|working)',
+  'Familiarity with',
+  'Proficiency (?:in|with)',
+  'Strong (?:understanding|knowledge|experience|background|communication|analytical)',
+  'Ability to',
+  'Proven (?:experience|track record|ability)',
+  'Excellent (?:communication|problem|written|verbal|analytical)',
+  'Bachelor(?:\'s)?\\s*(?:degree|in)',
+  'Master(?:\'s)?\\s*(?:degree|in)',
+  '\\d+\\+?\\s*years?\\s*(?:of\\s*)?(?:experience|working)',
+  'Understanding of',
+  'Knowledge of',
+  'Comfortable (?:with|working)',
+  'Passion(?:ate)? (?:for|about)',
+  'Must (?:have|be)',
+  'You (?:will|are|have|should|must)',
+  'We (?:are|offer|provide|expect|need)',
+  'The (?:ideal|successful|role|position|team|candidate)',
+  'This (?:role|position|is)',
+  'As (?:a|an|the)',
+  'Work(?:ing)? (?:with|closely|alongside)',
+  'Design(?:ing)? (?:and|,)',
+  'Build(?:ing)? (?:and|,)',
+  'Develop(?:ing)? (?:and|,)',
+  'Lead(?:ing)? (?:the|a|and)',
+  'Manage(?:ing)? (?:the|a|and)',
+  'Collaborate(?:ing)? (?:with|closely|across)',
+  'Participate(?:ing)? in',
+  'Responsible for',
+  'Ensure(?:ing)? ',
+  'Implement(?:ing)? ',
+  'Maintain(?:ing)? ',
+  'Support(?:ing)? ',
+  'Research(?:ing)? ',
+  'Monitor(?:ing)? ',
+  'Create(?:ing)? ',
+  'Conduct(?:ing)? ',
+  'Analyze(?:ing)? ',
+  'Communicate(?:ing)? ',
+]
+
+/**
+ * Add structure to plain-text job descriptions.
+ * Inserts line breaks before section headings, numbered items, and sentence starters.
+ */
+function formatPlainTextDescription(text: string): string {
+  let result = text
+
+  // 1) Break before section headings — capture heading to avoid partial re-matches
+  //    Also handle headings at the very start of the text
+  const sectionPattern = '(?:' + SECTION_HEADINGS.join('|') + ')'
+  const sectionMidRe = new RegExp('(?<=\\S)\\s*(' + sectionPattern + ')', 'gi')
+  result = result.replace(sectionMidRe, '\n\n$1\n')
+  // Handle heading at start of string
+  const sectionStartRe = new RegExp('^(' + sectionPattern + ')(?=\\S)', 'i')
+  result = result.replace(sectionStartRe, '$1\n')
+
+  // 2) Normalize numbered items: "1.Market" → "1. Market" (add space after dot if missing)
+  result = result.replace(/(\d+\.)(?=[A-Za-z])/g, '$1 ')
+
+  // 3) Break before numbered list items glued to text
+  result = result.replace(/(?<=\S)\s*(?=\d+\.\s[A-Z0-9])/g, '\n')
+
+  // 4) Break before sentence starters — after sentence-ending punctuation (with or without space)
+  //    Exclude numbered list periods (e.g. "2. Collaborate") with negative lookbehind for digits
+  const sentenceRe = new RegExp(
+    '(?<!\\d)([.!?;)])\\s*(?=' + SENTENCE_STARTERS.join('|') + ')',
+    'g'
+  )
+  result = result.replace(sentenceRe, '$1\n')
+
+  // 5) Generic sentence boundary: period/!/? or colon directly followed by capital letter (no space)
+  //    e.g. "environment.We" → "environment.\nWe", "Strategy:Develop" → "Strategy:\nDevelop"
+  result = result.replace(/(?<!\d)([.!?:])(?=[A-Z][a-z])/g, '$1\n')
+
+  // 6) Break before common field labels glued to text
+  //    e.g. "RepresentativeLocation:" → "Representative\nLocation:"
+  result = result.replace(
+    /(?<=\S)\s*(?=(?:Location|Company|Contact|Email|Phone|Salary|Type|Category|Industry|Department)\s*:)/gi,
+    '\n'
+  )
+
+  // 7) Format "SubTitle:" patterns as bold (e.g. "Platform Administration:")
+  result = result.replace(
+    /(?:^|\n)([A-Z][\w\s&/''-]{2,40})\s*:\s*(?=\n|[A-Z])/gm,
+    '\n\n<strong>$1:</strong>\n'
+  )
+
+  // 8) Format ALL-CAPS headings as bold (e.g. "KEY RESPONSIBILITIES")
+  result = result.replace(
+    /(?:^|\n)([A-Z][A-Z\s&/'-]{3,40})(?=\n)/gm,
+    (match, heading) => {
+      if (heading === heading.toUpperCase() && heading.trim().length > 3) {
+        return '\n\n<strong>' + heading.trim() + '</strong>\n'
+      }
+      return match
+    }
+  )
+
+  // 6) Separate concatenated tech stack tags (e.g. "engineercryptodefi" → "engineer crypto defi")
+  const TECH_KW = 'engineer|developer|solidity|rust|typescript|javascript|react|node|python|go|blockchain|crypto|defi|nft|web3|smart\\s*contract|aws|docker|kubernetes|ethereum|solana|cosmos|polkadot|substrate|graphql|sql|nosql|mongodb|postgresql|redis|api|sdk|frontend|backend|fullstack|full[\\s-]stack|devops|security|audit|protocol|dapp|token|staking|bridge|oracle|layer[\\s-]?[12]|zk|zero[\\s-]knowledge|rollup|l1|l2'
+  const techConcatRe = new RegExp('\\b(' + TECH_KW + ')((?:' + TECH_KW + ')+)\\b', 'gi')
+  const techSplitRe = new RegExp(TECH_KW, 'gi')
+  result = result.replace(techConcatRe, (match, first, rest) => {
+    const kw = rest.match(techSplitRe)
+    return kw && kw.length > 0 ? first + ' ' + kw.join(' ') : match
+  })
+
+  // 7) Convert \n → <br> for HTML rendering
+  result = result
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/\n\n/g, '<br/><br/>')
+    .replace(/\n/g, '<br/>')
+
+  return result
+}
+
 /**
  * Clean a job description HTML string for display.
  * Strips source-site UI noise while preserving actual job content.
@@ -97,6 +250,12 @@ export function cleanJobDisplay(html: string | null | undefined): string {
     seenEmails.add(lower)
     return match
   })
+
+  // ── Format plain-text descriptions (few/no HTML tags) ──
+  const htmlTagCount = (cleaned.match(/<[a-z]/gi) || []).length
+  if (htmlTagCount < 5) {
+    cleaned = formatPlainTextDescription(cleaned)
+  }
 
   // Clean up whitespace
   cleaned = cleaned
