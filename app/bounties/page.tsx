@@ -333,20 +333,20 @@ export default function BountiesPage() {
         )}
 
         {/* Stats Banner */}
-        <div className="mt-12 grid grid-cols-3 gap-4 p-6 bg-a24-surface/50 border border-a24-border">
+        <div className="mt-12 grid grid-cols-3 gap-2 sm:gap-4 p-4 sm:p-6 bg-a24-surface/50 border border-a24-border">
           <div className="text-center">
-            <p className="text-2xl font-bold text-a24-text">{bounties.length}</p>
-            <p className="text-xs text-a24-muted uppercase tracking-wider">Active Bounties</p>
+            <p className="text-lg sm:text-2xl font-bold text-a24-text">{bounties.length}</p>
+            <p className="text-[10px] sm:text-xs text-a24-muted uppercase tracking-wider">Active Bounties</p>
           </div>
           <div className="text-center border-x border-a24-border">
-            <p className="text-2xl font-bold text-green-400">
-              {bounties.reduce((sum, b) => sum + b.reward_amount, 0).toLocaleString()} ETH
+            <p className="text-lg sm:text-2xl font-bold text-green-400">
+              {bounties.reduce((sum, b) => sum + b.reward_amount, 0)} ETH
             </p>
-            <p className="text-xs text-a24-muted uppercase tracking-wider">Total Rewards</p>
+            <p className="text-[10px] sm:text-xs text-a24-muted uppercase tracking-wider">Total Rewards</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-a24-text">{leaderboard.length}</p>
-            <p className="text-xs text-a24-muted uppercase tracking-wider">Active Hunters</p>
+            <p className="text-lg sm:text-2xl font-bold text-a24-text">{leaderboard.length}</p>
+            <p className="text-[10px] sm:text-xs text-a24-muted uppercase tracking-wider">Active Hunters</p>
           </div>
         </div>
       </main>

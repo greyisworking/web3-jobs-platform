@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Caveat, Press_Start_2P } from 'next/font/google'
+import { Inter, Caveat, Press_Start_2P, Space_Grotesk } from 'next/font/google'
 import { Toaster } from 'sonner'
 import WebVitals from './components/WebVitals'
 import Navigation from './components/Navigation'
@@ -8,7 +8,7 @@ import KonamiEasterEgg from './components/KonamiEasterEgg'
 import TouchGrassReminder from './components/TouchGrassReminder'
 import { Web3Provider } from './components/Web3Provider'
 import ServiceWorkerRegistration from './components/ServiceWorkerRegistration'
-import PWAInstallPrompt from './components/PWAInstallPrompt'
+// PWAInstallPrompt moved to page.tsx inline (no longer global popup)
 import ErrorBoundary from './components/ErrorBoundary'
 import Onboarding from './components/Onboarding'
 import './globals.css'
@@ -16,6 +16,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'], weight: ['200', '300', '400', '500', '700'], display: 'swap', variable: '--font-body' })
 const caveat = Caveat({ subsets: ['latin'], weight: ['400', '500', '600', '700'], display: 'swap', variable: '--font-script' })
 const pressStart = Press_Start_2P({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-pixel' })
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['400', '500', '600', '700'], display: 'swap', variable: '--font-space' })
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.wtf'),
@@ -140,7 +141,7 @@ export default function RootLayout({
         <link rel="apple-touch-startup-image" href="/splash/splash-ipad-10.svg" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2)" />
         <link rel="apple-touch-startup-image" href="/splash/splash-ipad-air.svg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" />
       </head>
-      <body className={`${inter.variable} ${caveat.variable} ${pressStart.variable} ${inter.className}`}>
+      <body className={`${inter.variable} ${caveat.variable} ${pressStart.variable} ${spaceGrotesk.variable} ${inter.className}`}>
         <Web3Provider>
           <WebVitals />
           <PageTransition />
@@ -152,7 +153,7 @@ export default function RootLayout({
           <KonamiEasterEgg />
           <TouchGrassReminder />
           <ServiceWorkerRegistration />
-          <PWAInstallPrompt />
+          {/* PWA install button now inline on home page */}
           <Toaster
             position="bottom-right"
             theme="system"

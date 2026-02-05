@@ -12,8 +12,8 @@ export default function NeunLogo({ className = '' }: NeunLogoProps) {
       href="/"
       className={`inline-flex items-center select-none ${className}`}
     >
-      <span className="text-xs font-extralight uppercase tracking-[0.5em] text-a24-text dark:text-a24-dark-text">
-        N E U N
+      <span className="font-pixel text-[11px] sm:text-xs text-a24-text dark:text-a24-dark-text tracking-wider">
+        NEUN
       </span>
     </Link>
   )

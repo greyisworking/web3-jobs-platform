@@ -13,6 +13,7 @@ import SocialProof from './components/SocialProof'
 import ScrollPixelbara from './components/ScrollPixelbara'
 import ScrollReveal from './components/ScrollReveal'
 import Footer from './components/Footer'
+import PWAInstallPrompt from './components/PWAInstallPrompt'
 
 const FEATURED_COUNT = 6
 
@@ -88,7 +89,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start"
+              className="flex justify-center md:justify-start"
             >
               <Link
                 href="/careers"
@@ -96,13 +97,6 @@ export default function Home() {
               >
                 <MiniPixelbara className="opacity-80 group-hover:opacity-100 transition-opacity" />
                 Explore Careers
-                <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
-              </Link>
-              <Link
-                href="/post-job"
-                className="group inline-flex items-center justify-center gap-3 text-[12px] uppercase tracking-[0.2em] font-bold text-emerald-600 dark:text-emerald-400 border-2 border-emerald-500/30 px-6 sm:px-8 py-4 hover:bg-emerald-500/10 hover:border-emerald-500/50 active:scale-95 transition-all duration-200 touch-target"
-              >
-                Post a Job
                 <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
             </motion.div>
@@ -194,6 +188,11 @@ export default function Home() {
           </div>
         </section>
       </ScrollReveal>
+
+      {/* PWA Install — mobile only, inline */}
+      <section className="max-w-7xl mx-auto px-6 pb-6">
+        <PWAInstallPrompt />
+      </section>
 
       <Footer />
     </div>

@@ -36,8 +36,9 @@ interface RichTextEditorProps {
 }
 
 const COLORS = [
-  '#1A1A1A', '#6B7280', '#EF4444', '#F97316', '#EAB308',
-  '#22C55E', '#3B82F6', '#8B5CF6', '#EC4899',
+  { hex: '#F8FAFC', label: 'Default' },
+  { hex: '#22C55E', label: 'NEUN Green' },
+  { hex: '#94A3B8', label: 'Gray' },
 ]
 
 export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
@@ -275,11 +276,12 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
             <div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border z-50 grid grid-cols-3 gap-1">
               {COLORS.map((color) => (
                 <button
-                  key={color}
+                  key={color.hex}
                   type="button"
-                  onClick={() => handleColor(color)}
+                  onClick={() => handleColor(color.hex)}
                   className="w-6 h-6 border border-a24-border dark:border-a24-dark-border hover:scale-110 transition-transform"
-                  style={{ backgroundColor: color }}
+                  style={{ backgroundColor: color.hex }}
+                  title={color.label}
                 />
               ))}
             </div>
@@ -421,9 +423,12 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       </div>
 
       {/* Editor */}
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} className="font-space" />
 
       <style jsx global>{`
+        .ProseMirror {
+          font-family: var(--font-space), sans-serif;
+        }
         .ProseMirror p.is-editor-empty:first-child::before {
           color: #6B7280;
           content: attr(data-placeholder);

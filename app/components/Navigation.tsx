@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, Plus, ChevronDown, User, LogOut, Settings } from 'lucide-react'
+import { Menu, X, ChevronDown, User, LogOut, Settings } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import NeunLogo from './NeunLogo'
 import { WalletConnect } from './WalletConnect'
@@ -244,17 +244,8 @@ export default function Navigation() {
           {/* Mobile: Logo */}
           <NeunLogo className="md:hidden" />
 
-          {/* Right: Post Job + Connect + Theme */}
+          {/* Right: Connect + Theme */}
           <div className="hidden md:flex items-center gap-3">
-            {/* Post a Job CTA - Green button */}
-            <Link
-              href="/post-job"
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-[10px] uppercase tracking-wider font-medium bg-neun-success text-white hover:shadow-green-glow transition-all"
-            >
-              <Plus className="w-3 h-3" />
-              Post Job
-            </Link>
-
             {/* Connect / Profile dropdown */}
             <ProfileDropdown />
 
@@ -304,15 +295,7 @@ export default function Navigation() {
                 onClose={() => setMobileMenuOpen(false)}
               />
 
-              <div className="pt-4 pb-2 flex flex-col gap-3">
-                <Link
-                  href="/post-job"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-[10px] uppercase tracking-wider font-medium bg-neun-success text-white"
-                >
-                  <Plus className="w-3 h-3" />
-                  Post Job
-                </Link>
+              <div className="pt-4 pb-2">
                 <div className="py-2">
                   <WalletConnect />
                 </div>

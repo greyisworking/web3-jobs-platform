@@ -98,10 +98,9 @@ export default function ThemeToggle() {
     <button
       onClick={toggle}
       aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-a24-surface dark:hover:bg-a24-dark-surface hover:scale-110 active:scale-95 transition-all touch-target-44"
+      className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-a24-surface dark:hover:bg-a24-dark-surface hover:scale-110 active:scale-95 transition-all touch-target-44 flex-shrink-0"
     >
-      {/* Show what you'll switch TO: Sun for dark mode (switch to light), Moon for light mode (switch to dark) */}
-      <div className="w-7 h-7 flex items-center justify-center">
+      <div className="w-6 h-6 flex items-center justify-center">
         {dark ? <PixelSun /> : <PixelMoon />}
       </div>
     </button>

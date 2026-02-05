@@ -1,18 +1,46 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import Footer from '../components/Footer'
+
+// Detect in-app browsers (KakaoTalk, Instagram, Facebook, etc.)
+function isInAppBrowser(): boolean {
+  if (typeof window === 'undefined') return false
+  const ua = navigator.userAgent || ''
+  return /KAKAOTALK|FBAN|FBAV|Instagram|Line|NAVER|Daum|SamsungBrowser.*CrossApp/i.test(ua)
+}
+
+function openInExternalBrowser(url: string) {
+  // KakaoTalk: use kakaotalk://web/openExternal
+  const ua = navigator.userAgent || ''
+  if (/KAKAOTALK/i.test(ua)) {
+    window.location.href = `kakaotalk://web/openExternal?url=${encodeURIComponent(url)}`
+    return
+  }
+  // Generic fallback: try intent scheme for Android
+  if (/Android/i.test(ua)) {
+    window.location.href = `intent://${url.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`
+    return
+  }
+  // iOS Safari fallback
+  window.open(url, '_blank')
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [inApp, setInApp] = useState(false)
   const router = useRouter()
   const supabase = createSupabaseBrowserClient()
+
+  useEffect(() => {
+    setInApp(isInAppBrowser())
+  }, [])
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -125,6 +153,24 @@ export default function LoginPage() {
           </span>
           <div className="flex-1 h-px bg-a24-border dark:bg-a24-dark-border" />
         </div>
+
+        {/* In-app browser warning */}
+        {inApp && (
+          <div className="p-4 bg-amber-500/10 border border-amber-500/30 mb-4">
+            <p className="text-xs font-medium text-amber-400 mb-2">
+              In-app browser detected
+            </p>
+            <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted mb-3">
+              Google login doesn&apos;t work in KakaoTalk, Instagram, or other in-app browsers. Please open in your default browser.
+            </p>
+            <button
+              onClick={() => openInExternalBrowser(window.location.href)}
+              className="w-full py-2.5 text-[11px] uppercase tracking-[0.2em] font-medium bg-amber-500 text-black hover:bg-amber-400 transition-colors"
+            >
+              Open in Browser
+            </button>
+          </div>
+        )}
 
         {/* Google OAuth */}
         <button
