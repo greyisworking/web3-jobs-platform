@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import type { Job } from '@/types/job'
 import { trackEvent } from '@/lib/analytics'
 import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
+import { cleanJobDisplayWithSections } from '@/lib/clean-job-display'
 import BookmarkButton from '@/app/components/BookmarkButton'
 import GlowBadge from '@/app/components/GlowBadge'
 import {
@@ -211,7 +212,11 @@ export default function JobDetailPageClient({ job }: JobDetailPageClientProps) {
             </h3>
             <div
               className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
-              dangerouslySetInnerHTML={{ __html: job.description }}
+              dangerouslySetInnerHTML={{ __html: cleanJobDisplayWithSections(job.description, {
+                requirements: !!job.requirements,
+                responsibilities: !!job.responsibilities,
+                benefits: !!job.benefits,
+              }) }}
             />
           </div>
         )}
