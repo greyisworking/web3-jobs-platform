@@ -9,6 +9,7 @@ import { useAccount, useEnsName } from 'wagmi'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import type { User } from '@supabase/supabase-js'
 import RichTextEditor from '@/app/components/RichTextEditor'
+import ThumbnailUpload from '@/app/components/ThumbnailUpload'
 import Pixelbara from '@/app/components/Pixelbara'
 import Blockies, { truncateAddress } from '@/app/components/Blockies'
 import { WalletConnect } from '@/app/components/WalletConnect'
@@ -342,24 +343,13 @@ export default function ArticleWritePage() {
 
             {/* Cover Image */}
             <div>
-              <input
-                type="url"
+              <label className="block text-xs uppercase tracking-wider text-a24-muted mb-2">
+                Cover Image (optional)
+              </label>
+              <ThumbnailUpload
                 value={form.cover_image}
-                onChange={(e) => setForm((prev) => ({ ...prev, cover_image: e.target.value }))}
-                placeholder="Cover image URL (optional)"
-                className="w-full text-sm bg-transparent border border-a24-border p-3 outline-none text-a24-text placeholder:text-gray-600 focus:border-purple-500 transition-colors"
+                onChange={(url) => setForm((prev) => ({ ...prev, cover_image: url }))}
               />
-              {form.cover_image && (
-                <div className="mt-2 aspect-video bg-a24-surface overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={form.cover_image}
-                    alt="Cover preview"
-                    className="w-full h-full object-cover"
-                    onError={(e) => (e.currentTarget.style.display = 'none')}
-                  />
-                </div>
-              )}
             </div>
 
             {/* Tags */}
