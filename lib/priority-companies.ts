@@ -4,7 +4,7 @@
  * Korean + Global coverage from top VC portfolios
  */
 
-export type CareerPlatform = 'lever' | 'greenhouse' | 'ashby' | 'wanted' | 'notion' | null
+export type CareerPlatform = 'lever' | 'greenhouse' | 'ashby' | null
 
 export interface PriorityCompany {
   name: string;

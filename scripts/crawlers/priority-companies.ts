@@ -7,8 +7,6 @@ import {
   crawlLeverJobs,
   crawlGreenhouseJobs,
   crawlAshbyJobs,
-  crawlWantedJobs,
-  crawlNotionJobs,
 } from './platforms'
 import type { PlatformJob } from './platforms'
 
@@ -28,12 +26,6 @@ function extractSlug(careerUrl: string, platform: CareerPlatform): string {
     case 'ashby':
       // https://api.ashbyhq.com/posting-api/job-board/{org} → org
       return url.pathname.split('/').filter(Boolean).pop() || ''
-    case 'wanted':
-      // https://www.wanted.co.kr/company/{id} → id
-      return url.pathname.split('/').filter(Boolean).pop() || ''
-    case 'notion':
-      // Return full URL for Notion pages
-      return careerUrl
     default:
       return ''
   }
@@ -54,10 +46,6 @@ async function crawlCompanyJobs(
       return crawlGreenhouseJobs(slug, companyName)
     case 'ashby':
       return crawlAshbyJobs(slug, companyName)
-    case 'wanted':
-      return crawlWantedJobs(slug, companyName)
-    case 'notion':
-      return crawlNotionJobs(slug, companyName)
     default:
       return []
   }
