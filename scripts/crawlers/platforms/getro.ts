@@ -1,7 +1,10 @@
+import axios from 'axios'
 import type { CheerioAPI } from 'cheerio'
 import { supabase } from '../../../lib/supabase-script'
 import { validateAndSaveJob } from '../../../lib/validations/validate-job'
 import { fetchHTML, delay, detectExperienceLevel, detectRemoteType } from '../../utils'
+
+const GETRO_SEARCH_API = 'https://api.getro.com/api/v2'
 
 export interface GetroConfig {
   baseUrl: string
@@ -10,14 +13,47 @@ export interface GetroConfig {
   tags: string[]
   defaultCompany: string
   emoji: string
+  networkId: string
   perPage?: number
   pageDelay?: number
 }
 
+// ── Getro Search API (primary) ──────────────────────────────────────
+
+interface GetroSearchResponse {
+  results: {
+    jobs: any[]
+    count: number
+  }
+}
+
 /**
- * Parse __NEXT_DATA__ JSON from a Cheerio-loaded Getro page.
- * Returns the parsed object or null if not found / invalid.
+ * Fetch a page of jobs from the Getro search API.
+ * Endpoint: POST /collections/{networkId}/search/jobs
+ * Supports hitsPerPage up to 50, 0-indexed pages.
  */
+async function fetchSearchPage(
+  networkId: string,
+  page: number,
+  hitsPerPage: number,
+): Promise<{ jobs: any[]; total: number } | null> {
+  try {
+    const { data } = await axios.post<GetroSearchResponse>(
+      `${GETRO_SEARCH_API}/collections/${networkId}/search/jobs`,
+      { hits_per_page: hitsPerPage, page, filters: '', query: '' },
+      {
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        timeout: 15000,
+      },
+    )
+    return { jobs: data.results.jobs || [], total: data.results.count }
+  } catch {
+    return null
+  }
+}
+
+// ── SSR __NEXT_DATA__ fallback ──────────────────────────────────────
+
 function parseNextData($: CheerioAPI): any | null {
   const script = $('script#__NEXT_DATA__').html()
   if (!script) return null
@@ -28,12 +64,7 @@ function parseNextData($: CheerioAPI): any | null {
   }
 }
 
-/**
- * Extract the jobs array from a parsed __NEXT_DATA__ object.
- * Searches multiple Redux state paths common across Getro boards.
- * Falls back to link extraction from the DOM.
- */
-function extractJobs(nextData: any, $: CheerioAPI, config: GetroConfig): any[] {
+function extractJobsFromNextData(nextData: any, $: CheerioAPI, config: GetroConfig): any[] {
   const pageProps = nextData?.props?.pageProps || {}
   let jobsArray: any[] = []
 
@@ -68,9 +99,7 @@ function extractJobs(nextData: any, $: CheerioAPI, config: GetroConfig): any[] {
     }
   }
 
-  // Fallback: extract jobs from link hrefs
   if (jobsArray.length === 0) {
-    console.log('⚠️  No jobs found in __NEXT_DATA__, falling back to link extraction')
     $('a[href*="/companies/"][href*="/jobs/"]').each((_, el) => {
       const href = $(el).attr('href') || ''
       const title = $(el).text().trim()
@@ -87,20 +116,25 @@ function extractJobs(nextData: any, $: CheerioAPI, config: GetroConfig): any[] {
   return jobsArray
 }
 
-/**
- * Read total job count from Getro initialState.
- */
-function getTotalFromNextData(nextData: any): number | null {
-  const total = nextData?.props?.pageProps?.initialState?.jobs?.total
-  return typeof total === 'number' ? total : null
+// ── Normalize search API fields to match SSR field names ────────────
+
+function normalizeSearchJob(raw: any): any {
+  return {
+    ...raw,
+    // search API uses snake_case; map to the field names the save logic expects
+    compensationAmountMinCents: raw.compensation_amount_min_cents,
+    compensationAmountMaxCents: raw.compensation_amount_max_cents,
+    compensationCurrency: raw.compensation_currency,
+    searchableLocations: raw.searchable_locations,
+    location_names: raw.locations?.map((l: any) => typeof l === 'string' ? l : l.name).filter(Boolean),
+    workMode: raw.work_mode,
+    company_name: raw.organization?.name,
+    created_at: raw.created_at,
+  }
 }
 
-/**
- * Crawl a Getro-powered job board with full pagination.
- *
- * Fetches all pages using `?page=N&per_page=M` parameters, parses
- * __NEXT_DATA__ from each response, and saves jobs via validateAndSaveJob.
- */
+// ── Main crawl function ─────────────────────────────────────────────
+
 export async function crawlGetroBoard(config: GetroConfig): Promise<number> {
   const {
     baseUrl,
@@ -109,65 +143,74 @@ export async function crawlGetroBoard(config: GetroConfig): Promise<number> {
     tags: defaultTags,
     defaultCompany,
     emoji,
+    networkId,
     perPage = 50,
     pageDelay = 2000,
   } = config
 
   console.log(`${emoji} Starting ${displayName} crawler...`)
 
-  // --- Page 1 ---
-  const firstPageUrl = `${baseUrl}/jobs?page=1&per_page=${perPage}`
-  const $ = await fetchHTML(firstPageUrl)
+  // ── Try the Getro search API first (returns true per_page) ──
+  let allJobs: any[] = []
+  let usedSearchApi = false
 
-  if (!$) {
-    console.error(`❌ Failed to fetch ${displayName}`)
-    return 0
+  const firstPage = await fetchSearchPage(networkId, 0, perPage)
+  if (firstPage && firstPage.jobs.length > 0) {
+    usedSearchApi = true
+    allJobs = firstPage.jobs.map(normalizeSearchJob)
+    const total = firstPage.total
+    const totalPages = Math.ceil(total / perPage)
+
+    console.log(`📦 Page 1: ${firstPage.jobs.length} jobs (total: ${total}, pages: ${totalPages})`)
+
+    for (let page = 1; page < totalPages; page++) {
+      await delay(pageDelay)
+      const result = await fetchSearchPage(networkId, page, perPage)
+      if (!result || result.jobs.length === 0) {
+        console.log(`📭 Page ${page + 1} empty, stopping pagination`)
+        break
+      }
+      allJobs = allJobs.concat(result.jobs.map(normalizeSearchJob))
+      console.log(`📦 Page ${page + 1}: ${result.jobs.length} jobs (running total: ${allJobs.length})`)
+    }
   }
 
-  const nextData = parseNextData($)
-  if (!nextData) {
-    console.error(`❌ Could not find __NEXT_DATA__ on ${displayName} (Getro platform)`)
-    return 0
-  }
+  // ── Fallback: SSR __NEXT_DATA__ (no per_page control, ~20/page) ──
+  if (!usedSearchApi) {
+    console.log('⚠️  Search API unavailable, falling back to SSR pagination')
+    const $ = await fetchHTML(`${baseUrl}/jobs?page=1`)
+    if (!$) {
+      console.error(`❌ Failed to fetch ${displayName}`)
+      return 0
+    }
+    const nextData = parseNextData($)
+    if (!nextData) {
+      console.error(`❌ Could not find __NEXT_DATA__ on ${displayName}`)
+      return 0
+    }
+    allJobs = extractJobsFromNextData(nextData, $, config)
+    const total = nextData?.props?.pageProps?.initialState?.jobs?.total
+    const ssrPerPage = allJobs.length || 20
+    const totalPages = total ? Math.ceil(total / ssrPerPage) : 1
 
-  let allJobs = extractJobs(nextData, $, config)
-  const total = getTotalFromNextData(nextData)
-  const totalPages = total ? Math.ceil(total / perPage) : 1
+    console.log(`📦 Page 1 (SSR): ${allJobs.length} jobs (total: ${total ?? 'unknown'}, pages: ${totalPages})`)
 
-  console.log(`📦 Page 1: ${allJobs.length} jobs (total: ${total ?? 'unknown'}, pages: ${totalPages})`)
-
-  // --- Remaining pages ---
-  if (totalPages > 1) {
     for (let page = 2; page <= totalPages; page++) {
       await delay(pageDelay)
-
-      const pageUrl = `${baseUrl}/jobs?page=${page}&per_page=${perPage}`
-      const page$ = await fetchHTML(pageUrl)
-      if (!page$) {
-        console.warn(`⚠️  Failed to fetch page ${page}, stopping pagination`)
-        break
-      }
-
+      const page$ = await fetchHTML(`${baseUrl}/jobs?page=${page}`)
+      if (!page$) break
       const pageNextData = parseNextData(page$)
-      if (!pageNextData) {
-        console.warn(`⚠️  No __NEXT_DATA__ on page ${page}, stopping pagination`)
-        break
-      }
-
-      const pageJobs = extractJobs(pageNextData, page$, config)
-      if (pageJobs.length === 0) {
-        console.log(`📭 Page ${page} returned 0 jobs, stopping pagination`)
-        break
-      }
-
+      if (!pageNextData) break
+      const pageJobs = extractJobsFromNextData(pageNextData, page$, config)
+      if (pageJobs.length === 0) break
       allJobs = allJobs.concat(pageJobs)
-      console.log(`📦 Page ${page}: ${pageJobs.length} jobs (running total: ${allJobs.length})`)
+      console.log(`📦 Page ${page} (SSR): ${pageJobs.length} jobs (running total: ${allJobs.length})`)
     }
   }
 
   console.log(`📦 Found ${allJobs.length} total jobs from ${displayName}`)
 
-  // --- Save jobs ---
+  // ── Save jobs ──
   let savedCount = 0
   for (const job of allJobs) {
     try {
@@ -201,7 +244,6 @@ export async function crawlGetroBoard(config: GetroConfig): Promise<number> {
         location = 'Remote'
       }
 
-      // Getro may store salary in cents
       let salary: string | undefined
       let salaryMin = null
       let salaryMax = null
@@ -236,7 +278,7 @@ export async function crawlGetroBoard(config: GetroConfig): Promise<number> {
       const description = job.description || job.descriptionHtml || job.content || null
       const experienceLevel = description ? detectExperienceLevel(description) : null
       const remoteType = job.workMode === 'remote' || job.isRemote ? 'Remote' : detectRemoteType(location)
-      const companyLogo = job.company?.logo || job.organization?.logo || job.logo || null
+      const companyLogo = job.company?.logo || job.organization?.logo || job.organization?.logoUrl || job.logo || null
       const companyWebsite = job.company?.website || job.organization?.website || null
 
       const saved = await validateAndSaveJob(

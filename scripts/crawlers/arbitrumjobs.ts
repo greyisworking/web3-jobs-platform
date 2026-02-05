@@ -8,6 +8,7 @@ export async function crawlArbitrumJobs(): Promise<number> {
     tags: ['Arbitrum', 'Layer 2', 'Ethereum'],
     defaultCompany: 'Arbitrum Ecosystem',
     emoji: '🔵',
+    networkId: '4184',
   })
 }
 

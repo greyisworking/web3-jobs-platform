@@ -8,6 +8,7 @@ export async function crawlAvalancheJobs(): Promise<number> {
     tags: ['Avalanche', 'AVAX', 'Layer 1'],
     defaultCompany: 'Avalanche Ecosystem',
     emoji: '🏔️',
+    networkId: '10223',
   })
 }
 

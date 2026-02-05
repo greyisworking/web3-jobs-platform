@@ -8,5 +8,6 @@ export async function crawlSolanaJobs(): Promise<number> {
     tags: ['Solana', 'Blockchain', 'Layer 1'],
     defaultCompany: 'Solana Foundation',
     emoji: '🚀',
+    networkId: '858',
   })
 }

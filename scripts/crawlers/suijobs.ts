@@ -8,5 +8,6 @@ export async function crawlSuiJobs(): Promise<number> {
     tags: ['Sui', 'Blockchain', 'Layer 1'],
     defaultCompany: 'Sui Foundation',
     emoji: '🚀',
+    networkId: '3425',
   })
 }
