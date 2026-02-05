@@ -46,6 +46,12 @@ const NOISE_PATTERNS: RegExp[] = [
   // ── Salary amount lines from profile recommendations ──
   /^\s*\$[\d,]+k?\/year\s*$/gm,
 
+  // ── "Tech Stack" heading and everything after (already shown as tags) ──
+  /(?:^|\n)\s*(?:#{1,3}\s*)?Tech\s*Stack\s*:?\s*\n[\s\S]*$/gi,
+
+  // ── Duplicate email addresses (real emails like user@example.com) ──
+  // Keeps first occurrence, handled separately in cleanJobDisplay()
+
   // ── Orphaned UI labels ──
   /^\s*(?:Apply|View|Details|Read More|Load More|Show More|See All|Close)\s*$/gim,
 
@@ -81,6 +87,16 @@ export function cleanJobDisplay(html: string | null | undefined): string {
   for (const pattern of NOISE_PATTERNS) {
     cleaned = cleaned.replace(pattern, '')
   }
+
+  // Deduplicate email addresses — keep only the first occurrence
+  const emailRe = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g
+  const seenEmails = new Set<string>()
+  cleaned = cleaned.replace(emailRe, (match) => {
+    const lower = match.toLowerCase()
+    if (seenEmails.has(lower)) return ''
+    seenEmails.add(lower)
+    return match
+  })
 
   // Clean up whitespace
   cleaned = cleaned

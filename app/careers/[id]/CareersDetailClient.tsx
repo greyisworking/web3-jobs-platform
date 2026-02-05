@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import type { Job } from '@/types/job'
 import { trackEvent } from '@/lib/analytics'
 import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
-import { cleanJobDisplayWithSections } from '@/lib/clean-job-display'
+import { cleanJobDisplay, cleanJobDisplayWithSections } from '@/lib/clean-job-display'
 import BookmarkButton from '@/app/components/BookmarkButton'
 import GlowBadge from '@/app/components/GlowBadge'
 import { TrustCheckList, SimpleTrustCheckList, hasVCBacking } from '@/app/components/TrustBadge'
@@ -341,7 +341,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                 <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
                 <div
                   className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: job.requirements }}
+                  dangerouslySetInnerHTML={{ __html: cleanJobDisplay(job.requirements) }}
                 />
               </div>
             )}
@@ -355,7 +355,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                 <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
                 <div
                   className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: job.responsibilities }}
+                  dangerouslySetInnerHTML={{ __html: cleanJobDisplay(job.responsibilities) }}
                 />
               </div>
             )}
@@ -369,7 +369,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                 <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
                 <div
                   className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: job.benefits }}
+                  dangerouslySetInnerHTML={{ __html: cleanJobDisplay(job.benefits) }}
                 />
               </div>
             )}
