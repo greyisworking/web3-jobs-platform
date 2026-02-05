@@ -120,7 +120,7 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'San Francisco, USA',
     hasToken: false,
     stage: 'Public',
-    careerUrl: 'https://www.coinbase.com/careers/positions',
+    careerUrl: null,
     careerPlatform: null,
   },
   {
@@ -132,7 +132,7 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Global / Dubai',
     hasToken: true,
     stage: 'Established',
-    careerUrl: 'https://www.binance.com/en/careers',
+    careerUrl: null,
     careerPlatform: null,
   },
   {
@@ -276,7 +276,7 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'San Francisco, USA',
     hasToken: true,
     stage: 'Established',
-    careerUrl: 'https://jobs.solana.com/companies/solana-labs',
+    careerUrl: 'https://jobs.solana.com',
     careerPlatform: null,
   },
   {
@@ -596,7 +596,7 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Global / Dubai',
     hasToken: true,
     stage: 'Established',
-    careerUrl: 'https://www.okx.com/careers',
+    careerUrl: 'https://www.okx.com/join-us',
     careerPlatform: null,
   },
   {
@@ -608,7 +608,7 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Singapore',
     hasToken: true,
     stage: 'Established',
-    careerUrl: 'https://crypto.com/careers',
+    careerUrl: null,
     careerPlatform: null,
   },
   {
@@ -800,7 +800,7 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Paris, France',
     hasToken: false,
     stage: 'Series C',
-    careerUrl: 'https://www.ledger.com/careers',
+    careerUrl: 'https://careers.ledger.com/jobs/search',
     careerPlatform: null,
   },
   {
