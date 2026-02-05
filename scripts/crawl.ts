@@ -10,6 +10,8 @@ import { crawlRocketPunch } from './crawlers/rocketpunch'
 import { crawlSuiJobs } from './crawlers/suijobs'
 import { crawlSolanaJobs } from './crawlers/solanajobs'
 import { crawlEthereumJobs } from './crawlers/ethereum'
+import { crawlAvalancheJobs } from './crawlers/avalanchejobs'
+import { crawlArbitrumJobs } from './crawlers/arbitrumjobs'
 import axios from 'axios'
 
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || ''
@@ -56,7 +58,7 @@ async function main() {
   // 시작 알림
   await sendDiscordNotification(
     '🚀 Starting Crawl',
-    'GitHub Actions crawler started - collecting jobs from 11 sources',
+    'GitHub Actions crawler started - collecting jobs from 13 sources',
     0x3498db
   )
 
@@ -75,6 +77,8 @@ async function main() {
     { name: 'jobs.sui.io', fn: crawlSuiJobs },
     { name: 'jobs.solana.com', fn: crawlSolanaJobs },
     { name: 'ethereum.foundation', fn: crawlEthereumJobs },
+    { name: 'jobs.avax.network', fn: crawlAvalancheJobs },
+    { name: 'jobs.arbitrum.io', fn: crawlArbitrumJobs },
   ]
 
   for (const crawler of crawlers) {
