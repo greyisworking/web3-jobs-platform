@@ -6,6 +6,28 @@ import { fetchHTML, delay, detectExperienceLevel, detectRemoteType } from '../..
 
 const GETRO_SEARCH_API = 'https://api.getro.com/api/v2'
 
+/**
+ * Fetch job description from Getro job detail page.
+ * The detail page has __NEXT_DATA__ with the full job object including description.
+ */
+async function fetchJobDescription(jobUrl: string): Promise<string | null> {
+  try {
+    const $ = await fetchHTML(jobUrl)
+    if (!$) return null
+
+    const script = $('script#__NEXT_DATA__').html()
+    if (!script) return null
+
+    const nextData = JSON.parse(script)
+    const job = nextData?.props?.pageProps?.job
+    if (!job) return null
+
+    return job.description || job.descriptionHtml || job.content || null
+  } catch {
+    return null
+  }
+}
+
 export interface GetroConfig {
   baseUrl: string
   source: string
@@ -16,6 +38,8 @@ export interface GetroConfig {
   networkId: string
   perPage?: number
   pageDelay?: number
+  fetchDescriptions?: boolean  // Whether to fetch descriptions from detail pages (slower)
+  maxDescriptionFetches?: number  // Max number of descriptions to fetch per crawl
 }
 
 // ── Getro Search API (primary) ──────────────────────────────────────
@@ -146,7 +170,11 @@ export async function crawlGetroBoard(config: GetroConfig): Promise<number> {
     networkId,
     perPage = 50,
     pageDelay = 2000,
+    fetchDescriptions = false,  // Disabled by default - most jobs link to external pages (Greenhouse/Lever)
+    maxDescriptionFetches = 30,  // Limit to avoid very long crawl times
   } = config
+
+  let descriptionsFetched = 0
 
   console.log(`${emoji} Starting ${displayName} crawler...`)
 
@@ -275,7 +303,27 @@ export async function crawlGetroBoard(config: GetroConfig): Promise<number> {
         }
       }
 
-      const description = job.description || job.descriptionHtml || job.content || null
+      let description = job.description || job.descriptionHtml || job.content || null
+
+      // Fetch description from Getro detail page if not available
+      // Use slug/id to construct Getro page URL, not the external job URL
+      if (!description && fetchDescriptions && descriptionsFetched < maxDescriptionFetches) {
+        const getroDetailUrl = job.slug
+          ? `${baseUrl}/jobs/${job.slug}`
+          : job.id
+          ? `${baseUrl}/jobs/${job.id}`
+          : null
+
+        if (getroDetailUrl) {
+          description = await fetchJobDescription(getroDetailUrl)
+          descriptionsFetched++
+          if (description) {
+            console.log(`    📄 Got description for "${title}" (${description.length} chars)`)
+          }
+          await delay(300)  // Rate limit for detail page fetches
+        }
+      }
+
       const experienceLevel = description ? detectExperienceLevel(description) : null
       const remoteType = job.workMode === 'remote' || job.isRemote ? 'Remote' : detectRemoteType(location)
       const companyLogo = job.company?.logo || job.organization?.logo || job.organization?.logoUrl || job.logo || null
