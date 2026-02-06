@@ -32,34 +32,38 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
     return (
       <div
         className={`prose prose-sm dark:prose-invert max-w-none ${className}`}
+        style={{ fontFamily: 'inherit' }}
         dangerouslySetInnerHTML={{ __html: content }}
       />
     )
   }
 
   return (
-    <div className={`prose prose-sm dark:prose-invert max-w-none ${className}`}>
+    <div
+      className={`prose prose-sm dark:prose-invert max-w-none ${className}`}
+      style={{ fontFamily: 'inherit' }}
+    >
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        // Custom heading styles
+        // Custom heading styles - h2 uses NEUN green for section headings
         h1: ({ children }) => (
-          <h1 className="text-xl font-bold text-a24-text dark:text-a24-dark-text mt-8 mb-4 first:mt-0">
+          <h1 className="text-xl font-bold text-neun-primary mt-8 mb-4 first:mt-0">
             {children}
           </h1>
         ),
         h2: ({ children }) => (
-          <h2 className="text-lg font-semibold text-a24-text dark:text-a24-dark-text mt-6 mb-3 first:mt-0 pb-2 border-b border-a24-border/30 dark:border-a24-dark-border/30">
+          <h2 className="text-base font-semibold text-neun-primary mt-8 mb-3 first:mt-0 pb-2 border-b border-neun-primary/20">
             {children}
           </h2>
         ),
         h3: ({ children }) => (
-          <h3 className="text-base font-semibold text-a24-text dark:text-a24-dark-text mt-5 mb-2">
+          <h3 className="text-sm font-semibold text-neun-primary/80 mt-5 mb-2">
             {children}
           </h3>
         ),
         h4: ({ children }) => (
-          <h4 className="text-sm font-semibold text-a24-text dark:text-a24-dark-text mt-4 mb-2">
+          <h4 className="text-sm font-medium text-a24-text dark:text-a24-dark-text mt-4 mb-2">
             {children}
           </h4>
         ),

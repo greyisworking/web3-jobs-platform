@@ -159,21 +159,23 @@ const SECTION_PATTERNS: Array<{
 // ============================================================================
 
 const SPAM_PATTERNS = [
-  // Base64 spam codes
-  /\b[A-Za-z0-9+\/]{30,}={0,2}\b/g,
-  // Spam prevention phrases
+  // Full spam sentences with keyword mentions (must come first)
+  /when\s+applying,?\s*(?:please\s+)?mention\s+(?:the\s+)?word\s+\w+\s+to\s+show\s+you\s+read\s+the\s+job\s+post\s*(?:completely)?\.?\s*this\s+is\s+a\s+beta\s+feature\s+to\s+avoid\s+spam\s+applicants\.?\s*companies\s+can\s+search\s+these\s+words\s+to\s+find\s+applicants\s+that\s+read\s+this\s+and\s+to\s+see\s+they\s+are\s+human\.?/gi,
+  // Spam sentences (individual)
   /when\s+applying[^.]*mention[^.]*word[^.]*\./gi,
   /mention\s+(?:the\s+)?word\s+[A-Z]+[^.]*\./gi,
   /this\s+is\s+a\s+beta\s+feature\s+to\s+avoid\s+spam[^.]*\./gi,
   /to\s+show\s+you\s+read\s+the\s+job\s+post[^.]*\./gi,
   /please\s+mention\s+[A-Z]+\s+in\s+your\s+application[^.]*\./gi,
   /include\s+the\s+word\s+[A-Z]+[^.]*\./gi,
-  // "Companies can search these words" spam
   /companies\s+can\s+search\s+these\s+words[^.]*/gi,
   /to\s+find\s+applicants\s+that\s+read\s+this[^.]*/gi,
   /to\s+see\s+they\s+are\s+human[^.]*/gi,
-  // Standalone spam keywords in context
-  /[^.]*\b(CANDYSHOP|YELLOWBIRD|PIZZATIME|MOONBEAM|STARLIGHT)\b[^.]*/gi,
+  // Spam keywords in sentences
+  /[^.]*\b(CANDYSHOP|YELLOWBIRD|PIZZATIME|MOONBEAM|STARLIGHT|BLUEMOON|GREENLIGHT|ROCKETSHIP)\b[^.]*/gi,
+  // Base64 spam codes (various lengths)
+  /\b[A-Za-z0-9+\/]{20,}={0,2}\b/g,
+  /\bR[A-Za-z0-9]{8,}:/g,  // Patterns like RMjAwMToy...
 ]
 
 const BOILERPLATE_LINE_PATTERNS = [
@@ -258,55 +260,202 @@ export function summarizeJob(
 // Text Cleaning
 // ============================================================================
 
+/**
+ * Clean raw description for display in "View raw" mode.
+ * Decodes HTML entities and strips all HTML tags, returning plain text.
+ */
+export function cleanRawDescription(text: string): string {
+  if (!text) return ''
+
+  // Step 1: Robust HTML Entity Decoding (handle double/triple encoded)
+  let prevText = ''
+  let iterations = 0
+  while (text !== prevText && iterations < 5) {
+    prevText = text
+    text = decode(text)
+    iterations++
+  }
+
+  // Additional manual entity cleanup
+  text = text
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&mdash;/gi, '—')
+    .replace(/&ndash;/gi, '–')
+    .replace(/&bull;/gi, '•')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/'/g, "'")
+    .replace(/'/g, "'")
+    .replace(/"/g, '"')
+    .replace(/"/g, '"')
+
+  // Step 2: Convert HTML to plain text with proper line breaks
+  text = text
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<p[^>]*>/gi, '')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<div[^>]*>/gi, '')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '• ')
+    .replace(/<\/ul>/gi, '\n')
+    .replace(/<ul[^>]*>/gi, '\n')
+    .replace(/<\/ol>/gi, '\n')
+    .replace(/<ol[^>]*>/gi, '\n')
+    .replace(/<\/h[1-6]>/gi, '\n\n')
+    .replace(/<h[1-6][^>]*>/gi, '\n')
+    .replace(/<strong[^>]*>/gi, '')
+    .replace(/<\/strong>/gi, '')
+    .replace(/<b[^>]*>/gi, '')
+    .replace(/<\/b>/gi, '')
+    .replace(/<em[^>]*>/gi, '')
+    .replace(/<\/em>/gi, '')
+    .replace(/<i[^>]*>/gi, '')
+    .replace(/<\/i>/gi, '')
+    .replace(/<[^>]+>/g, '')  // Remove remaining HTML tags
+
+  // Step 3: Handle broken/malformed HTML tags
+  text = text
+    // Broken closing tags: /p> /div> /strong> etc.
+    .replace(/\/(?:strong|b|em|i|u|span|a)>\s*/gi, '')
+    .replace(/\/(?:p|div|br|hr)>\s*/gi, '\n')
+    .replace(/\/li>\s*/gi, '\n')
+    .replace(/\/(?:ul|ol)>\s*/gi, '\n')
+    .replace(/\/h[1-6]>\s*/gi, '\n\n')
+    // Broken opening tags without <: br> p> div> li> strong> etc.
+    .replace(/\bbr>\s*/gi, '\n')
+    .replace(/\bp>\s*/gi, '\n')
+    .replace(/\bdiv>\s*/gi, '\n')
+    .replace(/\bli>\s*/gi, '• ')
+    .replace(/\b(?:ul|ol)>\s*/gi, '\n')
+    .replace(/\bh[1-6]>\s*/gi, '\n')
+    .replace(/\b(?:strong|b|em|i|u|span|a)>\s*/gi, '')
+    // Catch-all for any remaining broken tags
+    .replace(/\/[a-z][a-z0-9]*>\s*/gi, '')
+    .replace(/\b[a-z][a-z0-9]*>\s*/gi, '')
+
+  // Step 4: Remove spam/boilerplate patterns
+  for (const pattern of SPAM_PATTERNS) {
+    text = text.replace(pattern, '')
+  }
+
+  // Step 5: Normalize whitespace
+  text = text
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/^[ \t]+|[ \t]+$/gm, '')
+    .trim()
+
+  return text
+}
+
 function cleanText(text: string): string {
   if (!text) return ''
 
-  // Pre-process: Insert line breaks around common section headers
-  // Many job descriptions have no newlines, so we need to split them
+  // ============================================================================
+  // Step 0: Robust HTML Entity Decoding (handle double/triple encoded)
+  // ============================================================================
+  // Some scraped content has entities like &amp;gt; which needs multiple decode passes
+  let prevText = ''
+  let iterations = 0
+  while (text !== prevText && iterations < 5) {
+    prevText = text
+    text = decode(text)
+    iterations++
+  }
 
-  // Step 1: Insert newlines AFTER section header colons (Header: Content -> Header:\nContent)
-  // Use a single comprehensive regex to avoid multiple passes causing overlapping matches
-  // Match common section headers followed by colon
+  // Additional manual entity cleanup
+  text = text
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&mdash;/gi, '—')
+    .replace(/&ndash;/gi, '–')
+    .replace(/&bull;/gi, '•')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/'/g, "'")
+    .replace(/'/g, "'")
+    .replace(/"/g, '"')
+    .replace(/"/g, '"')
+
+  // ============================================================================
+  // Step 1: Convert HTML structure to Markdown-like format
+  // ============================================================================
+  // First handle proper HTML tags
+  text = text
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<p[^>]*>/gi, '\n')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<div[^>]*>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '- ')
+    .replace(/<\/ul>/gi, '\n')
+    .replace(/<ul[^>]*>/gi, '\n')
+    .replace(/<\/ol>/gi, '\n')
+    .replace(/<ol[^>]*>/gi, '\n')
+    .replace(/<\/h[1-6]>/gi, '\n\n')
+    .replace(/<h[1-6][^>]*>/gi, '\n## ')
+    .replace(/<strong[^>]*>/gi, '**')
+    .replace(/<\/strong>/gi, '**')
+    .replace(/<b[^>]*>/gi, '**')
+    .replace(/<\/b>/gi, '**')
+    .replace(/<em[^>]*>/gi, '*')
+    .replace(/<\/em>/gi, '*')
+    .replace(/<i[^>]*>/gi, '*')
+    .replace(/<\/i>/gi, '*')
+    .replace(/<[^>]+>/g, ' ')  // Remove remaining HTML tags
+
+  // ============================================================================
+  // Step 2: Handle broken/malformed HTML tags (like /strong>, /p>, li>)
+  // ============================================================================
+  // These appear when entities are partially decoded or HTML is malformed
+  text = text
+    // Broken closing tags: /strong> /p> /div> /li> /ul> /ol> /h1> etc.
+    .replace(/\/(?:strong|b|em|i|u|span|a)>\s*/gi, '')
+    .replace(/\/(?:p|div|br|hr)>\s*/gi, '\n')
+    .replace(/\/li>\s*/gi, '\n')
+    .replace(/\/(?:ul|ol)>\s*/gi, '\n')
+    .replace(/\/h[1-6]>\s*/gi, '\n\n')
+    // Broken opening tags: p> div> li> ul> strong> etc.
+    .replace(/(?:^|\s)p>\s*/gim, '\n')
+    .replace(/(?:^|\s)div>\s*/gim, '\n')
+    .replace(/(?:^|\s)br>\s*/gim, '\n')
+    .replace(/(?:^|\s)li>\s*/gim, '- ')
+    .replace(/(?:^|\s)(?:ul|ol)>\s*/gim, '\n')
+    .replace(/(?:^|\s)h[1-6]>\s*/gim, '\n## ')
+    .replace(/(?:^|\s)(?:strong|b)>\s*/gim, '**')
+    .replace(/(?:^|\s)(?:em|i)>\s*/gim, '*')
+    // Any remaining broken tags
+    .replace(/\/[a-z][a-z0-9]*>\s*/gi, ' ')
+    .replace(/(?:^|\s)[a-z][a-z0-9]*>\s*/gim, ' ')
+
+  // ============================================================================
+  // Step 3: Insert line breaks around section headers
+  // ============================================================================
   text = text.replace(
     /((?:Key\s*)?Responsibilities\s*:|About\s+(?:the\s+)?(?:Role|Position|Company|Team|Us|\w+)\s*:|Requirements?\s*:|Qualifications?\s*:|What\s*You(?:'ll|\s*Will)\s*(?:Do|Be\s*Doing)\s*:|What\s*We\s*(?:Offer|Look\s*For)\s*:|Benefits?\s*:|Perks?\s*:|(?:Tech(?:nology)?\s*)?Stack\s*:|(?:Minimum|Preferred)\s*Qualifications?\s*:|Nice\s*to\s*Have\s*:|Why\s*(?:Join\s*Us|Work\s*(?:With|For)\s*Us)\s*:|(?:Who|What)\s*We(?:'re|\s*Are)\s*Looking\s*For\s*:|Your\s*(?:Role|Responsibilities)\s*:|(?:The\s*)?Opportunity\s*:|(?:Our\s*)?(?:Ideal\s*)?Candidate\s*:|(?:Job\s*)?Description\s*:|The\s*Role\s*:|Who\s*You\s*Are\s*:|What\s*You(?:'ll)?\s*Bring\s*:|Tools\s*(?:We\s*Use|&\s*Technologies)\s*:|Technical\s*Skill\s*Set[^:]*:)/gi,
     '\n\n$1\n'
   )
 
-  // Also insert line breaks for headers without colons (followed by capital letters)
+  // Headers without colons
   text = text
     .replace(/(?<![A-Za-z])((?:Key\s*)?Responsibilities)(?=[A-Z])/gi, '\n\n$1:\n')
     .replace(/(?<![A-Za-z])(Requirements?)(?=[A-Z])/g, '\n\n$1:\n')
     .replace(/(?<![A-Za-z])(Qualifications?)(?=[A-Z])/g, '\n\n$1:\n')
 
-  // Step 2: Also break on sentence endings followed by capital letters (likely new sections)
+  // Break on sentence endings followed by capital letters
   text = text.replace(/\.([A-Z][a-z])/g, '.\n$1')
 
-  // Step 3: Break on common bullet-like patterns
+  // Break on bullet-like patterns
   text = text
     .replace(/([^•\-\n])(?=[•\-]\s+[A-Z])/g, '$1\n')
     .replace(/([.!?])(?=\d+[\.\)]\s)/g, '$1\n')
-
-  // Decode HTML entities
-  text = decode(text)
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&mdash;/gi, '—')
-    .replace(/&ndash;/gi, '–')
-    .replace(/&bull;/gi, '•')
-    .replace(/'/g, "'")
-    .replace(/'/g, "'")
-    .replace(/"/g, '"')
-    .replace(/"/g, '"')
-
-  // Remove HTML tags, preserving structure
-  text = text
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n\n')
-    .replace(/<\/div>/gi, '\n')
-    .replace(/<\/li>/gi, '\n')
-    .replace(/<li[^>]*>/gi, '• ')
-    .replace(/<\/h[1-6]>/gi, '\n\n')
-    .replace(/<h[1-6][^>]*>/gi, '\n')
-    .replace(/<[^>]+>/g, ' ')
 
   // Remove spam patterns
   for (const pattern of SPAM_PATTERNS) {
@@ -475,7 +624,71 @@ function extractFromUnstructured(text: string): Record<string, string> {
 // Section Formatting
 // ============================================================================
 
+// Sub-heading patterns to detect and format
+const SUBHEADING_PATTERNS = [
+  // Success/timeline patterns
+  /^what\s+success\s+looks\s+like$/i,
+  /^in\s+your\s+first\s+\d+\s+days?$/i,
+  /^by\s+(?:month|week|day)\s+\d+(?:\s*[-–]\s*\d+)?$/i,
+  /^first\s+\d+\s+days?$/i,
+  /^after\s+\d+\s+(?:months?|weeks?|days?)$/i,
+  // Work style patterns
+  /^how\s+we\s+work$/i,
+  /^our\s+(?:culture|values|team)$/i,
+  /^why\s+(?:join\s+us|work\s+(?:with|for|here))$/i,
+  /^life\s+at\s+\w+$/i,
+  // Requirements patterns
+  /^must[\s-]?have(?:\s+experience)?$/i,
+  /^nice[\s-]?to[\s-]?have$/i,
+  /^competencies?\s*(?:&|and)?\s*traits?$/i,
+  /^skills?\s+(?:we\s+)?(?:need|require|want)$/i,
+  /^preferred\s+(?:qualifications?|skills?)$/i,
+  /^bonus\s+(?:points?|skills?)$/i,
+  // Benefits patterns
+  /^benefits?\s*(?:&|and)?\s*perks?$/i,
+  /^perks?\s*(?:&|and)?\s*benefits?$/i,
+  /^what\s+(?:we|you)\s+(?:offer|get)$/i,
+  /^compensation(?:\s+(?:&|and)\s+benefits?)?$/i,
+  // Other common patterns
+  /^equal\s+opportunity(?:\s+employer)?$/i,
+  /^diversity\s*(?:&|and)?\s*inclusion$/i,
+  /^(?:our\s+)?(?:interview|hiring)\s+process$/i,
+  /^location$/i,
+  /^team\s+(?:overview|structure)$/i,
+  /^(?:key\s+)?(?:responsibilities|duties)$/i,
+  /^what\s+you(?:'ll)?\s+(?:do|own|build)$/i,
+  /^day[\s-]?to[\s-]?day$/i,
+  /^your\s+(?:role|impact)$/i,
+]
+
+function isSubheading(text: string): boolean {
+  const trimmed = text.trim()
+  // Too long to be a subheading
+  if (trimmed.length > 60) return false
+  // Check against patterns
+  for (const pattern of SUBHEADING_PATTERNS) {
+    if (pattern.test(trimmed)) return true
+  }
+  // Check for short title-like text (2-5 words, title case, no punctuation at end)
+  if (/^[A-Z][A-Za-z]+(?:\s+[A-Z&]?[a-z]+){1,4}$/.test(trimmed) && !trimmed.endsWith(':')) {
+    // Additional heuristics for title-like text
+    const wordCount = trimmed.split(/\s+/).length
+    if (wordCount >= 2 && wordCount <= 5) return true
+  }
+  return false
+}
+
 function formatSection(content: string): string {
+  // Step 1: Pre-process to split stuck-together sentences
+  // Pattern: period followed directly by capital letter (no space)
+  content = content.replace(/\.([A-Z][a-z])/g, '.\n$1')
+
+  // Step 2: Detect "Label: Description" patterns and convert to bullet points
+  // Common patterns: "Web3 Analytics:", "Technical Skills:", "Marketing Ops Proficiency:" etc.
+  // Must be at start of line or after period/newline, followed by description
+  const labelPattern = /(?:^|\n)([A-Z][A-Za-z0-9\s\/&]+):\s*([A-Z0-9])/g
+  content = content.replace(labelPattern, '\n- **$1:** $2')
+
   const lines = content.split('\n')
   const formatted: string[] = []
 
@@ -486,21 +699,58 @@ function formatSection(content: string): string {
       continue
     }
 
+    // Check if this line is a sub-heading
+    if (isSubheading(trimmed)) {
+      // Format as bold sub-heading with spacing
+      formatted.push('')
+      formatted.push(`**${trimmed}**`)
+      continue
+    }
+
     // Convert various list markers to standard bullets
     if (/^[•\-\*\●\○\◦\▸\▹\→\►]\s/.test(trimmed)) {
-      trimmed = '- ' + trimmed.replace(/^[•\-\*\●\○\◦\▸\▹\→\►]\s*/, '')
+      const bulletContent = trimmed.replace(/^[•\-\*\●\○\◦\▸\▹\→\►]\s*/, '')
+      // Check if bullet content has "Label: Description" pattern
+      trimmed = '- ' + formatBulletContent(bulletContent)
     } else if (/^[a-z]\)\s/i.test(trimmed) || /^\([a-z]\)\s/i.test(trimmed)) {
-      trimmed = '- ' + trimmed.replace(/^(?:[a-z]\)|\([a-z]\))\s*/i, '')
+      const bulletContent = trimmed.replace(/^(?:[a-z]\)|\([a-z]\))\s*/i, '')
+      trimmed = '- ' + formatBulletContent(bulletContent)
     } else if (/^\d+[\.\)]\s/.test(trimmed)) {
-      trimmed = '- ' + trimmed.replace(/^\d+[\.\)]\s*/, '')
+      const bulletContent = trimmed.replace(/^\d+[\.\)]\s*/, '')
+      trimmed = '- ' + formatBulletContent(bulletContent)
     } else if (/^✓|✔|☑|☐|▪|▫/.test(trimmed)) {
-      trimmed = '- ' + trimmed.replace(/^[✓✔☑☐▪▫]\s*/, '')
+      const bulletContent = trimmed.replace(/^[✓✔☑☐▪▫]\s*/, '')
+      trimmed = '- ' + formatBulletContent(bulletContent)
+    } else if (/^- \*\*/.test(trimmed)) {
+      // Already formatted with bold label, keep as is
+    } else if (!trimmed.startsWith('-') && !trimmed.startsWith('#') && !trimmed.startsWith('**')) {
+      // Check for inline "Label: Description" pattern at line start
+      const inlineLabelMatch = trimmed.match(/^([A-Z][A-Za-z0-9\s\/&]{2,30}):\s+(.+)$/)
+      if (inlineLabelMatch) {
+        trimmed = `- **${inlineLabelMatch[1]}:** ${inlineLabelMatch[2]}`
+      }
     }
 
     formatted.push(trimmed)
   }
 
-  return formatted.join('\n').trim()
+  // Clean up multiple empty lines
+  let result = formatted.join('\n')
+  result = result.replace(/\n{3,}/g, '\n\n')
+
+  return result.trim()
+}
+
+/**
+ * Format bullet content - add bold to "Label:" patterns within bullet text
+ */
+function formatBulletContent(content: string): string {
+  // Check if content starts with "Label: " pattern
+  const labelMatch = content.match(/^([A-Z][A-Za-z0-9\s\/&]{2,30}):\s+(.+)$/)
+  if (labelMatch) {
+    return `**${labelMatch[1]}:** ${labelMatch[2]}`
+  }
+  return content
 }
 
 // ============================================================================
@@ -511,34 +761,34 @@ function generateTldr(metadata: JobMetadata): string {
   const parts: string[] = []
 
   // Role summary
-  parts.push(`**Role:** ${metadata.title} at ${metadata.company}`)
+  parts.push(`- **Role:** ${metadata.title} at ${metadata.company}`)
 
   // Level
   if (metadata.experienceLevel) {
-    parts.push(`**Level:** ${metadata.experienceLevel}`)
+    parts.push(`- **Level:** ${metadata.experienceLevel}`)
   }
 
   // Compensation
   if (metadata.salaryMin && metadata.salaryMax) {
     const currency = metadata.salaryCurrency || 'USD'
-    parts.push(`**Comp:** ${currency} ${metadata.salaryMin.toLocaleString()} - ${metadata.salaryMax.toLocaleString()}/yr`)
+    parts.push(`- **Comp:** ${currency} ${metadata.salaryMin.toLocaleString()} - ${metadata.salaryMax.toLocaleString()}/yr`)
   } else if (metadata.salary) {
-    parts.push(`**Comp:** ${metadata.salary}`)
+    parts.push(`- **Comp:** ${metadata.salary}`)
   } else {
-    parts.push(`**Comp:** Not listed`)
+    parts.push(`- **Comp:** Not listed`)
   }
 
   // Setup (remote/location)
   if (metadata.remoteType) {
     const location = metadata.location || 'Flexible'
-    parts.push(`**Setup:** ${metadata.remoteType} · ${location}`)
+    parts.push(`- **Setup:** ${metadata.remoteType} · ${location}`)
   } else if (metadata.location) {
-    parts.push(`**Location:** ${metadata.location}`)
+    parts.push(`- **Location:** ${metadata.location}`)
   }
 
   // Type
   if (metadata.type) {
-    parts.push(`**Type:** ${metadata.type}`)
+    parts.push(`- **Type:** ${metadata.type}`)
   }
 
   return parts.join('\n')
@@ -601,52 +851,187 @@ function buildMarkdownSummary(
 
   // Why This Role Slaps (if VC-backed)
   if (sections.whySlaps) {
-    parts.push('## 💡 Why This Role Slaps')
+    parts.push('## Why This Role Slaps')
     parts.push(sections.whySlaps)
     parts.push('')
   }
 
   // TL;DR
-  parts.push('## 📋 TL;DR')
+  parts.push('## TL;DR')
   parts.push(sections.tldr)
   parts.push('')
 
   // Requirements
   if (sections.requirements) {
-    parts.push('## 🎯 You Might Be a Fit If...')
-    parts.push(sections.requirements)
+    parts.push('## You Might Be a Fit If...')
+    parts.push(formatTimelineContent(sections.requirements))
     parts.push('')
   }
 
   // Responsibilities
   if (sections.responsibilities) {
-    parts.push("## 🔧 What You'll Actually Do")
-    parts.push(sections.responsibilities)
+    parts.push("## What You'll Actually Do")
+    parts.push(formatTimelineContent(sections.responsibilities))
     parts.push('')
   }
 
   // Tech Stack
   if (sections.techStack) {
-    parts.push('## 🛠️ Stack & Tools')
+    parts.push('## Stack & Tools')
     parts.push(sections.techStack)
     parts.push('')
   }
 
   // About
   if (sections.about) {
-    parts.push('## 🏢 About the Team')
-    parts.push(sections.about)
+    parts.push('## About the Team')
+    parts.push(formatAboutSection(sections.about))
     parts.push('')
   }
 
   // Benefits
   if (sections.benefits) {
-    parts.push('## 💰 What You Get')
+    parts.push('## What You Get')
     parts.push(sections.benefits)
     parts.push('')
   }
 
   return parts.join('\n').trim()
+}
+
+/**
+ * Format "About the Team" section with better paragraph breaks and bold funding info
+ */
+function formatAboutSection(content: string): string {
+  // Bold funding/investment information
+  content = content.replace(
+    /(\$\d+(?:\.\d+)?\s*(?:million|billion|M|B|k)?(?:\s+(?:in\s+)?(?:funding|investment|raised|secured|series\s+[A-Z]))?[^.]*(?:from|by|led by)[^.]+\.)/gi,
+    '**$1**'
+  )
+  content = content.replace(
+    /((?:secured|raised|received)\s+\$\d+[^.]+\.)/gi,
+    '**$1**'
+  )
+  content = content.replace(
+    /(backed\s+by\s+[^.]+(?:a16z|Paradigm|Sequoia|Coinbase|Binance|Pantera|Polychain)[^.]*\.)/gi,
+    '**$1**'
+  )
+
+  // Split into paragraphs on topic changes
+  const lines = content.split('\n')
+  const paragraphs: string[] = []
+  let currentParagraph: string[] = []
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (!trimmed) {
+      if (currentParagraph.length > 0) {
+        paragraphs.push(currentParagraph.join(' '))
+        currentParagraph = []
+      }
+      continue
+    }
+
+    // Check for topic change indicators
+    const isTopicChange = /^(?:mission|our\s+(?:mission|vision|goal)|we\s+(?:believe|are\s+building)|the\s+(?:company|team|protocol))/i.test(trimmed)
+
+    if (isTopicChange && currentParagraph.length > 0) {
+      paragraphs.push(currentParagraph.join(' '))
+      currentParagraph = []
+    }
+
+    currentParagraph.push(trimmed)
+  }
+
+  if (currentParagraph.length > 0) {
+    paragraphs.push(currentParagraph.join(' '))
+  }
+
+  return paragraphs.join('\n\n')
+}
+
+/**
+ * Format timeline content ("In your first 30 days", "By Month 4-6", etc.)
+ * Split paragraph content into bullet points where appropriate
+ */
+function formatTimelineContent(content: string): string {
+  const lines = content.split('\n')
+  const result: string[] = []
+  let inTimelineBlock = false
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    const trimmed = line.trim()
+
+    if (!trimmed) {
+      result.push('')
+      continue
+    }
+
+    // Check if this is a timeline sub-heading
+    const isTimelineHeading = /^(?:\*\*)?(?:in\s+your\s+first\s+\d+\s+days?|by\s+(?:month|week|day)\s+\d+(?:\s*[-–]\s*\d+)?|first\s+\d+\s+days?|after\s+\d+\s+(?:months?|weeks?|days?))(?:\*\*)?$/i.test(trimmed)
+
+    if (isTimelineHeading) {
+      inTimelineBlock = true
+      result.push('')
+      // Ensure it's bold
+      if (!trimmed.startsWith('**')) {
+        result.push(`**${trimmed}**`)
+      } else {
+        result.push(trimmed)
+      }
+      continue
+    }
+
+    // Check if this is a "What Success Looks Like" type heading
+    const isSuccessHeading = /^(?:\*\*)?what\s+success\s+looks\s+like(?:\*\*)?$/i.test(trimmed)
+    if (isSuccessHeading) {
+      inTimelineBlock = true
+      result.push('')
+      result.push(`**${trimmed.replace(/\*\*/g, '')}**`)
+      continue
+    }
+
+    // If we're in a timeline block and this is a paragraph, try to split into bullets
+    if (inTimelineBlock && !trimmed.startsWith('-') && !trimmed.startsWith('**') && trimmed.length > 50) {
+      // Split on common separators
+      const bullets = splitIntoBullets(trimmed)
+      result.push(...bullets)
+    } else {
+      result.push(line)
+    }
+
+    // Exit timeline block on empty line or new section
+    if (trimmed.startsWith('##') || trimmed.startsWith('**') && !isTimelineHeading) {
+      inTimelineBlock = false
+    }
+  }
+
+  return result.join('\n')
+}
+
+/**
+ * Split a paragraph into bullet points
+ */
+function splitIntoBullets(text: string): string[] {
+  // Try to split on sentence boundaries where each sentence describes a task/goal
+  const sentences = text.split(/(?<=\.)\s+(?=[A-Z])/)
+
+  if (sentences.length > 1) {
+    return sentences.map(s => `- ${s.trim()}`)
+  }
+
+  // Try to split on commas followed by "and" or action verbs
+  const parts = text.split(/,\s*(?=and\s|[a-z]+\s+(?:to|with|for|on|in)\s)/i)
+  if (parts.length > 2) {
+    return parts.map((p, i) => {
+      const cleaned = p.trim().replace(/^and\s+/i, '')
+      return `- ${cleaned}`
+    })
+  }
+
+  // Return as single bullet if can't split
+  return [`- ${text}`]
 }
 
 // ============================================================================

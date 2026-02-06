@@ -302,18 +302,37 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
             {/* Job Description Section */}
             {job.description ? (
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+                {/* Toggle Buttons - Right aligned above section */}
+                {hasRawDescription && (
+                  <div className="flex justify-end mb-4">
+                    <div className="inline-flex rounded overflow-hidden border border-a24-border dark:border-a24-dark-border">
+                      <button
+                        onClick={() => setShowRawDescription(false)}
+                        className={`px-4 py-2 text-xs font-medium uppercase tracking-wider transition-all ${
+                          !showRawDescription
+                            ? 'bg-neun-primary text-white'
+                            : 'bg-transparent text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text hover:bg-a24-surface dark:hover:bg-a24-dark-surface'
+                        }`}
+                      >
+                        📝 Formatted
+                      </button>
+                      <button
+                        onClick={() => setShowRawDescription(true)}
+                        className={`px-4 py-2 text-xs font-medium uppercase tracking-wider transition-all border-l border-a24-border dark:border-a24-dark-border ${
+                          showRawDescription
+                            ? 'bg-a24-surface dark:bg-a24-dark-surface text-a24-text dark:text-a24-dark-text'
+                            : 'bg-transparent text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text hover:bg-a24-surface dark:hover:bg-a24-dark-surface'
+                        }`}
+                      >
+                        📄 Raw
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted">
                     Job Description
                   </h3>
-                  {hasRawDescription && (
-                    <button
-                      onClick={() => setShowRawDescription(!showRawDescription)}
-                      className="text-[10px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text border border-a24-border dark:border-a24-dark-border px-2 py-1 transition-colors"
-                    >
-                      {showRawDescription ? '📝 View formatted' : '📄 View raw'}
-                    </button>
-                  )}
                 </div>
                 <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
                 {showRawDescription && hasRawDescription ? (
