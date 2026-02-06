@@ -7,6 +7,43 @@ import { computeBadges } from '../badges'
 // Prisma client for SQLite fallback
 const prisma = new PrismaClient()
 
+// ══════════════════════════════════════════════════════════
+// Cross-source deduplication
+// ══════════════════════════════════════════════════════════
+
+function normalizeText(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+// Source priority (higher = better, skip if existing job has higher priority)
+const SOURCE_PRIORITY: Record<string, number> = {
+  'priority:greenhouse': 100,
+  'priority:lever': 100,
+  'priority:ashby': 100,
+  'web3kr.jobs': 80,
+  'web3.career': 70,
+  'cryptojobslist.com': 60,
+  'jobs.sui.io': 50,
+  'jobs.solana.com': 50,
+  'jobs.arbitrum.io': 50,
+  'jobs.avax.network': 50,
+  'remoteok.com': 40,
+  'remote3.co': 40,
+  'rocketpunch.com': 30,
+}
+
+function getSourcePriority(source: string): number {
+  if (SOURCE_PRIORITY[source]) return SOURCE_PRIORITY[source]
+  for (const [key, priority] of Object.entries(SOURCE_PRIORITY)) {
+    if (source.toLowerCase().includes(key.toLowerCase())) return priority
+  }
+  return 0
+}
+
 export async function validateAndSaveJob(
   rawJob: Record<string, unknown>,
   crawlerName: string
@@ -33,7 +70,50 @@ export async function validateAndSaveJob(
 
   // Use Prisma for SQLite, Supabase for production
   if (isSupabaseConfigured) {
-    // First check if job already exists to preserve original values
+    // ── Cross-source dedup check ──
+    // Look for existing job with same normalized title + company (regardless of URL)
+    const normTitle = normalizeText(job.title)
+    const normCompany = normalizeText(job.company)
+    const newPriority = getSourcePriority(job.source)
+
+    // Query jobs from same company (case-insensitive) to check for duplicates
+    const { data: sameCompanyJobs } = await supabase
+      .from('Job')
+      .select('id, url, source, title, company, postedDate, description')
+      .eq('isActive', true)
+      .ilike('company', `%${job.company.replace(/[%_]/g, '')}%`)
+      .neq('url', job.url)
+      .limit(50)
+
+    // Find cross-source duplicate (same normalized title + company)
+    const crossDupe = sameCompanyJobs?.find((existing) => {
+      return (
+        normalizeText(existing.title) === normTitle &&
+        normalizeText(existing.company) === normCompany
+      )
+    })
+
+    if (crossDupe) {
+      const existingPriority = getSourcePriority(crossDupe.source)
+      if (existingPriority >= newPriority) {
+        // Existing job has equal or higher priority - skip this one
+        // But update description if we have one and they don't
+        if (job.description && !crossDupe.description) {
+          await supabase
+            .from('Job')
+            .update({ description: job.description })
+            .eq('id', crossDupe.id)
+        }
+        return true // Return true because job exists, just from different source
+      }
+      // New source has higher priority - deactivate the old one and continue with insert
+      await supabase
+        .from('Job')
+        .update({ isActive: false })
+        .eq('id', crossDupe.id)
+    }
+
+    // Check if job already exists by URL to preserve original values
     const { data: existingJob } = await supabase
       .from('Job')
       .select('id, postedDate, description')
