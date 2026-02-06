@@ -2118,8 +2118,17 @@ export function MiniPixelbara({ className = '' }: { className?: string }) {
 `
   const pixels = parseArt(miniArt)
   const { w, h } = artSize(miniArt)
+  // Use aspect-ratio to maintain proper proportions
+  const aspectRatio = w / h
   return (
-    <span className={`inline-block ${className}`} style={{ width: 32, height: 20, imageRendering: 'pixelated' }}>
+    <span
+      className={`inline-block flex-shrink-0 ${className}`}
+      style={{
+        width: 28,
+        aspectRatio: aspectRatio,
+        imageRendering: 'pixelated'
+      }}
+    >
       <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full" style={{ imageRendering: 'pixelated', shapeRendering: 'crispEdges' }}>
         {pixels.map((p, i) => (
           <rect key={i} x={p.x} y={p.y} width={1.01} height={1.01} fill={fill(dark, p.c)} style={{ shapeRendering: 'crispEdges' }} />

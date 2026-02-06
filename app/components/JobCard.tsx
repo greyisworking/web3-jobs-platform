@@ -17,7 +17,8 @@ function isNewJob(postedDate: Date | string | null | undefined): boolean {
   const posted = new Date(postedDate)
   const now = new Date()
   const diffMs = now.getTime() - posted.getTime()
-  return diffMs < 7 * 24 * 60 * 60 * 1000
+  // Changed from 7 days to 3 days to make NEW badge more meaningful
+  return diffMs < 3 * 24 * 60 * 60 * 1000
 }
 
 interface JobCardProps {

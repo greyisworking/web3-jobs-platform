@@ -1,7 +1,130 @@
-import puppeteer from 'puppeteer'
+import puppeteer, { type Page } from 'puppeteer'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { delay } from '../utils'
+
+/**
+ * Fetch job description from a web3kr.jobs detail page using Puppeteer.
+ * These pages are Oopy/Notion-rendered and require JS execution.
+ * Oopy wraps Notion content in specific class structures.
+ */
+async function fetchDescriptionFromDetailPage(
+  page: Page,
+  detailUrl: string
+): Promise<string | null> {
+  try {
+    await page.goto(detailUrl, {
+      waitUntil: 'networkidle2',
+      timeout: 25000,
+    })
+
+    // Wait longer for Notion/Oopy content to fully render
+    await delay(4000)
+
+    // Wait for Oopy-specific content containers
+    await page.waitForSelector('[class*="notion"], [class*="oopy"], [class*="page-content"], main, article', { timeout: 10000 }).catch(() => {
+      console.log('    ⚠️ Content container not found, proceeding anyway')
+    })
+
+    // Use string template to avoid TypeScript/esbuild transformation issues in page.evaluate
+    const description = await page.evaluate(`
+      (function() {
+        var oopySelectors = [
+          '[class*="oopy-page"]',
+          '[class*="oopy-content"]',
+          '[class*="oopy-notion"]',
+          '[class*="notion-page-content"]',
+          '[class*="notion-text-block"]',
+          '[class*="notion-bulleted"]',
+          '[class*="notion-numbered"]',
+          '[class*="page-body"]',
+          '[class*="page-content"]',
+          'article',
+          'main',
+          '[role="main"]',
+          '.content',
+        ];
+
+        function collectText(element) {
+          var clone = element.cloneNode(true);
+          var noiseSelectors = [
+            'nav', 'header', 'footer', 'script', 'style', 'noscript', 'iframe', 'svg',
+            '[class*="nav"]', '[class*="header"]', '[class*="footer"]', '[class*="menu"]',
+            '[class*="sidebar"]', '[class*="breadcrumb"]', '[class*="share"]',
+            '[class*="social"]', '[class*="comment"]', 'button', 'a[class*="button"]',
+          ];
+          noiseSelectors.forEach(function(sel) {
+            clone.querySelectorAll(sel).forEach(function(n) { n.remove(); });
+          });
+          return (clone.textContent || '')
+            .split('\\n')
+            .map(function(line) { return line.trim(); })
+            .filter(function(line) { return line.length > 0; })
+            .join('\\n');
+        }
+
+        for (var i = 0; i < oopySelectors.length; i++) {
+          var sel = oopySelectors[i];
+          var el = document.querySelector(sel);
+          if (el) {
+            var text = collectText(el);
+            if (text.length > 100) {
+              var hasJobContent = /[가-힣]|experience|requirement|responsibility|team|company|role|job/i.test(text);
+              if (hasJobContent) {
+                return text;
+              }
+            }
+          }
+        }
+
+        // Fallback: TreeWalker
+        var body = document.body;
+        if (!body) return null;
+
+        var textBlocks = [];
+        var walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, null);
+        var node;
+
+        while ((node = walker.nextNode())) {
+          var nodeText = node.textContent ? node.textContent.trim() : '';
+          if (!nodeText || nodeText.length < 10) continue;
+          var parent = node.parentElement;
+          if (!parent) continue;
+          var isInNoise = parent.closest('nav, header, footer, [class*="nav"], [class*="menu"], [class*="header"], [class*="footer"], script, style');
+          if (isInNoise) continue;
+          textBlocks.push(nodeText);
+        }
+
+        var combinedText = textBlocks.join('\\n');
+        if (combinedText.length > 150) {
+          return combinedText;
+        }
+
+        return null;
+      })()
+    `)
+
+    if (description && description.length > 50) {
+      // Clean up the text
+      const cleaned = description
+        .replace(/\n{3,}/g, '\n\n')  // Max 2 newlines
+        .replace(/[ \t]+/g, ' ')      // Collapse spaces
+        .replace(/\n /g, '\n')        // Remove leading spaces after newlines
+        .trim()
+        .substring(0, 10000)          // Limit size
+
+      // Final validation: make sure it's not just navigation text
+      if (cleaned.length > 100) {
+        return cleaned
+      }
+    }
+
+    return null
+  } catch (error) {
+    console.error(`  ⚠️ Failed to fetch description from ${detailUrl}:`, error)
+    return null
+  }
+}
 
 export async function crawlWeb3KRJobs(): Promise<number> {
   console.log('🚀 Starting Web3 KR Jobs crawler...')
@@ -30,7 +153,7 @@ export async function crawlWeb3KRJobs(): Promise<number> {
     })
 
     const jobs = await page.evaluate(() => {
-      const results: { title: string; company: string; url: string }[] = []
+      const results: { title: string; company: string; url: string; notionPagePath: string | null }[] = []
       const seen = new Set<string>()
 
       // ── Strategy 1: Header-based column mapping ──
@@ -88,10 +211,18 @@ export async function crawlWeb3KRJobs(): Promise<number> {
               // Extract title from the title/position column
               const titleCell = cells[colMap.title]
               let title = ''
+              let notionPagePath: string | null = null
               if (titleCell) {
                 // Prefer link text within the cell (Notion page link)
                 const titleLink = titleCell.querySelector('a')
                 title = titleLink?.textContent?.trim() || titleCell.textContent?.trim() || ''
+                // Capture Notion page path for later description fetch
+                if (titleLink) {
+                  const href = titleLink.getAttribute('href') || ''
+                  if (/^\/[0-9a-f-]{20,}$/i.test(href)) {
+                    notionPagePath = href
+                  }
+                }
               }
 
               // Extract apply URL from the link column
@@ -123,6 +254,7 @@ export async function crawlWeb3KRJobs(): Promise<number> {
                   title,
                   company: company || 'Unknown',
                   url: applyUrl || 'https://www.web3kr.jobs',
+                  notionPagePath,
                 })
               }
             }
@@ -182,6 +314,7 @@ export async function crawlWeb3KRJobs(): Promise<number> {
               title,
               company,
               url: applyUrl || `https://www.web3kr.jobs${href}`,
+              notionPagePath: href,
             })
           }
         } catch (e) {
@@ -205,7 +338,7 @@ export async function crawlWeb3KRJobs(): Promise<number> {
           if (['home', 'about', 'contact', 'login'].some((w) => text.toLowerCase() === w)) return
           seen.add(href)
 
-          results.push({ title: text, company: 'Unknown', url: href })
+          results.push({ title: text, company: 'Unknown', url: href, notionPagePath: null })
         })
       }
 
@@ -219,6 +352,10 @@ export async function crawlWeb3KRJobs(): Promise<number> {
       console.log(`   → "${j.title}" at ${j.company} (${j.url.substring(0, 60)}...)`)
     }
 
+    // Open a separate page for fetching descriptions so we don't lose the listing page
+    const detailPage = await browser.newPage()
+    await detailPage.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36')
+
     let savedCount = 0
     for (const job of jobs) {
       try {
@@ -228,6 +365,22 @@ export async function crawlWeb3KRJobs(): Promise<number> {
         // Skip status values and noise that aren't real job titles
         const SKIP_TITLES = ['open', 'closed', 'draft', 'expired']
         if (SKIP_TITLES.includes(job.title.toLowerCase())) continue
+
+        // Fetch JD description from the Notion detail page
+        let description: string | null = null
+
+        // If we have a Notion page path, visit it to get the description
+        if (job.notionPagePath) {
+          const detailUrl = `https://www.web3kr.jobs${job.notionPagePath}`
+          console.log(`   📄 Fetching JD for "${job.title}" ...`)
+          description = await fetchDescriptionFromDetailPage(detailPage, detailUrl)
+          if (description) {
+            console.log(`   ✅ Got description (${description.length} chars)`)
+          } else {
+            console.log(`   ⚠️ No description found for "${job.title}"`)
+          }
+          await delay(1000) // Rate limit between detail page fetches
+        }
 
         const saved = await validateAndSaveJob(
           {
@@ -241,8 +394,9 @@ export async function crawlWeb3KRJobs(): Promise<number> {
             source: 'web3kr.jobs',
             region: 'Korea',
             postedDate: new Date(),
-            // Enhanced fields (limited data from Notion board)
+            // Enhanced fields
             remoteType: 'Hybrid',
+            description: description || undefined,
           },
           'web3kr.jobs'
         )
@@ -252,6 +406,8 @@ export async function crawlWeb3KRJobs(): Promise<number> {
         console.error('Error saving Web3 KR job:', error)
       }
     }
+
+    await detailPage.close()
 
     await supabase.from('CrawlLog').insert({
       source: 'web3kr.jobs',

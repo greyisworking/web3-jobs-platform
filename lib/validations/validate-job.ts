@@ -33,6 +33,16 @@ export async function validateAndSaveJob(
 
   // Use Prisma for SQLite, Supabase for production
   if (isSupabaseConfigured) {
+    // First check if job already exists to preserve original postedDate
+    const { data: existingJob } = await supabase
+      .from('Job')
+      .select('id, postedDate')
+      .eq('url', job.url)
+      .single()
+
+    // Use existing postedDate if available, otherwise use new one
+    const postedDateToUse = existingJob?.postedDate || job.postedDate?.toISOString()
+
     const { data: upsertData, error } = await supabase.from('Job').upsert(
       {
         title: job.title,
@@ -46,9 +56,10 @@ export async function validateAndSaveJob(
         source: job.source,
         region: job.region,
         isActive: true,
-        postedDate: job.postedDate?.toISOString(),
+        // Preserve original postedDate on re-crawl to maintain correct sorting
+        postedDate: postedDateToUse,
         updatedAt: new Date().toISOString(),
-        // Enhanced job details
+        // Enhanced job details - only update if new value exists
         description: job.description || null,
         requirements: job.requirements || null,
         responsibilities: job.responsibilities || null,

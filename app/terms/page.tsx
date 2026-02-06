@@ -115,7 +115,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-4">9. Contact</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
-              For questions about these terms, please contact us at legal@neun.wtf
+              For questions about these terms, please contact us at neun@neun.wtf
             </p>
           </section>
         </div>
