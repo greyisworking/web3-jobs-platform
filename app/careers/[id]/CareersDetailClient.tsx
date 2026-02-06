@@ -9,6 +9,7 @@ import type { Job } from '@/types/job'
 import { trackEvent } from '@/lib/analytics'
 import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import { cleanJobDisplay, cleanJobDisplayWithSections } from '@/lib/clean-job-display'
+import MarkdownRenderer from '@/app/components/MarkdownRenderer'
 import BookmarkButton from '@/app/components/BookmarkButton'
 import GlowBadge from '@/app/components/GlowBadge'
 import { TrustCheckList, SimpleTrustCheckList, hasVCBacking } from '@/app/components/TrustBadge'
@@ -302,13 +303,9 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                   Job Description
                 </h3>
                 <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
-                <div
-                  className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-headings:text-a24-text dark:prose-headings:text-a24-dark-text prose-p:text-a24-text dark:prose-p:text-a24-dark-text prose-li:text-a24-text dark:prose-li:text-a24-dark-text prose-strong:text-a24-text dark:prose-strong:text-a24-dark-text"
-                  dangerouslySetInnerHTML={{ __html: cleanJobDisplayWithSections(job.description, {
-                    requirements: !!job.requirements,
-                    responsibilities: !!job.responsibilities,
-                    benefits: !!job.benefits,
-                  }) }}
+                <MarkdownRenderer
+                  content={job.description}
+                  className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed"
                 />
               </div>
             ) : (
@@ -350,9 +347,9 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                   Requirements
                 </h3>
                 <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
-                <div
-                  className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: cleanJobDisplay(job.requirements) }}
+                <MarkdownRenderer
+                  content={job.requirements}
+                  className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed"
                 />
               </div>
             )}
@@ -364,9 +361,9 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                   Responsibilities
                 </h3>
                 <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
-                <div
-                  className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: cleanJobDisplay(job.responsibilities) }}
+                <MarkdownRenderer
+                  content={job.responsibilities}
+                  className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed"
                 />
               </div>
             )}
@@ -378,9 +375,9 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                   Benefits & Perks
                 </h3>
                 <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
-                <div
-                  className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed prose prose-sm dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: cleanJobDisplay(job.benefits) }}
+                <MarkdownRenderer
+                  content={job.benefits}
+                  className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed"
                 />
               </div>
             )}
