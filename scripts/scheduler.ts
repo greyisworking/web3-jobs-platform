@@ -13,6 +13,9 @@ const scheduleEvery3Hours = '0 */3 * * *' // Every 3 hours
 // 매일 새벽 4시에 만료 체크
 const scheduleDaily4AM = '0 4 * * *' // Every day at 4 AM
 
+// 매일 새벽 4:30에 추천 공고 새로고침
+const scheduleDaily430AM = '30 4 * * *' // Every day at 4:30 AM
+
 async function sendDiscordNotification(title: string, description: string, color: number, fields?: any[]) {
   try {
     await axios.post(DISCORD_WEBHOOK_URL, {
@@ -76,9 +79,23 @@ cron.schedule(scheduleEvery3Hours, async () => {
     
     if (stderr) console.error(stderr)
     console.log('✅ Scheduled crawl completed!')
+
+    // Post-crawl: refresh featured jobs
+    console.log('⭐ Refreshing featured jobs after crawl...')
+    try {
+      const { stdout: featuredOut } = await execAsync('npm run refresh:featured')
+      console.log(featuredOut)
+      await sendDiscordNotification(
+        '⭐ Featured Jobs Refreshed',
+        'Featured scores recalculated after crawl',
+        0xf1c40f // Yellow
+      )
+    } catch (featuredErr: any) {
+      console.error('❌ Featured refresh failed:', featuredErr)
+    }
   } catch (error: any) {
     console.error('❌ Scheduled crawl failed:', error)
-    
+
     // 실패 알림
     await sendDiscordNotification(
       '❌ Crawl Failed',
@@ -144,6 +161,52 @@ cron.schedule(scheduleDaily4AM, async () => {
 })
 
 console.log('✅ Expired check scheduled daily at 4 AM')
+
+// 매일 새벽 4:30에 추천 공고 새로고침
+cron.schedule(scheduleDaily430AM, async () => {
+  console.log(`\n⭐ [${new Date().toLocaleString()}] Starting featured jobs refresh...`)
+
+  const startTime = Date.now()
+
+  await sendDiscordNotification(
+    '⭐ Starting Featured Refresh',
+    'Recalculating featured job scores...',
+    0xf1c40f // Yellow
+  )
+
+  try {
+    const { stdout, stderr } = await execAsync('npm run refresh:featured')
+    console.log(stdout)
+
+    const duration = ((Date.now() - startTime) / 1000).toFixed(1)
+
+    await sendDiscordNotification(
+      '✅ Featured Refresh Complete',
+      `Featured jobs updated in ${duration}s`,
+      0xf1c40f,
+      [
+        {
+          name: '⏱️ Duration',
+          value: `${duration} seconds`,
+          inline: true
+        }
+      ]
+    )
+
+    if (stderr) console.error(stderr)
+    console.log('✅ Featured refresh completed!')
+  } catch (error: any) {
+    console.error('❌ Featured refresh failed:', error)
+
+    await sendDiscordNotification(
+      '❌ Featured Refresh Failed',
+      `Error: ${error.message || error}`,
+      0xff0000
+    )
+  }
+})
+
+console.log('✅ Featured refresh scheduled daily at 4:30 AM')
 
 // 서버 시작 시 한 번 실행
 console.log('\n🚀 Running initial crawl...\n')

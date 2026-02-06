@@ -13,6 +13,7 @@ import {
   Shield,
   BarChart3,
   Flag,
+  Star,
 } from 'lucide-react'
 
 interface NavItem {
@@ -33,6 +34,7 @@ const navSections: NavSection[] = [
       { href: '/admin', label: '대시보드', icon: <LayoutDashboard className="h-4 w-4" /> },
       { href: '/admin/moderation', label: '콘텐츠 관리', icon: <Flag className="h-4 w-4" /> },
       { href: '/admin/jobs/pending', label: '검토 대기', icon: <Clock className="h-4 w-4" /> },
+      { href: '/admin/jobs/featured', label: '추천 공고', icon: <Star className="h-4 w-4" /> },
       { href: '/admin/jobs/duplicates', label: '중복 공고', icon: <CopyCheck className="h-4 w-4" /> },
       { href: '/admin/errors', label: '오류 기록', icon: <AlertCircle className="h-4 w-4" /> },
     ],

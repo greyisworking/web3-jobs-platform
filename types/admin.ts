@@ -37,6 +37,9 @@ export interface JobWithStatus {
   sector: string | null
   office_location: string | null
   badges: string[] | null
+  featured_score: number
+  featured_pinned: boolean
+  featured_at: string | null
 }
 
 export interface DuplicateGroup {

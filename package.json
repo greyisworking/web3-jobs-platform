@@ -31,7 +31,8 @@
     "test:all": "tsx tests/run-all-tests.ts",
     "test:qa": "tsx tests/qa-phase7-tests.ts",
     "test:qa:report": "tsx tests/qa-phase7-tests.ts --report",
-    "validate": "tsx scripts/validate-jobs.ts"
+    "validate": "tsx scripts/validate-jobs.ts",
+    "refresh:featured": "tsx scripts/refresh-featured.ts"
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "^4.3.7",

@@ -39,4 +39,8 @@ export interface Job {
   // Von Restorff Effect: Visual emphasis
   is_urgent?: boolean
   is_featured?: boolean
+  // Featured auto-curation
+  featured_score?: number
+  featured_pinned?: boolean
+  featured_at?: Date | string | null
 }
