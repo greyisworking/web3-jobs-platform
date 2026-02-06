@@ -624,8 +624,16 @@ function extractFromUnstructured(text: string): Record<string, string> {
 // Section Formatting
 // ============================================================================
 
-// Sub-heading patterns to detect and format
+// Sub-heading patterns to detect and format (EXACT MATCHES ONLY)
 const SUBHEADING_PATTERNS = [
+  // Main section headings (these are used as h2 in buildMarkdownSummary)
+  /^tl;?\s*dr$/i,
+  /^about(?:\s+the\s+team)?$/i,
+  /^about\s+us$/i,
+  /^what\s+you(?:'ll)?\s+(?:actually\s+)?(?:do|get)$/i,
+  /^you\s+might\s+be\s+a\s+fit\s+if\.{0,3}$/i,
+  /^(?:tech\s+)?stack(?:\s*(?:&|and)\s*tools)?$/i,
+  /^why\s+this\s+role\s+slaps$/i,
   // Success/timeline patterns
   /^what\s+success\s+looks\s+like$/i,
   /^in\s+your\s+first\s+\d+\s+days?$/i,
@@ -634,47 +642,70 @@ const SUBHEADING_PATTERNS = [
   /^after\s+\d+\s+(?:months?|weeks?|days?)$/i,
   // Work style patterns
   /^how\s+we\s+work$/i,
-  /^our\s+(?:culture|values|team)$/i,
+  /^our\s+(?:culture|values|team|mission|vision)$/i,
   /^why\s+(?:join\s+us|work\s+(?:with|for|here))$/i,
   /^life\s+at\s+\w+$/i,
+  /^the\s+role$/i,
+  /^role$/i,
   // Requirements patterns
-  /^must[\s-]?have(?:\s+experience)?$/i,
+  /^job\s+requirements?$/i,
+  /^must[\s-]?have(?:\s+(?:experience|skills?))?$/i,
   /^nice[\s-]?to[\s-]?have$/i,
   /^competencies?\s*(?:&|and)?\s*traits?$/i,
   /^skills?\s+(?:we\s+)?(?:need|require|want)$/i,
   /^preferred\s+(?:qualifications?|skills?)$/i,
   /^bonus\s+(?:points?|skills?)$/i,
+  /^requirements?$/i,
+  /^qualifications?$/i,
   // Benefits patterns
   /^benefits?\s*(?:&|and)?\s*perks?$/i,
   /^perks?\s*(?:&|and)?\s*benefits?$/i,
   /^what\s+(?:we|you)\s+(?:offer|get)$/i,
   /^compensation(?:\s+(?:&|and)\s+benefits?)?$/i,
+  /^what\s+you\s+get$/i,
   // Other common patterns
-  /^equal\s+opportunity(?:\s+employer)?$/i,
+  /^equal\s+opportunity(?:\s+(?:employer|statement))?$/i,
   /^diversity\s*(?:&|and)?\s*inclusion$/i,
   /^(?:our\s+)?(?:interview|hiring)\s+process$/i,
   /^location$/i,
   /^team\s+(?:overview|structure)$/i,
   /^(?:key\s+)?(?:responsibilities|duties)$/i,
-  /^what\s+you(?:'ll)?\s+(?:do|own|build)$/i,
   /^day[\s-]?to[\s-]?day$/i,
-  /^your\s+(?:role|impact)$/i,
+  /^your\s+(?:role|impact|responsibilities)$/i,
+  /^ready\s+to\s+(?:join|shape|build|apply)/i,
+]
+
+// Patterns that should NOT be treated as subheadings (location values, short phrases, etc.)
+const NOT_SUBHEADING_PATTERNS = [
+  /^remote\s+\w+$/i,  // "Remote Americas", "Remote EMEA"
+  /^(?:new\s+york|san\s+francisco|los\s+angeles|london|berlin|paris|tokyo|singapore)/i,
+  /^(?:usa|uk|eu|emea|apac|americas?|europe|asia)/i,
+  /^(?:full[\s-]?time|part[\s-]?time|contract|freelance)$/i,
+  /^\$[\d,]+/,  // Salary figures
+  /^\d+\+?\s*years?/i,  // Experience like "5+ years"
+  /^(?:senior|junior|lead|staff|principal|intern)/i,
 ]
 
 function isSubheading(text: string): boolean {
-  const trimmed = text.trim()
+  const trimmed = text.trim().replace(/\*\*/g, '')  // Remove bold markers
+
   // Too long to be a subheading
-  if (trimmed.length > 60) return false
-  // Check against patterns
+  if (trimmed.length > 50) return false
+
+  // Too short (single word that's not a known heading)
+  if (trimmed.length < 4) return false
+
+  // Check against NOT subheading patterns first
+  for (const pattern of NOT_SUBHEADING_PATTERNS) {
+    if (pattern.test(trimmed)) return false
+  }
+
+  // Check against known subheading patterns
   for (const pattern of SUBHEADING_PATTERNS) {
     if (pattern.test(trimmed)) return true
   }
-  // Check for short title-like text (2-5 words, title case, no punctuation at end)
-  if (/^[A-Z][A-Za-z]+(?:\s+[A-Z&]?[a-z]+){1,4}$/.test(trimmed) && !trimmed.endsWith(':')) {
-    // Additional heuristics for title-like text
-    const wordCount = trimmed.split(/\s+/).length
-    if (wordCount >= 2 && wordCount <= 5) return true
-  }
+
+  // NO generic title-like text detection - only match explicit patterns
   return false
 }
 
