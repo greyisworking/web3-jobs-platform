@@ -12,10 +12,19 @@ export async function GET(request: Request) {
     const supabase = await createSupabaseServerClient()
 
     // Only show active jobs (isActive=true)
-    // Note: status column doesn't exist in Supabase, we only use isActive
+    // Select only fields needed for job list (exclude large text fields like description)
+    const listFields = [
+      'id', 'title', 'company', 'url', 'location', 'type', 'category',
+      'salary', 'salaryMin', 'salaryMax', 'salaryCurrency', 'tags', 'source', 'region',
+      'postedDate', 'crawledAt', 'updatedAt', 'isActive',
+      'experienceLevel', 'remoteType', 'companyLogo',
+      'backers', 'sector', 'badges',
+      'is_featured', 'is_urgent', 'is_alpha', 'is_dao_job', 'token_gate'
+    ].join(',')
+
     let query = supabase
       .from('Job')
-      .select('*')
+      .select(listFields)
       .eq('isActive', true)
       .order('postedDate', { ascending: false })
       .order('crawledAt', { ascending: false })
@@ -40,11 +49,11 @@ export async function GET(request: Request) {
 
     const jobList = jobs ?? []
 
-    // Stats: count active jobs
+    // Stats: count active jobs (use 'id' instead of '*' for faster count)
     const [totalResult, globalResult, koreaResult] = await Promise.all([
-      supabase.from('Job').select('*', { count: 'exact', head: true }).eq('isActive', true),
-      supabase.from('Job').select('*', { count: 'exact', head: true }).eq('isActive', true).eq('region', 'Global'),
-      supabase.from('Job').select('*', { count: 'exact', head: true }).eq('isActive', true).eq('region', 'Korea'),
+      supabase.from('Job').select('id', { count: 'exact', head: true }).eq('isActive', true),
+      supabase.from('Job').select('id', { count: 'exact', head: true }).eq('isActive', true).eq('region', 'Global'),
+      supabase.from('Job').select('id', { count: 'exact', head: true }).eq('isActive', true).eq('region', 'Korea'),
     ])
 
     // Compute source counts from returned jobs
