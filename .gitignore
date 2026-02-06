@@ -42,3 +42,4 @@ logs/
 
 # k6 load test results
 results/
+.env.vercel

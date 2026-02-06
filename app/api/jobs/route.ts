@@ -18,8 +18,7 @@ export async function GET(request: Request) {
       'salary', 'salaryMin', 'salaryMax', 'salaryCurrency', 'tags', 'source', 'region',
       'postedDate', 'crawledAt', 'updatedAt', 'isActive',
       'experienceLevel', 'remoteType', 'companyLogo',
-      'backers', 'sector', 'badges',
-      'is_featured', 'is_urgent', 'is_alpha', 'is_dao_job', 'token_gate'
+      'backers', 'sector', 'badges'
     ].join(',')
 
     let query = supabase
@@ -58,7 +57,7 @@ export async function GET(request: Request) {
 
     // Compute source counts from returned jobs
     const sourceCounts = new Map<string, number>()
-    for (const job of jobList) {
+    for (const job of jobList as Array<{ source?: string }>) {
       const src = job.source ?? 'unknown'
       sourceCounts.set(src, (sourceCounts.get(src) ?? 0) + 1)
     }

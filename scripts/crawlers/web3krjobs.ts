@@ -104,7 +104,7 @@ async function fetchDescriptionFromDetailPage(
       })()
     `)
 
-    if (description && description.length > 50) {
+    if (description && typeof description === 'string' && description.length > 50) {
       // Clean up the text
       const cleaned = description
         .replace(/\n{3,}/g, '\n\n')  // Max 2 newlines
