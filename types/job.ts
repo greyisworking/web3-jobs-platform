@@ -19,6 +19,7 @@ export interface Job {
   office_location?: string | null
   badges?: string[] | null
   description?: string | null
+  raw_description?: string | null  // Original unformatted description
   tags?: string | null
   // Enhanced job details
   requirements?: string | null

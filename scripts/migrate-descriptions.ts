@@ -70,15 +70,20 @@ async function ensureRawDescriptionColumn() {
   return true
 }
 
-async function getJobsToProcess(args: Args, columnExists: boolean) {
-  // Base query without raw_description if column doesn't exist
-  const selectFields = columnExists
-    ? 'id, title, company, source, description, raw_description'
-    : 'id, title, company, source, description'
+interface JobRecord {
+  id: string
+  title: string
+  company: string
+  source: string
+  description: string | null
+  raw_description?: string | null
+}
 
+async function getJobsToProcess(args: Args, columnExists: boolean): Promise<JobRecord[]> {
+  // Always select all fields - handle missing column at runtime
   let query = supabase
     .from('Job')
-    .select(selectFields)
+    .select('id, title, company, source, description, raw_description')
     .eq('isActive', true)
     .not('description', 'is', null)
     .neq('description', '')
@@ -103,7 +108,7 @@ async function getJobsToProcess(args: Args, columnExists: boolean) {
     throw new Error(`Failed to fetch jobs: ${error.message}`)
   }
 
-  return jobs || []
+  return (jobs || []) as JobRecord[]
 }
 
 function truncate(str: string, len: number): string {
@@ -152,6 +157,13 @@ async function main() {
     const prefix = `[${processed}/${jobs.length}]`
 
     try {
+      // Skip if no description (shouldn't happen but check anyway)
+      if (!job.description) {
+        console.log(`${prefix} ⏭️  ${truncate(job.title, 40)} - No description`)
+        skipped++
+        continue
+      }
+
       // Check if needs formatting
       if (!needsFormatting(job.description) && !args.force) {
         console.log(`${prefix} ⏭️  ${truncate(job.title, 40)} - Already formatted`)

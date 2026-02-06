@@ -38,6 +38,7 @@
     "refresh:featured": "tsx scripts/refresh-featured.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.73.0",
     "@coinbase/wallet-sdk": "^4.3.7",
     "@metamask/sdk": "^0.33.1",
     "@prisma/client": "^6.1.0",

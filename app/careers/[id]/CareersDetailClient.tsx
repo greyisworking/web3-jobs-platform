@@ -95,10 +95,13 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
   const [showReportModal, setShowReportModal] = useState(false)
   const [reportReason, setReportReason] = useState('')
   const [reportSubmitting, setReportSubmitting] = useState(false)
+  const [showRawDescription, setShowRawDescription] = useState(false)
   const hasValidUrl = isValidUrl(job.url)
   const { address } = useAccount()
   // Check if job is expired (isActive=false means expired)
   const isExpired = job.isActive === false
+  // Check if raw description is available (different from formatted)
+  const hasRawDescription = job.raw_description && job.raw_description !== job.description
 
   useEffect(() => {
     trackEvent('job_view', { job_id: job.id, title: job.title, company: job.company, source: 'page' })
@@ -299,14 +302,30 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
             {/* Job Description Section */}
             {job.description ? (
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-                <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
-                  Job Description
-                </h3>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted">
+                    Job Description
+                  </h3>
+                  {hasRawDescription && (
+                    <button
+                      onClick={() => setShowRawDescription(!showRawDescription)}
+                      className="text-[10px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text border border-a24-border dark:border-a24-dark-border px-2 py-1 transition-colors"
+                    >
+                      {showRawDescription ? '📝 View formatted' : '📄 View raw'}
+                    </button>
+                  )}
+                </div>
                 <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
-                <MarkdownRenderer
-                  content={job.description}
-                  className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed"
-                />
+                {showRawDescription && hasRawDescription ? (
+                  <div className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed whitespace-pre-wrap font-mono bg-a24-surface dark:bg-a24-dark-surface p-4 border border-a24-border dark:border-a24-dark-border overflow-x-auto">
+                    {job.raw_description}
+                  </div>
+                ) : (
+                  <MarkdownRenderer
+                    content={job.description}
+                    className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed"
+                  />
+                )}
               </div>
             ) : (
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">

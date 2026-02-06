@@ -129,7 +129,60 @@ const BOILERPLATE_PATTERNS = [
   /\[image\]/gi,
   /^loading\.\.\.$/gim,
   /^please\s*wait.*$/gim,
+
+  // Spam prevention / anti-bot phrases
+  /mention\s+(?:the\s+)?word\s+[A-Z]+\s+(?:to\s+)?show\s+you\s+read.*$/gim,
+  /this\s+is\s+a\s+beta\s+feature\s+to\s+avoid\s+spam\s+applicants.*$/gim,
+  /to\s+show\s+you\s+read\s+the\s+job\s+post\s+completely.*$/gim,
+  /please\s+mention\s+[A-Z]+\s+in\s+your\s+application.*$/gim,
 ]
+
+// Base64-like spam prevention codes
+// These are typically 40+ char strings with random-looking mixed case/numbers
+// Pattern: Must look like actual Base64 spam codes, not legitimate content
+function isBase64SpamCode(str: string): boolean {
+  // Must be quite long (spam codes are typically 40+ chars)
+  if (str.length < 40) return false
+
+  // Must have Base64-like character distribution
+  const hasLower = /[a-z]/.test(str)
+  const hasUpper = /[A-Z]/.test(str)
+  const hasNumber = /[0-9]/.test(str)
+
+  // All three must be present for Base64
+  if (!hasLower || !hasUpper || !hasNumber) return false
+
+  // Must not look like words (CamelCase, PascalCase, etc.)
+  const looksLikeWords = /^[A-Z][a-z]+(?:[A-Z][a-z]+)*$/.test(str)
+  if (looksLikeWords) return false
+
+  // Must not contain common word patterns
+  const hasCommonWords = /(?:the|and|for|with|this|that|from|have|are|was|were|will|would|could|should|about|into|more|some|than|them|then|there|these|they|what|when|where|which|while|your|been|being|each|during|through)/i.test(str)
+  if (hasCommonWords) return false
+
+  // Must have high entropy (mix of different character types throughout)
+  // Check that numbers are distributed throughout, not just at the end
+  const firstHalf = str.slice(0, Math.floor(str.length / 2))
+  const secondHalf = str.slice(Math.floor(str.length / 2))
+  const firstHalfHasNumber = /[0-9]/.test(firstHalf)
+  const secondHalfHasNumber = /[0-9]/.test(secondHalf)
+  if (!firstHalfHasNumber && !secondHalfHasNumber) return false
+
+  // Check for actual Base64 padding pattern (ends with = or ==)
+  const hasBase64Padding = /={1,2}$/.test(str)
+
+  // If it has Base64 padding, it's very likely a spam code
+  if (hasBase64Padding && str.length >= 40) return true
+
+  // Otherwise, require very specific characteristics
+  // Count unique characters - spam codes have high variety
+  const uniqueChars = new Set(str).size
+  const varietyRatio = uniqueChars / str.length
+
+  // Spam codes typically have 40-60% unique characters
+  // Normal text has much lower variety
+  return varietyRatio > 0.3 && str.length >= 50
+}
 
 // Salary/compensation patterns for highlighting
 const SALARY_PATTERNS = [
@@ -186,6 +239,21 @@ export function formatJobDescription(
   // Step 6: Final cleanup
   text = finalCleanup(text)
 
+  // Safety check: if formatting removed too much content, fallback to cleaned raw
+  // This prevents the Somnia bug where content went from 5664 → 0 chars
+  if (text.length < raw.length * 0.1 && raw.length > 100) {
+    console.warn(`[description-formatter] Formatting removed too much content (${raw.length} → ${text.length}), falling back to cleaned raw`)
+    // Just do basic cleanup without aggressive filtering
+    text = decode(rawText)
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<\/div>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+  }
+
   // Truncate if needed
   if (text.length > maxLength) {
     text = text.substring(0, maxLength) + '\n\n...(truncated)'
@@ -228,6 +296,21 @@ function cleanRawText(text: string, preserveHtml: boolean): string {
     .replace(/&#8217;/gi, "'")
     .replace(/&#8220;/gi, '"')
     .replace(/&#8221;/gi, '"')
+    .replace(/'/g, "'")  // Smart quotes
+    .replace(/'/g, "'")
+    .replace(/"/g, '"')
+    .replace(/"/g, '"')
+
+  // Remove Base64-like spam prevention codes (standalone long alphanumeric strings)
+  // Only target strings that are clearly spam codes, not legitimate content
+  text = text.replace(/\b([A-Za-z0-9+\/]{40,}={1,2})\b/g, (match) => {
+    // Strings with Base64 padding are almost certainly spam codes
+    return ''
+  })
+  // Also check for very long random-looking strings without padding
+  text = text.replace(/\b([A-Za-z0-9]{50,})\b/g, (match) => {
+    return isBase64SpamCode(match) ? '' : match
+  })
 
   if (!preserveHtml) {
     // Convert <br>, <p>, <div> to newlines
@@ -267,6 +350,13 @@ function cleanRawText(text: string, preserveHtml: boolean): string {
     }
     return match
   })
+
+  // Add line breaks after section headers (text ending with :)
+  // Pattern: "Header Text:" followed by content without newline
+  text = text.replace(/([A-Z][^.!?\n]{3,50}:)([A-Z])/g, '$1\n\n$2')
+
+  // Add line breaks before common section starters
+  text = text.replace(/([.!?])([A-Z][a-z]+\s+(?:the\s+)?(?:Role|Position|Company|Team|Candidate|Responsibilities|Requirements|Benefits|Qualifications|Experience|Skills|About|Overview|Summary|Description|Duties|Tasks):?)/g, '$1\n\n$2')
 
   // Normalize whitespace
   text = text.replace(/\t/g, '  ')
@@ -321,7 +411,16 @@ function removeBoilerplate(text: string): string {
       'cookie policy',
       'privacy policy',
       'terms of service',
+      'this is a beta feature',
+      'to avoid spam applicants',
+      'mention the word',
+      'to show you read the job post',
     ]
+
+    // Check for spam prevention code words (all caps words like CANDYSHOP)
+    if (/\b[A-Z]{6,}\b/.test(line) && /mention|show|read|word/i.test(line)) {
+      return false
+    }
 
     for (const phrase of boilerplatePhrases) {
       if (trimmed === phrase || trimmed.startsWith(phrase + ' ')) {
