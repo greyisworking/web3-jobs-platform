@@ -130,11 +130,15 @@ const BOILERPLATE_PATTERNS = [
   /^loading\.\.\.$/gim,
   /^please\s*wait.*$/gim,
 
-  // Spam prevention / anti-bot phrases
-  /mention\s+(?:the\s+)?word\s+[A-Z]+\s+(?:to\s+)?show\s+you\s+read.*$/gim,
-  /this\s+is\s+a\s+beta\s+feature\s+to\s+avoid\s+spam\s+applicants.*$/gim,
-  /to\s+show\s+you\s+read\s+the\s+job\s+post\s+completely.*$/gim,
+  // Spam prevention / anti-bot phrases (more aggressive patterns)
+  /mention\s+(?:the\s+)?word\s+[A-Z]+.*$/gim,
+  /this\s+is\s+a\s+beta\s+feature\s+to\s+avoid\s+spam.*$/gim,
+  /to\s+show\s+you\s+read\s+the\s+job\s+post.*$/gim,
   /please\s+mention\s+[A-Z]+\s+in\s+your\s+application.*$/gim,
+  /when\s+applying.*mention.*word.*$/gim,
+  /include\s+the\s+word\s+[A-Z]+.*$/gim,
+  // Standalone spam keywords (all caps, 6+ letters, surrounded by whitespace)
+  /(?:^|\s)(CANDYSHOP|YELLOWBIRD|PIZZATIME|MOONBEAM|STARLIGHT|BLOCKCHAIN|CRYPTOJOB)(?:\s|$)/gi,
 ]
 
 // Base64-like spam prevention codes
@@ -243,12 +247,25 @@ export function formatJobDescription(
   // This prevents the Somnia bug where content went from 5664 → 0 chars
   if (text.length < raw.length * 0.1 && raw.length > 100) {
     console.warn(`[description-formatter] Formatting removed too much content (${raw.length} → ${text.length}), falling back to cleaned raw`)
-    // Just do basic cleanup without aggressive filtering
+    // Do basic cleanup but still remove spam
     text = decode(rawText)
       .replace(/<br\s*\/?>/gi, '\n')
       .replace(/<\/p>/gi, '\n\n')
       .replace(/<\/div>/gi, '\n')
       .replace(/<[^>]+>/g, ' ')
+      // Remove Base64 spam codes
+      .replace(/\b[A-Za-z0-9+\/]{20,}={1,2}\b/g, '')
+      .replace(/\b[A-Za-z][A-Za-z0-9]{30,}\b/g, (match) => {
+        const hasLower = /[a-z]/.test(match)
+        const hasUpper = /[A-Z]/.test(match)
+        const hasNumber = /[0-9]/.test(match)
+        if (hasLower && hasUpper && hasNumber) return ''
+        return match
+      })
+      // Remove spam keywords in context
+      .replace(/[^.]*\b(CANDYSHOP|YELLOWBIRD|PIZZATIME)\b[^.]*/gi, '')
+      .replace(/[^.]*mention\s+(?:the\s+)?word\s+[A-Z]+[^.]*/gi, '')
+      .replace(/[^.]*this\s+is\s+a\s+beta\s+feature[^.]*/gi, '')
       .replace(/[ \t]+/g, ' ')
       .replace(/\n{3,}/g, '\n\n')
       .trim()
@@ -302,12 +319,27 @@ function cleanRawText(text: string, preserveHtml: boolean): string {
     .replace(/"/g, '"')
 
   // Remove Base64-like spam prevention codes (standalone long alphanumeric strings)
-  // Only target strings that are clearly spam codes, not legitimate content
-  text = text.replace(/\b([A-Za-z0-9+\/]{40,}={1,2})\b/g, (match) => {
-    // Strings with Base64 padding are almost certainly spam codes
-    return ''
+  // Pattern 1: Strings with Base64 padding (ends with = or ==)
+  text = text.replace(/\b[A-Za-z0-9+\/]{20,}={1,2}\b/g, '')
+
+  // Pattern 2: Common Base64 spam patterns (IPv6-like encoded strings)
+  // These often start with RMj, eyJ, etc.
+  text = text.replace(/\b[A-Za-z][A-Za-z0-9+\/]{25,}\b/g, (match) => {
+    // Check if it looks like Base64 spam
+    const hasLower = /[a-z]/.test(match)
+    const hasUpper = /[A-Z]/.test(match)
+    const hasNumber = /[0-9]/.test(match)
+    // Must have mixed case and numbers, and be random-looking
+    if (hasLower && hasUpper && hasNumber && match.length >= 30) {
+      // Check it's not a normal word pattern
+      if (!/^[A-Z][a-z]+(?:[A-Z][a-z]+)*$/.test(match)) {
+        return ''
+      }
+    }
+    return match
   })
-  // Also check for very long random-looking strings without padding
+
+  // Pattern 3: Very long random strings without padding
   text = text.replace(/\b([A-Za-z0-9]{50,})\b/g, (match) => {
     return isBase64SpamCode(match) ? '' : match
   })
@@ -418,8 +450,23 @@ function removeBoilerplate(text: string): string {
     ]
 
     // Check for spam prevention code words (all caps words like CANDYSHOP)
-    if (/\b[A-Z]{6,}\b/.test(line) && /mention|show|read|word/i.test(line)) {
+    if (/\b[A-Z]{6,}\b/.test(line) && /mention|show|read|word|apply|include/i.test(line)) {
       return false
+    }
+
+    // Check for lines containing Base64-like spam codes
+    if (/\b[A-Za-z][A-Za-z0-9]{25,}\b/.test(line)) {
+      const match = line.match(/\b[A-Za-z][A-Za-z0-9]{25,}\b/)
+      if (match) {
+        const code = match[0]
+        const hasLower = /[a-z]/.test(code)
+        const hasUpper = /[A-Z]/.test(code)
+        const hasNumber = /[0-9]/.test(code)
+        // If it looks like a random code, filter the whole line
+        if (hasLower && hasUpper && hasNumber) {
+          return false
+        }
+      }
     }
 
     for (const phrase of boilerplatePhrases) {
