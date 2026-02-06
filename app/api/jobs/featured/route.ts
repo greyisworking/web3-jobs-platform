@@ -18,18 +18,16 @@ export async function GET() {
       'salary', 'salaryMin', 'salaryMax', 'salaryCurrency', 'tags', 'source', 'region',
       'postedDate', 'crawledAt', 'updatedAt', 'isActive',
       'experienceLevel', 'remoteType', 'companyLogo',
-      'backers', 'sector', 'badges',
-      'is_featured', 'is_urgent', 'is_alpha', 'is_dao_job', 'token_gate',
-      'featured_pinned', 'featured_score'
+      'backers', 'sector', 'badges'
     ].join(',');
 
+    // Get recent jobs from priority sources (high-quality companies)
     const { data: jobs, error } = await supabase
       .from('Job')
       .select(listFields)
       .eq('isActive', true)
-      .eq('is_featured', true)
-      .order('featured_pinned', { ascending: false })
-      .order('featured_score', { ascending: false })
+      .in('source', ['priority:greenhouse', 'priority:lever', 'priority:ashby'])
+      .order('postedDate', { ascending: false })
       .limit(6);
 
     if (error) {
