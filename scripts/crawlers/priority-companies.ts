@@ -91,8 +91,9 @@ export async function crawlPriorityCompanies(): Promise<number> {
               category: job.category,
               tags: job.tags,
               source: `priority:${company.careerPlatform}`,
-              region: 'Korea',
+              region: 'Global',
               postedDate: job.postedDate,
+              description: job.description,  // Pass description from platform crawler
             },
             `priority:${company.careerPlatform}`
           )

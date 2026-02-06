@@ -1,6 +1,11 @@
 import { fetchJSON } from '../../utils'
 import type { PlatformJob } from './index'
 
+interface LeverList {
+  text: string
+  content: string
+}
+
 interface LeverPosting {
   id: string
   text: string
@@ -14,6 +19,30 @@ interface LeverPosting {
   applyUrl?: string
   createdAt?: number
   tags?: string[]
+  descriptionPlain?: string
+  lists?: LeverList[]
+}
+
+/**
+ * Build description from Lever posting data
+ */
+function buildDescription(posting: LeverPosting): string | undefined {
+  const parts: string[] = []
+
+  if (posting.descriptionPlain) {
+    parts.push(posting.descriptionPlain)
+  }
+
+  if (posting.lists && posting.lists.length > 0) {
+    for (const list of posting.lists) {
+      if (list.text && list.content) {
+        parts.push(`\n${list.text}\n${list.content}`)
+      }
+    }
+  }
+
+  const description = parts.join('\n').trim()
+  return description.length > 50 ? description : undefined
 }
 
 /**
@@ -42,6 +71,7 @@ export async function crawlLeverJobs(slug: string, companyName: string): Promise
       category: posting.categories?.department || posting.categories?.team || 'Engineering',
       tags: posting.tags || [],
       postedDate: posting.createdAt ? new Date(posting.createdAt) : new Date(),
+      description: buildDescription(posting),
     })
   }
 

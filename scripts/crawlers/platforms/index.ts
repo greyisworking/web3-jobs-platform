@@ -7,6 +7,7 @@ export interface PlatformJob {
   category: string
   tags: string[]
   postedDate: Date
+  description?: string  // Job description HTML/text
 }
 
 export { crawlLeverJobs } from './lever'

@@ -11,6 +11,8 @@ interface AshbyJob {
   jobUrl?: string
   publishedAt?: string
   isRemote?: boolean
+  descriptionHtml?: string
+  descriptionPlain?: string
 }
 
 interface AshbyResponse {
@@ -50,6 +52,7 @@ export async function crawlAshbyJobs(orgSlug: string, companyName: string): Prom
       category: job.department || job.team || 'Engineering',
       tags: [],
       postedDate: job.publishedAt ? new Date(job.publishedAt) : new Date(),
+      description: job.descriptionHtml || job.descriptionPlain || undefined,
     })
   }
 
