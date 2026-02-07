@@ -74,9 +74,11 @@ const SECTION_PATTERNS: Array<{
     patterns: [
       /^key\s*responsibilities/i,
       /^responsibilities/i,
-      /^what\s*you(?:'ll|\s*will)\s*(?:do|be\s*doing)/i,
+      /^what\s*you(?:'ll|'ll|\s*ll|\s*will)\s*(?:do|be\s*doing)/i,  // Handle missing apostrophe
       /^your\s*(?:role|responsibilities)/i,
       /^duties/i,
+      /^in\s*this\s*role/i,
+      /^the\s*role/i,
       /^주요\s*업무/i,
       /^담당\s*업무/i,
     ],
@@ -88,8 +90,10 @@ const SECTION_PATTERNS: Array<{
     patterns: [
       /^requirements?/i,
       /^qualifications?/i,
-      /^what\s*we(?:'re|\s*are)\s*looking\s*for/i,
-      /^you(?:'ll)?\s*(?:bring|have|need)/i,
+      /^what\s*we(?:'re|'re|\s*re|\s*are)\s*looking\s*for/i,  // Handle missing apostrophe
+      /^you(?:'ll|'ll|\s*ll)?\s*(?:bring|have|need)/i,  // Handle missing apostrophe
+      /^who\s*you\s*are/i,  // Add "Who You Are" pattern
+      /^about\s*you/i,  // Add "About You" pattern
       /^must\s*have/i,
       /^required\s*(?:skills?|experience)/i,
       /^minimum\s*qualifications?/i,
@@ -533,6 +537,7 @@ function parseSections(text: string): Record<string, string> {
 
   let currentSection: string | null = null
   let currentContent: string[] = []
+  let introContent: string[] = []  // Content before first section header
 
   for (const line of lines) {
     const trimmed = line.trim()
@@ -587,6 +592,9 @@ function parseSections(text: string): Record<string, string> {
       currentContent = []
     } else if (currentSection) {
       currentContent.push(line)
+    } else {
+      // Content before first section header - save as intro
+      introContent.push(line)
     }
   }
 
@@ -599,6 +607,16 @@ function parseSections(text: string): Record<string, string> {
       } else {
         sections[currentSection] = content
       }
+    }
+  }
+
+  // Save intro content as "about" if it has substantial text
+  const introText = introContent.join('\n').trim()
+  if (introText.length > 50) {  // Only if there's substantial intro content
+    if (sections.about) {
+      sections.about = introText + '\n\n' + sections.about
+    } else {
+      sections.about = introText
     }
   }
 
