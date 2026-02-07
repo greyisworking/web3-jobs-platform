@@ -179,7 +179,7 @@ const SPAM_PATTERNS = [
 ]
 
 const BOILERPLATE_LINE_PATTERNS = [
-  /^apply\s*now\s*:?$/i,
+  /^apply\s*(?:now|for\s+this\s+job)\s*:?$/i,
   /^click\s*(?:here\s*)?to\s*apply\s*$/i,
   /^share\s*(?:this\s*)?(?:job|position)?/i,
   /^save\s*(?:this\s*)?job/i,
@@ -209,11 +209,24 @@ const BOILERPLATE_LINE_PATTERNS = [
 
 // Patterns to remove from end of content (trailing CTA/EEO)
 const TRAILING_BOILERPLATE_PATTERNS = [
+  // "Ready to..." CTA
   /(?:\n\n|\n)(?:\*\*)?ready\s+to\s+[^?]+\?(?:\*\*)?\s*$/i,
-  /(?:\n\n|\n)(?:\*\*)?equal\s+opportunity(?:\*\*)?\s*(?:\n\n|\n)?(?:\*\*)?(?:apply\s+now|we\s+welcome)[^]*?$/i,
-  /(?:\n\n|\n)(?:\*\*)?apply\s+now\s*:?\s*(?:\*\*)?\s*$/i,
+  // Standalone Apply Now / Apply for this job
+  /(?:\n\n|\n)(?:\*\*)?apply\s*(?:now|for\s+this\s+job)\s*:?\s*(?:\*\*)?\s*$/i,
+  /apply\s+for\s+this\s+job\s*$/i,
+  // EEO statements
   /(?:\n\n|\n)we\s+welcome\s+applicants\s+from\s+all\s+backgrounds[^]*?$/i,
   /(?:\n\n|\n)we\s+are\s+an?\s+equal\s+opportunity\s+employer[^]*?$/i,
+  // "Equal opportunityApply Now:" (stuck together)
+  /(?:\n\n|\n)(?:\*\*)?equal\s*opportunity\s*(?:apply\s*now\s*:?)?(?:\*\*)?\s*$/i,
+  // "Benefits & Perks" followed by "Equal opportunity" with no actual content
+  /(?:\n\n|\n)(?:\*\*)?benefits?\s*(?:&|and)?\s*perks?(?:\*\*)?\s*(?:\n+)(?:\*\*)?equal\s*opportunity[^]*?$/i,
+  // Multiple empty section headers at the end
+  /(?:\n\n|\n)(?:\*\*)?(?:benefits?\s*(?:&|and)?\s*perks?|equal\s*opportunity|how\s+to\s+apply|apply\s*now)(?:\*\*)?\s*(?:\n+(?:\*\*)?(?:equal\s*opportunity|apply\s*now|benefits?)(?:\*\*)?\s*)*$/i,
+  // Any combination of these at the very end with no content
+  /(?:\n)(?:\*\*)?(?:equal\s*opportunity|apply\s*(?:now|for\s+this\s+job)\s*:?|benefits?\s*(?:&|and)?\s*perks?)(?:\*\*)?\s*(?:\n(?:\*\*)?(?:equal\s*opportunity|apply\s*(?:now|for\s+this\s+job)\s*:?|we\s+welcome)(?:\*\*)?[^\n]*)*\s*$/i,
+  // "If you would like more information..." + "Apply for this job"
+  /if\s+you\s+would\s+like\s+more\s+information[^.]+\.\s*apply\s+for\s+this\s+job\s*$/i,
 ]
 
 // ============================================================================
@@ -956,12 +969,74 @@ function buildMarkdownSummary(
   // Build result and remove trailing boilerplate
   let result = parts.join('\n').trim()
 
-  // Remove trailing CTA/EEO boilerplate
-  for (const pattern of TRAILING_BOILERPLATE_PATTERNS) {
-    result = result.replace(pattern, '')
+  // Remove trailing CTA/EEO boilerplate (run multiple times to catch nested patterns)
+  for (let i = 0; i < 3; i++) {
+    const prevResult = result
+    for (const pattern of TRAILING_BOILERPLATE_PATTERNS) {
+      result = result.replace(pattern, '')
+    }
+    result = result.trim()
+    if (result === prevResult) break
   }
 
+  // Final cleanup: remove last lines if they're just boilerplate headers
+  result = cleanTrailingBoilerplate(result)
+
   return result.trim()
+}
+
+/**
+ * Remove trailing boilerplate headers that have no content
+ */
+function cleanTrailingBoilerplate(text: string): string {
+  const lines = text.split('\n')
+
+  // Remove trailing empty lines first
+  while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
+    lines.pop()
+  }
+
+  // Check last few lines for boilerplate-only content
+  const boilerplateOnlyPatterns = [
+    /^\*\*(?:benefits?\s*(?:&|and)?\s*perks?|equal\s*opportunity|apply\s*now|how\s+to\s+apply|ready\s+to)\*\*$/i,
+    /^(?:benefits?\s*(?:&|and)?\s*perks?|equal\s*opportunity|apply\s*(?:now|for\s+this\s+job)\s*:?|how\s+to\s+apply)$/i,
+    /^equal\s*opportunity\s*apply\s*now\s*:?$/i,
+    /^ready\s+to\s+(?:shape|join|build|apply|start)/i,
+    /^we\s+welcome\s+applicants/i,
+    /^##\s+what\s+you\s+get$/i,  // Section header with no content following
+    /^apply\s+for\s+this\s+job$/i,
+    /^if\s+you\s+would\s+like\s+more\s+information/i,
+  ]
+
+  // Remove trailing boilerplate lines
+  let removed = true
+  while (removed && lines.length > 0) {
+    removed = false
+    const lastLine = lines[lines.length - 1].trim()
+
+    // Check if last line is boilerplate
+    for (const pattern of boilerplateOnlyPatterns) {
+      if (pattern.test(lastLine)) {
+        lines.pop()
+        removed = true
+        break
+      }
+    }
+
+    // Also remove trailing empty lines after removal
+    while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
+      lines.pop()
+    }
+  }
+
+  // Check if "## What You Get" section is empty (only has the header)
+  const result = lines.join('\n')
+  const emptyWhatYouGetPattern = /\n## What You Get\s*$/
+  if (emptyWhatYouGetPattern.test(result)) {
+    return result.replace(emptyWhatYouGetPattern, '')
+  }
+
+  return result
 }
 
 /**
