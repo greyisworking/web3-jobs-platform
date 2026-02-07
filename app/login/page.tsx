@@ -64,28 +64,35 @@ export default function LoginPage() {
   const handleKakaoLogin = async () => {
     setError('')
     setLoading(true)
+    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`
+    console.log('[OAuth] Kakao login - redirectTo:', redirectTo)
+
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'kakao',
         options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`,
+          redirectTo,
           skipBrowserRedirect: true,
         },
       })
-      console.log('Kakao OAuth response:', { data, error })
+      console.log('[OAuth] Kakao response:', { url: data?.url, error })
+
       if (error) {
+        console.error('[OAuth] Kakao error:', error)
         setError(error.message)
         setLoading(false)
         return
       }
       if (data?.url) {
-        window.location.href = data.url
+        console.log('[OAuth] Redirecting to:', data.url)
+        window.location.replace(data.url)
       } else {
-        setError('Kakao OAuth가 설정되지 않았습니다.')
+        console.error('[OAuth] No URL returned')
+        setError('Kakao OAuth가 설정되지 않았습니다. Supabase에서 Kakao provider를 활성화하세요.')
         setLoading(false)
       }
     } catch (err) {
-      console.error('Kakao OAuth error:', err)
+      console.error('[OAuth] Kakao exception:', err)
       setError('카카오 로그인 중 오류가 발생했습니다.')
       setLoading(false)
     }
@@ -177,29 +184,35 @@ export default function LoginPage() {
           onClick={async () => {
             setError('')
             setLoading(true)
+            const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`
+            console.log('[OAuth] Google login - redirectTo:', redirectTo)
+
             try {
               const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                  redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`,
+                  redirectTo,
                   skipBrowserRedirect: true,
                 },
               })
-              console.log('Google OAuth response:', { data, error })
+              console.log('[OAuth] Google response:', { url: data?.url, error })
+
               if (error) {
+                console.error('[OAuth] Google error:', error)
                 setError(error.message)
                 setLoading(false)
                 return
               }
-              // Manually redirect to OAuth URL
               if (data?.url) {
-                window.location.href = data.url
+                console.log('[OAuth] Redirecting to:', data.url)
+                window.location.replace(data.url)
               } else {
-                setError('Google OAuth가 설정되지 않았습니다. Supabase 대시보드에서 Google provider를 활성화하세요.')
+                console.error('[OAuth] No URL returned')
+                setError('Google OAuth가 설정되지 않았습니다. Supabase에서 Google provider를 활성화하세요.')
                 setLoading(false)
               }
             } catch (err) {
-              console.error('Google OAuth error:', err)
+              console.error('[OAuth] Google exception:', err)
               setError('Google 로그인 중 오류가 발생했습니다.')
               setLoading(false)
             }

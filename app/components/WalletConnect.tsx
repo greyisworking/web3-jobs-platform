@@ -191,28 +191,50 @@ export function WalletConnect() {
 
   const handleGoogleLogin = async () => {
     setOauthLoading(true)
+    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`
+    console.log('[OAuth] Google login - redirectTo:', redirectTo)
+
+    // Safety timeout - reset loading if redirect doesn't happen within 10s
+    const safetyTimeout = setTimeout(() => {
+      console.error('[OAuth] Google safety timeout triggered')
+      setOauthLoading(false)
+      toast.error('Login timeout', { description: 'Please try again.' })
+    }, 10000)
+
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`,
+          redirectTo,
           skipBrowserRedirect: true,
         },
       })
+
+      console.log('[OAuth] Google response:', { url: data?.url, error })
+
       if (error) {
+        clearTimeout(safetyTimeout)
+        console.error('[OAuth] Google error:', error)
         const { title, description } = getErrorForToast(error)
         toast.error(title, { description })
         setOauthLoading(false)
         return
       }
       if (data?.url) {
-        window.location.href = data.url
+        console.log('[OAuth] Redirecting to:', data.url)
+        // Keep timeout active - it will be cleared when page unloads
+        window.location.replace(data.url)
       } else {
-        toast.error('Google OAuth not configured')
+        clearTimeout(safetyTimeout)
+        console.error('[OAuth] No URL returned - Google OAuth may not be configured in Supabase')
+        toast.error('Google OAuth not configured', {
+          description: 'Please enable Google provider in Supabase Dashboard'
+        })
         setOauthLoading(false)
       }
     } catch (err) {
-      console.error('Google OAuth error:', err)
+      clearTimeout(safetyTimeout)
+      console.error('[OAuth] Google exception:', err)
       toast.error('Google login failed', { description: 'Please try again.' })
       setOauthLoading(false)
     }
@@ -220,28 +242,50 @@ export function WalletConnect() {
 
   const handleKakaoLogin = async () => {
     setOauthLoading(true)
+    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`
+    console.log('[OAuth] Kakao login - redirectTo:', redirectTo)
+
+    // Safety timeout - reset loading if redirect doesn't happen within 10s
+    const safetyTimeout = setTimeout(() => {
+      console.error('[OAuth] Kakao safety timeout triggered')
+      setOauthLoading(false)
+      toast.error('Login timeout', { description: 'Please try again.' })
+    }, 10000)
+
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'kakao',
         options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`,
+          redirectTo,
           skipBrowserRedirect: true,
         },
       })
+
+      console.log('[OAuth] Kakao response:', { url: data?.url, error })
+
       if (error) {
+        clearTimeout(safetyTimeout)
+        console.error('[OAuth] Kakao error:', error)
         const { title, description } = getErrorForToast(error)
         toast.error(title, { description })
         setOauthLoading(false)
         return
       }
       if (data?.url) {
-        window.location.href = data.url
+        console.log('[OAuth] Redirecting to:', data.url)
+        // Keep timeout active - it will be cleared when page unloads
+        window.location.replace(data.url)
       } else {
-        toast.error('Kakao OAuth not configured')
+        clearTimeout(safetyTimeout)
+        console.error('[OAuth] No URL returned - Kakao OAuth may not be configured in Supabase')
+        toast.error('Kakao OAuth not configured', {
+          description: 'Please enable Kakao provider in Supabase Dashboard'
+        })
         setOauthLoading(false)
       }
     } catch (err) {
-      console.error('Kakao OAuth error:', err)
+      clearTimeout(safetyTimeout)
+      console.error('[OAuth] Kakao exception:', err)
       toast.error('Kakao login failed', { description: 'Please try again.' })
       setOauthLoading(false)
     }
