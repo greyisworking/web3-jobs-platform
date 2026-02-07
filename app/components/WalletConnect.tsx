@@ -116,9 +116,12 @@ export function WalletConnect() {
   const { data: ensName } = useEnsName({ address })
   const supabase = createSupabaseBrowserClient()
 
-  // Hydration fix
+  // Hydration fix + reset OAuth loading state on mount
+  // (prevents stuck loading state if previous navigation was interrupted)
   useEffect(() => {
     setMounted(true)
+    setOauthLoading(false) // Reset on mount
+    console.log('[WalletConnect] Component mounted, oauthLoading reset to false')
   }, [])
 
   // Handle connection errors
@@ -383,7 +386,14 @@ export function WalletConnect() {
         <div className="space-y-1">
           <button
             type="button"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleGoogleLogin() }}
+            onClick={(e) => {
+              console.log('[OAuth] Google button clicked, oauthLoading:', oauthLoading)
+              e.preventDefault()
+              e.stopPropagation()
+              if (!oauthLoading) {
+                handleGoogleLogin()
+              }
+            }}
             disabled={oauthLoading}
             className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors disabled:opacity-50 touch-target"
           >
@@ -402,7 +412,14 @@ export function WalletConnect() {
           </button>
           <button
             type="button"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleKakaoLogin() }}
+            onClick={(e) => {
+              console.log('[OAuth] Kakao button clicked, oauthLoading:', oauthLoading)
+              e.preventDefault()
+              e.stopPropagation()
+              if (!oauthLoading) {
+                handleKakaoLogin()
+              }
+            }}
             disabled={oauthLoading}
             className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors disabled:opacity-50 touch-target"
           >
