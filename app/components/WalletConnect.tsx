@@ -116,12 +116,9 @@ export function WalletConnect() {
   const { data: ensName } = useEnsName({ address })
   const supabase = createSupabaseBrowserClient()
 
-  // Hydration fix + reset OAuth loading state on mount
-  // (prevents stuck loading state if previous navigation was interrupted)
+  // Hydration fix
   useEffect(() => {
     setMounted(true)
-    setOauthLoading(false) // Reset on mount
-    console.log('[WalletConnect] Component mounted, oauthLoading reset to false')
   }, [])
 
   // Handle connection errors
@@ -194,52 +191,28 @@ export function WalletConnect() {
 
   const handleGoogleLogin = async () => {
     setOauthLoading(true)
-    // Include current path so user returns to same page after login
-    const currentPath = window.location.pathname + window.location.search
-    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
-    console.log('[OAuth] Google login - redirectTo:', redirectTo)
-
-    // Safety timeout - reset loading if redirect doesn't happen within 10s
-    const safetyTimeout = setTimeout(() => {
-      console.error('[OAuth] Google safety timeout triggered')
-      setOauthLoading(false)
-      toast.error('Login timeout', { description: 'Please try again.' })
-    }, 10000)
-
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo,
+          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`,
           skipBrowserRedirect: true,
         },
       })
-
-      console.log('[OAuth] Google response:', { url: data?.url, error })
-
       if (error) {
-        clearTimeout(safetyTimeout)
-        console.error('[OAuth] Google error:', error)
         const { title, description } = getErrorForToast(error)
         toast.error(title, { description })
         setOauthLoading(false)
         return
       }
       if (data?.url) {
-        console.log('[OAuth] Redirecting to:', data.url)
-        // Keep timeout active - it will be cleared when page unloads
-        window.location.replace(data.url)
+        window.location.href = data.url
       } else {
-        clearTimeout(safetyTimeout)
-        console.error('[OAuth] No URL returned - Google OAuth may not be configured in Supabase')
-        toast.error('Google OAuth not configured', {
-          description: 'Please enable Google provider in Supabase Dashboard'
-        })
+        toast.error('Google OAuth not configured')
         setOauthLoading(false)
       }
     } catch (err) {
-      clearTimeout(safetyTimeout)
-      console.error('[OAuth] Google exception:', err)
+      console.error('Google OAuth error:', err)
       toast.error('Google login failed', { description: 'Please try again.' })
       setOauthLoading(false)
     }
@@ -247,52 +220,28 @@ export function WalletConnect() {
 
   const handleKakaoLogin = async () => {
     setOauthLoading(true)
-    // Include current path so user returns to same page after login
-    const currentPath = window.location.pathname + window.location.search
-    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
-    console.log('[OAuth] Kakao login - redirectTo:', redirectTo)
-
-    // Safety timeout - reset loading if redirect doesn't happen within 10s
-    const safetyTimeout = setTimeout(() => {
-      console.error('[OAuth] Kakao safety timeout triggered')
-      setOauthLoading(false)
-      toast.error('Login timeout', { description: 'Please try again.' })
-    }, 10000)
-
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'kakao',
         options: {
-          redirectTo,
+          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`,
           skipBrowserRedirect: true,
         },
       })
-
-      console.log('[OAuth] Kakao response:', { url: data?.url, error })
-
       if (error) {
-        clearTimeout(safetyTimeout)
-        console.error('[OAuth] Kakao error:', error)
         const { title, description } = getErrorForToast(error)
         toast.error(title, { description })
         setOauthLoading(false)
         return
       }
       if (data?.url) {
-        console.log('[OAuth] Redirecting to:', data.url)
-        // Keep timeout active - it will be cleared when page unloads
-        window.location.replace(data.url)
+        window.location.href = data.url
       } else {
-        clearTimeout(safetyTimeout)
-        console.error('[OAuth] No URL returned - Kakao OAuth may not be configured in Supabase')
-        toast.error('Kakao OAuth not configured', {
-          description: 'Please enable Kakao provider in Supabase Dashboard'
-        })
+        toast.error('Kakao OAuth not configured')
         setOauthLoading(false)
       }
     } catch (err) {
-      clearTimeout(safetyTimeout)
-      console.error('[OAuth] Kakao exception:', err)
+      console.error('Kakao OAuth error:', err)
       toast.error('Kakao login failed', { description: 'Please try again.' })
       setOauthLoading(false)
     }
@@ -386,14 +335,7 @@ export function WalletConnect() {
         <div className="space-y-1">
           <button
             type="button"
-            onClick={(e) => {
-              console.log('[OAuth] Google button clicked, oauthLoading:', oauthLoading)
-              e.preventDefault()
-              e.stopPropagation()
-              if (!oauthLoading) {
-                handleGoogleLogin()
-              }
-            }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleGoogleLogin() }}
             disabled={oauthLoading}
             className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors disabled:opacity-50 touch-target"
           >
@@ -412,14 +354,7 @@ export function WalletConnect() {
           </button>
           <button
             type="button"
-            onClick={(e) => {
-              console.log('[OAuth] Kakao button clicked, oauthLoading:', oauthLoading)
-              e.preventDefault()
-              e.stopPropagation()
-              if (!oauthLoading) {
-                handleKakaoLogin()
-              }
-            }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleKakaoLogin() }}
             disabled={oauthLoading}
             className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors disabled:opacity-50 touch-target"
           >
