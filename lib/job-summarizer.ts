@@ -1008,10 +1008,12 @@ function cleanTrailingBoilerplate(text: string): string {
     /^if\s+you\s+would\s+like\s+more\s+information/i,
   ]
 
-  // Remove trailing boilerplate lines
+  // Remove trailing boilerplate lines (check last 5 lines)
   let removed = true
-  while (removed && lines.length > 0) {
+  let iterations = 0
+  while (removed && lines.length > 0 && iterations < 10) {
     removed = false
+    iterations++
     const lastLine = lines[lines.length - 1].trim()
 
     // Check if last line is boilerplate
@@ -1029,14 +1031,27 @@ function cleanTrailingBoilerplate(text: string): string {
     }
   }
 
-  // Check if "## What You Get" section is empty (only has the header)
-  const result = lines.join('\n')
-  const emptyWhatYouGetPattern = /\n## What You Get\s*$/
-  if (emptyWhatYouGetPattern.test(result)) {
-    return result.replace(emptyWhatYouGetPattern, '')
+  let result = lines.join('\n')
+
+  // Remove empty section headers at the end
+  const emptySectionPatterns = [
+    /\n## What You Get\s*$/,
+    /\n## About the Team\s*$/,
+    /\n\*\*Benefits & Perks\*\*\s*$/,
+    /\n\*\*Equal opportunity\*\*\s*$/,
+    /\nBenefits & Perks\s*$/i,
+    /\nEqual opportunity\s*$/i,
+  ]
+
+  for (const pattern of emptySectionPatterns) {
+    result = result.replace(pattern, '')
   }
 
-  return result
+  // Remove "Benefits & Perks" followed immediately by "Equal opportunity" with no content
+  result = result.replace(/\n\*?\*?Benefits\s*&\s*Perks\*?\*?\s*\n\s*\*?\*?Equal\s*opportunity\*?\*?[^\n]*$/gi, '')
+  result = result.replace(/\n\*?\*?Equal\s*opportunity\*?\*?\s*Apply\s*Now[^\n]*$/gi, '')
+
+  return result.trim()
 }
 
 /**
