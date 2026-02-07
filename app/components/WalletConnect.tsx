@@ -191,7 +191,9 @@ export function WalletConnect() {
 
   const handleGoogleLogin = async () => {
     setOauthLoading(true)
-    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`
+    // Include current path so user returns to same page after login
+    const currentPath = window.location.pathname + window.location.search
+    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
     console.log('[OAuth] Google login - redirectTo:', redirectTo)
 
     // Safety timeout - reset loading if redirect doesn't happen within 10s
@@ -242,7 +244,9 @@ export function WalletConnect() {
 
   const handleKakaoLogin = async () => {
     setOauthLoading(true)
-    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`
+    // Include current path so user returns to same page after login
+    const currentPath = window.location.pathname + window.location.search
+    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
     console.log('[OAuth] Kakao login - redirectTo:', redirectTo)
 
     // Safety timeout - reset loading if redirect doesn't happen within 10s

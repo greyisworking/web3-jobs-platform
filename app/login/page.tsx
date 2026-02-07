@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import Footer from '../components/Footer'
 
@@ -36,7 +36,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [inApp, setInApp] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createSupabaseBrowserClient()
+
+  // Get the redirect destination from query params (default to /)
+  const nextUrl = searchParams.get('next') || '/'
 
   useEffect(() => {
     setInApp(isInAppBrowser())
@@ -56,7 +60,7 @@ export default function LoginPage() {
       setError(error.message)
       setLoading(false)
     } else {
-      router.push('/account')
+      router.push(nextUrl)
       router.refresh()
     }
   }
@@ -64,7 +68,7 @@ export default function LoginPage() {
   const handleKakaoLogin = async () => {
     setError('')
     setLoading(true)
-    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`
+    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`
     console.log('[OAuth] Kakao login - redirectTo:', redirectTo)
 
     try {
@@ -184,7 +188,7 @@ export default function LoginPage() {
           onClick={async () => {
             setError('')
             setLoading(true)
-            const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`
+            const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`
             console.log('[OAuth] Google login - redirectTo:', redirectTo)
 
             try {

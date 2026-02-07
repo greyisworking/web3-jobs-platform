@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   const error_code = searchParams.get('error')
   const error_description = searchParams.get('error_description')
-  const next = searchParams.get('next') ?? '/careers'
+  const next = searchParams.get('next') ?? '/'
 
   console.log('[Auth Callback] Received:', { code: !!code, error_code, error_description, next })
 
