@@ -1,6 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Cookie domain for production (works across www and non-www)
+const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.neun.wtf' : undefined
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -18,20 +21,30 @@ export async function middleware(request: NextRequest) {
           )
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, {
+              ...options,
+              domain: COOKIE_DOMAIN,
+            })
           )
         },
       },
     }
   )
 
-  // Refresh the session
+  // Refresh the session (this updates cookies if needed)
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Allow access to login page without auth
-  if (request.nextUrl.pathname === '/admin/login') {
+  const pathname = request.nextUrl.pathname
+
+  // Skip auth check for non-admin routes - just return with refreshed cookies
+  if (!pathname.startsWith('/admin')) {
+    return supabaseResponse
+  }
+
+  // Allow access to admin login page without auth
+  if (pathname === '/admin/login') {
     // If already logged in, redirect to admin dashboard
     if (user) {
       const url = request.nextUrl.clone()
@@ -52,5 +65,14 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public files (images, etc)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+  ],
 }

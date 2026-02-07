@@ -1,6 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+// Cookie domain for production (works across www and non-www)
+const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.neun.wtf' : undefined
+
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies()
 
@@ -15,7 +18,10 @@ export async function createSupabaseServerClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, {
+                ...options,
+                domain: COOKIE_DOMAIN,
+              })
             )
           } catch {
             // The `setAll` method is called from a Server Component.

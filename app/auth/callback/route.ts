@@ -2,6 +2,9 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+// Cookie domain for production (works across www and non-www)
+const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.neun.wtf' : undefined
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const { searchParams } = requestUrl
@@ -16,6 +19,7 @@ export async function GET(request: Request) {
   console.log('[Auth Callback] ===== DEBUG =====')
   console.log('[Auth Callback] Request URL:', request.url)
   console.log('[Auth Callback] Site URL:', siteUrl)
+  console.log('[Auth Callback] Cookie domain:', COOKIE_DOMAIN)
   console.log('[Auth Callback] Code present:', !!code)
   console.log('[Auth Callback] Error:', error_code, error_description)
   console.log('[Auth Callback] Next:', next)
@@ -52,7 +56,10 @@ export async function GET(request: Request) {
           console.log('[Auth Callback] Setting cookies:', cookiesToSet.map(c => c.name))
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, {
+                ...options,
+                domain: COOKIE_DOMAIN,
+              })
             )
           } catch (e) {
             console.error('[Auth Callback] Cookie set error:', e)
