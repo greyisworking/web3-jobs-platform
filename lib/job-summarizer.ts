@@ -179,7 +179,7 @@ const SPAM_PATTERNS = [
 ]
 
 const BOILERPLATE_LINE_PATTERNS = [
-  /^apply\s*now\s*$/i,
+  /^apply\s*now\s*:?$/i,
   /^click\s*(?:here\s*)?to\s*apply\s*$/i,
   /^share\s*(?:this\s*)?(?:job|position)?/i,
   /^save\s*(?:this\s*)?job/i,
@@ -188,6 +188,32 @@ const BOILERPLATE_LINE_PATTERNS = [
   /^related\s*(?:jobs?|positions?)/i,
   /^sourced\s*from/i,
   /^posted\s*(?:on|via|by)/i,
+  // CTA phrases
+  /^ready\s+to\s+(?:shape|join|build|apply|start|make|be\s+part)/i,
+  /^interested\s*\?/i,
+  /^sound\s+like\s+you\s*\?/i,
+  /^think\s+you(?:'re|'d\s+be)\s+a\s+(?:good\s+)?fit\s*\?/i,
+  /^excited\s+to\s+join/i,
+  /^want\s+to\s+(?:join|work|be\s+part)/i,
+  // EEO boilerplate
+  /^equal\s+opportunity(?:\s+employer)?(?:\s*apply\s*now\s*:?\s*)?$/i,
+  /^we\s+(?:are\s+an?\s+)?equal\s+opportunity/i,
+  /^we\s+welcome\s+applicants\s+from\s+all\s+backgrounds/i,
+  /^we\s+(?:value|celebrate|embrace)\s+diversity/i,
+  /^we\s+hire\s+based\s+on\s+(?:talent|merit|skills)/i,
+  /^we\s+(?:do\s+not|don't)\s+discriminate/i,
+  /^all\s+qualified\s+applicants\s+will\s+receive/i,
+  // Empty section headers (title with no content)
+  /^\*\*(?:benefits?\s*(?:&|and)?\s*perks?|equal\s+opportunity|how\s+to\s+apply)\*\*$/i,
+]
+
+// Patterns to remove from end of content (trailing CTA/EEO)
+const TRAILING_BOILERPLATE_PATTERNS = [
+  /(?:\n\n|\n)(?:\*\*)?ready\s+to\s+[^?]+\?(?:\*\*)?\s*$/i,
+  /(?:\n\n|\n)(?:\*\*)?equal\s+opportunity(?:\*\*)?\s*(?:\n\n|\n)?(?:\*\*)?(?:apply\s+now|we\s+welcome)[^]*?$/i,
+  /(?:\n\n|\n)(?:\*\*)?apply\s+now\s*:?\s*(?:\*\*)?\s*$/i,
+  /(?:\n\n|\n)we\s+welcome\s+applicants\s+from\s+all\s+backgrounds[^]*?$/i,
+  /(?:\n\n|\n)we\s+are\s+an?\s+equal\s+opportunity\s+employer[^]*?$/i,
 ]
 
 // ============================================================================
@@ -927,7 +953,15 @@ function buildMarkdownSummary(
     parts.push('')
   }
 
-  return parts.join('\n').trim()
+  // Build result and remove trailing boilerplate
+  let result = parts.join('\n').trim()
+
+  // Remove trailing CTA/EEO boilerplate
+  for (const pattern of TRAILING_BOILERPLATE_PATTERNS) {
+    result = result.replace(pattern, '')
+  }
+
+  return result.trim()
 }
 
 /**
