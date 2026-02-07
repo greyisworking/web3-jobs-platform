@@ -11,7 +11,7 @@ interface PageProps {
   params: Promise<{ slug: string }>
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.io'
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.wtf'
 
 async function getArticle(slug: string): Promise<Article | null> {
   const supabase = await createSupabaseServerClient()

@@ -24,15 +24,15 @@ export const config = createConfig({
       projectId,
       showQrModal: true,
       metadata: {
-        name: 'NEUN Jobs',
-        description: 'Web3 Jobs Platform for Korea',
-        url: 'https://neun.jobs',
-        icons: ['https://neun.jobs/icon.png'],
+        name: 'NEUN',
+        description: 'Web3 Jobs Platform',
+        url: 'https://neun.wtf',
+        icons: ['https://neun.wtf/icon.png'],
       },
     }),
     coinbaseWallet({
-      appName: 'NEUN Jobs',
-      appLogoUrl: 'https://neun.jobs/icon.png',
+      appName: 'NEUN',
+      appLogoUrl: 'https://neun.wtf/icon.png',
     }),
   ],
   transports: {

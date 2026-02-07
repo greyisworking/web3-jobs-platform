@@ -12,7 +12,7 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.io'
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.wtf'
 
 async function getJob(id: string): Promise<Job | null> {
   const supabase = await createSupabaseServerClient()
