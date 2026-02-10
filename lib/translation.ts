@@ -121,13 +121,14 @@ const KOREAN_JOB_TERMS: Record<string, string> = {
 }
 
 // Check if text contains Korean characters
-export function containsKorean(text: string): boolean {
+export function containsKorean(text: string | null | undefined): boolean {
+  if (!text) return false
   return /[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]/.test(text)
 }
 
 // Simple term-based translation (for display purposes)
-export function quickTranslateTerms(text: string): string {
-  if (!containsKorean(text)) return text
+export function quickTranslateTerms(text: string | null | undefined): string {
+  if (!text || !containsKorean(text)) return text || ''
 
   let translated = text
 
