@@ -86,8 +86,8 @@ async function translateJobs(dryRun: boolean): Promise<void> {
     }
 
     // Translate description
-    if (containsKorean(job.description)) {
-      const translated = quickTranslateTerms(job.description!)
+    if (job.description && containsKorean(job.description)) {
+      const translated = quickTranslateTerms(job.description)
         .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
         .replace(/\s{2,}/g, ' ')
       updates.description = translated
@@ -95,8 +95,8 @@ async function translateJobs(dryRun: boolean): Promise<void> {
     }
 
     // Translate requirements
-    if (containsKorean(job.requirements)) {
-      const translated = quickTranslateTerms(job.requirements!)
+    if (job.requirements && containsKorean(job.requirements)) {
+      const translated = quickTranslateTerms(job.requirements)
         .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
         .replace(/\s{2,}/g, ' ')
       updates.requirements = translated
@@ -104,8 +104,8 @@ async function translateJobs(dryRun: boolean): Promise<void> {
     }
 
     // Translate responsibilities
-    if (containsKorean(job.responsibilities)) {
-      const translated = quickTranslateTerms(job.responsibilities!)
+    if (job.responsibilities && containsKorean(job.responsibilities)) {
+      const translated = quickTranslateTerms(job.responsibilities)
         .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
         .replace(/\s{2,}/g, ' ')
       updates.responsibilities = translated
@@ -113,8 +113,8 @@ async function translateJobs(dryRun: boolean): Promise<void> {
     }
 
     // Translate benefits
-    if (containsKorean(job.benefits)) {
-      const translated = quickTranslateTerms(job.benefits!)
+    if (job.benefits && containsKorean(job.benefits)) {
+      const translated = quickTranslateTerms(job.benefits)
         .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
         .replace(/\s{2,}/g, ' ')
       updates.benefits = translated
