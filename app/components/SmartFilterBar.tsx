@@ -11,7 +11,7 @@ export interface SmartFilters {
   type: string
   sector: string
   backer: string
-  techStack: string
+  role: string
   tier1VCOnly: boolean
   daoJobsOnly: boolean
   tokenGatedOnly: boolean
@@ -47,9 +47,9 @@ const FILTER_CONFIGS = [
     ],
   },
   {
-    key: 'techStack' as const,
-    label: 'Tech',
-    options: ['Solidity', 'Rust', 'TypeScript', 'Go', 'Python', 'React', 'Node.js', 'Move'],
+    key: 'role' as const,
+    label: 'Role',
+    options: ['Engineering', 'Product', 'Design', 'Marketing/Growth', 'Business Development', 'Operations/HR', 'Community/Support'],
   },
 ] as const
 
@@ -58,7 +58,7 @@ const emptyFilters: SmartFilters = {
   type: '',
   sector: '',
   backer: '',
-  techStack: '',
+  role: '',
   tier1VCOnly: false,
   daoJobsOnly: false,
   tokenGatedOnly: false,
@@ -74,7 +74,7 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
     type: searchParams.get('type') ?? '',
     sector: searchParams.get('sector') ?? '',
     backer: searchParams.get('backer') ?? '',
-    techStack: searchParams.get('techStack') ?? '',
+    role: searchParams.get('role') ?? '',
     tier1VCOnly: searchParams.get('tier1vc') === 'true',
     daoJobsOnly: searchParams.get('dao') === 'true',
     tokenGatedOnly: searchParams.get('tokengate') === 'true',

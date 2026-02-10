@@ -205,3 +205,150 @@ export function detectRemoteType(text: string): string | null {
 
   return null
 }
+
+/**
+ * Role categories for job classification
+ */
+export type RoleCategory =
+  | 'Engineering'
+  | 'Product'
+  | 'Design'
+  | 'Marketing/Growth'
+  | 'Business Development'
+  | 'Operations/HR'
+  | 'Community/Support'
+
+/**
+ * Detect job role category from job title
+ * Categories: Engineering, Product, Design, Marketing/Growth, Business Development, Operations/HR, Community/Support
+ */
+export function detectRole(title: string): RoleCategory {
+  const lower = title.toLowerCase()
+
+  // Check compound/specific patterns FIRST (order matters!)
+
+  // Community/Support compound terms (check before "developer" matches Engineering)
+  if (lower.includes('developer relations') || lower.includes('devrel')) return 'Community/Support'
+  if (lower.includes('developer advocate')) return 'Community/Support'
+  if (lower.includes('support engineer')) return 'Community/Support'
+  if (lower.includes('technical support')) return 'Community/Support'
+
+  // Engineering-specific compound terms (check before ops/support)
+  if (lower.includes('devops') || lower.includes('dev ops')) return 'Engineering'
+  if (lower.includes('protocol engineer')) return 'Engineering'
+  if (lower.includes('platform engineer')) return 'Engineering'
+  if (lower.includes('infrastructure engineer')) return 'Engineering'
+
+  // Business Development specific patterns
+  if (lower.includes('business development') || lower.includes('biz dev') || lower.includes('bizdev')) return 'Business Development'
+  if (lower.includes('enterprise sales') || lower.includes('sales manager') || lower.includes('account executive')) return 'Business Development'
+  if (lower.includes('bd lead') || lower.includes('bd manager') || lower.match(/\bbd\b/)) return 'Business Development'
+  if (lower.includes('사업개발')) return 'Business Development'
+
+  // Operations/HR specific patterns
+  if (lower.includes('talent acquisition') || lower.includes('recruiter') || lower.includes('recruiting')) return 'Operations/HR'
+  if (lower.includes('human resource') || lower.includes(' hr ') || lower.startsWith('hr ')) return 'Operations/HR'
+  if (lower.includes('people ops') || lower.includes('people operations')) return 'Operations/HR'
+
+  // Engineering (high confidence patterns)
+  const engineeringKeywords = [
+    'engineer', 'developer', 'dev', 'programmer', 'architect', 'swe', 'sre',
+    'backend', 'frontend', 'fullstack', 'full-stack', 'full stack',
+    'infrastructure', 'platform', 'security', 'blockchain',
+    'smart contract', 'solidity', 'rust', 'protocol', 'node',
+    'data engineer', 'ml engineer', 'machine learning', 'ai engineer',
+    'qa', 'quality', 'test', 'automation',
+    '개발', '엔지니어', '백엔드', '프론트엔드', '풀스택',
+  ]
+
+  // Product
+  const productKeywords = [
+    'product manager', 'product lead', 'product owner', 'product director',
+    'product analyst', 'product strategist',
+    'program manager', 'project manager', 'technical product',
+    '프로덕트', '기획',
+  ]
+
+  // Design
+  const designKeywords = [
+    'designer', 'design lead', 'design director', 'ux', 'ui', 'ui/ux',
+    'visual design', 'brand design', 'graphic design', 'product design',
+    'creative director', 'art director', 'illustrator',
+    '디자이너', '디자인',
+  ]
+
+  // Marketing/Growth
+  const marketingKeywords = [
+    'marketing', 'growth', 'seo', 'sem', 'content', 'copywriter',
+    'social media', 'brand manager', 'communications',
+    'demand gen', 'acquisition', 'performance marketing',
+    'influencer', 'campaign', 'events',
+    '마케팅', '마케터', '그로스',
+  ]
+
+  // Business Development
+  const bdKeywords = [
+    'partnerships', 'sales', 'account',
+    'client', 'revenue', 'strategic', 'alliances',
+    'deal', 'commercial', 'expansion',
+    '사업개발', '영업', '파트너십',
+  ]
+
+  // Operations/HR
+  const opsKeywords = [
+    'operations manager', 'ops manager',
+    'people', 'finance', 'accounting',
+    'legal', 'compliance', 'admin', 'office manager',
+    'chief of staff', 'executive assistant',
+    '운영', '인사', '채용', '재무', '회계',
+  ]
+
+  // Community/Support
+  const communityKeywords = [
+    'community', 'customer success', 'customer service',
+    'developer relations', 'devrel', 'advocate', 'ambassador',
+    'moderator', 'engagement', 'success manager',
+    'help desk',
+    '커뮤니티', '고객',
+  ]
+
+  // Check in order of specificity
+
+  // Product (check before general terms)
+  for (const keyword of productKeywords) {
+    if (lower.includes(keyword)) return 'Product'
+  }
+
+  // Design
+  for (const keyword of designKeywords) {
+    if (lower.includes(keyword)) return 'Design'
+  }
+
+  // Engineering (check early for tech roles)
+  for (const keyword of engineeringKeywords) {
+    if (lower.includes(keyword)) return 'Engineering'
+  }
+
+  // Community/Support
+  for (const keyword of communityKeywords) {
+    if (lower.includes(keyword)) return 'Community/Support'
+  }
+
+  // Marketing/Growth
+  for (const keyword of marketingKeywords) {
+    if (lower.includes(keyword)) return 'Marketing/Growth'
+  }
+
+  // Business Development
+  for (const keyword of bdKeywords) {
+    if (lower.includes(keyword)) return 'Business Development'
+  }
+
+  // Operations/HR
+  for (const keyword of opsKeywords) {
+    if (lower.includes(keyword)) return 'Operations/HR'
+  }
+
+  // Default to Engineering for web3 job boards (most common category)
+  return 'Engineering'
+}

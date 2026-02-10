@@ -1,5 +1,14 @@
 import type { TokenGate } from './web3'
 
+export type RoleCategory =
+  | 'Engineering'
+  | 'Product'
+  | 'Design'
+  | 'Marketing/Growth'
+  | 'Business Development'
+  | 'Operations/HR'
+  | 'Community/Support'
+
 export interface Job {
   id: string
   title: string
@@ -7,6 +16,7 @@ export interface Job {
   location: string
   type: string
   category: string
+  role?: RoleCategory | null  // Job role category
   url: string
   salary: string | null
   source: string

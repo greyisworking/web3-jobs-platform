@@ -14,6 +14,7 @@ model Job {
   location    String
   type        String   // Full-time, Part-time, Contract, Remote
   category    String   // Engineering, Design, Marketing, etc.
+  role        String?  // Engineering, Product, Design, Marketing/Growth, Business Development, Operations/HR, Community/Support
   description String?  // Full job description (HTML/Markdown)
   url         String   @unique
   salary      String?
@@ -52,6 +53,7 @@ model Job {
   @@index([postedDate])
   @@index([postedBy])
   @@index([experienceLevel])
+  @@index([role])
 }
 
 model JobReport {

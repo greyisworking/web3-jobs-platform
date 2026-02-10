@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { jobSchema, type JobInput } from './job'
 import { findPriorityCompany } from '../priority-companies'
 import { computeBadges } from '../badges'
+import { detectRole } from '../../scripts/utils'
 
 // Prisma client for SQLite fallback
 const prisma = new PrismaClient()
@@ -67,6 +68,9 @@ export async function validateAndSaveJob(
   }
 
   const job = result.data
+
+  // Auto-detect role from title if not provided
+  const detectedRole = job.role || detectRole(job.title)
 
   // Use Prisma for SQLite, Supabase for production
   if (isSupabaseConfigured) {
@@ -135,6 +139,7 @@ export async function validateAndSaveJob(
         location: job.location,
         type: job.type,
         category: job.category,
+        role: detectedRole,
         salary: job.salary || null,
         tags: JSON.stringify(job.tags),
         source: job.source,
@@ -185,6 +190,7 @@ export async function validateAndSaveJob(
           location: job.location,
           type: job.type,
           category: job.category,
+          role: detectedRole,
           salary: job.salary || null,
           tags: JSON.stringify(job.tags),
           source: job.source,
@@ -213,6 +219,7 @@ export async function validateAndSaveJob(
           location: job.location,
           type: job.type,
           category: job.category,
+          role: detectedRole,
           salary: job.salary || null,
           tags: JSON.stringify(job.tags),
           source: job.source,

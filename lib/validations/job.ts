@@ -1,6 +1,18 @@
 import { z } from 'zod'
 
-// 크롤러에서 수집한 데이터 유효성 검사 스키마
+// Role categories for job classification
+export const ROLE_CATEGORIES = [
+  'Engineering',
+  'Product',
+  'Design',
+  'Marketing/Growth',
+  'Business Development',
+  'Operations/HR',
+  'Community/Support',
+] as const
+
+export type RoleCategory = typeof ROLE_CATEGORIES[number]
+
 export const jobSchema = z.object({
   title: z.string().min(2, '제목은 최소 2자 이상이어야 합니다'),
   company: z.string().min(1, '회사명은 필수입니다'),
@@ -8,6 +20,7 @@ export const jobSchema = z.object({
   location: z.string().optional().default('Remote'),
   type: z.string().optional().default('Full-time'),
   category: z.string().optional().default('Engineering'),
+  role: z.string().nullable().optional(),
   salary: z.string().nullable().optional(),
   tags: z.array(z.string()).optional().default([]),
   source: z.string().min(1, '소스는 필수입니다'),

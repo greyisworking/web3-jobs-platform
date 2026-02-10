@@ -27,7 +27,7 @@ function CareersContent() {
     type: '',
     sector: '',
     backer: '',
-    techStack: '',
+    role: '',
     tier1VCOnly: false,
     daoJobsOnly: false,
     tokenGatedOnly: false,
@@ -78,9 +78,8 @@ function CareersContent() {
     if (f.type) filtered = filtered.filter((job) => (job.type ?? '').includes(f.type))
     if (f.sector) filtered = filtered.filter((job) => (job.sector ?? '').toLowerCase().includes(f.sector.toLowerCase()))
     if (f.backer) filtered = filtered.filter((job) => job.backers?.includes(f.backer))
-    if (f.techStack) {
-      const tech = f.techStack.toLowerCase()
-      filtered = filtered.filter((job) => (job.title ?? '').toLowerCase().includes(tech) || (job.category ?? '').toLowerCase().includes(tech))
+    if (f.role) {
+      filtered = filtered.filter((job) => job.role === f.role)
     }
     if (vc) filtered = filtered.filter((job) => job.backers?.includes(vc))
     if (f.tier1VCOnly) filtered = filtered.filter((job) => job.backers && job.backers.length > 0)
