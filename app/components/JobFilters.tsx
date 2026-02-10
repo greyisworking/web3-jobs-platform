@@ -58,7 +58,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
         </h2>
         <button
           onClick={handleReset}
-          className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+          className="text-sm text-neun-primary hover:text-neun-primary-hover"
         >
           Clear all
         </button>
@@ -75,7 +75,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
             placeholder="Job title or company..."
             value={filters.search}
             onChange={(e) => handleChange('search', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-neun-primary dark:bg-white/10 dark:text-white"
           />
         </div>
 
@@ -87,7 +87,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
           <select
             value={filters.region}
             onChange={(e) => handleChange('region', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-neun-primary dark:bg-white/10 dark:text-white"
           >
             <option value="">All</option>
             <option value="Global">Global</option>
@@ -103,7 +103,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
           <select
             value={filters.type}
             onChange={(e) => handleChange('type', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-neun-primary dark:bg-white/10 dark:text-white"
           >
             <option value="">All</option>
             <option value="Full-time">Full-time</option>
@@ -121,7 +121,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
           <select
             value={filters.location}
             onChange={(e) => handleChange('location', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-neun-primary dark:bg-white/10 dark:text-white"
           >
             <option value="">All</option>
             <option value="Remote">Remote</option>
@@ -139,7 +139,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
           <select
             value={filters.source}
             onChange={(e) => handleChange('source', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-neun-primary dark:bg-white/10 dark:text-white"
           >
             <option value="">All</option>
             <option value="web3.career">web3.career</option>
@@ -167,7 +167,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
           <select
             value={filters.badge}
             onChange={(e) => handleChange('badge', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-neun-primary dark:bg-white/10 dark:text-white"
           >
             <option value="">All Badges</option>
             {BADGE_OPTIONS.map((badge) => (
@@ -186,7 +186,7 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
           <select
             value={filters.backer}
             onChange={(e) => handleChange('backer', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-neun-primary dark:bg-white/10 dark:text-white"
           >
             <option value="">All Backers</option>
             {BACKER_OPTIONS.map((backer) => (
@@ -201,45 +201,45 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
       {/* Active filter pills */}
       <div className="mt-4 flex flex-wrap gap-2">
         {filters.search && (
-          <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             Search: {filters.search}
-            <button onClick={() => handleChange('search', '')} className="ml-1 hover:text-blue-600">x</button>
+            <button onClick={() => handleChange('search', '')} className="ml-1 hover:opacity-70">×</button>
           </span>
         )}
         {filters.region && (
-          <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             {filters.region}
-            <button onClick={() => handleChange('region', '')} className="ml-1 hover:text-green-600">x</button>
+            <button onClick={() => handleChange('region', '')} className="ml-1 hover:opacity-70">×</button>
           </span>
         )}
         {filters.type && (
-          <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm">
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             {filters.type}
-            <button onClick={() => handleChange('type', '')} className="ml-1 hover:text-purple-600">x</button>
+            <button onClick={() => handleChange('type', '')} className="ml-1 hover:opacity-70">×</button>
           </span>
         )}
         {filters.location && (
-          <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-sm">
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             {filters.location}
-            <button onClick={() => handleChange('location', '')} className="ml-1 hover:text-yellow-600">x</button>
+            <button onClick={() => handleChange('location', '')} className="ml-1 hover:opacity-70">×</button>
           </span>
         )}
         {filters.source && (
-          <span className="inline-flex items-center gap-1 px-3 py-1 bg-pink-100 dark:bg-pink-900 text-pink-800 dark:text-pink-200 rounded-full text-sm">
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             {filters.source}
-            <button onClick={() => handleChange('source', '')} className="ml-1 hover:text-pink-600">x</button>
+            <button onClick={() => handleChange('source', '')} className="ml-1 hover:opacity-70">×</button>
           </span>
         )}
         {filters.badge && (
-          <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm">
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             Badge: {filters.badge}
-            <button onClick={() => handleChange('badge', '')} className="ml-1 hover:text-indigo-600">x</button>
+            <button onClick={() => handleChange('badge', '')} className="ml-1 hover:opacity-70">×</button>
           </span>
         )}
         {filters.backer && (
-          <span className="inline-flex items-center gap-1 px-3 py-1 bg-violet-100 dark:bg-violet-900 text-violet-800 dark:text-violet-200 rounded-full text-sm">
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             Backer: {filters.backer}
-            <button onClick={() => handleChange('backer', '')} className="ml-1 hover:text-violet-600">x</button>
+            <button onClick={() => handleChange('backer', '')} className="ml-1 hover:opacity-70">×</button>
           </span>
         )}
       </div>

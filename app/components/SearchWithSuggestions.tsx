@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, Clock, TrendingUp, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -32,6 +33,8 @@ export default function SearchWithSuggestions({
   onSearch,
   jobs = [],
 }: SearchWithSuggestionsProps) {
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const [query, setQuery] = useState('')
   const [focused, setFocused] = useState(false)
   const [recent, setRecent] = useState<string[]>([])
@@ -40,6 +43,15 @@ export default function SearchWithSuggestions({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Initialize from URL and sync
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || ''
+    if (urlSearch && urlSearch !== query) {
+      setQuery(urlSearch)
+      onSearch(urlSearch)
+    }
+  }, []) // Only run on mount
 
   useEffect(() => {
     setRecent(loadRecent())
@@ -82,13 +94,26 @@ export default function SearchWithSuggestions({
 
   const showDropdown = focused && allSuggestions.length > 0
 
+  const syncToURL = useCallback((search: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (search) {
+      params.set('search', search)
+    } else {
+      params.delete('search')
+    }
+    const newPath = params.toString() ? `?${params.toString()}` : window.location.pathname
+    router.replace(newPath, { scroll: false })
+  }, [searchParams, router])
+
   const submitSearch = useCallback(
     (value: string) => {
       const trimmed = value.trim()
-      if (!trimmed) return
 
       onSearch(trimmed)
       setFocused(false)
+      syncToURL(trimmed)
+
+      if (!trimmed) return
 
       const updated = [trimmed, ...recent.filter((r) => r !== trimmed)].slice(0, MAX_RECENT)
       setRecent(updated)
@@ -100,7 +125,7 @@ export default function SearchWithSuggestions({
         body: JSON.stringify({ query: trimmed }),
       }).catch(() => {})
     },
-    [onSearch, recent]
+    [onSearch, recent, syncToURL]
   )
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,6 +187,7 @@ export default function SearchWithSuggestions({
             onClick={() => {
               setQuery('')
               onSearch('')
+              syncToURL('')
               inputRef.current?.focus()
             }}
             className="absolute right-0 top-1/2 -translate-y-1/2 text-a24-muted hover:text-a24-text"

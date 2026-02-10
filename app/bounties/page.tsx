@@ -274,7 +274,7 @@ export default function BountiesPage() {
                         </span>
                       </div>
 
-                      <h3 className="text-lg font-bold text-a24-text group-hover:text-green-400 transition-colors mb-2">
+                      <h3 className="text-lg font-bold text-a24-text group-hover:text-green-400 transition-colors mb-2 line-clamp-2">
                         {bounty.title}
                       </h3>
 
