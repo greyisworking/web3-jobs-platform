@@ -200,24 +200,24 @@ function formatPlainTextDescription(text: string): string {
     '\n'
   )
 
-  // 7) Format "SubTitle:" patterns as bold (e.g. "Platform Administration:")
+  // 7) Format "SubTitle:" patterns as markdown bold (e.g. "Platform Administration:")
   result = result.replace(
     /(?:^|\n)([A-Z][\w\s&/''-]{2,40})\s*:\s*(?=\n|[A-Z])/gm,
-    '\n\n<strong>$1:</strong>\n'
+    '\n\n**$1:**\n'
   )
 
-  // 8) Format ALL-CAPS headings as bold (e.g. "KEY RESPONSIBILITIES")
+  // 8) Format ALL-CAPS headings as markdown h3 (e.g. "KEY RESPONSIBILITIES")
   result = result.replace(
     /(?:^|\n)([A-Z][A-Z\s&/'-]{3,40})(?=\n)/gm,
     (match, heading) => {
       if (heading === heading.toUpperCase() && heading.trim().length > 3) {
-        return '\n\n<strong>' + heading.trim() + '</strong>\n'
+        return '\n\n### ' + heading.trim() + '\n'
       }
       return match
     }
   )
 
-  // 6) Separate concatenated tech stack tags (e.g. "engineercryptodefi" → "engineer crypto defi")
+  // 9) Separate concatenated tech stack tags (e.g. "engineercryptodefi" → "engineer crypto defi")
   const TECH_KW = 'engineer|developer|solidity|rust|typescript|javascript|react|node|python|go|blockchain|crypto|defi|nft|web3|smart\\s*contract|aws|docker|kubernetes|ethereum|solana|cosmos|polkadot|substrate|graphql|sql|nosql|mongodb|postgresql|redis|api|sdk|frontend|backend|fullstack|full[\\s-]stack|devops|security|audit|protocol|dapp|token|staking|bridge|oracle|layer[\\s-]?[12]|zk|zero[\\s-]knowledge|rollup|l1|l2'
   const techConcatRe = new RegExp('\\b(' + TECH_KW + ')((?:' + TECH_KW + ')+)\\b', 'gi')
   const techSplitRe = new RegExp(TECH_KW, 'gi')
@@ -226,11 +226,8 @@ function formatPlainTextDescription(text: string): string {
     return kw && kw.length > 0 ? first + ' ' + kw.join(' ') : match
   })
 
-  // 7) Convert \n → <br> for HTML rendering
-  result = result
-    .replace(/\n{3,}/g, '\n\n')
-    .replace(/\n\n/g, '<br/><br/>')
-    .replace(/\n/g, '<br/>')
+  // 10) Normalize multiple newlines (keep as \n for markdown rendering)
+  result = result.replace(/\n{3,}/g, '\n\n')
 
   return result
 }
