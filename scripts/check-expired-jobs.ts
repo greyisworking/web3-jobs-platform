@@ -1,11 +1,17 @@
 /**
- * Check for expired jobs by validating URLs
- * Marks jobs as "expired" if their source URL returns 404 or contains closed text
+ * Check for expired jobs by validating URLs and age
+ * Marks jobs as "expired" if:
+ * 1. Source URL returns 404 or contains closed text
+ * 2. Job deadline has passed
+ * 3. Job is older than 3 months (90 days)
  */
 
 import { createClient } from '@supabase/supabase-js'
 import axios from 'axios'
 import 'dotenv/config'
+
+// Max age in days before auto-expiring
+const MAX_JOB_AGE_DAYS = 90
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -90,6 +96,55 @@ async function checkUrlStatus(url: string): Promise<{ isValid: boolean; statusCo
     // Timeout or other errors - keep as is
     return { isValid: true, statusCode: null }
   }
+}
+
+/**
+ * Expire jobs based on deadline or age (no URL check needed)
+ */
+async function expireByDeadlineOrAge(): Promise<{ deadlineExpired: number; ageExpired: number }> {
+  const now = new Date()
+  const maxAgeDate = new Date(now.getTime() - MAX_JOB_AGE_DAYS * 24 * 60 * 60 * 1000)
+
+  console.log('📅 Checking deadline-based and age-based expiration...\n')
+
+  // 1. Expire jobs with past deadlines
+  const { data: deadlineJobs, error: deadlineError } = await supabase
+    .from('Job')
+    .update({ isActive: false })
+    .eq('isActive', true)
+    .lt('deadline', now.toISOString())
+    .select('id')
+
+  if (deadlineError) {
+    console.error('Error expiring deadline jobs:', deadlineError)
+  }
+  const deadlineExpired = deadlineJobs?.length || 0
+  if (deadlineExpired > 0) {
+    console.log(`  ⏰ ${deadlineExpired} jobs expired (deadline passed)`)
+  }
+
+  // 2. Expire jobs older than MAX_JOB_AGE_DAYS
+  const { data: ageJobs, error: ageError } = await supabase
+    .from('Job')
+    .update({ isActive: false })
+    .eq('isActive', true)
+    .lt('postedDate', maxAgeDate.toISOString())
+    .select('id')
+
+  if (ageError) {
+    console.error('Error expiring old jobs:', ageError)
+  }
+  const ageExpired = ageJobs?.length || 0
+  if (ageExpired > 0) {
+    console.log(`  📆 ${ageExpired} jobs expired (older than ${MAX_JOB_AGE_DAYS} days)`)
+  }
+
+  if (deadlineExpired === 0 && ageExpired === 0) {
+    console.log('  ✅ No deadline/age-based expirations')
+  }
+  console.log('')
+
+  return { deadlineExpired, ageExpired }
 }
 
 /**
@@ -199,8 +254,18 @@ async function main() {
   if (statsOnly) {
     await getExpiredStats()
   } else {
+    // First: Quick deadline/age-based expiration (no HTTP requests)
+    const { deadlineExpired, ageExpired } = await expireByDeadlineOrAge()
+
+    // Then: URL-based validation for remaining jobs
     await checkExpiredJobs({ limit })
+
+    // Show final stats
     await getExpiredStats()
+
+    if (deadlineExpired > 0 || ageExpired > 0) {
+      console.log(`\n📋 Summary: ${deadlineExpired} deadline + ${ageExpired} age-based expirations`)
+    }
   }
 }
 

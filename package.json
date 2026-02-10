@@ -35,7 +35,9 @@
     "test:qa": "tsx tests/qa-phase7-tests.ts",
     "test:qa:report": "tsx tests/qa-phase7-tests.ts --report",
     "validate": "tsx scripts/validate-jobs.ts",
-    "refresh:featured": "tsx scripts/refresh-featured.ts"
+    "refresh:featured": "tsx scripts/refresh-featured.ts",
+    "translate:korean": "tsx scripts/translate-korean-jobs.ts",
+    "translate:korean:apply": "tsx scripts/translate-korean-jobs.ts --apply"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.73.0",

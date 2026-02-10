@@ -4,6 +4,7 @@ import { jobSchema, type JobInput } from './job'
 import { findPriorityCompany } from '../priority-companies'
 import { computeBadges } from '../badges'
 import { detectRole } from '../../scripts/utils'
+import { containsKorean, translateJobTitle, quickTranslateTerms } from '../translation'
 
 // Prisma client for SQLite fallback
 const prisma = new PrismaClient()
@@ -69,8 +70,13 @@ export async function validateAndSaveJob(
 
   const job = result.data
 
+  // Auto-translate Korean title to English for better searchability
+  const translatedTitle = containsKorean(job.title)
+    ? translateJobTitle(job.title)
+    : job.title
+
   // Auto-detect role from title if not provided
-  const detectedRole = job.role || detectRole(job.title)
+  const detectedRole = job.role || detectRole(translatedTitle)
 
   // Use Prisma for SQLite, Supabase for production
   if (isSupabaseConfigured) {
@@ -133,7 +139,7 @@ export async function validateAndSaveJob(
 
     const { data: upsertData, error } = await supabase.from('Job').upsert(
       {
-        title: job.title,
+        title: translatedTitle,
         company: job.company,
         url: job.url,
         location: job.location,
@@ -185,7 +191,7 @@ export async function validateAndSaveJob(
       await prisma.job.upsert({
         where: { url: job.url },
         update: {
-          title: job.title,
+          title: translatedTitle,
           company: job.company,
           location: job.location,
           type: job.type,
@@ -213,7 +219,7 @@ export async function validateAndSaveJob(
           companyWebsite: job.companyWebsite || null,
         },
         create: {
-          title: job.title,
+          title: translatedTitle,
           company: job.company,
           url: job.url,
           location: job.location,
