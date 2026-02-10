@@ -71,7 +71,7 @@
     --chart-3: 336 100% 68%;
     --chart-4: 209 83% 75%;
     --chart-5: 270 50% 60%;
-    --radius: 0;
+    --radius: 0.25rem;
   }
 
   .dark {
@@ -138,6 +138,51 @@
     font-family: var(--font-heading), 'Pretendard Variable', Pretendard, var(--font-body), sans-serif;
     font-weight: 600;
     letter-spacing: -0.02em;
+  }
+}
+
+/* ════════════════════════════════════════════
+   NEUN Typography System
+   Use these classes for consistent font sizes
+   ════════════════════════════════════════════ */
+
+@layer components {
+  /* Headings */
+  .neun-h1 {
+    @apply text-heading-1 font-bold tracking-tight;
+  }
+  .neun-h2 {
+    @apply text-heading-2 font-bold tracking-tight;
+  }
+  .neun-h3 {
+    @apply text-heading-3 font-semibold;
+  }
+
+  /* Body text */
+  .neun-body {
+    @apply text-body font-normal;
+  }
+  .neun-small {
+    @apply text-small font-normal;
+  }
+
+  /* Card typography */
+  .neun-card-title {
+    @apply text-body font-semibold leading-snug;
+  }
+  .neun-card-subtitle {
+    @apply text-small font-medium uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted;
+  }
+  .neun-card-meta {
+    @apply text-small text-a24-muted dark:text-a24-dark-muted;
+  }
+
+  /* Labels & captions */
+  .neun-label {
+    @apply text-[11px] font-light uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted;
+  }
+  .neun-caption {
+    @apply text-[10px] font-light text-a24-muted/60 dark:text-a24-dark-muted/60;
   }
 }
 

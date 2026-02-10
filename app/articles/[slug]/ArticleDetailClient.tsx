@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { useAccount } from 'wagmi'
 import type { Article } from '@/types/article'
+import { formatDate } from '@/lib/format'
 import Pixelbara from '@/app/components/Pixelbara'
 import Footer from '@/app/components/Footer'
 import Blockies, { truncateAddress } from '@/app/components/Blockies'
@@ -214,14 +215,6 @@ export default function ArticleDetailClient({ article: initialArticle }: Article
   useEffect(() => {
     fetch(`/api/articles/${initialArticle.slug}`).catch(() => {})
   }, [initialArticle.slug])
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  }
 
   const handleCollect = async () => {
     if (!isConnected || !article) return

@@ -8,6 +8,7 @@ import { useAccount } from 'wagmi'
 import type { Article } from '@/types/article'
 import type { User } from '@supabase/supabase-js'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import { formatDate } from '@/lib/format'
 import SubpageHeader from '../components/SubpageHeader'
 import Footer from '../components/Footer'
 import Pixelbara from '../components/Pixelbara'
@@ -35,14 +36,6 @@ export default function ArticlesPage() {
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  }
 
   // Get all unique tags
   const allTags = [...new Set(articles.flatMap(a => a.tags || []))]

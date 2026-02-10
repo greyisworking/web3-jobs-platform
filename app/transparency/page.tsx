@@ -14,6 +14,7 @@ import {
   getRecentTrustLogs,
   type CommunityVote,
 } from '@/lib/trust'
+import { formatDate, formatWalletAddress } from '@/lib/format'
 
 interface BlacklistEntry {
   wallet: string
@@ -58,19 +59,9 @@ export default function TransparencyPage() {
     fetchData()
   }, [])
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
-  const formatWallet = (wallet: string) => {
-    return `${wallet.slice(0, 6)}...${wallet.slice(-4)}`
-  }
+  // Use centralized formatDate with time option
+  const formatDateWithTime = (date: string) => formatDate(date, { includeTime: true })
+  const formatWallet = formatWalletAddress
 
   const getActionIcon = (action: string) => {
     if (action.includes('vouch')) return <Users className="w-4 h-4 text-emerald-500" />
@@ -290,7 +281,7 @@ export default function TransparencyPage() {
                                 {entry.reason}
                               </td>
                               <td className="px-4 py-3 text-sm text-a24-muted dark:text-a24-dark-muted whitespace-nowrap">
-                                {formatDate(entry.blacklistedAt)}
+                                {formatDateWithTime(entry.blacklistedAt)}
                               </td>
                             </tr>
                           ))}
@@ -334,7 +325,7 @@ export default function TransparencyPage() {
                           )}
                         </div>
                         <span className="text-xs text-a24-muted dark:text-a24-dark-muted whitespace-nowrap">
-                          {formatDate(log.createdAt)}
+                          {formatDateWithTime(log.createdAt)}
                         </span>
                       </div>
                     ))}
