@@ -47,7 +47,7 @@ export async function GET(request: Request) {
   // Fetch recent jobs
   const { data: jobs, error } = await supabase
     .from('Job')
-    .select('id, title, company, location, role, salary, salaryMin, salaryMax, salaryCurrency, remoteType, is_featured, crawledAt, postedDate')
+    .select('id, title, company, location, url, role, salary, salaryMin, salaryMax, salaryCurrency, remoteType, is_featured, crawledAt, postedDate, backers')
     .eq('isActive', true)
     .gte('crawledAt', startDate.toISOString())
     .order('crawledAt', { ascending: false })

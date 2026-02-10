@@ -59,6 +59,34 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Admin email whitelist check (additional security layer)
+  const ADMIN_EMAIL_WHITELIST = [
+    'admin@neun.wtf',
+    'dahye@neun.wtf',
+    // Add your admin emails here
+  ]
+
+  // Check if user email is in whitelist or has admin in DB
+  const userEmail = user.email?.toLowerCase()
+  const isWhitelisted = userEmail && ADMIN_EMAIL_WHITELIST.includes(userEmail)
+
+  if (!isWhitelisted) {
+    // Also check admins table
+    const { data: admin } = await supabase
+      .from('admins')
+      .select('id')
+      .eq('id', user.id)
+      .single()
+
+    if (!admin) {
+      // Not an admin - redirect to 403 or login
+      const url = request.nextUrl.clone()
+      url.pathname = '/admin/login'
+      url.searchParams.set('error', 'unauthorized')
+      return NextResponse.redirect(url)
+    }
+  }
+
   return supabaseResponse
 }
 
