@@ -14,6 +14,7 @@ import {
   BarChart3,
   Flag,
   Star,
+  Mail,
 } from 'lucide-react'
 
 interface NavItem {
@@ -46,6 +47,12 @@ const navSections: NavSection[] = [
       { href: '/admin/monitoring/errors', label: '오류 대시보드', icon: <Shield className="h-4 w-4" /> },
       { href: '/admin/monitoring/proxies', label: '프록시 상태', icon: <Radio className="h-4 w-4" /> },
       { href: '/admin/analytics', label: '통계', icon: <BarChart3 className="h-4 w-4" /> },
+    ],
+  },
+  {
+    title: '마케팅',
+    items: [
+      { href: '/admin/newsletter', label: '뉴스레터', icon: <Mail className="h-4 w-4" /> },
     ],
   },
 ]

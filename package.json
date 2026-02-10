@@ -40,7 +40,9 @@
     "translate:korean:apply": "tsx scripts/translate-korean-jobs.ts --apply",
     "translate:ai": "tsx scripts/translate-korean-ai.ts",
     "translate:ai:apply": "tsx scripts/translate-korean-ai.ts --apply",
-    "delete:jobkorea": "tsx scripts/delete-jobkorea.ts"
+    "delete:jobkorea": "tsx scripts/delete-jobkorea.ts",
+    "newsletter": "tsx scripts/generate-weekly-newsletter.ts",
+    "newsletter:output": "tsx scripts/generate-weekly-newsletter.ts --output"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.73.0",
