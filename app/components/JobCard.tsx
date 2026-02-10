@@ -12,12 +12,12 @@ import { MiniPixelbara } from './Pixelbara'
 import { Lock, Vote, Flag } from 'lucide-react'
 import { toast } from 'sonner'
 
-function isNewJob(postedDate: Date | string | null | undefined): boolean {
-  if (!postedDate) return false
-  const posted = new Date(postedDate)
+function isNewJob(crawledAt: Date | string | null | undefined): boolean {
+  if (!crawledAt) return false
+  const crawled = new Date(crawledAt)
   const now = new Date()
-  const diffMs = now.getTime() - posted.getTime()
-  // 7 days for NEW badge
+  const diffMs = now.getTime() - crawled.getTime()
+  // 7 days for NEW badge (based on when added to our platform)
   return diffMs < 7 * 24 * 60 * 60 * 1000
 }
 
@@ -190,7 +190,7 @@ export default function JobCard({ job, index }: JobCardProps) {
               {displayCompany}
             </p>
             {/* NEW badge inline with company */}
-            {isNewJob(job.postedDate) && !job.is_urgent && !job.is_featured && (
+            {isNewJob(job.crawledAt) && !job.is_urgent && !job.is_featured && (
               <span className="ml-2 badge-new-emphasis px-1.5 py-0.5 border border-neun-primary/50 text-[9px] uppercase tracking-wider rounded-sm flex-shrink-0">
                 NEW
               </span>

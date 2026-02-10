@@ -294,7 +294,7 @@ export default function InvestorsPage() {
 
         {/* VCs grid */}
         {filteredVCs.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {filteredVCs.map((vc, index) => (
               <InvestorCard key={vc.name} vc={vc} index={index} />
             ))}

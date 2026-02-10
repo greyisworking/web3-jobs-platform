@@ -24,12 +24,14 @@ function ShareModal({
   article: Article
 }) {
   const [copied, setCopied] = useState(false)
+  const [articleUrl, setArticleUrl] = useState('')
+
+  // Set URL on client side only to avoid hydration mismatch
+  useEffect(() => {
+    setArticleUrl(`${window.location.origin}/articles/${article.slug}`)
+  }, [article.slug])
 
   if (!isOpen) return null
-
-  const articleUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/articles/${article.slug}`
-    : ''
 
   const shareText = `${article.title} by ${article.author_ens || article.author_name}`
 

@@ -21,11 +21,15 @@ export async function GET(request: Request) {
       'backers', 'sector', 'badges'
     ].join(',')
 
+    // Filter out old jobs (3+ months old or past deadline)
+    const threeMonthsAgo = new Date()
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
+
     let query = supabase
       .from('Job')
       .select(listFields)
       .eq('isActive', true)
-      .order('postedDate', { ascending: false })
+      .gte('crawledAt', threeMonthsAgo.toISOString())
       .order('crawledAt', { ascending: false })
       .limit(300)
 
