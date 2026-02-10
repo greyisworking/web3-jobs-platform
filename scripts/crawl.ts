@@ -56,8 +56,8 @@ async function main() {
 
   // 시작 알림
   await sendDiscordNotification(
-    '🚀 Starting Crawl',
-    'GitHub Actions crawler started - collecting jobs from 12 sources',
+    '🚀 크롤링 시작!',
+    '12개 채용 사이트에서 공고를 수집하고 있어요.\n완료되면 다시 알려드릴게요!',
     0x3498db
   )
 
@@ -107,33 +107,41 @@ async function main() {
   // 완료 알림
   const successList = results
     .filter(r => r.status === 'success' && r.jobCount > 0)
-    .map(r => `✅ **${r.source}**: ${r.jobCount} jobs`)
+    .map(r => `✅ **${r.source}**: ${r.jobCount}개`)
     .slice(0, 10)
-    .join('\n') || 'None'
+    .join('\n') || '없음'
 
   const failedList = results
     .filter(r => r.status === 'failed')
     .map(r => `❌ **${r.source}**`)
     .slice(0, 10)
-    .join('\n') || 'None'
+    .join('\n') || '없음'
+
+  const completeTitle = failedCount === 0
+    ? '✅ 크롤링 완료!'
+    : '⚠️ 크롤링 완료 (일부 오류 있음)'
+
+  const completeDesc = failedCount === 0
+    ? `새 공고 ${totalJobs}개 수집했어요!\n홈페이지에 반영 완료!`
+    : `새 공고 ${totalJobs}개 수집했어요.\n일부 소스에서 오류가 발생했어요. 확인 필요해요!`
 
   await sendDiscordNotification(
-    failedCount === 0 ? '🎉 Crawl Complete!' : '⚠️ Crawl Complete (with errors)',
-    `Successfully collected ${totalJobs} jobs from ${successCount} sources`,
-    failedCount === 0 ? 0x00ff00 : 0xffa500,
+    completeTitle,
+    completeDesc,
+    failedCount === 0 ? 0x22c55e : 0xffa500,
     [
       {
-        name: '📊 Summary',
-        value: `**Total Jobs**: ${totalJobs}\n**Sources**: ${successCount}/${results.length} successful\n**Duration**: ${duration.toFixed(1)}s`,
+        name: '📊 요약',
+        value: `**총 공고 수**: ${totalJobs}개\n**성공**: ${successCount}/${results.length}개 소스\n**소요 시간**: ${duration.toFixed(1)}초`,
         inline: false
       },
       {
-        name: '✅ Successful Sources',
+        name: '✅ 수집 완료',
         value: successList,
         inline: false
       },
       ...(failedCount > 0 ? [{
-        name: '❌ Failed Sources',
+        name: '❌ 오류 발생 (확인 필요)',
         value: failedList,
         inline: false
       }] : [])
@@ -146,12 +154,17 @@ main()
   .catch(async (error) => {
     console.error('🚨 Fatal error:', error)
     await sendDiscordNotification(
-      '🚨 Fatal Error',
-      `Crawler crashed: ${error.message || error}`,
+      '❌ 크롤링 실패',
+      `크롤러가 중단됐어요.\n\n**원인**: ${error.message || error}\n\n**확인이 필요해요!**`,
       0xff0000,
       [{
-        name: 'Error Details',
+        name: '🔍 오류 상세',
         value: `\`\`\`${error.stack?.substring(0, 500) || error}\`\`\``,
+        inline: false
+      },
+      {
+        name: '💡 조치 방법',
+        value: '관리자 페이지에서 오류 로그를 확인해주세요.',
         inline: false
       }]
     )

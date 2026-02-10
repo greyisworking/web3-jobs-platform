@@ -14,31 +14,76 @@ interface MarkdownRendererProps {
 function preprocessContent(content: string): string {
   let processed = content
 
-  // 1. Convert <br/> and <br> tags to newlines
+  // 1. Decode HTML entities first
+  processed = processed
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&#x27;/gi, "'")
+    .replace(/&apos;/gi, "'")
+    .replace(/&rsquo;/gi, "'")
+    .replace(/&lsquo;/gi, "'")
+    .replace(/&rdquo;/gi, '"')
+    .replace(/&ldquo;/gi, '"')
+    .replace(/&ndash;/gi, '–')
+    .replace(/&mdash;/gi, '—')
+    .replace(/&hellip;/gi, '...')
+    .replace(/&bull;/gi, '•')
+    .replace(/&#8211;/gi, '–')
+    .replace(/&#8212;/gi, '—')
+    .replace(/&#8216;/gi, "'")
+    .replace(/&#8217;/gi, "'")
+    .replace(/&#8220;/gi, '"')
+    .replace(/&#8221;/gi, '"')
+    .replace(/&#\d+;/g, '') // Remove remaining numeric entities
+
+  // 2. Convert <br/> and <br> tags to newlines
   processed = processed.replace(/<br\s*\/?>/gi, '\n')
 
-  // 2. Convert ● bullet points to markdown list items
-  //    Handle: "● Item" or "●Item" at start of line
-  processed = processed.replace(/^[●•]\s*/gm, '- ')
-  //    Handle: inline bullets after newline
-  processed = processed.replace(/\n[●•]\s*/g, '\n- ')
+  // 3. Convert </p> to double newlines, <p> to nothing
+  processed = processed.replace(/<\/p>/gi, '\n\n')
+  processed = processed.replace(/<p[^>]*>/gi, '')
 
-  // 3. Convert numbered items like "1.Item" to "1. Item"
+  // 4. Convert heading tags to markdown
+  processed = processed.replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n')
+  processed = processed.replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n')
+  processed = processed.replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n')
+  processed = processed.replace(/<h4[^>]*>(.*?)<\/h4>/gi, '#### $1\n')
+  processed = processed.replace(/<h5[^>]*>(.*?)<\/h5>/gi, '##### $1\n')
+  processed = processed.replace(/<h6[^>]*>(.*?)<\/h6>/gi, '###### $1\n')
+
+  // 5. Convert bold/italic tags to markdown
+  processed = processed.replace(/<(?:strong|b)[^>]*>(.*?)<\/(?:strong|b)>/gi, '**$1**')
+  processed = processed.replace(/<(?:em|i)[^>]*>(.*?)<\/(?:em|i)>/gi, '*$1*')
+  processed = processed.replace(/<u[^>]*>(.*?)<\/u>/gi, '$1')
+
+  // 6. Convert list items
+  processed = processed.replace(/<li[^>]*>/gi, '- ')
+  processed = processed.replace(/<\/li>/gi, '\n')
+  processed = processed.replace(/<\/?(?:ul|ol)[^>]*>/gi, '\n')
+
+  // 7. Strip remaining HTML tags but preserve their content
+  processed = processed.replace(/<\/?(?:div|span|a|table|tr|td|th|thead|tbody|article|section|header|footer)[^>]*>/gi, '')
+
+  // 8. Convert ● bullet points to markdown list items
+  processed = processed.replace(/^[●•◦‣⁃]\s*/gm, '- ')
+  processed = processed.replace(/\n[●•◦‣⁃]\s*/g, '\n- ')
+
+  // 9. Convert numbered items like "1.Item" to "1. Item"
   processed = processed.replace(/^(\d+\.)(?=[A-Za-z])/gm, '$1 ')
 
-  // 4. Strip remaining HTML tags but preserve their content
-  //    (except for already-converted br tags)
-  processed = processed.replace(/<\/?(?:p|div|span|strong|b|em|i|u)[^>]*>/gi, '')
-
-  // 5. Normalize multiple newlines
+  // 10. Normalize multiple newlines
   processed = processed.replace(/\n{3,}/g, '\n\n')
 
-  // 6. Fix words that got broken by line breaks (e.g., "compen\nsation" -> "compensation")
-  //    Look for lowercase letter + newline + lowercase letter (word continuation)
+  // 11. Fix words that got broken by line breaks
   processed = processed.replace(/([a-z])\n([a-z])/g, '$1$2')
 
-  // 7. Clean up extra whitespace
+  // 12. Clean up extra whitespace
   processed = processed.replace(/[ \t]+\n/g, '\n')
+  processed = processed.replace(/[ \t]{2,}/g, ' ')
   processed = processed.trim()
 
   return processed

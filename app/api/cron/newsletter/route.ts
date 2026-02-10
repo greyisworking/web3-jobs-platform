@@ -279,16 +279,16 @@ async function sendDiscordNotification(jobCount: number, week: string) {
 
   try {
     await axios.post(DISCORD_WEBHOOK_URL, {
-      username: 'NEUN Newsletter Bot',
+      username: 'NEUN 봇',
       embeds: [{
-        title: `📧 Newsletter Generated: ${week}`,
-        description: `Weekly newsletter with ${jobCount} jobs is ready for review.`,
+        title: `📧 뉴스레터 생성 완료!`,
+        description: `${week} 주간 뉴스레터가 준비됐어요.\n공고 ${jobCount}개가 포함되어 있어요!`,
         color: 0x22c55e,
         fields: [
-          { name: 'Jobs', value: `${jobCount}`, inline: true },
-          { name: 'Week', value: week, inline: true },
+          { name: '📋 포함된 공고', value: `${jobCount}개`, inline: true },
+          { name: '📅 기간', value: week, inline: true },
         ],
-        footer: { text: 'NEUN Weekly Newsletter' },
+        footer: { text: 'NEUN 주간 뉴스레터' },
         timestamp: new Date().toISOString(),
       }],
     })

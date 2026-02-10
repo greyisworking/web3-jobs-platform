@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useState, useMemo, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, X } from 'lucide-react'
 import type { Job } from '@/types/job'
 import { useJobs } from '@/hooks/useJobs'
 import SmartFilterBar, { SmartFilters } from '../components/SmartFilterBar'
@@ -17,6 +19,8 @@ import Footer from '../components/Footer'
 const PAGE_SIZE = 12
 
 function CareersContent() {
+  const searchParams = useSearchParams()
+  const companyFilter = searchParams.get('company') || ''
   // Use SWR for caching and deduplication
   const { jobs, stats, isLoading } = useJobs()
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([])
@@ -34,12 +38,12 @@ function CareersContent() {
   })
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
-  // Update filtered jobs when jobs data changes
+  // Update filtered jobs when jobs data changes or company filter changes
   useEffect(() => {
     if (jobs.length > 0) {
-      setFilteredJobs(jobs)
+      applyAllFilters(smartFilters, selectedVC, searchQuery, companyFilter)
     }
-  }, [jobs])
+  }, [jobs, companyFilter])
 
   // Reset visible count when filters change
   useEffect(() => {
@@ -61,9 +65,18 @@ function CareersContent() {
   const applyAllFilters = (
     f: SmartFilters,
     vc: string,
-    search: string
+    search: string,
+    company: string = companyFilter
   ) => {
     let filtered = [...jobs]
+
+    // Company filter from URL
+    if (company) {
+      const companyLower = company.toLowerCase()
+      filtered = filtered.filter(
+        (job) => (job.company ?? '').toLowerCase().includes(companyLower)
+      )
+    }
 
     if (search) {
       const searchLower = search.toLowerCase()
@@ -141,6 +154,22 @@ function CareersContent() {
           </p>
         </div>
 
+        {/* Company filter badge */}
+        {companyFilter && (
+          <div className="mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
+              <span>Showing jobs from: <strong>{companyFilter}</strong></span>
+              <Link
+                href="/jobs"
+                className="p-0.5 hover:bg-neun-primary/20 rounded-full transition-colors"
+                title="필터 해제"
+              >
+                <X className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Search */}
         <ScrollReveal>
           <div className="mb-8">
@@ -179,11 +208,16 @@ function CareersContent() {
           {filteredJobs.length === 0 ? (
             <div className="py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
               <Pixelbara pose="question" size={140} className="mx-auto mb-4" clickable />
-              <p className="text-a24-muted dark:text-a24-dark-muted text-sm">
+              <p className="text-a24-muted dark:text-a24-dark-muted text-sm mb-2">
                 {jobs.length === 0
-                  ? 'no jobs found... ngmi'
-                  : 'no jobs found... try different filters ser'}
+                  ? '공고를 불러오는 중이에요...'
+                  : '해당하는 공고가 없어요'}
               </p>
+              {jobs.length > 0 && (
+                <p className="text-a24-muted/60 dark:text-a24-dark-muted/60 text-xs">
+                  다른 필터를 선택하거나 검색어를 바꿔보세요
+                </p>
+              )}
             </div>
           ) : (
             <>

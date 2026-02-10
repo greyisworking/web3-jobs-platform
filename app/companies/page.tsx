@@ -1,17 +1,24 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowUpRight, MapPin, Briefcase, Building2 } from 'lucide-react'
+import { ArrowUpRight, MapPin, Briefcase, ExternalLink } from 'lucide-react'
 import { PRIORITY_COMPANIES, type PriorityCompany } from '@/lib/priority-companies'
 import GlowBadge from '../components/GlowBadge'
 import Pixelbara from '../components/Pixelbara'
+import { useJobs } from '@/hooks/useJobs'
 
 const SECTORS = ['All', ...Array.from(new Set(PRIORITY_COMPANIES.map(c => c.sector))).sort()]
 const TIERS = ['All', 'P0', 'P1', 'P2']
 
-function CompanyCard({ company, index }: { company: PriorityCompany; index: number }) {
+interface CompanyCardProps {
+  company: PriorityCompany
+  index: number
+  jobCount: number
+}
+
+function CompanyCard({ company, index, jobCount }: CompanyCardProps) {
   const [hovered, setHovered] = useState(false)
 
   return (
@@ -52,6 +59,18 @@ function CompanyCard({ company, index }: { company: PriorityCompany; index: numb
         {company.office_location}
       </p>
 
+      {/* Job count - clickable to filter jobs */}
+      {jobCount > 0 && (
+        <Link
+          href={`/jobs?company=${encodeURIComponent(company.name)}`}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] bg-neun-primary/10 text-neun-primary hover:bg-neun-primary/20 transition-colors rounded mb-3"
+        >
+          <span className="font-medium">{jobCount}</span>
+          <span>open positions</span>
+          <ArrowUpRight className="w-3 h-3" />
+        </Link>
+      )}
+
       {/* VC Backers */}
       {company.backers.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-4">
@@ -68,15 +87,16 @@ function CompanyCard({ company, index }: { company: PriorityCompany; index: numb
         </span>
       )}
 
-      {/* Career link */}
+      {/* Career link - external */}
       {company.careerUrl && (
         <Link
           href={company.careerUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute bottom-4 right-4 p-2 text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+          className="absolute bottom-4 right-4 p-2 text-a24-muted dark:text-a24-dark-muted hover:text-neun-primary transition-colors"
+          title="채용 페이지로 이동"
         >
-          <ArrowUpRight className="w-4 h-4" />
+          <ExternalLink className="w-4 h-4" />
         </Link>
       )}
 
@@ -93,14 +113,43 @@ function CompanyCard({ company, index }: { company: PriorityCompany; index: numb
 export default function CompaniesPage() {
   const [selectedSector, setSelectedSector] = useState('All')
   const [selectedTier, setSelectedTier] = useState('All')
+  const { jobs } = useJobs()
+
+  // Calculate job counts per company
+  const jobCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const job of jobs) {
+      const companyName = job.company?.toLowerCase() || ''
+      // Match against company name and aliases
+      for (const company of PRIORITY_COMPANIES) {
+        const names = [company.name.toLowerCase(), ...company.aliases.map(a => a.toLowerCase())]
+        if (names.some(name => companyName.includes(name) || name.includes(companyName))) {
+          counts[company.name] = (counts[company.name] || 0) + 1
+          break
+        }
+      }
+    }
+    return counts
+  }, [jobs])
 
   const filteredCompanies = useMemo(() => {
     return PRIORITY_COMPANIES.filter(company => {
       if (selectedSector !== 'All' && company.sector !== selectedSector) return false
       if (selectedTier !== 'All' && company.tier !== selectedTier) return false
       return true
+    }).sort((a, b) => {
+      // Sort by job count (descending), then by name
+      const countA = jobCounts[a.name] || 0
+      const countB = jobCounts[b.name] || 0
+      if (countB !== countA) return countB - countA
+      return a.name.localeCompare(b.name)
     })
-  }, [selectedSector, selectedTier])
+  }, [selectedSector, selectedTier, jobCounts])
+
+  // Count companies with open positions
+  const companiesWithJobs = useMemo(() => {
+    return filteredCompanies.filter(c => (jobCounts[c.name] || 0) > 0).length
+  }, [filteredCompanies, jobCounts])
 
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
@@ -112,7 +161,12 @@ export default function CompaniesPage() {
               Companies
             </h1>
             <p className="text-a24-muted dark:text-a24-dark-muted text-sm">
-              {filteredCompanies.length} Web3 companies from Korea&apos;s top VC portfolios
+              {filteredCompanies.length} Web3 companies
+              {companiesWithJobs > 0 && (
+                <span className="text-neun-primary ml-1">
+                  · {companiesWithJobs} actively hiring
+                </span>
+              )}
             </p>
           </div>
           <Pixelbara pose="companies" size={100} clickable />
@@ -159,14 +213,19 @@ export default function CompaniesPage() {
         {filteredCompanies.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {filteredCompanies.map((company, index) => (
-              <CompanyCard key={company.name} company={company} index={index} />
+              <CompanyCard
+                key={company.name}
+                company={company}
+                index={index}
+                jobCount={jobCounts[company.name] || 0}
+              />
             ))}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20">
             <Pixelbara pose="success" size={120} className="mb-4" />
             <p className="text-sm text-a24-muted dark:text-a24-dark-muted">
-              more companies coming...
+              해당하는 회사가 없어요
             </p>
           </div>
         )}
