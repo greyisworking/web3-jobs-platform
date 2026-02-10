@@ -1089,15 +1089,15 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
   },
   {
     name: 'Story Protocol',
-    aliases: ['storyprotocol.xyz', 'Story'],
+    aliases: ['storyprotocol.xyz', 'Story', 'Story Foundation'],
     tier: 'P2',
     backers: ['a16z', 'Polychain'],
     sector: 'IP / Infrastructure',
     office_location: 'Remote',
     hasToken: true,
     stage: 'Series B',
-    careerUrl: null,
-    careerPlatform: null,
+    careerUrl: 'https://careers.story.foundation/',
+    careerPlatform: 'greenhouse',
   },
   {
     name: 'Farcaster',

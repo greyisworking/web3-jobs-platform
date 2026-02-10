@@ -339,7 +339,11 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                   </div>
                 ) : (
                   <MarkdownRenderer
-                    content={job.description}
+                    content={cleanJobDisplayWithSections(job.description, {
+                      requirements: !!job.requirements,
+                      responsibilities: !!job.responsibilities,
+                      benefits: !!job.benefits,
+                    })}
                     className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed"
                   />
                 )}

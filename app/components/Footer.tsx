@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { MiniPixelbara } from './Pixelbara'
 import { PixelSend } from './PixelIcons'
 
 export default function Footer() {
@@ -9,12 +8,11 @@ export default function Footer() {
     <footer className="border-t border-a24-border dark:border-a24-dark-border">
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Logo + Pixelbara */}
+          {/* Logo */}
           <div className="flex items-center gap-2">
             <span className="font-pixel text-[10px] text-a24-text dark:text-a24-dark-text tracking-wider">
               NEUN
             </span>
-            <MiniPixelbara />
           </div>
 
           {/* Links */}

@@ -6,6 +6,14 @@
 
 /** Patterns to remove — order matters (specific first, broad last) */
 const NOISE_PATTERNS: RegExp[] = [
+  // ── Diversity/EEO boilerplate ──
+  /We\s+(?:know\s+that\s+)?(?:are\s+(?:an?\s+)?)?(?:equal\s+opportunity|committed\s+to\s+(?:diversity|building\s+a\s+diverse)|believe\s+(?:in\s+)?(?:diversity|that\s+diversity))[\s\S]*?(?:protected\s+(?:class|characteristics?|status)|without\s+regard\s+to\s+(?:race|gender)|affirmative\s+action|accommodation|disability)[\s\S]*?(?:\.\s*\n|\.\s*$)/gi,
+  /(?:Equal\s+Opportunity|EEO)\s+(?:Employer|Statement)[\s\S]*?(?:\.\s*\n|\.\s*$)/gi,
+  /We\s+(?:celebrate|embrace|value)\s+diversity[\s\S]*?(?:\.\s*\n|\.\s*$)/gi,
+  /(?:We\s+)?(?:don'?t|do\s+not)\s+discriminate[\s\S]*?(?:\.\s*\n|\.\s*$)/gi,
+  /All\s+qualified\s+applicants\s+will\s+receive\s+consideration[\s\S]*?(?:\.\s*\n|\.\s*$)/gi,
+  /We\s+encourage\s+(?:all\s+)?(?:qualified\s+)?(?:candidates|applicants|individuals)[\s\S]*?(?:apply|to\s+apply)[\s\S]*?(?:\.\s*\n|\.\s*$)/gi,
+
   // ── "Apply Now:" and everything after ──
   /Apply\s*(?:Now|for this job)\s*:?\s*[\s\S]*$/i,
 
@@ -256,6 +264,22 @@ export function cleanJobDisplay(html: string | null | undefined): string {
   if (htmlTagCount < 5) {
     cleaned = formatPlainTextDescription(cleaned)
   }
+
+  // Fix common encoding issues (HTML entities that weren't decoded)
+  cleaned = cleaned
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&rsquo;/g, "'")
+    .replace(/&lsquo;/g, "'")
+    .replace(/&rdquo;/g, '"')
+    .replace(/&ldquo;/g, '"')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&ndash;/g, '–')
+    .replace(/&mdash;/g, '—')
+    .replace(/&hellip;/g, '...')
+    .replace(/&nbsp;/g, ' ')
 
   // Clean up whitespace
   cleaned = cleaned

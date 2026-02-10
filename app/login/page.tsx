@@ -39,7 +39,12 @@ export default function LoginPage() {
 
   useEffect(() => {
     setInApp(isInAppBrowser())
-  }, [])
+    // Show error from URL params (e.g., from OAuth callback failure)
+    const errorParam = searchParams.get('error')
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam))
+    }
+  }, [searchParams])
 
   const handleGoogleLogin = async () => {
     setError('')
@@ -185,12 +190,6 @@ export default function LoginPage() {
           <WalletConnect />
         </div>
 
-        <p className="text-center text-xs font-light text-a24-muted dark:text-a24-dark-muted mt-8">
-          Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-a24-text dark:text-a24-dark-text underline underline-offset-2 decoration-1">
-            Sign Up
-          </Link>
-        </p>
       </main>
 
       <Footer />

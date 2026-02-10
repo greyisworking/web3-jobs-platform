@@ -117,7 +117,7 @@ export default function TransparencyPage() {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-a24-text dark:text-a24-dark-text mb-4">
             Transparency Report
           </h1>
-          <p className="text-base md:text-lg text-a24-muted dark:text-a24-dark-muted max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-a24-muted dark:text-a24-dark-muted max-w-2xl mx-auto leading-relaxed text-balance">
             All moderation actions are public. Every report, vote, and decision is recorded on-chain for full accountability.
           </p>
         </motion.div>
