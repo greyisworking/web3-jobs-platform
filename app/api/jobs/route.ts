@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     // Only show active jobs (isActive=true)
     // Select only fields needed for job list (exclude large text fields like description)
     const listFields = [
-      'id', 'title', 'company', 'url', 'location', 'type', 'category',
+      'id', 'title', 'company', 'url', 'location', 'type', 'category', 'role',
       'salary', 'salaryMin', 'salaryMax', 'salaryCurrency', 'tags', 'source', 'region',
       'postedDate', 'crawledAt', 'updatedAt', 'isActive',
       'experienceLevel', 'remoteType', 'companyLogo',
