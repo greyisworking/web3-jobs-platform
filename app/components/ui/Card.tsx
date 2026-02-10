@@ -66,7 +66,7 @@ export const JobCard = memo(function JobCard({ job, compact = false }: JobCardPr
   })()
 
   return (
-    <Link href={`/careers/${job.id}`}>
+    <Link href={`/jobs/${job.id}`}>
       <Card className="group cursor-pointer h-full">
         <div className="flex flex-col h-full">
           {/* Header */}

@@ -312,7 +312,7 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'San Francisco, USA',
     hasToken: true,
     stage: 'Established',
-    careerUrl: 'https://ripple.com/careers',
+    careerUrl: 'https://ripple.com/jobs',
     careerPlatform: null,
   },
   {
@@ -668,7 +668,7 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Tel Aviv, Israel',
     hasToken: true,
     stage: 'Series D',
-    careerUrl: 'https://starkware.co/careers/',
+    careerUrl: 'https://starkware.co/jobs/',
     careerPlatform: null,
   },
   {
@@ -800,7 +800,7 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Paris, France',
     hasToken: false,
     stage: 'Series C',
-    careerUrl: 'https://careers.ledger.com/jobs/search',
+    careerUrl: 'https://jobs.ledger.com/jobs/search',
     careerPlatform: null,
   },
   {
@@ -1230,18 +1230,6 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     stage: 'Series A',
     careerUrl: 'https://jobs.ashbyhq.com/helius',
     careerPlatform: 'ashby',
-  },
-  {
-    name: 'Jito Labs',
-    aliases: ['jito.network', 'Jito'],
-    tier: 'P2',
-    backers: ['Multicoin', 'Framework Ventures'],
-    sector: 'DeFi / MEV',
-    office_location: 'Remote',
-    hasToken: true,
-    stage: 'Series A',
-    careerUrl: null,
-    careerPlatform: null,
   },
   {
     name: 'Jupiter',

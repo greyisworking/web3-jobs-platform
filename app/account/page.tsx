@@ -152,7 +152,7 @@ export default function AccountPage() {
                   key={job.id}
                   className="flex items-center justify-between py-3 border-b border-a24-border dark:border-a24-dark-border"
                 >
-                  <Link href={`/careers/${job.id}`} className="min-w-0 mr-4 group">
+                  <Link href={`/jobs/${job.id}`} className="min-w-0 mr-4 group">
                     <p className="text-sm font-light text-a24-text dark:text-a24-dark-text truncate group-hover:underline underline-offset-2 decoration-1">
                       {job.title}
                     </p>

@@ -214,7 +214,7 @@ export default function NewJobPage() {
               type="url"
               value={form.url}
               onChange={(e) => setForm({ ...form, url: e.target.value })}
-              placeholder="https://your-company.com/careers/apply"
+              placeholder="https://your-company.com/jobs/apply"
               className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
             />
             <p className="text-xs text-gray-500 mt-1">

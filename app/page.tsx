@@ -91,7 +91,7 @@ export default function Home() {
               className="flex justify-center md:justify-start"
             >
               <Link
-                href="/careers"
+                href="/jobs"
                 className="group inline-flex items-center justify-center gap-3 text-[12px] uppercase tracking-[0.2em] font-bold text-white bg-emerald-500 px-6 sm:px-8 py-4 hover:bg-emerald-400 hover:shadow-green-glow active:scale-95 transition-all duration-200 touch-target"
               >
                 <MiniPixelbara className="opacity-80 group-hover:opacity-100 transition-opacity" />
@@ -133,7 +133,7 @@ export default function Home() {
               Featured Positions
             </h2>
             <Link
-              href="/careers"
+              href="/jobs"
               className="group inline-flex items-center gap-2 text-[11px] sm:text-[12px] uppercase tracking-[0.2em] font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 transition-colors touch-target"
             >
               View All

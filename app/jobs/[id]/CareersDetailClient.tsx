@@ -210,7 +210,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
       <main className="max-w-6xl mx-auto px-6 py-12">
         {/* Back link */}
         <Link
-          href="/careers"
+          href="/jobs"
           className="group inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors mb-8 block"
         >
           <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />

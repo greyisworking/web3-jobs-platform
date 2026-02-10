@@ -115,7 +115,7 @@ export default function JobCard({ job, index }: JobCardProps) {
       className={isExpired ? 'opacity-50 grayscale' : ''}
     >
       <Link
-        href={`/careers/${job.id}`}
+        href={`/jobs/${job.id}`}
         onClick={() => {
           trackEvent('job_card_click', { job_id: job.id, title: job.title, company: job.company })
         }}

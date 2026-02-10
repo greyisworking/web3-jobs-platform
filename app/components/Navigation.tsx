@@ -197,7 +197,7 @@ export default function Navigation() {
     return pathname?.startsWith(href)
   }
 
-  const isJobsActive = isActive('/careers') || isActive('/bounties') || isActive('/ecosystems')
+  const isJobsActive = isActive('/jobs') || isActive('/bounties') || isActive('/ecosystems')
   const isCommunityActive = isActive('/articles') || isActive('/meme') || isActive('/transparency')
 
   const linkClass = (active: boolean) =>
@@ -208,7 +208,7 @@ export default function Navigation() {
     }`
 
   const jobsDropdownItems: DropdownItem[] = [
-    { label: 'All Jobs', href: '/careers' },
+    { label: 'All Jobs', href: '/jobs' },
     { label: 'Bounties', href: '/bounties' },
   ]
 

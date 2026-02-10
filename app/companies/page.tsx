@@ -157,7 +157,7 @@ export default function CompaniesPage() {
 
         {/* Companies grid */}
         {filteredCompanies.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-a24-border dark:bg-a24-dark-border">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredCompanies.map((company, index) => (
               <CompanyCard key={company.name} company={company} index={index} />
             ))}

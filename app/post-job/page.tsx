@@ -154,7 +154,7 @@ export default function PostJobPage() {
             )}
             <div className="flex gap-4 justify-center mt-8">
               <Link
-                href="/careers"
+                href="/jobs"
                 className="px-6 py-3 text-[11px] uppercase tracking-wider bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg"
               >
                 Browse Jobs
@@ -195,7 +195,7 @@ export default function PostJobPage() {
         <main className="max-w-2xl mx-auto px-6 pt-24 pb-12">
           {/* Back link */}
           <Link
-            href="/careers"
+            href="/jobs"
             className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text mb-8 transition-colors"
           >
             <ArrowLeft className="w-3 h-3" />
@@ -276,7 +276,7 @@ export default function PostJobPage() {
       <main className="max-w-2xl mx-auto px-6 pt-24 pb-12">
         {/* Back link */}
         <Link
-          href="/careers"
+          href="/jobs"
           className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text mb-8 transition-colors"
         >
           <ArrowLeft className="w-3 h-3" />
@@ -525,7 +525,7 @@ export default function PostJobPage() {
                 type="url"
                 value={form.applyUrl}
                 onChange={(e) => setForm({ ...form, applyUrl: e.target.value })}
-                placeholder="https://yourcompany.com/careers/apply"
+                placeholder="https://yourcompany.com/jobs/apply"
                 className="w-full px-4 py-3 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border focus:border-a24-text dark:focus:border-a24-dark-text outline-none transition-colors text-a24-text dark:text-a24-dark-text"
               />
               <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted mt-2">

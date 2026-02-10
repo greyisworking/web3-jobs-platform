@@ -37,7 +37,7 @@ export default function OfflinePage() {
           </button>
 
           <Link
-            href="/careers"
+            href="/jobs"
             className="px-6 py-3 border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text text-sm uppercase tracking-wider hover:border-neun-success hover:text-neun-success transition-colors"
           >
             Cached Jobs

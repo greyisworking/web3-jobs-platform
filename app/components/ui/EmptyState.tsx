@@ -98,7 +98,7 @@ export function NoJobsFound({ onReset }: { onReset?: () => void }) {
       message="try different keywords or reset your filters ser"
       ctaText={onReset ? 'Reset Filters' : 'Browse All Jobs'}
       ctaOnClick={onReset}
-      ctaHref={onReset ? undefined : '/careers'}
+      ctaHref={onReset ? undefined : '/jobs'}
     />
   )
 }
@@ -111,7 +111,7 @@ export function NoResultsFound({ onReset }: { onReset?: () => void }) {
       message="nothing matches your search... maybe try different keywords?"
       ctaText={onReset ? 'Clear Search' : 'Browse All'}
       ctaOnClick={onReset}
-      ctaHref={onReset ? undefined : '/careers'}
+      ctaHref={onReset ? undefined : '/jobs'}
     />
   )
 }
@@ -123,7 +123,7 @@ export function NoBookmarks() {
       title="no saved jobs yet"
       message="save jobs you're interested in and they'll show up here"
       ctaText="Browse Jobs"
-      ctaHref="/careers"
+      ctaHref="/jobs"
     />
   )
 }

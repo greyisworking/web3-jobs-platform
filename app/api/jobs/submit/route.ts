@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     const region = location.toLowerCase().includes('korea') ? 'Korea' : 'Global'
 
     // Generate unique URL for the job
-    const jobUrl = `https://neun.wtf/careers/${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const jobUrl = `https://neun.wtf/jobs/${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
     if (!supabaseUrl || !supabaseKey) {
       // Fallback: just log and return success if no Supabase

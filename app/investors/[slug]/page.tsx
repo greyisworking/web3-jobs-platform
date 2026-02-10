@@ -343,7 +343,7 @@ export default function InvestorDetailPage() {
               {portfolioCompanies.map((company) => (
                 <Link
                   key={company.name}
-                  href={`/careers?company=${encodeURIComponent(company.name)}`}
+                  href={`/jobs?company=${encodeURIComponent(company.name)}`}
                   className="group p-4 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border hover:border-a24-text dark:hover:border-a24-dark-text transition-all"
                 >
                   <h3 className="font-medium text-a24-text dark:text-a24-dark-text group-hover:underline">
@@ -380,7 +380,7 @@ export default function InvestorDetailPage() {
             </h2>
             {jobs.length > 0 && (
               <Link
-                href={`/careers?vc=${encodeURIComponent(vcName)}`}
+                href={`/jobs?vc=${encodeURIComponent(vcName)}`}
                 className="text-[11px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text flex items-center gap-1"
               >
                 View all
@@ -413,7 +413,7 @@ export default function InvestorDetailPage() {
             backed by {vcName}. probably gonna make it.
           </p>
           <Link
-            href="/careers"
+            href="/jobs"
             className="inline-flex items-center gap-2 px-6 py-3 text-[11px] uppercase tracking-wider bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg hover:opacity-80 transition-opacity"
           >
             Browse all jobs

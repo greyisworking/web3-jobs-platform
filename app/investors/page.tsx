@@ -317,7 +317,7 @@ export default function InvestorsPage() {
             backed by the best. building the future.
           </p>
           <Link
-            href="/careers"
+            href="/jobs"
             className="inline-flex items-center gap-2 px-6 py-3 text-[11px] uppercase tracking-wider bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg hover:opacity-80 transition-opacity"
           >
             Browse all jobs

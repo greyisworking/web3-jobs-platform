@@ -14,7 +14,7 @@ interface EcosystemWithCount extends Ecosystem {
 
 function EcosystemCard({ eco, index }: { eco: EcosystemWithCount; index: number }) {
   return (
-    <Link href={`/careers?ecosystem=${eco.id}`}>
+    <Link href={`/jobs?ecosystem=${eco.id}`}>
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -144,7 +144,7 @@ export default function EcosystemsPage() {
             can&apos;t decide? just browse all
           </p>
           <Link
-            href="/careers"
+            href="/jobs"
             className="inline-flex items-center gap-3 px-10 py-5 text-base font-bold uppercase tracking-wider bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg hover:scale-105 transition-transform"
           >
             Browse all jobs

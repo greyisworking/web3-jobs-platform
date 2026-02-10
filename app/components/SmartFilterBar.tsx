@@ -103,7 +103,7 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
         }
       }
       const qs = params.toString()
-      router.replace(qs ? `?${qs}` : '/careers', { scroll: false })
+      router.replace(qs ? `?${qs}` : '/jobs', { scroll: false })
     },
     [router]
   )
