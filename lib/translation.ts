@@ -4,29 +4,54 @@
  * For production, integrate with DeepL or Google Translate API
  */
 
-// Common Korean job terms to English
+// Comprehensive Korean job terms to English
 const KOREAN_JOB_TERMS: Record<string, string> = {
-  // Job titles
+  // Job titles - Core
   '개발자': 'Developer',
   '엔지니어': 'Engineer',
   '프론트엔드': 'Frontend',
+  '프론트 엔드': 'Frontend',
   '백엔드': 'Backend',
+  '백 엔드': 'Backend',
   '풀스택': 'Full Stack',
+  '풀 스택': 'Full Stack',
   '시니어': 'Senior',
   '주니어': 'Junior',
   '리드': 'Lead',
+  '팀장': 'Team Lead',
   '매니저': 'Manager',
   '디자이너': 'Designer',
+  '프로덕트': 'Product',
   '기획자': 'Product Manager',
-  'PM': 'Product Manager',
+  '프로덕트 매니저': 'Product Manager',
+  '콘텐츠': 'Content',
+  '크리에이터': 'Creator',
+  '마켓플레이스': 'Marketplace',
   '데이터': 'Data',
   '분석가': 'Analyst',
   '연구원': 'Researcher',
   '인턴': 'Intern',
   '계약직': 'Contract',
   '정규직': 'Full-time',
+  '마케터': 'Marketer',
+  '마케팅': 'Marketing',
+  '운영': 'Operations',
+  '총괄': 'Head',
+  '담당자': 'Specialist',
+  '코어': 'Core',
+  '서비스': 'Service',
+  '플랫폼': 'Platform',
+  '보안': 'Security',
+  '인프라': 'Infrastructure',
+  '퍼포먼스': 'Performance',
+  '글로벌': 'Global',
+  '커뮤니티': 'Community',
+  '경영지원': 'Business Support',
+  '위험관리': 'Risk Management',
+  '가상자산': 'Digital Asset',
+  '수탁': 'Custody',
 
-  // Tech terms
+  // Tech terms - Blockchain
   '블록체인': 'Blockchain',
   '스마트컨트랙트': 'Smart Contract',
   '스마트 컨트랙트': 'Smart Contract',
@@ -49,34 +74,50 @@ const KOREAN_JOB_TERMS: Record<string, string> = {
   '자바스크립트': 'JavaScript',
   '리액트': 'React',
   '넥스트': 'Next.js',
+  '연계': 'Integration',
 
   // Employment terms
-  '경력': 'Experience',
+  '경력': '',
   '신입': 'Entry-level',
-  '무관': 'Not required',
+  '무관': '',
   '우대': 'Preferred',
   '필수': 'Required',
   '자격요건': 'Requirements',
   '우대사항': 'Preferred qualifications',
   '담당업무': 'Responsibilities',
   '근무지': 'Location',
-  '서울': 'Seoul',
-  '판교': 'Pangyo',
-  '강남': 'Gangnam',
   '재택근무': 'Remote',
   '하이브리드': 'Hybrid',
   '연봉': 'Salary',
   '협의': 'Negotiable',
   '복리후생': 'Benefits',
   '스톡옵션': 'Stock options',
+  '상시': '',
+  '채용': '',
+  '모집': '',
+
+  // Locations
+  '서울': 'Seoul',
+  '판교': 'Pangyo',
+  '강남': 'Gangnam',
+  '송파': 'Songpa',
+  '성수': 'Seongsu',
+  '역삼': 'Yeoksam',
+  '구': '',
 
   // Common phrases
-  '~년 이상': '+ years',
   '년 이상': '+ years',
+  '년': 'years',
   '개월': 'months',
   '팀원': 'Team member',
   '협업': 'Collaboration',
   '커뮤니케이션': 'Communication',
+  '팀': 'Team',
+  '부서': 'Department',
+
+  // Company suffixes
+  '주식회사': '',
+  '(주)': '',
 }
 
 // Check if text contains Korean characters
@@ -108,8 +149,11 @@ export function translateJobTitle(title: string): string {
 
   let translated = quickTranslateTerms(title)
 
-  // Clean up any remaining Korean if possible
-  // In production, send to translation API
+  // Remove any remaining Korean characters and clean up
+  translated = translated.replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
+  translated = translated.replace(/\s{2,}/g, ' ').trim()
+  translated = translated.replace(/^\s*[-–]\s*/, '').trim()
+  translated = translated.replace(/\s*[-–]\s*$/, '').trim()
 
   return translated
 }

@@ -37,7 +37,10 @@
     "validate": "tsx scripts/validate-jobs.ts",
     "refresh:featured": "tsx scripts/refresh-featured.ts",
     "translate:korean": "tsx scripts/translate-korean-jobs.ts",
-    "translate:korean:apply": "tsx scripts/translate-korean-jobs.ts --apply"
+    "translate:korean:apply": "tsx scripts/translate-korean-jobs.ts --apply",
+    "translate:ai": "tsx scripts/translate-korean-ai.ts",
+    "translate:ai:apply": "tsx scripts/translate-korean-ai.ts --apply",
+    "delete:jobkorea": "tsx scripts/delete-jobkorea.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.73.0",

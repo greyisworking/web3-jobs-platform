@@ -23,15 +23,18 @@ interface KoreanJob {
   title: string
   company: string
   description: string | null
+  requirements: string | null
+  responsibilities: string | null
+  benefits: string | null
 }
 
 async function findKoreanJobs(): Promise<KoreanJob[]> {
-  console.log('Scanning for Korean job titles...\n')
+  console.log('Scanning for Korean job content...\n')
 
   // Fetch all active jobs
   const { data: jobs, error } = await supabase
     .from('Job')
-    .select('id, title, company, description')
+    .select('id, title, company, description, requirements, responsibilities, benefits')
     .eq('isActive', true)
     .order('crawledAt', { ascending: false })
 
@@ -40,10 +43,16 @@ async function findKoreanJobs(): Promise<KoreanJob[]> {
     return []
   }
 
-  // Filter for jobs with Korean in title
-  const koreanJobs = (jobs || []).filter(job => containsKorean(job.title))
+  // Filter for jobs with Korean in any field
+  const koreanJobs = (jobs || []).filter(job =>
+    containsKorean(job.title) ||
+    containsKorean(job.description) ||
+    containsKorean(job.requirements) ||
+    containsKorean(job.responsibilities) ||
+    containsKorean(job.benefits)
+  )
 
-  console.log(`Found ${koreanJobs.length} jobs with Korean titles out of ${jobs?.length || 0} total\n`)
+  console.log(`Found ${koreanJobs.length} jobs with Korean content out of ${jobs?.length || 0} total\n`)
 
   return koreanJobs
 }
@@ -64,23 +73,72 @@ async function translateJobs(dryRun: boolean): Promise<void> {
   let errorCount = 0
 
   for (const job of koreanJobs) {
-    const translatedTitle = translateJobTitle(job.title)
+    const updates: Record<string, string> = {}
+    let hasChanges = false
 
-    // Skip if translation didn't change anything meaningful
-    if (translatedTitle === job.title) {
+    // Translate title
+    if (containsKorean(job.title)) {
+      const translatedTitle = translateJobTitle(job.title)
+      if (translatedTitle !== job.title && translatedTitle.length > 0) {
+        updates.title = translatedTitle
+        hasChanges = true
+      }
+    }
+
+    // Translate description
+    if (containsKorean(job.description)) {
+      const translated = quickTranslateTerms(job.description!)
+        .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
+        .replace(/\s{2,}/g, ' ')
+      updates.description = translated
+      hasChanges = true
+    }
+
+    // Translate requirements
+    if (containsKorean(job.requirements)) {
+      const translated = quickTranslateTerms(job.requirements!)
+        .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
+        .replace(/\s{2,}/g, ' ')
+      updates.requirements = translated
+      hasChanges = true
+    }
+
+    // Translate responsibilities
+    if (containsKorean(job.responsibilities)) {
+      const translated = quickTranslateTerms(job.responsibilities!)
+        .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
+        .replace(/\s{2,}/g, ' ')
+      updates.responsibilities = translated
+      hasChanges = true
+    }
+
+    // Translate benefits
+    if (containsKorean(job.benefits)) {
+      const translated = quickTranslateTerms(job.benefits!)
+        .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
+        .replace(/\s{2,}/g, ' ')
+      updates.benefits = translated
+      hasChanges = true
+    }
+
+    if (!hasChanges) {
       skippedCount++
       continue
     }
 
     console.log(`[${job.company}]`)
-    console.log(`  Original:   ${job.title}`)
-    console.log(`  Translated: ${translatedTitle}`)
+    if (updates.title) {
+      console.log(`  Title: ${job.title} → ${updates.title}`)
+    }
+    if (updates.description) {
+      console.log(`  Description: translated`)
+    }
     console.log('')
 
     if (!dryRun) {
       const { error } = await supabase
         .from('Job')
-        .update({ title: translatedTitle })
+        .update(updates)
         .eq('id', job.id)
 
       if (error) {

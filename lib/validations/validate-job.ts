@@ -70,10 +70,25 @@ export async function validateAndSaveJob(
 
   const job = result.data
 
-  // Auto-translate Korean title to English for better searchability
+  // Auto-translate Korean to English for better searchability
   const translatedTitle = containsKorean(job.title)
     ? translateJobTitle(job.title)
     : job.title
+
+  // Also translate description if it contains Korean
+  const translateField = (text: string | null | undefined): string | null => {
+    if (!text) return null
+    if (!containsKorean(text)) return text
+    return quickTranslateTerms(text)
+      .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+  }
+
+  const translatedDescription = translateField(job.description)
+  const translatedRequirements = translateField(job.requirements)
+  const translatedResponsibilities = translateField(job.responsibilities)
+  const translatedBenefits = translateField(job.benefits)
 
   // Auto-detect role from title if not provided
   const detectedRole = job.role || detectRole(translatedTitle)
@@ -133,9 +148,9 @@ export async function validateAndSaveJob(
     // Use existing postedDate if available, otherwise use new one
     const postedDateToUse = existingJob?.postedDate || job.postedDate?.toISOString()
 
-    // For description: use new value if provided, otherwise keep existing
+    // For description: use translated value if provided, otherwise keep existing
     // This allows re-crawl to ADD descriptions to jobs that didn't have them
-    const descriptionToUse = job.description || existingJob?.description || null
+    const descriptionToUse = translatedDescription || existingJob?.description || null
 
     const { data: upsertData, error } = await supabase.from('Job').upsert(
       {
@@ -154,11 +169,11 @@ export async function validateAndSaveJob(
         // Preserve original postedDate on re-crawl to maintain correct sorting
         postedDate: postedDateToUse,
         updatedAt: new Date().toISOString(),
-        // Enhanced job details - preserve existing if no new value
+        // Enhanced job details - use translated values, preserve existing if no new value
         description: descriptionToUse,
-        requirements: job.requirements || null,
-        responsibilities: job.responsibilities || null,
-        benefits: job.benefits || null,
+        requirements: translatedRequirements || null,
+        responsibilities: translatedResponsibilities || null,
+        benefits: translatedBenefits || null,
         salaryMin: job.salaryMin || null,
         salaryMax: job.salaryMax || null,
         salaryCurrency: job.salaryCurrency || null,
@@ -204,11 +219,11 @@ export async function validateAndSaveJob(
           isActive: true,
           postedDate: job.postedDate,
           updatedAt: new Date(),
-          // Enhanced job details
-          description: job.description || null,
-          requirements: job.requirements || null,
-          responsibilities: job.responsibilities || null,
-          benefits: job.benefits || null,
+          // Enhanced job details - use translated values
+          description: translatedDescription || null,
+          requirements: translatedRequirements || null,
+          responsibilities: translatedResponsibilities || null,
+          benefits: translatedBenefits || null,
           salaryMin: job.salaryMin || null,
           salaryMax: job.salaryMax || null,
           salaryCurrency: job.salaryCurrency || null,
@@ -232,11 +247,11 @@ export async function validateAndSaveJob(
           region: job.region,
           isActive: true,
           postedDate: job.postedDate,
-          // Enhanced job details
-          description: job.description || null,
-          requirements: job.requirements || null,
-          responsibilities: job.responsibilities || null,
-          benefits: job.benefits || null,
+          // Enhanced job details - use translated values
+          description: translatedDescription || null,
+          requirements: translatedRequirements || null,
+          responsibilities: translatedResponsibilities || null,
+          benefits: translatedBenefits || null,
           salaryMin: job.salaryMin || null,
           salaryMax: job.salaryMax || null,
           salaryCurrency: job.salaryCurrency || null,
