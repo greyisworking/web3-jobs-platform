@@ -9,6 +9,42 @@ interface MarkdownRendererProps {
 }
 
 /**
+ * Pre-process content to normalize it for markdown rendering
+ */
+function preprocessContent(content: string): string {
+  let processed = content
+
+  // 1. Convert <br/> and <br> tags to newlines
+  processed = processed.replace(/<br\s*\/?>/gi, '\n')
+
+  // 2. Convert ● bullet points to markdown list items
+  //    Handle: "● Item" or "●Item" at start of line
+  processed = processed.replace(/^[●•]\s*/gm, '- ')
+  //    Handle: inline bullets after newline
+  processed = processed.replace(/\n[●•]\s*/g, '\n- ')
+
+  // 3. Convert numbered items like "1.Item" to "1. Item"
+  processed = processed.replace(/^(\d+\.)(?=[A-Za-z])/gm, '$1 ')
+
+  // 4. Strip remaining HTML tags but preserve their content
+  //    (except for already-converted br tags)
+  processed = processed.replace(/<\/?(?:p|div|span|strong|b|em|i|u)[^>]*>/gi, '')
+
+  // 5. Normalize multiple newlines
+  processed = processed.replace(/\n{3,}/g, '\n\n')
+
+  // 6. Fix words that got broken by line breaks (e.g., "compen\nsation" -> "compensation")
+  //    Look for lowercase letter + newline + lowercase letter (word continuation)
+  processed = processed.replace(/([a-z])\n([a-z])/g, '$1$2')
+
+  // 7. Clean up extra whitespace
+  processed = processed.replace(/[ \t]+\n/g, '\n')
+  processed = processed.trim()
+
+  return processed
+}
+
+/**
  * Markdown Renderer for Job Descriptions
  *
  * Renders markdown content with NEUN design system typography.
@@ -17,19 +53,8 @@ interface MarkdownRendererProps {
 export default function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
   if (!content) return null
 
-  // Check if content looks like markdown or HTML
-  const isMarkdown = /^#{1,6}\s|^\s*[-*]\s|^\d+\.\s|\*\*[^*]+\*\*/m.test(content)
-  const hasHtml = /<[a-z][^>]*>/i.test(content)
-
-  // If it has HTML and doesn't look like markdown, render as HTML (legacy)
-  if (hasHtml && !isMarkdown) {
-    return (
-      <div
-        className={`jd-prose ${className}`}
-        dangerouslySetInnerHTML={{ __html: content }}
-      />
-    )
-  }
+  // Pre-process content to normalize HTML and bullet points
+  const processedContent = preprocessContent(content)
 
   return (
     <div className={`jd-prose ${className}`}>
@@ -142,7 +167,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           ),
         }}
       >
-        {content}
+        {processedContent}
       </ReactMarkdown>
     </div>
   )

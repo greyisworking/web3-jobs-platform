@@ -226,7 +226,11 @@ function formatPlainTextDescription(text: string): string {
     return kw && kw.length > 0 ? first + ' ' + kw.join(' ') : match
   })
 
-  // 10) Normalize multiple newlines (keep as \n for markdown rendering)
+  // 10) Fix broken words (lowercase letter + newline + lowercase letter)
+  //     This happens when text is wrapped mid-word
+  result = result.replace(/([a-z])\n([a-z])/g, '$1$2')
+
+  // 11) Normalize multiple newlines (keep as \n for markdown rendering)
   result = result.replace(/\n{3,}/g, '\n\n')
 
   return result
@@ -278,10 +282,12 @@ export function cleanJobDisplay(html: string | null | undefined): string {
     .replace(/&hellip;/g, '...')
     .replace(/&nbsp;/g, ' ')
 
+  // Convert <br/> tags to newlines for markdown rendering
+  cleaned = cleaned.replace(/<br\s*\/?>/gi, '\n')
+
   // Clean up whitespace
   cleaned = cleaned
     .replace(/\n{3,}/g, '\n\n')
-    .replace(/(<br\s*\/?>){3,}/gi, '<br/><br/>')
     .trim()
 
   return cleaned
