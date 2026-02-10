@@ -15,6 +15,7 @@ import {
   Flag,
   Star,
   Mail,
+  Sparkles,
 } from 'lucide-react'
 
 interface NavItem {
@@ -53,6 +54,7 @@ const navSections: NavSection[] = [
     title: '마케팅',
     items: [
       { href: '/admin/newsletter', label: '뉴스레터', icon: <Mail className="h-4 w-4" /> },
+      { href: '/admin/content-generator', label: '콘텐츠 생성', icon: <Sparkles className="h-4 w-4" /> },
     ],
   },
 ]

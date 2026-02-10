@@ -1,0 +1,378 @@
+'use client'
+
+import { useState, useCallback } from 'react'
+import { createClient } from '@supabase/supabase-js'
+import { Sparkles, Copy, RotateCcw, Save, FileText, Briefcase, BookOpen, Loader2, Check } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+type ContentMode = 'newsletter' | 'ludium-jobs' | 'ludium-article'
+
+interface GeneratedContent {
+  english: string
+  korean: string | null
+  raw: string
+}
+
+interface UsageInfo {
+  inputTokens: number
+  outputTokens: number
+  totalTokens: number
+  costUsd: number
+}
+
+const MODE_CONFIG = {
+  'newsletter': {
+    label: 'Newsletter',
+    description: 'NEUN weekly newsletter (English only)',
+    icon: FileText,
+    color: 'text-green-500',
+    bgColor: 'bg-green-500/10',
+    dualLanguage: false,
+  },
+  'ludium-jobs': {
+    label: 'Ludium Jobs',
+    description: 'Job listings for Ludium (EN + KR)',
+    icon: Briefcase,
+    color: 'text-blue-500',
+    bgColor: 'bg-blue-500/10',
+    dualLanguage: true,
+  },
+  'ludium-article': {
+    label: 'Ludium Article',
+    description: 'Educational articles (EN + KR)',
+    icon: BookOpen,
+    color: 'text-purple-500',
+    bgColor: 'bg-purple-500/10',
+    dualLanguage: true,
+  },
+}
+
+const SAMPLE_PROMPTS = {
+  'newsletter': 'Write this week\'s NEUN newsletter highlighting the top 10 Web3 job opportunities. Focus on engineering roles and VC-backed companies.',
+  'ludium-jobs': 'Create a job listing post for these 5 exciting Web3 positions. Make it engaging and accessible for newcomers to the space.',
+  'ludium-article': 'Write an article explaining "How to Break into Web3 Development in 2026" for beginners. Cover the essential skills, learning resources, and job hunting tips.',
+}
+
+export default function ContentGeneratorPage() {
+  const [mode, setMode] = useState<ContentMode>('newsletter')
+  const [prompt, setPrompt] = useState('')
+  const [content, setContent] = useState<GeneratedContent | null>(null)
+  const [usage, setUsage] = useState<UsageInfo | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'english' | 'korean'>('english')
+  const [copiedField, setCopiedField] = useState<string | null>(null)
+  const [editMode, setEditMode] = useState(false)
+  const [editedContent, setEditedContent] = useState<GeneratedContent | null>(null)
+
+  const handleGenerate = useCallback(async () => {
+    if (!prompt.trim()) {
+      setError('Please enter a prompt')
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    setContent(null)
+    setEditMode(false)
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        setError('Please log in to use the content generator')
+        return
+      }
+
+      const response = await fetch('/api/admin/content-generator', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          mode,
+          prompt,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate content')
+      }
+
+      setContent(data.content)
+      setEditedContent(data.content)
+      setUsage(data.usage)
+
+      // Switch to Korean tab if available
+      if (data.content.korean && mode !== 'newsletter') {
+        setActiveTab('english')
+      }
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong')
+    } finally {
+      setLoading(false)
+    }
+  }, [mode, prompt])
+
+  const handleCopy = useCallback(async (text: string, field: string) => {
+    await navigator.clipboard.writeText(text)
+    setCopiedField(field)
+    setTimeout(() => setCopiedField(null), 2000)
+  }, [])
+
+  const handleRegenerate = useCallback(() => {
+    handleGenerate()
+  }, [handleGenerate])
+
+  const handleSave = useCallback(async () => {
+    if (!editedContent) return
+
+    // For now, just copy to clipboard and show success
+    const textToSave = activeTab === 'korean' && editedContent.korean
+      ? editedContent.korean
+      : editedContent.english
+
+    await navigator.clipboard.writeText(textToSave)
+    setCopiedField('save')
+    setTimeout(() => setCopiedField(null), 2000)
+  }, [editedContent, activeTab])
+
+  const handleUseSamplePrompt = useCallback(() => {
+    setPrompt(SAMPLE_PROMPTS[mode])
+  }, [mode])
+
+  const currentContent = editMode ? editedContent : content
+  const displayContent = activeTab === 'korean' && currentContent?.korean
+    ? currentContent.korean
+    : currentContent?.english || ''
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20">
+          <Sparkles className="h-6 w-6 text-purple-400" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold">Content Generator</h1>
+          <p className="text-sm text-muted-foreground">
+            AI-powered content creation with Claude
+          </p>
+        </div>
+      </div>
+
+      {/* Mode Selection */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {(Object.entries(MODE_CONFIG) as [ContentMode, typeof MODE_CONFIG[ContentMode]][]).map(
+          ([key, config]) => {
+            const Icon = config.icon
+            const isActive = mode === key
+
+            return (
+              <button
+                key={key}
+                onClick={() => setMode(key)}
+                className={`p-4 rounded-xl border-2 transition-all text-left ${
+                  isActive
+                    ? `border-primary ${config.bgColor}`
+                    : 'border-border hover:border-muted-foreground/30'
+                }`}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Icon className={`h-5 w-5 ${config.color}`} />
+                  <span className="font-semibold">{config.label}</span>
+                  {config.dualLanguage && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                      EN + KR
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">{config.description}</p>
+              </button>
+            )
+          }
+        )}
+      </div>
+
+      {/* Input Section */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium">Prompt</label>
+          <button
+            onClick={handleUseSamplePrompt}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Use sample prompt
+          </button>
+        </div>
+        <textarea
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder={`Describe what content you want to generate...\n\nExample: ${SAMPLE_PROMPTS[mode]}`}
+          className="w-full h-32 px-4 py-3 rounded-lg border bg-card resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
+        />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleGenerate}
+            disabled={loading || !prompt.trim()}
+            className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium flex items-center gap-2 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                Generate
+              </>
+            )}
+          </button>
+          {usage && (
+            <span className="text-xs text-muted-foreground">
+              {usage.totalTokens.toLocaleString()} tokens | ${usage.costUsd.toFixed(4)}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400">
+          {error}
+        </div>
+      )}
+
+      {/* Output Section */}
+      {currentContent && (
+        <div className="rounded-xl border bg-card overflow-hidden">
+          {/* Tabs for dual language */}
+          {MODE_CONFIG[mode].dualLanguage && currentContent.korean && (
+            <div className="flex border-b">
+              <button
+                onClick={() => setActiveTab('english')}
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                  activeTab === 'english'
+                    ? 'bg-muted text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                English
+              </button>
+              <button
+                onClick={() => setActiveTab('korean')}
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                  activeTab === 'korean'
+                    ? 'bg-muted text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Korean
+              </button>
+            </div>
+          )}
+
+          {/* Toolbar */}
+          <div className="flex items-center gap-2 p-3 border-b bg-muted/30">
+            <button
+              onClick={() => handleCopy(displayContent, 'content')}
+              className="px-3 py-1.5 rounded-md text-sm flex items-center gap-1.5 hover:bg-muted transition-colors"
+            >
+              {copiedField === 'content' ? (
+                <>
+                  <Check className="h-4 w-4 text-green-500" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  Copy
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleRegenerate}
+              disabled={loading}
+              className="px-3 py-1.5 rounded-md text-sm flex items-center gap-1.5 hover:bg-muted transition-colors disabled:opacity-50"
+            >
+              <RotateCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Regenerate
+            </button>
+            <button
+              onClick={() => setEditMode(!editMode)}
+              className={`px-3 py-1.5 rounded-md text-sm flex items-center gap-1.5 transition-colors ${
+                editMode ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+              }`}
+            >
+              Edit
+            </button>
+            <button
+              onClick={handleSave}
+              className="px-3 py-1.5 rounded-md text-sm flex items-center gap-1.5 hover:bg-muted transition-colors ml-auto"
+            >
+              {copiedField === 'save' ? (
+                <>
+                  <Check className="h-4 w-4 text-green-500" />
+                  Saved to clipboard!
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Save
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Content Area */}
+          <div className="p-6">
+            {editMode ? (
+              <textarea
+                value={
+                  activeTab === 'korean' && editedContent?.korean
+                    ? editedContent.korean
+                    : editedContent?.english || ''
+                }
+                onChange={(e) => {
+                  if (!editedContent) return
+                  if (activeTab === 'korean') {
+                    setEditedContent({ ...editedContent, korean: e.target.value })
+                  } else {
+                    setEditedContent({ ...editedContent, english: e.target.value })
+                  }
+                }}
+                className="w-full min-h-[400px] p-4 rounded-lg border bg-background font-mono text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            ) : (
+              <div className="prose prose-invert max-w-none">
+                <ReactMarkdown>{displayContent}</ReactMarkdown>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!content && !loading && (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="p-4 rounded-full bg-muted mb-4">
+            <Sparkles className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-medium mb-2">No content generated yet</h3>
+          <p className="text-sm text-muted-foreground max-w-md">
+            Select a content type, enter your prompt, and click Generate to create
+            AI-powered content with Claude.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
