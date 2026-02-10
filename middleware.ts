@@ -1,9 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Cookie domain for production (works across www and non-www)
-const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.neun.wtf' : undefined
-
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -21,22 +18,23 @@ export async function middleware(request: NextRequest) {
           )
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, {
-              ...options,
-              domain: COOKIE_DOMAIN,
-            })
+            supabaseResponse.cookies.set(name, value, options)
           )
         },
       },
     }
   )
 
+  // IMPORTANT: Do NOT run getUser() on auth callback - let the route handler do it
+  const pathname = request.nextUrl.pathname
+  if (pathname.startsWith('/auth/callback')) {
+    return supabaseResponse
+  }
+
   // Refresh the session (this updates cookies if needed)
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
-  const pathname = request.nextUrl.pathname
 
   // Skip auth check for non-admin routes - just return with refreshed cookies
   if (!pathname.startsWith('/admin')) {
@@ -65,6 +63,14 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Only run middleware on admin routes to avoid interfering with OAuth flow
-  matcher: ['/admin/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }
