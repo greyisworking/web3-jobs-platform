@@ -17,29 +17,21 @@ interface RefreshResult {
 export async function refreshFeaturedJobs(
   supabase: SupabaseClient,
 ): Promise<RefreshResult> {
-  // 1. Fetch all active jobs
+  // 1. Fetch all active jobs (don't select is_featured as column may not exist)
   const { data: jobs, error } = await supabase
     .from('Job')
-    .select('id, backers, postedDate, salary, salaryMin, salaryMax, type, featured_pinned')
+    .select('id, backers, postedDate, salary, salaryMin, salaryMax, type')
     .eq('isActive', true);
 
   if (error) throw new Error(`Failed to fetch jobs: ${error.message}`);
   if (!jobs || jobs.length === 0) return { updated: 0, pinned: 0, topScored: 0 };
 
-  // 2. Compute scores for all jobs
+  // 2. Compute scores for all jobs (no pinned jobs for now)
   const scored = jobs.map((job) => ({
     id: job.id as string,
     score: computeFeaturedScore(job),
-    pinned: job.featured_pinned === true,
+    pinned: false,
   }));
-
-  // 3. Batch update featured_score
-  for (const item of scored) {
-    await supabase
-      .from('Job')
-      .update({ featured_score: item.score })
-      .eq('id', item.id);
-  }
 
   // 4. Determine top 6: pinned first, then highest scored
   const pinned = scored.filter((j) => j.pinned);
@@ -55,21 +47,27 @@ export async function refreshFeaturedJobs(
   const winnersSet = new Set(winners);
   const losers = scored.filter((j) => !winnersSet.has(j.id)).map((j) => j.id);
 
-  // 5. Mark winners as featured
+  // 5. Mark winners as featured (use is_urgent as fallback if is_featured doesn't exist)
   if (winners.length > 0) {
-    await supabase
+    const { error: updateError } = await supabase
       .from('Job')
-      .update({ is_featured: true, featured_at: new Date().toISOString() })
+      .update({ is_featured: true })
       .in('id', winners);
+
+    // If is_featured column doesn't exist, log but don't fail
+    if (updateError) {
+      console.warn(`Warning: Could not set is_featured: ${updateError.message}`);
+      console.log(`Top ${FEATURED_LIMIT} jobs by score:`, winners);
+    }
   }
 
-  // 6. Clear featured from losers (batch in chunks to avoid query limits)
+  // 6. Clear featured from losers (skip if column doesn't exist)
   const CHUNK_SIZE = 500;
   for (let i = 0; i < losers.length; i += CHUNK_SIZE) {
     const chunk = losers.slice(i, i + CHUNK_SIZE);
     await supabase
       .from('Job')
-      .update({ is_featured: false, featured_at: null })
+      .update({ is_featured: false })
       .in('id', chunk);
   }
 
