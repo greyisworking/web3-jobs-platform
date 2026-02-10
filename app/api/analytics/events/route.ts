@@ -35,6 +35,7 @@ export async function POST(request: Request) {
     )
 
     // Fire-and-forget insert — don't block the response
+    // Silently fails if table doesn't exist (non-critical feature)
     supabase
       .from('analytics_events')
       .insert({
@@ -42,8 +43,8 @@ export async function POST(request: Request) {
         event_data: event_data ?? {},
         user_session: user_session ?? null,
       })
-      .then(({ error }) => {
-        if (error) console.error('Analytics insert error:', error.message)
+      .then(() => {
+        // Silent - analytics is optional
       })
 
     return NextResponse.json({ ok: true })
