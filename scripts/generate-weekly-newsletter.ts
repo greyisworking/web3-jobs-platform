@@ -118,9 +118,9 @@ function normalizeLocation(location: string): string {
 
 function getWeekLabel(): string {
   const date = new Date()
-  const month = date.getMonth() + 1
+  const month = date.toLocaleString('en-US', { month: 'short' })
   const weekOfMonth = Math.ceil(date.getDate() / 7)
-  return `${month}월 ${weekOfMonth}주차`
+  return `${month} Week ${weekOfMonth}`
 }
 
 function formatSalary(job: Job): string {
@@ -152,12 +152,12 @@ function generateMarkdown(jobs: Job[], stats: Stats): string {
 
   let md = `# 🚀 NEUN Weekly | ${week}
 
-gm ser, 이번 주 Web3 채용 시장 핫합니다. 🔥
+gm ser, this week's Web3 job market is heating up 🔥
 
-## 📊 이번 주 하이라이트
-- 신규 공고: **${stats.totalJobs}개**
-- Top 직무: **${topRole?.[0] || 'Engineering'}** (${topRolePercent}%)
-- Remote 비율: **${stats.remoteRate}%**
+## 📊 This Week's Highlights
+- New listings: **${stats.totalJobs}**
+- Top role: **${topRole?.[0] || 'Engineering'}** (${topRolePercent}%)
+- Remote rate: **${stats.remoteRate}%**
 
 ## 🔥 Featured Positions
 
@@ -172,30 +172,30 @@ gm ser, 이번 주 Web3 채용 시장 핫합니다. 🔥
   }
 
   // Role breakdown
-  md += `\n## 📈 직무별 분포\n`
+  md += `\n## 📈 Role Breakdown\n`
   const sortedRoles = Object.entries(stats.roleBreakdown).sort((a, b) => b[1] - a[1])
   for (const [role, count] of sortedRoles) {
     const percent = Math.round((count / stats.totalJobs) * 100)
-    md += `- **${role}**: ${count}개 (${percent}%)\n`
+    md += `- **${role}**: ${count} (${percent}%)\n`
   }
 
   // Top companies
-  md += `\n## 🏢 채용 활발 기업\n`
+  md += `\n## 🏢 Companies to Watch\n`
   for (const company of stats.topCompanies.slice(0, 5)) {
-    md += `- **${company.name}** - ${company.count}개 포지션 채용 중\n`
+    md += `- **${company.name}** - ${company.count} open positions\n`
   }
 
   // Location breakdown
-  md += `\n## 🌍 지역별 분포\n`
+  md += `\n## 🌍 Location Breakdown\n`
   const sortedLocations = Object.entries(stats.locationBreakdown).sort((a, b) => b[1] - a[1])
   for (const [location, count] of sortedLocations) {
-    md += `- ${location}: ${count}개\n`
+    md += `- ${location}: ${count}\n`
   }
 
   md += `
 ---
 
-[전체 공고 보기 →](${SITE_URL}/jobs?${utmParams})
+[View all jobs →](${SITE_URL}/jobs?${utmParams})
 
 *Powered by NEUN | Built for Web3 natives*
 `
@@ -236,7 +236,7 @@ function generateHtml(jobs: Job[], stats: Stats): string {
 
   let topCompaniesHtml = ''
   for (const company of stats.topCompanies.slice(0, 5)) {
-    topCompaniesHtml += `<li style="margin-bottom: 8px;"><strong>${company.name}</strong> - ${company.count}개 포지션 채용 중</li>`
+    topCompaniesHtml += `<li style="margin-bottom: 8px;"><strong>${company.name}</strong> - ${company.count} open positions</li>`
   }
 
   return `<!DOCTYPE html>
@@ -257,15 +257,15 @@ function generateHtml(jobs: Job[], stats: Stats): string {
       🚀 NEUN Weekly | ${week}
     </h2>
     <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6; margin-bottom: 32px;">
-      gm ser, 이번 주 Web3 채용 시장 핫합니다. 🔥
+      gm ser, this week's Web3 job market is heating up 🔥
     </p>
 
     <div style="background-color: #1e293b; border-radius: 8px; padding: 24px; margin-bottom: 32px;">
-      <h3 style="color: #22c55e; font-size: 18px; margin: 0 0 16px 0;">📊 이번 주 하이라이트</h3>
+      <h3 style="color: #22c55e; font-size: 18px; margin: 0 0 16px 0;">📊 This Week's Highlights</h3>
       <ul style="color: #e2e8f0; margin: 0; padding-left: 20px; line-height: 1.8;">
-        <li>신규 공고: <strong>${stats.totalJobs}개</strong></li>
-        <li>Top 직무: <strong>${topRole?.[0] || 'Engineering'}</strong> (${topRolePercent}%)</li>
-        <li>Remote 비율: <strong>${stats.remoteRate}%</strong></li>
+        <li>New listings: <strong>${stats.totalJobs}</strong></li>
+        <li>Top role: <strong>${topRole?.[0] || 'Engineering'}</strong> (${topRolePercent}%)</li>
+        <li>Remote rate: <strong>${stats.remoteRate}%</strong></li>
       </ul>
     </div>
 
