@@ -150,7 +150,6 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
             <option value="remote3.co">remote3.co</option>
             <option value="remoteok.com">remoteok.com</option>
             <option value="rocketpunch.com">rocketpunch.com</option>
-            <option value="jobkorea.co.kr">jobkorea.co.kr</option>
             <option value="jobs.sui.io">sui jobs</option>
             <option value="jobs.solana.com">solana jobs</option>
             <option value="ethereum.foundation">ethereum foundation</option>

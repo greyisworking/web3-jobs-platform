@@ -264,14 +264,9 @@ export function WalletConnect() {
     <>
       {/* Header */}
       <div className="p-4 border-b border-a24-border dark:border-a24-dark-border flex items-center justify-between">
-        <div>
-          <p className="text-sm font-bold text-a24-text dark:text-a24-dark-text">
-            Connect
-          </p>
-          <p className="text-[10px] text-a24-muted dark:text-a24-dark-muted mt-0.5">
-            Get on-chain badges with wallet, or start easily with social login
-          </p>
-        </div>
+        <p className="text-sm font-bold text-a24-text dark:text-a24-dark-text">
+          Connect
+        </p>
         {!isMobile && (
           <button
             onClick={() => setIsOpen(false)}
@@ -286,9 +281,6 @@ export function WalletConnect() {
       <div className="p-3">
         <p className="text-[10px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted mb-2 px-1">
           Web3 Wallet
-        </p>
-        <p className="text-[9px] text-neun-success mb-3 px-1">
-          Full features: Post jobs, on-chain badges, POAP
         </p>
         <div className="space-y-1">
           {connectors.map((c) => {
@@ -329,9 +321,6 @@ export function WalletConnect() {
 
       {/* Social Login Section */}
       <div className="p-3 pt-1">
-        <p className="text-[9px] text-a24-muted dark:text-a24-dark-muted mb-3 px-1">
-          Basic features: Browse jobs, bookmarks, apply
-        </p>
         <div className="space-y-1">
           <button
             type="button"

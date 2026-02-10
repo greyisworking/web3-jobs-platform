@@ -262,7 +262,6 @@ const SOURCE_PRIORITY: Record<string, number> = {
   'linkedin': 60,
   'web3career': 50,
   'web3jobs': 50,
-  'jobkorea': 40,
   'unknown': 0,
 }
 

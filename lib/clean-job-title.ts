@@ -89,6 +89,23 @@ export function cleanJobTitle(raw: string, companyName?: string): string {
   // ── Step 6: Remove work type suffixes ──
   title = title.replace(/\s*\(\s*(?:Remote|Hybrid|Onsite|On-site|원격|재택|하이브리드)\s*\)\s*$/ig, '')
   title = title.replace(/\s*[,\-]\s*(?:Remote|Hybrid)\s*$/i, '')
+  // Remove "100% remote", "(US)", country codes
+  title = title.replace(/\s*\(\s*(?:100%\s*)?(?:Remote|US|USA|UK|EU|APAC|EMEA|LATAM|Global)\s*\)\s*$/ig, '')
+  title = title.replace(/\s*-\s*(?:100%\s*)?Remote\s*$/i, '')
+
+  // ── Step 6.5: Remove tech stack / location suffixes ──
+  // "-Rust/Go", "-Web3 Space at bondex", "- Crypto"
+  title = title.replace(/\s*-\s*(?:Rust|Go|Python|TypeScript|Solidity|Node\.?js)(?:\/\w+)*\s*$/i, '')
+  title = title.replace(/\s*-\s*Web3\s+(?:Space\s+)?(?:at\s+\w+)?\s*$/i, '')
+  title = title.replace(/\s*-\s*(?:Crypto|Web3|Blockchain|DeFi|NFT)\s*$/i, '')
+
+  // ── Step 6.6: Remove "Web3", "Crypto" as trailing keywords ──
+  title = title.replace(/\s*[,\-]\s*(?:Web3|Crypto|Blockchain)\s*$/i, '')
+  title = title.replace(/\s+(?:Web3|Crypto)\s*$/i, '')
+
+  // ── Step 6.7: Remove Korean duplicate explanations in parentheses ──
+  // (위험관리부서), (마케팅팀), (개발팀) etc.
+  title = title.replace(/\s*\([^)]*(?:부서|팀|본부|사업부|센터|실)\)\s*$/g, '')
 
   // ── Step 7: Remove trailing parenthesized experience ──
   title = title.replace(/\s*\((?:신입\/?경력|경력\s*(?:무관|\d+\s*년?\s*(?:이상)?)|신입)\)\s*$/g, '')
@@ -97,6 +114,23 @@ export function cleanJobTitle(raw: string, companyName?: string): string {
   title = title.replace(/\s{2,}/g, ' ').trim()
   title = title.replace(/[\s\-·,/]+$/, '').trim()
   title = title.replace(/^[\s\-·,/]+/, '').trim()
+
+  // ── Step 9: Title case common job words ──
+  // "FE developer" → "FE Developer", "backend engineer" → "Backend Engineer"
+  const TITLE_CASE_WORDS = [
+    'developer', 'engineer', 'designer', 'manager', 'lead', 'architect',
+    'analyst', 'specialist', 'director', 'consultant', 'coordinator',
+    'administrator', 'associate', 'officer', 'executive', 'intern',
+    'senior', 'junior', 'staff', 'principal', 'head', 'chief', 'vp',
+  ]
+  for (const word of TITLE_CASE_WORDS) {
+    const regex = new RegExp(`\\b${word}\\b`, 'gi')
+    title = title.replace(regex, (match) => {
+      // Preserve all-caps (like "VP", "CEO")
+      if (match === match.toUpperCase() && match.length <= 3) return match
+      return match.charAt(0).toUpperCase() + match.slice(1).toLowerCase()
+    })
+  }
 
   return title.length > 0 ? title : raw
 }

@@ -119,7 +119,7 @@ export default function JobCard({ job, index }: JobCardProps) {
         onClick={() => {
           trackEvent('job_card_click', { job_id: job.id, title: job.title, company: job.company })
         }}
-        className={`relative block p-4 sm:p-6 min-h-[160px] sm:h-[180px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border transition-all duration-300 ease-out group flex flex-col overflow-hidden touch-target rounded-sm ${
+        className={`relative block p-3 sm:p-4 min-h-[140px] sm:h-[160px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border transition-all duration-300 ease-out group flex flex-col overflow-hidden touch-target rounded-sm ${
           isExpired
             ? 'cursor-default'
             : 'hover:-translate-y-1 hover:shadow-card-hover dark:hover:shadow-card-hover-dark hover:border-emerald-500/30 dark:hover:border-emerald-500/20'
