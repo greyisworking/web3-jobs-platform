@@ -27,7 +27,14 @@ export default function AdminLoginPage() {
     })
 
     if (signInError) {
-      setError(signInError.message)
+      // Handle Supabase rate limit error with friendly Korean message
+      if (signInError.message.toLowerCase().includes('rate limit')) {
+        setError('너무 많이 시도했어요. 잠시 후 다시 해주세요 (약 1분)')
+      } else if (signInError.message.toLowerCase().includes('invalid')) {
+        setError('이메일 또는 비밀번호가 올바르지 않습니다')
+      } else {
+        setError(signInError.message)
+      }
       setLoading(false)
       return
     }
