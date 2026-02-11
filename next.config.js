@@ -63,6 +63,14 @@ const nextConfig = {
       },
     ],
   },
+  // Redirects
+  async redirects() {
+    return [
+      // /careers -> /jobs (alias)
+      { source: '/careers', destination: '/jobs', permanent: true },
+      { source: '/ko/careers', destination: '/ko/jobs', permanent: true },
+    ]
+  },
   // i18n rewrites - map /ko/* to /* (same pages, different locale)
   async rewrites() {
     return {
