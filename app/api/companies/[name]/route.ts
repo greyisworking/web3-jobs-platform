@@ -147,16 +147,26 @@ function normalizeCompanyName(name: string): string {
 
 async function findCompanyWebsite(companyName: string): Promise<{ domain: string; logo: string } | null> {
   const lowerName = companyName.toLowerCase()
+  const baseName = normalizeCompanyName(companyName)
 
   // 1. Check known domains first (fastest, most reliable)
-  const knownDomain = KNOWN_DOMAINS[lowerName]
-  if (knownDomain) {
-    const logoUrl = `https://logo.clearbit.com/${knownDomain}`
-    return { domain: knownDomain, logo: logoUrl }
+  // Try multiple variations: full name, normalized name, first word
+  const namesToTry = [
+    lowerName,                                    // "chainlink labs"
+    baseName,                                      // "chainlink"
+    lowerName.split(' ')[0],                      // "chainlink"
+    lowerName.replace(/\s+(labs?|inc|co|foundation|protocol)$/i, ''), // "chainlink"
+  ]
+
+  for (const name of namesToTry) {
+    const knownDomain = KNOWN_DOMAINS[name]
+    if (knownDomain) {
+      const logoUrl = `https://logo.clearbit.com/${knownDomain}`
+      return { domain: knownDomain, logo: logoUrl }
+    }
   }
 
   // 2. Try Clearbit with common TLDs (parallel for speed)
-  const baseName = normalizeCompanyName(companyName)
   const tlds = ['.com', '.io', '.xyz', '.org', '.co']
 
   const checks = tlds.map(async (tld) => {
