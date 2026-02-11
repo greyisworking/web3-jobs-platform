@@ -73,13 +73,9 @@ export async function middleware(request: NextRequest) {
         url.pathname = newPathname
         return NextResponse.redirect(url)
       }
-
-      // Non-default locale in URL - REWRITE to the actual page (without locale prefix)
-      // This allows /ko/jobs to serve the same page as /jobs
-      const rewritePath = pathname.replace(`/${currentLocale}`, '') || '/'
-      const url = request.nextUrl.clone()
-      url.pathname = rewritePath
-      response = NextResponse.rewrite(url)
+      // Non-default locale - let next.config.js rewrites handle the routing
+      // Just continue with normal response (cookie/header will be set below)
+      response = NextResponse.next({ request })
     } else {
       // No locale in URL
       currentLocale = preferredLocale

@@ -63,6 +63,17 @@ const nextConfig = {
       },
     ],
   },
+  // i18n rewrites - map /ko/* to /* (same pages, different locale)
+  async rewrites() {
+    return {
+      beforeFiles: [
+        // Rewrite /ko to /
+        { source: '/ko', destination: '/' },
+        // Rewrite /ko/anything to /anything
+        { source: '/ko/:path*', destination: '/:path*' },
+      ],
+    }
+  },
   // Security headers
   async headers() {
     return [
