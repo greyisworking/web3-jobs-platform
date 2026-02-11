@@ -26,6 +26,80 @@ const ATS_PLATFORMS = [
   'fountain.com',
 ]
 
+// Known company domains (manual mapping for reliability)
+const KNOWN_DOMAINS: Record<string, string> = {
+  'uniswap': 'uniswap.org',
+  'uniswap labs': 'uniswap.org',
+  'aave': 'aave.com',
+  'alchemy': 'alchemy.com',
+  'base': 'base.org',
+  'arbitrum': 'arbitrum.io',
+  'optimism': 'optimism.io',
+  'polygon': 'polygon.technology',
+  'solana': 'solana.com',
+  'sui': 'sui.io',
+  'aptos': 'aptoslabs.com',
+  'avalanche': 'avax.network',
+  'cosmos': 'cosmos.network',
+  'near': 'near.org',
+  'chainlink': 'chain.link',
+  'compound': 'compound.finance',
+  'makerdao': 'makerdao.com',
+  'lido': 'lido.fi',
+  'opensea': 'opensea.io',
+  'blur': 'blur.io',
+  'dydx': 'dydx.exchange',
+  'gmx': 'gmx.io',
+  'synthetix': 'synthetix.io',
+  'yearn': 'yearn.fi',
+  'curve': 'curve.fi',
+  'convex': 'convexfinance.com',
+  'sushi': 'sushi.com',
+  'balancer': 'balancer.fi',
+  '1inch': '1inch.io',
+  'paraswap': 'paraswap.io',
+  'zapper': 'zapper.xyz',
+  'zerion': 'zerion.io',
+  'rainbow': 'rainbow.me',
+  'metamask': 'metamask.io',
+  'ledger': 'ledger.com',
+  'consensys': 'consensys.io',
+  'infura': 'infura.io',
+  'etherscan': 'etherscan.io',
+  'the graph': 'thegraph.com',
+  'filecoin': 'filecoin.io',
+  'ipfs': 'ipfs.tech',
+  'arweave': 'arweave.org',
+  'worldcoin': 'worldcoin.org',
+  'eigenlayer': 'eigenlayer.xyz',
+  'layerzero': 'layerzero.network',
+  'wormhole': 'wormhole.com',
+  'axelar': 'axelar.network',
+  'celestia': 'celestia.org',
+  'starknet': 'starknet.io',
+  'zksync': 'zksync.io',
+  'scroll': 'scroll.io',
+  'linea': 'linea.build',
+  'mantle': 'mantle.xyz',
+  'mode': 'mode.network',
+  'blast': 'blast.io',
+  // Korean companies
+  'hashed': 'hashed.com',
+  'klaytn': 'klaytn.foundation',
+  'kaia': 'kaia.io',
+  'wemade': 'wemade.com',
+  'wemix': 'wemix.com',
+  'line next': 'line-next.com',
+  'dsrv': 'dsrvlabs.com',
+  'cryptoquant': 'cryptoquant.com',
+  'luniverse': 'luniverse.io',
+  'ozys': 'ozys.io',
+  'klip': 'klip.kr',
+  'upbit': 'upbit.com',
+  'bithumb': 'bithumb.com',
+  'korbit': 'korbit.co.kr',
+}
+
 interface CompanyInfo {
   name: string
   logo: string | null
@@ -72,32 +146,49 @@ function normalizeCompanyName(name: string): string {
 }
 
 async function findCompanyWebsite(companyName: string): Promise<{ domain: string; logo: string } | null> {
-  const baseName = normalizeCompanyName(companyName)
+  const lowerName = companyName.toLowerCase()
 
-  // Try different TLDs
-  const tlds = ['.com', '.io', '.xyz', '.co', '.org', '.finance', '.network']
-
-  for (const tld of tlds) {
-    const domain = baseName + tld
-    const logoUrl = `https://logo.clearbit.com/${domain}`
-
-    const response = await fetchWithTimeout(logoUrl, 2000)
-    if (response?.ok) {
-      return { domain, logo: logoUrl }
-    }
+  // 1. Check known domains first (fastest, most reliable)
+  const knownDomain = KNOWN_DOMAINS[lowerName]
+  if (knownDomain) {
+    const logoUrl = `https://logo.clearbit.com/${knownDomain}`
+    return { domain: knownDomain, logo: logoUrl }
   }
 
-  // Try with common suffixes
-  const suffixes = ['labs', 'protocol', 'foundation', 'network']
-  for (const suffix of suffixes) {
-    for (const tld of ['.com', '.io', '.xyz']) {
-      const domain = baseName + suffix + tld
-      const logoUrl = `https://logo.clearbit.com/${domain}`
+  // 2. Try Clearbit with common TLDs (parallel for speed)
+  const baseName = normalizeCompanyName(companyName)
+  const tlds = ['.com', '.io', '.xyz', '.org', '.co']
 
-      const response = await fetchWithTimeout(logoUrl, 2000)
+  const checks = tlds.map(async (tld) => {
+    const domain = baseName + tld
+    const logoUrl = `https://logo.clearbit.com/${domain}`
+    try {
+      const response = await fetchWithTimeout(logoUrl, 3000)
       if (response?.ok) {
         return { domain, logo: logoUrl }
       }
+    } catch {
+      // Ignore errors
+    }
+    return null
+  })
+
+  const results = await Promise.all(checks)
+  const found = results.find(r => r !== null)
+  if (found) return found
+
+  // 3. Try with common suffixes
+  const suffixes = ['labs', 'protocol']
+  for (const suffix of suffixes) {
+    const domain = baseName + suffix + '.com'
+    const logoUrl = `https://logo.clearbit.com/${domain}`
+    try {
+      const response = await fetchWithTimeout(logoUrl, 3000)
+      if (response?.ok) {
+        return { domain, logo: logoUrl }
+      }
+    } catch {
+      // Ignore
     }
   }
 
