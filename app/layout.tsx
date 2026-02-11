@@ -7,6 +7,7 @@ import PageTransition from './components/PageTransition'
 import KonamiEasterEgg from './components/KonamiEasterEgg'
 import TouchGrassReminder from './components/TouchGrassReminder'
 import { Web3Provider } from './components/Web3Provider'
+import { I18nProvider } from '@/lib/i18n/context'
 import ServiceWorkerRegistration from './components/ServiceWorkerRegistration'
 // PWAInstallPrompt moved to page.tsx inline (no longer global popup)
 import ErrorBoundary from './components/ErrorBoundary'
@@ -34,9 +35,18 @@ export const metadata: Metadata = {
   authors: [{ name: 'NEUN' }],
   creator: 'NEUN',
   publisher: 'NEUN',
+  alternates: {
+    canonical: 'https://neun.wtf',
+    languages: {
+      'en': 'https://neun.wtf',
+      'ko': 'https://neun.wtf',
+      'x-default': 'https://neun.wtf',
+    },
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
+    alternateLocale: ['ko_KR'],
     url: 'https://neun.wtf',
     siteName: 'NEUN',
     title: 'NEUN | Web3 Jobs',
@@ -144,6 +154,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${caveat.variable} ${pressStart.variable} ${spaceGrotesk.variable} ${inter.className}`}>
         <Web3Provider>
+          <I18nProvider>
           <WebVitals />
           <PageTransition />
           <Navigation />
@@ -163,6 +174,7 @@ export default function RootLayout({
               className: 'bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text !rounded-none',
             }}
           />
+          </I18nProvider>
         </Web3Provider>
       </body>
     </html>

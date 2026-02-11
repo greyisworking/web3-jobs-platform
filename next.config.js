@@ -2,6 +2,22 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
 
+// Content Security Policy
+const ContentSecurityPolicy = `
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.walletconnect.com https://*.walletconnect.org;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  img-src 'self' data: blob: https: http:;
+  font-src 'self' https://fonts.gstatic.com;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org https://rpc.walletconnect.com https://verify.walletconnect.com https://api.web3modal.com https://pulse.walletconnect.org https://*.infura.io https://*.alchemy.com https://cloudflare-eth.com https://mainnet.base.org https://arb1.arbitrum.io https://api.coingecko.com https://api.llama.fi https://vercel.live;
+  frame-src 'self' https://verify.walletconnect.com https://vercel.live;
+  object-src 'none';
+  base-uri 'self';
+  form-action 'self';
+  frame-ancestors 'self';
+  upgrade-insecure-requests;
+`.replace(/\n/g, ' ').trim()
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -78,6 +94,10 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
+          {
+            key: 'Content-Security-Policy',
+            value: ContentSecurityPolicy,
+          },
         ],
       },
       {
@@ -94,7 +114,7 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization',
+            value: 'Content-Type, Authorization, X-CSRF-Token',
           },
           {
             key: 'Access-Control-Max-Age',

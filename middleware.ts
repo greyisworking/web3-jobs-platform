@@ -1,8 +1,43 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Supported locales
+const SUPPORTED_LOCALES = ['en', 'ko'] as const
+const DEFAULT_LOCALE = 'en'
+const LOCALE_COOKIE = 'NEXT_LOCALE'
+
+function getPreferredLocale(request: NextRequest): string {
+  // 1. Check cookie first
+  const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value
+  if (cookieLocale && SUPPORTED_LOCALES.includes(cookieLocale as 'en' | 'ko')) {
+    return cookieLocale
+  }
+
+  // 2. Check Accept-Language header
+  const acceptLang = request.headers.get('accept-language')
+  if (acceptLang) {
+    const preferred = acceptLang.split(',')[0]?.split('-')[0]?.toLowerCase()
+    if (preferred && SUPPORTED_LOCALES.includes(preferred as 'en' | 'ko')) {
+      return preferred
+    }
+  }
+
+  return DEFAULT_LOCALE
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
+
+  // Set locale cookie if not present
+  const pathname = request.nextUrl.pathname
+  if (!request.cookies.has(LOCALE_COOKIE) && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
+    const locale = getPreferredLocale(request)
+    supabaseResponse.cookies.set(LOCALE_COOKIE, locale, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+      sameSite: 'lax',
+    })
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,7 +61,6 @@ export async function middleware(request: NextRequest) {
   )
 
   // IMPORTANT: Do NOT run getUser() on auth callback - let the route handler do it
-  const pathname = request.nextUrl.pathname
   if (pathname.startsWith('/auth/callback')) {
     return supabaseResponse
   }
