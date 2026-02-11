@@ -1,77 +1,78 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-
-type Locale = 'en' | 'ko'
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
+import { usePathname } from 'next/navigation'
+import { translations, Locale } from './translations'
 
 interface I18nContextType {
   locale: Locale
   setLocale: (locale: Locale) => void
-  t: (key: string) => string
+  t: (key: string, params?: Record<string, string | number>) => string
 }
 
 const I18nContext = createContext<I18nContextType | null>(null)
 
-// Simple translations - expand as needed
-const translations: Record<Locale, Record<string, string>> = {
-  en: {
-    'nav.jobs': 'Jobs',
-    'nav.companies': 'Companies',
-    'nav.post': 'Post a Job',
-    'hero.title': 'Web3 Jobs from Top VCs',
-    'hero.subtitle': 'a16z, Hashed, Paradigm backed companies. Only legit jobs.',
-    'search.placeholder': 'Search jobs, companies, or skills...',
-    'filter.all': 'All',
-    'filter.remote': 'Remote',
-    'filter.korea': 'Korea',
-    'job.apply': 'Apply Now',
-    'job.posted': 'Posted',
-    'job.ago': 'ago',
-    'footer.rights': 'All rights reserved',
-  },
-  ko: {
-    'nav.jobs': '채용공고',
-    'nav.companies': '회사',
-    'nav.post': '채용공고 등록',
-    'hero.title': 'Top VC 포트폴리오 채용',
-    'hero.subtitle': 'a16z, Hashed, Paradigm 투자사만. 검증된 Web3 채용공고.',
-    'search.placeholder': '채용공고, 회사, 기술스택 검색...',
-    'filter.all': '전체',
-    'filter.remote': '원격',
-    'filter.korea': '한국',
-    'job.apply': '지원하기',
-    'job.posted': '게시일',
-    'job.ago': '전',
-    'footer.rights': 'All rights reserved',
-  },
+const DEFAULT_LOCALE: Locale = 'en'
+const SUPPORTED_LOCALES: Locale[] = ['en', 'ko']
+
+function getLocaleFromPathname(pathname: string): Locale | null {
+  const segments = pathname.split('/')
+  const potentialLocale = segments[1]
+  if (potentialLocale && SUPPORTED_LOCALES.includes(potentialLocale as Locale)) {
+    return potentialLocale as Locale
+  }
+  return null
+}
+
+function getLocaleFromCookie(): Locale | null {
+  if (typeof document === 'undefined') return null
+
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'NEXT_LOCALE' && SUPPORTED_LOCALES.includes(value as Locale)) {
+      return value as Locale
+    }
+  }
+  return null
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('en')
+  const pathname = usePathname()
+  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE)
 
+  // Determine locale from pathname or cookie
   useEffect(() => {
-    // Read from cookie
-    const cookies = document.cookie.split(';')
-    for (const cookie of cookies) {
-      const [name, value] = cookie.trim().split('=')
-      if (name === 'NEXT_LOCALE' && (value === 'en' || value === 'ko')) {
-        setLocaleState(value)
-        break
-      }
-    }
+    const pathnameLocale = getLocaleFromPathname(pathname)
+    const cookieLocale = getLocaleFromCookie()
+
+    // Priority: pathname > cookie > default
+    const detectedLocale = pathnameLocale || cookieLocale || DEFAULT_LOCALE
+    setLocaleState(detectedLocale)
+  }, [pathname])
+
+  const setLocale = useCallback((newLocale: Locale) => {
+    setLocaleState(newLocale)
+    // Update cookie
+    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`
   }, [])
 
-  const setLocale = (newLocale: Locale) => {
-    setLocaleState(newLocale)
-    // Set cookie
-    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`
-    // Reload to apply changes
-    window.location.reload()
-  }
+  /**
+   * Get translated string with optional parameter interpolation
+   * Usage: t('time.daysAgo', { n: 5 }) => "5 days ago" or "5일 전"
+   */
+  const t = useCallback((key: string, params?: Record<string, string | number>): string => {
+    let text = translations[locale][key] || translations['en'][key] || key
 
-  const t = (key: string): string => {
-    return translations[locale][key] || translations['en'][key] || key
-  }
+    // Interpolate parameters
+    if (params) {
+      Object.entries(params).forEach(([paramKey, value]) => {
+        text = text.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(value))
+      })
+    }
+
+    return text
+  }, [locale])
 
   return (
     <I18nContext.Provider value={{ locale, setLocale, t }}>
@@ -92,3 +93,11 @@ export function useLocale(): Locale {
   const { locale } = useI18n()
   return locale
 }
+
+export function useTranslation() {
+  const { t, locale } = useI18n()
+  return { t, locale }
+}
+
+// Re-export Locale type
+export type { Locale }

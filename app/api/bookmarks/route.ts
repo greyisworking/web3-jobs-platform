@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireCSRF } from '@/lib/csrf'
 
 // GET: Fetch current user's bookmarks (with job details)
 export async function GET() {
@@ -59,6 +60,10 @@ export async function GET() {
 
 // POST: Add a bookmark
 export async function POST(request: NextRequest) {
+  // CSRF protection
+  const csrfError = requireCSRF(request)
+  if (csrfError) return csrfError
+
   try {
     const supabase = await createSupabaseServerClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -96,6 +101,10 @@ export async function POST(request: NextRequest) {
 
 // DELETE: Remove a bookmark
 export async function DELETE(request: NextRequest) {
+  // CSRF protection
+  const csrfError = requireCSRF(request)
+  if (csrfError) return csrfError
+
   try {
     const supabase = await createSupabaseServerClient()
     const { data: { user } } = await supabase.auth.getUser()

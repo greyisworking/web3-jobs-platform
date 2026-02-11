@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { requireCSRF } from '@/lib/csrf'
 
 // Simple in-memory rate limit for report endpoint
 const reportRateLimit = new Map<string, { count: number; resetAt: number }>()
@@ -32,6 +33,10 @@ function getSupabaseClient() {
 }
 
 export async function POST(req: NextRequest) {
+  // CSRF protection
+  const csrfError = requireCSRF(req)
+  if (csrfError) return csrfError
+
   try {
     // Rate limiting by IP
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ||

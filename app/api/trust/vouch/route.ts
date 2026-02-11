@@ -10,6 +10,7 @@ import {
   isSelfAction,
   sanitizeInput,
 } from '@/lib/security'
+import { requireCSRF } from '@/lib/csrf'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,6 +19,10 @@ const supabase = createClient(
 
 // POST /api/trust/vouch - Create a vouch
 export async function POST(request: NextRequest) {
+  // CSRF protection
+  const csrfError = requireCSRF(request)
+  if (csrfError) return csrfError
+
   try {
     // Get client IP for rate limiting
     const forwardedFor = request.headers.get('x-forwarded-for')

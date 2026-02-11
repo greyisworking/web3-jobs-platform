@@ -10,6 +10,7 @@ import {
   sanitizeInput,
   sanitizeUrl,
 } from '@/lib/security'
+import { requireCSRF } from '@/lib/csrf'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,6 +22,10 @@ const ALLOWED_CATEGORIES = ['scam', 'spam', 'harassment', 'impersonation', 'frau
 
 // POST /api/trust/report - Create a report
 export async function POST(request: NextRequest) {
+  // CSRF protection
+  const csrfError = requireCSRF(request)
+  if (csrfError) return csrfError
+
   try {
     const body = await request.json()
     const { reporterWallet, targetWallet, targetType, category, reason, evidenceUrls } = body

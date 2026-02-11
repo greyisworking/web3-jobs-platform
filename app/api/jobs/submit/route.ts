@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { PRIORITY_COMPANIES } from '@/lib/priority-companies'
+import { requireCSRF } from '@/lib/csrf'
 
 // Basic XSS sanitization
 function sanitizeText(text: string): string {
@@ -39,7 +40,11 @@ function checkPostRateLimit(wallet: string): { allowed: boolean; remaining: numb
   return { allowed: true, remaining: POST_LIMIT_MAX - entry.count }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // CSRF protection
+  const csrfError = requireCSRF(request)
+  if (csrfError) return csrfError
+
   try {
     const body = await request.json()
     const {
