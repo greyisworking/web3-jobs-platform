@@ -42,18 +42,20 @@ function NavDropdown({ label, items, isActive }: NavDropdownProps) {
       onMouseLeave={handleMouseLeave}
     >
       <button
-        className={`flex items-center gap-1 text-[11px] uppercase tracking-[0.3em] font-light transition-colors ${
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className={`flex items-center gap-1 text-[11px] uppercase tracking-[0.3em] font-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neun-success focus-visible:ring-offset-2 ${
           isActive
             ? 'text-neun-success'
             : 'text-a24-muted dark:text-a24-dark-muted hover:text-neun-success'
         }`}
       >
         {label}
-        <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-2 min-w-[160px] bg-a24-surface border border-a24-border shadow-lg shadow-neun-success/10 z-50">
+        <div role="menu" className="absolute top-full left-0 mt-2 min-w-[160px] bg-a24-surface border border-a24-border shadow-lg shadow-neun-success/10 z-50">
           {items.map((item) => (
             <Link
               key={item.href}
@@ -81,18 +83,20 @@ function MobileAccordion({ label, items, isActive, onClose }: NavDropdownProps &
     <div className="border-b border-a24-border last:border-b-0">
       <button
         onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between py-3 text-[11px] uppercase tracking-[0.3em] font-light transition-colors ${
+        aria-expanded={open}
+        aria-controls={`mobile-menu-${label.toLowerCase()}`}
+        className={`w-full flex items-center justify-between py-3 text-[11px] uppercase tracking-[0.3em] font-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neun-success ${
           isActive
             ? 'text-neun-success'
             : 'text-a24-muted dark:text-a24-dark-muted'
         }`}
       >
         {label}
-        <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
 
       {open && (
-        <div className="pb-2 pl-4 flex flex-col gap-1">
+        <div id={`mobile-menu-${label.toLowerCase()}`} className="pb-2 pl-4 flex flex-col gap-1">
           {items.map((item) => (
             <Link
               key={item.href}
@@ -138,39 +142,47 @@ function ProfileDropdown() {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <button className="flex items-center gap-2 px-3 py-2 border border-neun-success/50 text-neun-success text-[10px] uppercase tracking-wider hover:bg-neun-success/10 transition-colors">
-        <div className="w-2 h-2 bg-neun-success rounded-full animate-pulse" />
+      <button
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-label={`Account menu for ${shortAddress}`}
+        className="flex items-center gap-2 px-3 py-2 border border-neun-success/50 text-neun-success text-[10px] uppercase tracking-wider hover:bg-neun-success/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neun-success focus-visible:ring-offset-2"
+      >
+        <div className="w-2 h-2 bg-neun-success rounded-full animate-pulse" aria-hidden="true" />
         {shortAddress}
-        <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
 
       {open && (
-        <div className="absolute top-full right-0 mt-2 min-w-[180px] bg-a24-surface border border-a24-border shadow-lg shadow-neun-success/10 z-50">
+        <div role="menu" className="absolute top-full right-0 mt-2 min-w-[180px] bg-a24-surface border border-a24-border shadow-lg shadow-neun-success/10 z-50">
           <Link
             href="/profile"
-            className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-a24-text hover:text-neun-success hover:bg-neun-success/10 transition-colors"
+            role="menuitem"
+            className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-a24-text hover:text-neun-success hover:bg-neun-success/10 transition-colors focus-visible:outline-none focus-visible:bg-neun-success/10"
             onClick={() => setOpen(false)}
           >
-            <User className="w-3.5 h-3.5" />
+            <User className="w-3.5 h-3.5" aria-hidden="true" />
             Profile
           </Link>
           <Link
             href="/settings"
-            className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-a24-text hover:text-neun-success hover:bg-neun-success/10 transition-colors"
+            role="menuitem"
+            className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-a24-text hover:text-neun-success hover:bg-neun-success/10 transition-colors focus-visible:outline-none focus-visible:bg-neun-success/10"
             onClick={() => setOpen(false)}
           >
-            <Settings className="w-3.5 h-3.5" />
+            <Settings className="w-3.5 h-3.5" aria-hidden="true" />
             Settings
           </Link>
-          <div className="border-t border-a24-border" />
+          <div className="border-t border-a24-border" role="separator" />
           <button
+            role="menuitem"
             onClick={() => {
               disconnect()
               setOpen(false)
             }}
-            className="w-full flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors focus-visible:outline-none focus-visible:bg-red-500/10"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
             Disconnect
           </button>
         </div>
@@ -221,6 +233,13 @@ export default function Navigation() {
 
   return (
     <>
+      {/* Skip link for accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-neun-success focus:text-white focus:outline-none"
+      >
+        Skip to main content
+      </a>
       <header className={`sticky top-0 z-50 bg-a24-bg/95 dark:bg-a24-dark-surface/95 backdrop-blur-sm transition-all duration-300 ${scrolled ? 'border-b border-a24-border dark:border-a24-dark-border' : 'border-b border-transparent'}`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           {/* Left: Logo + Nav */}
@@ -260,17 +279,20 @@ export default function Navigation() {
             <ThemeToggle />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-1 text-a24-text dark:text-a24-dark-text"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              className="p-1 text-a24-text dark:text-a24-dark-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neun-success"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
             </button>
           </div>
         </div>
 
         {/* Mobile Nav */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-a24-border dark:border-a24-dark-border bg-a24-surface/95">
-            <nav className="max-w-7xl mx-auto px-6 py-2">
+          <div id="mobile-navigation" className="md:hidden border-t border-a24-border dark:border-a24-dark-border bg-a24-surface/95">
+            <nav aria-label="Mobile navigation" className="max-w-7xl mx-auto px-6 py-2">
               <MobileAccordion
                 label="Jobs"
                 items={jobsDropdownItems}

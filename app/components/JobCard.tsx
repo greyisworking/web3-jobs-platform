@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, memo, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useDecayEffect } from '@/hooks/useDecayEffect'
@@ -12,13 +12,14 @@ import { MiniPixelbara } from './Pixelbara'
 import { Lock, Vote, Flag } from 'lucide-react'
 import { toast } from 'sonner'
 
+// 7 days in milliseconds (hoisted constant)
+const NEW_JOB_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000
+
 function isNewJob(crawledAt: Date | string | null | undefined): boolean {
   if (!crawledAt) return false
   const crawled = new Date(crawledAt)
-  const now = new Date()
-  const diffMs = now.getTime() - crawled.getTime()
-  // 7 days for NEW badge (based on when added to our platform)
-  return diffMs < 7 * 24 * 60 * 60 * 1000
+  const diffMs = Date.now() - crawled.getTime()
+  return diffMs < NEW_JOB_THRESHOLD_MS
 }
 
 interface JobCardProps {
@@ -26,18 +27,19 @@ interface JobCardProps {
   index: number
 }
 
+// Hoisted static values (rendering-hoist-jsx)
 const cardVariants = {
   hidden: { opacity: 0, y: 12 },
   visible: { opacity: 1, y: 0 },
-}
+} as const
 
-function ReportButton({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
+const REPORT_REASONS = ['Spam', 'Scam/Fraud', 'Expired', 'Inappropriate', 'Duplicate'] as const
+
+const ReportButton = memo(function ReportButton({ jobId }: { jobId: string }) {
   const [showTooltip, setShowTooltip] = useState(false)
   const [showReportMenu, setShowReportMenu] = useState(false)
 
-  const reportReasons = ['Spam', 'Scam/Fraud', 'Expired', 'Inappropriate', 'Duplicate']
-
-  const handleReport = async (e: React.MouseEvent, reason: string) => {
+  const handleReport = useCallback(async (e: React.MouseEvent, reason: string) => {
     e.preventDefault()
     e.stopPropagation()
     setShowReportMenu(false)
@@ -52,13 +54,13 @@ function ReportButton({ jobId, jobTitle }: { jobId: string; jobTitle: string }) 
     } catch {
       toast.error('Report failed... try again 😢')
     }
-  }
+  }, [jobId])
 
-  const toggleMenu = (e: React.MouseEvent) => {
+  const toggleMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setShowReportMenu(!showReportMenu)
-  }
+    setShowReportMenu(prev => !prev)
+  }, [])
 
   return (
     <div className="relative">
@@ -78,7 +80,7 @@ function ReportButton({ jobId, jobTitle }: { jobId: string; jobTitle: string }) 
       </button>
       {showReportMenu && (
         <div className="absolute bottom-full right-0 mb-1 w-32 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border shadow-lg z-50">
-          {reportReasons.map((reason) => (
+          {REPORT_REASONS.map((reason) => (
             <button
               key={reason}
               onClick={(e) => handleReport(e, reason)}
@@ -91,16 +93,24 @@ function ReportButton({ jobId, jobTitle }: { jobId: string; jobTitle: string }) 
       )}
     </div>
   )
-}
+})
 
-export default function JobCard({ job, index }: JobCardProps) {
+// Memoized JobCard component (rerender-memo)
+const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
   const { opacity, isFading } = useDecayEffect(job.postedDate)
   const [hovered, setHovered] = useState(false)
-  const displayTitle = cleanJobTitle(job.title, job.company)
-  const displayCompany = cleanCompanyName(job.company)
-  // Jobs marked as expired are already filtered out from the API
-  // This is a fallback check for any edge cases
-  const isExpired = false
+
+  // Memoize expensive string operations (js-cache-function-results)
+  const displayTitle = useMemo(() => cleanJobTitle(job.title, job.company), [job.title, job.company])
+  const displayCompany = useMemo(() => cleanCompanyName(job.company), [job.company])
+  const isNew = useMemo(() => isNewJob(job.crawledAt), [job.crawledAt])
+
+  // Memoize event handler (rerender-functional-setstate)
+  const handleMouseEnter = useCallback(() => setHovered(true), [])
+  const handleMouseLeave = useCallback(() => setHovered(false), [])
+  const handleClick = useCallback(() => {
+    trackEvent('job_card_click', { job_id: job.id, title: job.title, company: job.company })
+  }, [job.id, job.title, job.company])
 
   return (
     <motion.div
@@ -110,29 +120,14 @@ export default function JobCard({ job, index }: JobCardProps) {
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.4, delay: (index % 6) * 0.08, ease: [0.22, 1, 0.36, 1] }}
       style={{ opacity: isFading ? opacity : undefined }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className={isExpired ? 'opacity-50 grayscale' : ''}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <Link
         href={`/jobs/${job.id}`}
-        onClick={() => {
-          trackEvent('job_card_click', { job_id: job.id, title: job.title, company: job.company })
-        }}
-        className={`relative block p-3 sm:p-4 min-h-[140px] sm:h-[160px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border transition-all duration-300 ease-out group flex flex-col overflow-hidden touch-target rounded-sm ${
-          isExpired
-            ? 'cursor-default'
-            : 'hover:-translate-y-1 hover:shadow-card-hover dark:hover:shadow-card-hover-dark hover:border-emerald-500/30 dark:hover:border-emerald-500/20'
-        }`}
+        onClick={handleClick}
+        className="relative block p-3 sm:p-4 min-h-[140px] sm:h-[160px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border transition-all duration-300 ease-out group flex flex-col overflow-hidden touch-target rounded-sm hover:-translate-y-1 hover:shadow-card-hover dark:hover:shadow-card-hover-dark hover:border-emerald-500/30 dark:hover:border-emerald-500/20"
       >
-        {/* Expired overlay */}
-        {isExpired && (
-          <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-            <span className="px-3 py-1.5 bg-gray-800/90 text-gray-300 text-[11px] font-medium uppercase tracking-wider">
-              Closed
-            </span>
-          </div>
-        )}
 
         {/* Von Restorff Effect: Urgent/Featured badges only */}
         {(job.is_urgent || job.is_featured) && (
@@ -190,14 +185,14 @@ export default function JobCard({ job, index }: JobCardProps) {
               {displayCompany}
             </p>
             {/* NEW badge inline with company */}
-            {isNewJob(job.crawledAt) && !job.is_urgent && !job.is_featured && (
+            {isNew && !job.is_urgent && !job.is_featured && (
               <span className="ml-2 badge-new-emphasis px-1.5 py-0.5 border border-neun-primary/50 text-[9px] uppercase tracking-wider rounded-sm flex-shrink-0">
                 NEW
               </span>
             )}
           </div>
           <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation() }}>
-            <ReportButton jobId={job.id} jobTitle={job.title} />
+            <ReportButton jobId={job.id} />
             <BookmarkButton job={{ id: job.id, title: job.title, company: job.company }} />
           </div>
         </div>
@@ -214,4 +209,6 @@ export default function JobCard({ job, index }: JobCardProps) {
       </Link>
     </motion.div>
   )
-}
+})
+
+export default JobCard
