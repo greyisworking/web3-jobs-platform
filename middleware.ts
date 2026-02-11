@@ -31,26 +31,20 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Refresh the session (this updates cookies if needed)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  // Skip auth check for non-admin routes - just return with refreshed cookies
+  // Skip auth check for non-admin routes entirely (no getUser call needed)
   if (!pathname.startsWith('/admin')) {
     return supabaseResponse
   }
 
-  // Allow access to admin login page without auth
+  // Admin login page - don't call getUser() to avoid token refresh loop
   if (pathname === '/admin/login') {
-    // If already logged in, redirect to admin dashboard
-    if (user) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/admin'
-      return NextResponse.redirect(url)
-    }
     return supabaseResponse
   }
+
+  // Only call getUser() for protected admin routes (not login page)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   // Protect all other /admin routes
   if (!user) {
