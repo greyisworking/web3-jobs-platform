@@ -33,6 +33,25 @@
 - Avalanche Jobs
 - 그 외 27개 사이트...
 
+## ⚙️ 환경변수 설정
+
+`.env.example`을 복사해서 `.env` 파일을 만드세요:
+
+```bash
+cp .env.example .env
+```
+
+**필수 환경변수:**
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase 프로젝트 URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase 익명 키
+
+**선택 환경변수:**
+- `ANTHROPIC_API_KEY` - AI 콘텐츠 생성용
+- `DISCORD_WEBHOOK_URL` - 알림용
+- `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` - 지갑 연결용
+
+자세한 내용은 `.env.example` 파일을 참고하세요.
+
 ## 🚀 빠른 시작
 
 ### 1. 의존성 설치
