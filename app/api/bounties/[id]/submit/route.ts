@@ -60,12 +60,11 @@ export async function POST(
       })
       .eq('id', id)
 
-    // Increment submissions count - try RPC first, fallback to raw SQL
+    // Increment submissions count - try RPC first
     try {
       await supabase.rpc('increment', { x: 1, row_id: id, table_name: 'bounties', column_name: 'submissions_count' })
     } catch {
-      // RPC might not exist, ignore for now
-      console.log('RPC increment not available')
+      // RPC might not exist, skip silently
     }
 
     return NextResponse.json({

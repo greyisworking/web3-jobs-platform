@@ -9,11 +9,21 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PU
 
 type ContentMode = 'newsletter' | 'ludium-jobs' | 'ludium-article'
 
+interface NewsletterJob {
+  title: string
+  company: string
+  location?: string
+  type?: string
+  salary?: string | null
+  backers?: string[] | null
+  sector?: string | null
+}
+
 interface GenerateRequest {
   mode: ContentMode
   prompt: string
   context?: {
-    jobs?: any[]
+    jobs?: NewsletterJob[]
     period?: string
     topic?: string
   }
@@ -268,10 +278,10 @@ export async function POST(request: Request) {
         costUsd: Math.round(costUsd * 10000) / 10000,
       },
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Content generation error:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to generate content' },
+      { error: error instanceof Error ? error.message : 'Failed to generate content' },
       { status: 500 }
     )
   }

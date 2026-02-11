@@ -48,6 +48,10 @@ export interface Job {
   token_gate?: TokenGate | null
   is_dao_job?: boolean
   is_alpha?: boolean
+  // User-submitted jobs
+  postedBy?: string | null  // Wallet address of submitter
+  reportCount?: number
+  isHidden?: boolean
   // Von Restorff Effect: Visual emphasis
   is_urgent?: boolean
   is_featured?: boolean

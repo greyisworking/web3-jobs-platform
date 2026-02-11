@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Flag, Ban, Briefcase, Eye, EyeOff, Trash2, Plus, RefreshCw, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import Pixelbara from '@/app/components/Pixelbara'
@@ -52,11 +52,7 @@ export default function ModerationPage() {
   const [newWallet, setNewWallet] = useState('')
   const [newReason, setNewReason] = useState('')
 
-  useEffect(() => {
-    fetchData()
-  }, [activeTab])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     try {
       if (activeTab === 'reports') {
@@ -77,7 +73,11 @@ export default function ModerationPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [activeTab])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const toggleJobVisibility = async (jobId: string, currentlyHidden: boolean) => {
     try {

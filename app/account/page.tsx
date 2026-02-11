@@ -15,6 +15,14 @@ interface SavedJob {
   savedAt?: string
 }
 
+interface BookmarkResponse {
+  id: string
+  title: string
+  company: string
+  location?: string
+  savedAt?: string
+}
+
 export default function AccountPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -39,7 +47,7 @@ export default function AccountPage() {
         if (res.ok) {
           const data = await res.json()
           setSavedJobs(
-            (data.bookmarks ?? []).map((b: any) => ({
+            (data.bookmarks ?? []).map((b: BookmarkResponse) => ({
               id: b.id,
               title: b.title,
               company: b.company,

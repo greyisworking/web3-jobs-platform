@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo, Suspense } from 'react'
+import { useEffect, useState, useMemo, useCallback, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -43,6 +43,7 @@ function CareersContent() {
     if (jobs.length > 0) {
       applyAllFilters(smartFilters, selectedVC, searchQuery, companyFilter)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobs, companyFilter])
 
   // Reset visible count when filters change

@@ -60,9 +60,10 @@ export async function GET(request: Request) {
         const count = await crawler.fn()
         results.push({ source: crawler.name, count })
         console.log(`✅ ${crawler.name}: ${count} jobs`)
-      } catch (error: any) {
-        console.error(`❌ ${crawler.name}:`, error.message)
-        results.push({ source: crawler.name, count: 0, error: error.message })
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        console.error(`❌ ${crawler.name}:`, message)
+        results.push({ source: crawler.name, count: 0, error: message })
       }
     }
 
@@ -91,12 +92,12 @@ export async function GET(request: Request) {
       duration: `${duration}s`,
       results,
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error('❌ Cron crawl failed:', error)
 
     return NextResponse.json({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
     }, { status: 500 })
   }
 }

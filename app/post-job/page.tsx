@@ -119,9 +119,10 @@ export default function PostJobPage() {
 
       setSubmitted(true)
       toast.success('Job posted successfully!')
-    } catch (err: any) {
-      setError(err.message || 'Failed to submit job. Please try again.')
-      toast.error(err.message || 'Failed to submit job')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to submit job. Please try again.'
+      setError(message)
+      toast.error(message)
     } finally {
       setSubmitting(false)
     }

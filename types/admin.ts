@@ -40,6 +40,7 @@ export interface JobWithStatus {
   featured_score: number
   featured_pinned: boolean
   featured_at: string | null
+  is_featured?: boolean
 }
 
 export interface DuplicateGroup {

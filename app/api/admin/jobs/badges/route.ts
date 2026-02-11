@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
       updated: results.filter((r) => r.success).length,
       results,
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('POST /api/admin/jobs/badges error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 });
   }
 }

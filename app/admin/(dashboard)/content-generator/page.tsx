@@ -114,8 +114,8 @@ export default function ContentGeneratorPage() {
       if (data.content.korean && mode !== 'newsletter') {
         setActiveTab('english')
       }
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setLoading(false)
     }

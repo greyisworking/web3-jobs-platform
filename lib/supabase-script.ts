@@ -39,5 +39,5 @@ export const supabase: SupabaseClient = isSupabaseConfigured
 
 // Log configuration status
 if (!isSupabaseConfigured) {
-  console.log('⚠️  Supabase not configured - using Prisma/SQLite only')
+  console.warn('⚠️  Supabase not configured - using Prisma/SQLite only')
 }

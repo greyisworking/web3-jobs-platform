@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import {
   Eye, Users, TrendingUp, TrendingDown, BarChart3, Calendar
@@ -38,59 +38,59 @@ export default function CompanyAnalyticsPage() {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | 'all'>('30d')
   const supabase = createSupabaseBrowserClient()
 
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      setLoading(true)
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
+  const fetchAnalytics = useCallback(async () => {
+    setLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-        const { data: company } = await supabase
-          .from('companies')
-          .select('id')
-          .eq('user_id', user.id)
-          .single()
+      const { data: company } = await supabase
+        .from('companies')
+        .select('id')
+        .eq('user_id', user.id)
+        .single()
 
-        if (!company) return
+      if (!company) return
 
-        const { data: jobs } = await supabase
-          .from('Job')
-          .select('id, title, view_count, apply_count, isActive, created_at')
-          .eq('company_id', company.id)
-          .order('view_count', { ascending: false })
+      const { data: jobs } = await supabase
+        .from('Job')
+        .select('id, title, view_count, apply_count, isActive, created_at')
+        .eq('company_id', company.id)
+        .order('view_count', { ascending: false })
 
-        if (jobs) {
-          const stats: JobStats[] = jobs.map(job => ({
-            ...job,
-            view_count: job.view_count || 0,
-            apply_count: job.apply_count || 0,
-            conversion: job.view_count > 0
-              ? (job.apply_count / job.view_count) * 100
-              : 0,
-          }))
+      if (jobs) {
+        const stats: JobStats[] = jobs.map(job => ({
+          ...job,
+          view_count: job.view_count || 0,
+          apply_count: job.apply_count || 0,
+          conversion: job.view_count > 0
+            ? (job.apply_count / job.view_count) * 100
+            : 0,
+        }))
 
-          setJobStats(stats)
+        setJobStats(stats)
 
-          const totalViews = stats.reduce((sum, j) => sum + j.view_count, 0)
-          const totalApplies = stats.reduce((sum, j) => sum + j.apply_count, 0)
+        const totalViews = stats.reduce((sum, j) => sum + j.view_count, 0)
+        const totalApplies = stats.reduce((sum, j) => sum + j.apply_count, 0)
 
-          setOverall({
-            totalViews,
-            totalApplies,
-            avgConversion: totalViews > 0 ? (totalApplies / totalViews) * 100 : 0,
-            viewsTrend: 12.5, // Mock data - would need historical data
-            appliesTrend: 8.3,
-          })
-        }
-      } catch (error) {
-        console.error('Failed to fetch analytics:', error)
-      } finally {
-        setLoading(false)
+        setOverall({
+          totalViews,
+          totalApplies,
+          avgConversion: totalViews > 0 ? (totalApplies / totalViews) * 100 : 0,
+          viewsTrend: 12.5, // Mock data - would need historical data
+          appliesTrend: 8.3,
+        })
       }
+    } catch (error) {
+      console.error('Failed to fetch analytics:', error)
+    } finally {
+      setLoading(false)
     }
+  }, [supabase])
 
+  useEffect(() => {
     fetchAnalytics()
-  }, [timeRange])
+  }, [fetchAnalytics, timeRange])
 
   if (loading) {
     return (

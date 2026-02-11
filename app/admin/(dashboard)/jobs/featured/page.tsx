@@ -89,10 +89,10 @@ export default function FeaturedJobsPage() {
         ),
     },
     {
-      key: 'is_featured' as any,
+      key: 'is_featured',
       header: '추천',
       render: (job) =>
-        (job as any).is_featured ? (
+        job.is_featured ? (
           <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
             Featured
           </Badge>

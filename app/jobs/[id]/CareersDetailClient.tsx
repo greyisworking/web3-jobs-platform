@@ -136,8 +136,8 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
       toast.success('Report submitted. Thank you!')
       setShowReportModal(false)
       setReportReason('')
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to submit report')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to submit report')
     } finally {
       setReportSubmitting(false)
     }
@@ -625,7 +625,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
             )}
 
             {/* Posted by (for user-posted jobs) */}
-            {(job as any).postedBy && (
+            {job.postedBy && (
               <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface">
                 <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-2">
                   Posted By
@@ -633,7 +633,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                 <div className="flex items-center gap-2">
                   <User className="w-3.5 h-3.5 text-a24-muted dark:text-a24-dark-muted" />
                   <span className="text-xs font-mono text-a24-text dark:text-a24-dark-text">
-                    {truncateAddress((job as any).postedBy)}
+                    {truncateAddress(job.postedBy)}
                   </span>
                 </div>
               </div>

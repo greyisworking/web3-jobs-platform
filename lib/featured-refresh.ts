@@ -57,7 +57,6 @@ export async function refreshFeaturedJobs(
     // If is_featured column doesn't exist, log but don't fail
     if (updateError) {
       console.warn(`Warning: Could not set is_featured: ${updateError.message}`);
-      console.log(`Top ${FEATURED_LIMIT} jobs by score:`, winners);
     }
   }
 

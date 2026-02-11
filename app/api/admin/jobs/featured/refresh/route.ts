@@ -22,8 +22,8 @@ export async function POST() {
     const result = await refreshFeaturedJobs(supabase);
 
     return NextResponse.json({ success: true, ...result });
-  } catch (err: any) {
+  } catch (err) {
     console.error('POST /api/admin/jobs/featured/refresh error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 });
   }
 }

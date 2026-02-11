@@ -29,6 +29,22 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'logo.clearbit.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com', // Google OAuth avatars
+      },
+      {
+        protocol: 'https',
+        hostname: 'k.kakaocdn.net', // Kakao OAuth avatars
+      },
+      {
+        protocol: 'https',
+        hostname: 't1.kakaocdn.net', // Kakao OAuth avatars (alternate)
+      },
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com', // GitHub OAuth avatars
+      },
     ],
   },
   // Security headers

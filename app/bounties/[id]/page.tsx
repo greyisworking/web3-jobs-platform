@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAccount } from 'wagmi'
 import { motion } from 'framer-motion'
@@ -43,11 +43,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
     description: '',
   })
 
-  useEffect(() => {
-    fetchBounty()
-  }, [id])
-
-  const fetchBounty = async () => {
+  const fetchBounty = useCallback(async () => {
     try {
       const res = await fetch(`/api/bounties/${id}`)
       const data = await res.json()
@@ -61,7 +57,11 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
+
+  useEffect(() => {
+    fetchBounty()
+  }, [fetchBounty])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

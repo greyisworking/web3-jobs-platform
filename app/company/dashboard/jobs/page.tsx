@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import {
@@ -29,7 +29,7 @@ export default function CompanyJobsPage() {
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const supabase = createSupabaseBrowserClient()
 
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     setLoading(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -62,11 +62,11 @@ export default function CompanyJobsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, filter])
 
   useEffect(() => {
     fetchJobs()
-  }, [filter])
+  }, [fetchJobs])
 
   const toggleJobStatus = async (jobId: string, currentStatus: boolean) => {
     try {

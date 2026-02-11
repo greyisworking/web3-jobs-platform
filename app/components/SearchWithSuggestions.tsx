@@ -44,14 +44,15 @@ export default function SearchWithSuggestions({
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Initialize from URL and sync
+  // Initialize from URL and sync - only run on mount
   useEffect(() => {
     const urlSearch = searchParams.get('search') || ''
     if (urlSearch && urlSearch !== query) {
       setQuery(urlSearch)
       onSearch(urlSearch)
     }
-  }, []) // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     setRecent(loadRecent())

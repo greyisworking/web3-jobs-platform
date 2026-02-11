@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, count: ids.length });
-  } catch (err: any) {
+  } catch (err) {
     console.error('POST /api/admin/jobs/featured/pin error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 });
   }
 }

@@ -6,7 +6,6 @@ export default function ServiceWorkerRegistration() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (!('serviceWorker' in navigator)) {
-      console.log('[SW] Service workers not supported')
       return
     }
 
@@ -17,8 +16,6 @@ export default function ServiceWorkerRegistration() {
           updateViaCache: 'none',
         })
 
-        console.log('[SW] Service worker registered:', registration.scope)
-
         // Check for updates periodically
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing
@@ -26,9 +23,6 @@ export default function ServiceWorkerRegistration() {
 
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New content available, show update notification
-              console.log('[SW] New content available')
-
               // Dispatch custom event for update notification
               window.dispatchEvent(new CustomEvent('sw-update-available', {
                 detail: { registration }
@@ -39,8 +33,7 @@ export default function ServiceWorkerRegistration() {
 
         // Handle controller change (new SW activated)
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          console.log('[SW] Controller changed, reloading for fresh content')
-          // Optional: auto-reload when new SW takes control
+          // Auto-reload when new SW takes control (optional)
           // window.location.reload()
         })
 

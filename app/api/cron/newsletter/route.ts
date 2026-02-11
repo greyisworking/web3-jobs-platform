@@ -96,9 +96,9 @@ export async function GET(request: Request) {
       jobCount: stats.totalJobs,
       week,
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error('❌ Newsletter generation failed:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 })
   }
 }
 

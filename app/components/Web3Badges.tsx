@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAccount } from 'wagmi'
 import { RefreshCw, Shield, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
@@ -22,16 +22,7 @@ export default function Web3Badges({ address: propAddress, showSync = false, com
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
 
-  useEffect(() => {
-    if (!address) {
-      setLoading(false)
-      return
-    }
-
-    fetchProfile()
-  }, [address])
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!address) return
 
     try {
@@ -43,7 +34,16 @@ export default function Web3Badges({ address: propAddress, showSync = false, com
     } finally {
       setLoading(false)
     }
-  }
+  }, [address])
+
+  useEffect(() => {
+    if (!address) {
+      setLoading(false)
+      return
+    }
+
+    fetchProfile()
+  }, [address, fetchProfile])
 
   const handleSync = async () => {
     if (!address) return

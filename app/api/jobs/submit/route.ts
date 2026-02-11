@@ -63,13 +63,7 @@ export async function POST(request: Request) {
     const jobUrl = `https://neun.wtf/jobs/${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
     if (!supabaseUrl || !supabaseKey) {
-      // Fallback: just log and return success if no Supabase
-      console.log('Job posted (no Supabase):', {
-        companyName,
-        jobTitle,
-        walletAddress,
-        isPriority: !!priorityCompany,
-      })
+      // Fallback: return success if no Supabase configured
       return NextResponse.json({
         success: true,
         message: 'Job posted successfully',

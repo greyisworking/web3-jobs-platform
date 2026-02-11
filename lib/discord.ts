@@ -87,13 +87,12 @@ export async function sendDiscordNotification(summary: CrawlSummary) {
       avatar_url: 'https://cdn-icons-png.flaticon.com/512/2111/2111370.png',
       embeds: [embed],
     })
-    console.log('✅ Discord notification sent!')
   } catch (error) {
     console.error('❌ Failed to send Discord notification:', error)
   }
 }
 
-export async function sendDiscordError(message: string, error: any) {
+export async function sendDiscordError(message: string, error: unknown) {
   if (!DISCORD_WEBHOOK_URL) return
 
   const embed = {
@@ -103,7 +102,7 @@ export async function sendDiscordError(message: string, error: any) {
     fields: [
       {
         name: '🔍 오류 내용',
-        value: `\`\`\`${error?.message || error}\`\`\``,
+        value: `\`\`\`${error instanceof Error ? error.message : String(error)}\`\`\``,
         inline: false,
       },
       {

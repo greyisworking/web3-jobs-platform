@@ -18,7 +18,7 @@ import {
   Sparkles,
   HelpCircle,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface NavItem {
   href: string
@@ -129,6 +129,11 @@ const navSections: NavSection[] = [
 export function Sidebar() {
   const pathname = usePathname()
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <aside className="w-64 border-r bg-card min-h-screen p-4">
@@ -179,8 +184,8 @@ export function Sidebar() {
                       {item.icon}
                       {item.label}
                     </Link>
-                    {/* Tooltip */}
-                    {hoveredItem === item.href && !isActive && (
+                    {/* Tooltip - only render client-side to prevent hydration mismatch */}
+                    {mounted && hoveredItem === item.href && !isActive && (
                       <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50">
                         <div className="bg-popover text-popover-foreground text-xs px-2 py-1.5 rounded shadow-lg whitespace-nowrap border max-w-[200px]">
                           {item.description}

@@ -42,8 +42,8 @@ export async function GET() {
         },
       },
     );
-  } catch (err: any) {
+  } catch (err) {
     console.error('GET /api/jobs/featured error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 });
   }
 }
