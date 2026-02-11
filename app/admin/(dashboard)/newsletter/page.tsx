@@ -57,9 +57,9 @@ interface VerificationResult {
 }
 
 const PERIOD_OPTIONS = [
-  { label: '7 days', value: 7 },
-  { label: '14 days', value: 14 },
-  { label: '30 days', value: 30 },
+  { label: '7일', value: 7 },
+  { label: '14일', value: 14 },
+  { label: '30일', value: 30 },
 ]
 
 export default function NewsletterPage() {
@@ -110,7 +110,7 @@ export default function NewsletterPage() {
   const generateNewsletter = async () => {
     const selectedJobs = jobs.filter(j => selectedIds.has(j.id))
     if (selectedJobs.length === 0) {
-      alert('Please select at least one job.')
+      alert('공고를 하나 이상 선택해 주세요.')
       return
     }
 
@@ -187,7 +187,7 @@ export default function NewsletterPage() {
   // Save newsletter
   const saveNewsletter = async () => {
     if (!markdown) {
-      alert('Please generate the newsletter first.')
+      alert('먼저 뉴스레터를 생성해 주세요.')
       return
     }
 
@@ -209,13 +209,13 @@ export default function NewsletterPage() {
       })
       const data = await res.json()
       if (data.success) {
-        alert('Newsletter saved successfully!')
+        alert('뉴스레터가 저장되었어요!')
       } else {
-        alert('Save failed: ' + (data.error || 'Unknown error'))
+        alert('저장 실패: ' + (data.error || '알 수 없는 오류'))
       }
     } catch (error) {
       console.error('Failed to save newsletter:', error)
-      alert('Error saving newsletter.')
+      alert('뉴스레터 저장 중 오류가 발생했어요.')
     } finally {
       setSaving(false)
     }
@@ -271,9 +271,9 @@ export default function NewsletterPage() {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Mail className="w-6 h-6 text-green-500" />
-            NEUN Weekly Newsletter Generator
+            NEUN 주간 뉴스레터 생성기
           </h1>
-          <p className="text-gray-400 mt-1">Create and manage newsletter content</p>
+          <p className="text-gray-400 mt-1">뉴스레터 콘텐츠를 만들고 관리해요</p>
         </div>
       </div>
 
@@ -281,7 +281,7 @@ export default function NewsletterPage() {
       <div className="bg-[#1e293b] rounded-lg p-4 flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-gray-400" />
-          <span className="text-sm text-gray-400">Period:</span>
+          <span className="text-sm text-gray-400">기간:</span>
           <div className="flex gap-2">
             {PERIOD_OPTIONS.map(opt => (
               <button
@@ -306,7 +306,7 @@ export default function NewsletterPage() {
             onChange={e => setSkipVerification(e.target.checked)}
             className="w-4 h-4 rounded border-gray-600 text-green-600 focus:ring-green-500 bg-[#0f172a]"
           />
-          Skip verification
+          검증 건너뛰기
         </label>
 
         <div className="flex-1" />
@@ -317,7 +317,7 @@ export default function NewsletterPage() {
           className="flex items-center gap-2 px-4 py-2 bg-[#0f172a] text-gray-300 rounded hover:bg-[#0f172a]/80 transition-colors disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
+          새로고침
         </button>
 
         <button
@@ -330,7 +330,7 @@ export default function NewsletterPage() {
           ) : (
             <Mail className="w-4 h-4" />
           )}
-          Generate Preview
+          미리보기 생성
         </button>
       </div>
 
@@ -340,28 +340,28 @@ export default function NewsletterPage() {
           <div className="bg-[#1e293b] rounded-lg p-4">
             <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
               <Users className="w-4 h-4" />
-              Total Jobs
+              전체 공고
             </div>
             <div className="text-2xl font-bold text-white">{stats.totalJobs}</div>
           </div>
           <div className="bg-[#1e293b] rounded-lg p-4">
             <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
               <Check className="w-4 h-4" />
-              Selected
+              선택됨
             </div>
             <div className="text-2xl font-bold text-green-500">{selectedIds.size}</div>
           </div>
           <div className="bg-[#1e293b] rounded-lg p-4">
             <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
               <TrendingUp className="w-4 h-4" />
-              Remote Rate
+              리모트 비율
             </div>
             <div className="text-2xl font-bold text-white">{stats.remoteRate}%</div>
           </div>
           <div className="bg-[#1e293b] rounded-lg p-4">
             <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
               <ChevronDown className="w-4 h-4" />
-              Top Role
+              인기 직무
             </div>
             <div className="text-xl font-bold text-white truncate">
               {Object.entries(stats.roleBreakdown).sort((a, b) => b[1] - a[1])[0]?.[0] || '-'}
@@ -375,20 +375,20 @@ export default function NewsletterPage() {
         <div className="bg-[#1e293b] rounded-lg p-4">
           <h3 className="font-medium text-white flex items-center gap-2 mb-3">
             <Shield className="w-4 h-4 text-green-500" />
-            Verification Results
+            검증 결과
           </h3>
           <div className="flex gap-6 text-sm">
             <span className="flex items-center gap-2 text-green-500">
               <Check className="w-4 h-4" />
-              Verified: {verification.verified}
+              확인됨: {verification.verified}
             </span>
             <span className="flex items-center gap-2 text-yellow-500">
               <AlertTriangle className="w-4 h-4" />
-              Warnings: {verification.warnings}
+              경고: {verification.warnings}
             </span>
             <span className="flex items-center gap-2 text-red-500">
               <XCircle className="w-4 h-4" />
-              Failed: {verification.failed}
+              실패: {verification.failed}
             </span>
           </div>
         </div>
@@ -396,7 +396,7 @@ export default function NewsletterPage() {
 
       {/* Custom Intro */}
       <div className="bg-[#1e293b] rounded-lg p-4">
-        <label className="text-sm text-gray-400 mb-2 block">Custom Intro (optional)</label>
+        <label className="text-sm text-gray-400 mb-2 block">인트로 문구 (선택)</label>
         <input
           type="text"
           value={customIntro}
@@ -409,29 +409,29 @@ export default function NewsletterPage() {
       {/* Job Selection */}
       <div className="bg-[#1e293b] rounded-lg overflow-hidden">
         <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-          <h3 className="font-medium text-white">Job Selection</h3>
+          <h3 className="font-medium text-white">공고 선택</h3>
           <button
             onClick={toggleAll}
             className="text-sm text-green-500 hover:text-green-400"
           >
-            {selectedIds.size === jobs.length ? 'Deselect All' : 'Select All'}
+            {selectedIds.size === jobs.length ? '전체 해제' : '전체 선택'}
           </button>
         </div>
         <div className="max-h-80 overflow-y-auto">
           {loading ? (
-            <div className="p-8 text-center text-gray-400">Loading...</div>
+            <div className="p-8 text-center text-gray-400">불러오는 중...</div>
           ) : jobs.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">No jobs found for this period</div>
+            <div className="p-8 text-center text-gray-400">해당 기간에 공고가 없어요</div>
           ) : (
             <table className="w-full">
               <thead className="bg-[#0f172a] sticky top-0">
                 <tr>
                   <th className="w-10 p-3"></th>
-                  <th className="text-left p-3 text-xs text-gray-400 uppercase">Company</th>
-                  <th className="text-left p-3 text-xs text-gray-400 uppercase">Position</th>
-                  <th className="text-left p-3 text-xs text-gray-400 uppercase">Role</th>
-                  <th className="text-left p-3 text-xs text-gray-400 uppercase">Location</th>
-                  <th className="text-left p-3 text-xs text-gray-400 uppercase">Status</th>
+                  <th className="text-left p-3 text-xs text-gray-400 uppercase">회사</th>
+                  <th className="text-left p-3 text-xs text-gray-400 uppercase">포지션</th>
+                  <th className="text-left p-3 text-xs text-gray-400 uppercase">직무</th>
+                  <th className="text-left p-3 text-xs text-gray-400 uppercase">위치</th>
+                  <th className="text-left p-3 text-xs text-gray-400 uppercase">상태</th>
                 </tr>
               </thead>
               <tbody>
@@ -459,10 +459,10 @@ export default function NewsletterPage() {
                       <div className="flex items-center gap-2">
                         {getVerificationIcon(job.verificationStatus)}
                         {job.is_featured && (
-                          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-500 text-xs rounded">Featured</span>
+                          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-500 text-xs rounded">추천</span>
                         )}
                         {job.wasInPreviousNewsletter && (
-                          <span className="px-2 py-0.5 bg-gray-500/20 text-gray-400 text-xs rounded">Sent</span>
+                          <span className="px-2 py-0.5 bg-gray-500/20 text-gray-400 text-xs rounded">발송됨</span>
                         )}
                       </div>
                     </td>
@@ -479,7 +479,7 @@ export default function NewsletterPage() {
         <div className="bg-[#1e293b] rounded-lg overflow-hidden">
           <div className="p-4 border-b border-gray-700 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <h3 className="font-medium text-white">Preview</h3>
+              <h3 className="font-medium text-white">미리보기</h3>
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowHtml(false)}
@@ -505,7 +505,7 @@ export default function NewsletterPage() {
                 className="flex items-center gap-1 px-3 py-1 text-sm rounded bg-[#0f172a] text-gray-400 hover:text-white"
               >
                 {previewMode === 'edit' ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                {previewMode === 'edit' ? 'Preview' : 'Edit'}
+                {previewMode === 'edit' ? '미리보기' : '편집'}
               </button>
             </div>
           </div>
@@ -542,14 +542,14 @@ export default function NewsletterPage() {
             className="flex items-center gap-2 px-4 py-2 bg-[#1e293b] text-white rounded hover:bg-[#1e293b]/80 transition-colors"
           >
             {copied === 'md' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-            Copy Markdown (Ludium)
+            마크다운 복사 (루디움)
           </button>
           <button
             onClick={() => copyToClipboard('html')}
             className="flex items-center gap-2 px-4 py-2 bg-[#1e293b] text-white rounded hover:bg-[#1e293b]/80 transition-colors"
           >
             {copied === 'html' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-            Copy HTML (Stibee)
+            HTML 복사 (스티비)
           </button>
           <div className="flex-1" />
           <button
@@ -558,7 +558,7 @@ export default function NewsletterPage() {
             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50"
           >
             {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save (Archive)
+            저장 (아카이브)
           </button>
         </div>
       )}

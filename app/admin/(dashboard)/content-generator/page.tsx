@@ -27,24 +27,24 @@ interface UsageInfo {
 
 const MODE_CONFIG = {
   'newsletter': {
-    label: 'Newsletter',
-    description: 'NEUN weekly newsletter (English only)',
+    label: '뉴스레터',
+    description: 'NEUN 주간 뉴스레터 (영문)',
     icon: FileText,
     color: 'text-green-500',
     bgColor: 'bg-green-500/10',
     dualLanguage: false,
   },
   'ludium-jobs': {
-    label: 'Ludium Jobs',
-    description: 'Job listings for Ludium (EN + KR)',
+    label: '루디움 채용',
+    description: '루디움용 채용공고 (영문 + 한글)',
     icon: Briefcase,
     color: 'text-blue-500',
     bgColor: 'bg-blue-500/10',
     dualLanguage: true,
   },
   'ludium-article': {
-    label: 'Ludium Article',
-    description: 'Educational articles (EN + KR)',
+    label: '루디움 아티클',
+    description: '교육용 아티클 (영문 + 한글)',
     icon: BookOpen,
     color: 'text-purple-500',
     bgColor: 'bg-purple-500/10',
@@ -72,7 +72,7 @@ export default function ContentGeneratorPage() {
 
   const handleGenerate = useCallback(async () => {
     if (!prompt.trim()) {
-      setError('Please enter a prompt')
+      setError('프롬프트를 입력해 주세요')
       return
     }
 
@@ -84,7 +84,7 @@ export default function ContentGeneratorPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.access_token) {
-        setError('Please log in to use the content generator')
+        setError('콘텐츠 생성기를 사용하려면 로그인해 주세요')
         return
       }
 
@@ -115,7 +115,7 @@ export default function ContentGeneratorPage() {
         setActiveTab('english')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setError(err instanceof Error ? err.message : '오류가 발생했어요')
     } finally {
       setLoading(false)
     }
@@ -161,9 +161,9 @@ export default function ContentGeneratorPage() {
           <Sparkles className="h-6 w-6 text-purple-400" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Content Generator</h1>
+          <h1 className="text-2xl font-bold">콘텐츠 생성기</h1>
           <p className="text-sm text-muted-foreground">
-            AI-powered content creation with Claude
+            Claude로 AI 콘텐츠 만들기
           </p>
         </div>
       </div>
@@ -204,18 +204,18 @@ export default function ContentGeneratorPage() {
       {/* Input Section */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Prompt</label>
+          <label className="text-sm font-medium">프롬프트</label>
           <button
             onClick={handleUseSamplePrompt}
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            Use sample prompt
+            예시 프롬프트 사용
           </button>
         </div>
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder={`Describe what content you want to generate...\n\nExample: ${SAMPLE_PROMPTS[mode]}`}
+          placeholder={`생성할 콘텐츠를 설명해 주세요...\n\n예시: ${SAMPLE_PROMPTS[mode]}`}
           className="w-full h-32 px-4 py-3 rounded-lg border bg-card resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
         />
         <div className="flex items-center gap-3">
@@ -227,18 +227,18 @@ export default function ContentGeneratorPage() {
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Generating...
+                생성 중...
               </>
             ) : (
               <>
                 <Sparkles className="h-4 w-4" />
-                Generate
+                생성하기
               </>
             )}
           </button>
           {usage && (
             <span className="text-xs text-muted-foreground">
-              {usage.totalTokens.toLocaleString()} tokens | ${usage.costUsd.toFixed(4)}
+              {usage.totalTokens.toLocaleString()} 토큰 | ${usage.costUsd.toFixed(4)}
             </span>
           )}
         </div>
@@ -265,7 +265,7 @@ export default function ContentGeneratorPage() {
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                English
+                영문
               </button>
               <button
                 onClick={() => setActiveTab('korean')}
@@ -275,7 +275,7 @@ export default function ContentGeneratorPage() {
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Korean
+                한글
               </button>
             </div>
           )}
@@ -289,12 +289,12 @@ export default function ContentGeneratorPage() {
               {copiedField === 'content' ? (
                 <>
                   <Check className="h-4 w-4 text-green-500" />
-                  Copied!
+                  복사됨!
                 </>
               ) : (
                 <>
                   <Copy className="h-4 w-4" />
-                  Copy
+                  복사
                 </>
               )}
             </button>
@@ -304,7 +304,7 @@ export default function ContentGeneratorPage() {
               className="px-3 py-1.5 rounded-md text-sm flex items-center gap-1.5 hover:bg-muted transition-colors disabled:opacity-50"
             >
               <RotateCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              Regenerate
+              다시 생성
             </button>
             <button
               onClick={() => setEditMode(!editMode)}
@@ -312,7 +312,7 @@ export default function ContentGeneratorPage() {
                 editMode ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
               }`}
             >
-              Edit
+              편집
             </button>
             <button
               onClick={handleSave}
@@ -321,12 +321,12 @@ export default function ContentGeneratorPage() {
               {copiedField === 'save' ? (
                 <>
                   <Check className="h-4 w-4 text-green-500" />
-                  Saved to clipboard!
+                  클립보드에 저장됨!
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  Save
+                  저장
                 </>
               )}
             </button>
@@ -366,10 +366,10 @@ export default function ContentGeneratorPage() {
           <div className="p-4 rounded-full bg-muted mb-4">
             <Sparkles className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-medium mb-2">No content generated yet</h3>
+          <h3 className="text-lg font-medium mb-2">아직 생성된 콘텐츠가 없어요</h3>
           <p className="text-sm text-muted-foreground max-w-md">
-            Select a content type, enter your prompt, and click Generate to create
-            AI-powered content with Claude.
+            콘텐츠 유형을 선택하고 프롬프트를 입력한 후
+            생성하기 버튼을 눌러 Claude로 콘텐츠를 만들어 보세요.
           </p>
         </div>
       )}
