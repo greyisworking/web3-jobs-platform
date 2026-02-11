@@ -305,12 +305,13 @@ Remember:
       tokensUsed: inputTokens + outputTokens,
       costUsd,
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('AI summarization error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return {
       summary: '',
       success: false,
-      error: error.message || 'Unknown error',
+      error: errorMessage,
     }
   }
 }

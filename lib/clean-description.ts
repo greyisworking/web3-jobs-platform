@@ -14,7 +14,7 @@ import type { CheerioAPI } from 'cheerio'
  * Remove noisy DOM elements before extracting text.
  * Call this on a cloned cheerio element or the page $ before calling extractHTML().
  */
-export function removeNoiseElements($: CheerioAPI, root?: any): void {
+export function removeNoiseElements($: CheerioAPI, root?: ReturnType<CheerioAPI>): void {
   const scope = root ? $(root) : $.root()
 
   // Standard noise elements

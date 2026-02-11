@@ -277,8 +277,9 @@ export async function validateAndSaveJob(
           companyWebsite: job.companyWebsite || null,
         },
       })
-    } catch (error: any) {
-      console.error(`[${crawlerName}] Prisma upsert failed:`, error.message)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      console.error(`[${crawlerName}] Prisma upsert failed:`, message)
       return { saved: false, isNew: false }
     }
 

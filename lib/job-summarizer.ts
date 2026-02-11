@@ -1268,7 +1268,8 @@ export async function summarizeJobBatch(
       if (options.onProgress) {
         options.onProgress(i + 1, jobs.length, batchResult)
       }
-    } catch (err: any) {
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err)
       results.push({
         id: job.id,
         success: false,
@@ -1276,7 +1277,7 @@ export async function summarizeJobBatch(
         afterLength: 0,
         hasVCBacking: false,
         sectionsFound: [],
-        error: err.message,
+        error: errorMessage,
       })
     }
   }
