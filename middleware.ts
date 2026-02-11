@@ -73,7 +73,13 @@ export async function middleware(request: NextRequest) {
         url.pathname = newPathname
         return NextResponse.redirect(url)
       }
-      // Non-default locale in URL - continue with that locale
+
+      // Non-default locale in URL - REWRITE to the actual page (without locale prefix)
+      // This allows /ko/jobs to serve the same page as /jobs
+      const rewritePath = pathname.replace(`/${currentLocale}`, '') || '/'
+      const url = request.nextUrl.clone()
+      url.pathname = rewritePath
+      response = NextResponse.rewrite(url)
     } else {
       // No locale in URL
       currentLocale = preferredLocale
@@ -90,11 +96,14 @@ export async function middleware(request: NextRequest) {
         })
         return redirectResponse
       }
-    }
-  }
 
-  // Create response
-  response = NextResponse.next({ request })
+      // Default locale - create normal response
+      response = NextResponse.next({ request })
+    }
+  } else {
+    // Static/API routes - normal response
+    response = NextResponse.next({ request })
+  }
 
   // Set locale cookie if changed
   const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value
