@@ -9,6 +9,23 @@ export const dynamic = 'force-dynamic'
 const companyCache = new Map<string, { data: CompanyInfo; expiry: number }>()
 const CACHE_TTL = 1000 * 60 * 60 * 24 // 24 hours
 
+// ATS platforms to skip when deriving company website
+const ATS_PLATFORMS = [
+  'greenhouse.io',
+  'lever.co',
+  'ashbyhq.com',
+  'workable.com',
+  'breezy.hr',
+  'recruitee.com',
+  'smartrecruiters.com',
+  'jobvite.com',
+  'icims.com',
+  'workday.com',
+  'bamboohr.com',
+  'jazz.co',
+  'fountain.com',
+]
+
 interface CompanyInfo {
   name: string
   logo: string | null
@@ -42,6 +59,91 @@ async function fetchWithTimeout(url: string, timeout = 5000): Promise<Response |
   }
 }
 
+function isATSPlatform(hostname: string): boolean {
+  return ATS_PLATFORMS.some(ats => hostname.includes(ats))
+}
+
+function normalizeCompanyName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\s+(labs?|foundation|protocol|network|finance|dao)$/i, '')
+    .replace(/\s+/g, '')
+    .replace(/[^a-z0-9]/g, '')
+}
+
+async function findCompanyWebsite(companyName: string): Promise<{ domain: string; logo: string } | null> {
+  const baseName = normalizeCompanyName(companyName)
+
+  // Try different TLDs
+  const tlds = ['.com', '.io', '.xyz', '.co', '.org', '.finance', '.network']
+
+  for (const tld of tlds) {
+    const domain = baseName + tld
+    const logoUrl = `https://logo.clearbit.com/${domain}`
+
+    const response = await fetchWithTimeout(logoUrl, 2000)
+    if (response?.ok) {
+      return { domain, logo: logoUrl }
+    }
+  }
+
+  // Try with common suffixes
+  const suffixes = ['labs', 'protocol', 'foundation', 'network']
+  for (const suffix of suffixes) {
+    for (const tld of ['.com', '.io', '.xyz']) {
+      const domain = baseName + suffix + tld
+      const logoUrl = `https://logo.clearbit.com/${domain}`
+
+      const response = await fetchWithTimeout(logoUrl, 2000)
+      if (response?.ok) {
+        return { domain, logo: logoUrl }
+      }
+    }
+  }
+
+  return null
+}
+
+async function scrapeWebsiteMeta(websiteUrl: string): Promise<{
+  description: string | null
+  twitter: string | null
+  linkedin: string | null
+}> {
+  const result = { description: null as string | null, twitter: null as string | null, linkedin: null as string | null }
+
+  try {
+    const response = await fetchWithTimeout(websiteUrl, 5000)
+    if (!response?.ok) return result
+
+    const html = await response.text()
+    const $ = cheerio.load(html)
+
+    result.description =
+      $('meta[name="description"]').attr('content') ||
+      $('meta[property="og:description"]').attr('content') ||
+      null
+
+    // Find social links
+    $('a[href*="twitter.com"], a[href*="x.com"]').each((_, el) => {
+      const href = $(el).attr('href')
+      if (href && !result.twitter && !href.includes('/intent/') && !href.includes('/share')) {
+        result.twitter = href
+      }
+    })
+
+    $('a[href*="linkedin.com/company"]').each((_, el) => {
+      const href = $(el).attr('href')
+      if (href && !result.linkedin) {
+        result.linkedin = href
+      }
+    })
+  } catch {
+    // Scraping failed
+  }
+
+  return result
+}
+
 async function enrichCompanyData(companyName: string): Promise<CompanyInfo | null> {
   // Find company in priority list
   const company = PRIORITY_COMPANIES.find(
@@ -68,46 +170,46 @@ async function enrichCompanyData(companyName: string): Promise<CompanyInfo | nul
     office_location: company.office_location,
   }
 
-  // Try to get logo from Clearbit
-  const domain = company.name.toLowerCase().replace(/\s+/g, '') + '.com'
-  const logoUrl = `https://logo.clearbit.com/${domain}`
-  const logoResponse = await fetchWithTimeout(logoUrl, 3000)
-  if (logoResponse?.ok) {
-    info.logo = logoUrl
+  // Try to find company website and logo via Clearbit
+  const discovered = await findCompanyWebsite(company.name)
+
+  if (discovered) {
+    info.logo = discovered.logo
+    info.website = `https://${discovered.domain}`
+
+    // Scrape meta data from actual company website
+    const meta = await scrapeWebsiteMeta(info.website)
+    info.description = meta.description
+    info.twitter = meta.twitter
+    info.linkedin = meta.linkedin
   }
 
-  // If career URL exists, derive website
-  if (company.careerUrl) {
+  // If no website found via Clearbit, try deriving from careerUrl (but skip ATS platforms)
+  if (!info.website && company.careerUrl) {
     try {
       const url = new URL(company.careerUrl)
-      const mainDomain = url.hostname.replace(/^(jobs\.|careers\.|apply\.)/, '')
-      info.website = `https://${mainDomain}`
 
-      // Try to scrape meta description
-      const siteResponse = await fetchWithTimeout(info.website, 5000)
-      if (siteResponse?.ok) {
-        const html = await siteResponse.text()
-        const $ = cheerio.load(html)
+      // Skip if it's an ATS platform
+      if (!isATSPlatform(url.hostname)) {
+        const mainDomain = url.hostname.replace(/^(jobs\.|careers\.|apply\.|boards\.)/, '')
+        info.website = `https://${mainDomain}`
 
-        info.description =
-          $('meta[name="description"]').attr('content') ||
-          $('meta[property="og:description"]').attr('content') ||
-          null
-
-        // Find social links
-        $('a[href*="twitter.com"], a[href*="x.com"]').each((_, el) => {
-          const href = $(el).attr('href')
-          if (href && !info.twitter) {
-            info.twitter = href
+        // Try to get logo if we don't have one
+        if (!info.logo) {
+          const logoUrl = `https://logo.clearbit.com/${mainDomain}`
+          const logoResponse = await fetchWithTimeout(logoUrl, 2000)
+          if (logoResponse?.ok) {
+            info.logo = logoUrl
           }
-        })
+        }
 
-        $('a[href*="linkedin.com/company"]').each((_, el) => {
-          const href = $(el).attr('href')
-          if (href && !info.linkedin) {
-            info.linkedin = href
-          }
-        })
+        // Scrape meta if we don't have description
+        if (!info.description) {
+          const meta = await scrapeWebsiteMeta(info.website)
+          info.description = meta.description
+          info.twitter = info.twitter || meta.twitter
+          info.linkedin = info.linkedin || meta.linkedin
+        }
       }
     } catch {
       // Invalid URL
