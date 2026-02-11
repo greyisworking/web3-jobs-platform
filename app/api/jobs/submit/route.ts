@@ -2,9 +2,42 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { PRIORITY_COMPANIES } from '@/lib/priority-companies'
 
+// Basic XSS sanitization
+function sanitizeText(text: string): string {
+  return text
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+=/gi, '')
+    .trim()
+}
+
 // Create Supabase client for API route
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+// Rate limiting: max 3 job posts per wallet per day
+const postRateLimit = new Map<string, { count: number; resetAt: number }>()
+const POST_LIMIT_WINDOW = 24 * 60 * 60 * 1000 // 24 hours
+const POST_LIMIT_MAX = 3
+
+function checkPostRateLimit(wallet: string): { allowed: boolean; remaining: number } {
+  const now = Date.now()
+  const key = wallet.toLowerCase()
+  const entry = postRateLimit.get(key)
+
+  if (!entry || entry.resetAt < now) {
+    postRateLimit.set(key, { count: 1, resetAt: now + POST_LIMIT_WINDOW })
+    return { allowed: true, remaining: POST_LIMIT_MAX - 1 }
+  }
+
+  if (entry.count >= POST_LIMIT_MAX) {
+    return { allowed: false, remaining: 0 }
+  }
+
+  entry.count++
+  return { allowed: true, remaining: POST_LIMIT_MAX - entry.count }
+}
 
 export async function POST(request: Request) {
   try {
@@ -46,6 +79,15 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'Invalid wallet address' },
         { status: 400 }
+      )
+    }
+
+    // Rate limiting per wallet
+    const rateCheck = checkPostRateLimit(walletAddress)
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Daily posting limit reached. Try again tomorrow.' },
+        { status: 429 }
       )
     }
 
@@ -94,15 +136,16 @@ export async function POST(request: Request) {
       : []
 
     // Insert job directly to Job table (instant posting)
+    // Sanitize user inputs to prevent XSS
     const { data, error } = await supabase
       .from('Job')
       .insert({
-        title: jobTitle,
-        company: companyName,
-        location,
+        title: sanitizeText(jobTitle),
+        company: sanitizeText(companyName),
+        location: sanitizeText(location),
         type: jobType,
         category: sector,
-        description: `${description}\n\nRequirements:\n${requirements}`,
+        description: `${sanitizeText(description)}\n\nRequirements:\n${sanitizeText(requirements)}`,
         url: applyUrl || jobUrl,
         salary: salaryRange || null,
         tags: JSON.stringify(tags),
@@ -129,12 +172,12 @@ export async function POST(request: Request) {
         const { data: fallbackData, error: fallbackError } = await supabase
           .from('Job')
           .insert({
-            title: jobTitle,
-            company: companyName,
-            location,
+            title: sanitizeText(jobTitle),
+            company: sanitizeText(companyName),
+            location: sanitizeText(location),
             type: jobType,
             category: sector,
-            description: `${description}\n\nRequirements:\n${requirements}\n\nPosted by: ${walletAddress}`,
+            description: `${sanitizeText(description)}\n\nRequirements:\n${sanitizeText(requirements)}\n\nPosted by: ${walletAddress}`,
             url: applyUrl || jobUrl,
             salary: salaryRange || null,
             tags: JSON.stringify(tags),

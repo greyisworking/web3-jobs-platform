@@ -15,9 +15,13 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  // Clear any stale auth sessions on page load to prevent refresh loops
+  // Check if already logged in, redirect to admin
+  // Only clear stale sessions if there was an error param
   useEffect(() => {
-    clearAuthSession()
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('error') === 'unauthorized') {
+      clearAuthSession()
+    }
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,13 +40,10 @@ export default function AdminLoginPage() {
     })
 
     if (signInError) {
-      // Debug: log full error details
-      console.error('Admin login error:', {
-        message: signInError.message,
-        status: signInError.status,
-        code: signInError.code,
-        name: signInError.name,
-      })
+      // Log error code only (not full message for security)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Admin login error:', signInError.code, signInError.status)
+      }
 
       // Handle Supabase rate limit error with friendly Korean message
       if (signInError.message.toLowerCase().includes('rate limit')) {
