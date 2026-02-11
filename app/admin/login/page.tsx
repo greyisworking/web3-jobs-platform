@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createSupabaseAuthClient } from '@/lib/supabase-browser'
+import { createSupabaseAuthClient, clearAuthSession } from '@/lib/supabase-browser'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,13 +14,22 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const supabase = createSupabaseAuthClient()
+
+  // Clear any stale auth sessions on page load to prevent refresh loops
+  useEffect(() => {
+    clearAuthSession()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
 
+    // Clear any stale/corrupted auth sessions before login attempt
+    clearAuthSession()
+
+    // Create client only when submitting to avoid auto-refresh on mount
+    const supabase = createSupabaseAuthClient()
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
