@@ -2,7 +2,12 @@ import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { fetchHTML, delay, cleanText } from '../utils'
 
-export async function crawlCryptoJobsList(): Promise<number> {
+interface CrawlerReturn {
+  total: number
+  new: number
+}
+
+export async function crawlCryptoJobsList(): Promise<CrawlerReturn> {
   console.log('🚀 Starting CryptoJobsList crawler...')
 
   const baseUrl = 'https://cryptojobslist.com'
@@ -10,14 +15,14 @@ export async function crawlCryptoJobsList(): Promise<number> {
 
   if (!$) {
     console.error('❌ Failed to fetch CryptoJobsList')
-    return 0
+    return { total: 0, new: 0 }
   }
 
   // Extract __NEXT_DATA__ JSON from the page
   const nextDataScript = $('script#__NEXT_DATA__').html()
   if (!nextDataScript) {
     console.error('❌ Could not find __NEXT_DATA__ script tag on CryptoJobsList')
-    return 0
+    return { total: 0, new: 0 }
   }
 
   let pageProps: any
@@ -26,12 +31,12 @@ export async function crawlCryptoJobsList(): Promise<number> {
     pageProps = nextData?.props?.pageProps
   } catch (error) {
     console.error('❌ Failed to parse __NEXT_DATA__ JSON:', error)
-    return 0
+    return { total: 0, new: 0 }
   }
 
   if (!pageProps) {
     console.error('❌ No pageProps found in __NEXT_DATA__')
-    return 0
+    return { total: 0, new: 0 }
   }
 
   // Jobs may be at pageProps.jobs, pageProps.initialJobs, or similar
@@ -40,6 +45,7 @@ export async function crawlCryptoJobsList(): Promise<number> {
   console.log(`📦 Found ${jobsArray.length} jobs from CryptoJobsList`)
 
   let savedCount = 0
+  let newCount = 0
   for (const job of jobsArray) {
     try {
       const title = job.title || job.name
@@ -63,7 +69,7 @@ export async function crawlCryptoJobsList(): Promise<number> {
         ? job.tags.map((t: any) => typeof t === 'string' ? t : t.name || t.label || '').filter(Boolean)
         : []
 
-      const saved = await validateAndSaveJob(
+      const result = await validateAndSaveJob(
         {
           title,
           company: companyName,
@@ -79,7 +85,8 @@ export async function crawlCryptoJobsList(): Promise<number> {
         },
         'cryptojobslist.com'
       )
-      if (saved) savedCount++
+      if (result.saved) savedCount++
+      if (result.isNew) newCount++
       await delay(100)
     } catch (error) {
       console.error('Error saving CryptoJobsList job:', error)
@@ -93,6 +100,6 @@ export async function crawlCryptoJobsList(): Promise<number> {
     createdAt: new Date().toISOString(),
   })
 
-  console.log(`✅ Saved ${savedCount} jobs from CryptoJobsList`)
-  return savedCount
+  console.log(`✅ Saved ${savedCount} jobs from CryptoJobsList (${newCount} new)`)
+  return { total: savedCount, new: newCount }
 }

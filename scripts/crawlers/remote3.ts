@@ -2,14 +2,19 @@ import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { fetchXML, delay, cleanText, detectExperienceLevel, detectRemoteType } from '../utils'
 
-export async function crawlRemote3(): Promise<number> {
+interface CrawlerReturn {
+  total: number
+  new: number
+}
+
+export async function crawlRemote3(): Promise<CrawlerReturn> {
   console.log('🚀 Starting Remote3.co crawler...')
 
   const $ = await fetchXML('https://remote3.co/api/rss')
 
   if (!$) {
     console.error('❌ Failed to fetch Remote3.co RSS feed')
-    return 0
+    return { total: 0, new: 0 }
   }
 
   const items = $('item')
@@ -49,13 +54,14 @@ export async function crawlRemote3(): Promise<number> {
   })
 
   let savedCount = 0
+  let newCount = 0
   for (const job of jobEntries) {
     try {
       // Extract enhanced details
       const experienceLevel = job.description ? detectExperienceLevel(job.description) : null
       const remoteType = detectRemoteType('Remote')
 
-      const saved = await validateAndSaveJob(
+      const result = await validateAndSaveJob(
         {
           title: job.title,
           company: job.company,
@@ -74,7 +80,8 @@ export async function crawlRemote3(): Promise<number> {
         },
         'remote3.co'
       )
-      if (saved) savedCount++
+      if (result.saved) savedCount++
+      if (result.isNew) newCount++
       await delay(100)
     } catch (error) {
       console.error('Error saving Remote3 job:', error)
@@ -88,6 +95,6 @@ export async function crawlRemote3(): Promise<number> {
     createdAt: new Date().toISOString(),
   })
 
-  console.log(`✅ Saved ${savedCount} jobs from Remote3.co`)
-  return savedCount
+  console.log(`✅ Saved ${savedCount} jobs from Remote3.co (${newCount} new)`)
+  return { total: savedCount, new: newCount }
 }

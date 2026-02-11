@@ -15,10 +15,16 @@ import axios from 'axios'
 
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || ''
 
+interface CrawlerReturn {
+  total: number  // Total jobs processed (saved or updated)
+  new: number    // Brand new jobs added
+}
+
 interface CrawlResult {
   source: string
   status: 'success' | 'failed'
-  jobCount: number
+  jobCount: number    // Total processed
+  newCount: number    // New jobs added
   error?: string
 }
 
@@ -81,12 +87,15 @@ async function main() {
 
   for (const crawler of crawlers) {
     try {
-      const count = await crawler.fn()
-      results.push({ source: crawler.name, status: 'success', jobCount: count })
-      console.log(`✅ ${crawler.name}: ${count} jobs`)
+      const result = await crawler.fn()
+      // Handle both old (number) and new ({ total, new }) return types
+      const total = typeof result === 'number' ? result : result.total
+      const newCount = typeof result === 'number' ? 0 : result.new
+      results.push({ source: crawler.name, status: 'success', jobCount: total, newCount })
+      console.log(`✅ ${crawler.name}: ${total} jobs (${newCount} new)`)
     } catch (error: any) {
       console.error(`❌ ${crawler.name}:`, error.message)
-      results.push({ source: crawler.name, status: 'failed', jobCount: 0, error: error.message })
+      results.push({ source: crawler.name, status: 'failed', jobCount: 0, newCount: 0, error: error.message })
     }
   }
 
@@ -94,12 +103,14 @@ async function main() {
   const duration = (endTime - startTime) / 1000
 
   const totalJobs = results.reduce((sum, r) => sum + r.jobCount, 0)
+  const totalNewJobs = results.reduce((sum, r) => sum + r.newCount, 0)
   const successCount = results.filter(r => r.status === 'success').length
   const failedCount = results.filter(r => r.status === 'failed').length
 
   console.log('\n' + '='.repeat(50))
   console.log(`\n✨ Crawling Complete!`)
-  console.log(`📊 Total: ${totalJobs} jobs`)
+  console.log(`📊 Total processed: ${totalJobs} jobs`)
+  console.log(`🆕 New jobs added: ${totalNewJobs} jobs`)
   console.log(`✅ Success: ${successCount}/${results.length}`)
   console.log(`❌ Failed: ${failedCount}/${results.length}`)
   console.log(`⏱️  Duration: ${duration.toFixed(1)}s\n`)
@@ -107,7 +118,7 @@ async function main() {
   // 완료 알림
   const successList = results
     .filter(r => r.status === 'success' && r.jobCount > 0)
-    .map(r => `✅ **${r.source}**: ${r.jobCount}개`)
+    .map(r => `✅ **${r.source}**: ${r.jobCount}개 (🆕 ${r.newCount}개)`)
     .slice(0, 10)
     .join('\n') || '없음'
 
@@ -121,9 +132,10 @@ async function main() {
     ? '✅ 크롤링 완료!'
     : '⚠️ 크롤링 완료 (일부 오류 있음)'
 
+  // 새 공고 수 vs 전체 처리 수 구분해서 표시
   const completeDesc = failedCount === 0
-    ? `새 공고 ${totalJobs}개 수집했어요!\n홈페이지에 반영 완료!`
-    : `새 공고 ${totalJobs}개 수집했어요.\n일부 소스에서 오류가 발생했어요. 확인 필요해요!`
+    ? `🆕 새 공고 **${totalNewJobs}개** 추가됐어요!\n(전체 ${totalJobs}개 처리 완료)`
+    : `🆕 새 공고 **${totalNewJobs}개** 추가됐어요.\n(전체 ${totalJobs}개 처리)\n일부 소스에서 오류가 발생했어요. 확인 필요해요!`
 
   await sendDiscordNotification(
     completeTitle,
@@ -132,7 +144,7 @@ async function main() {
     [
       {
         name: '📊 요약',
-        value: `**총 공고 수**: ${totalJobs}개\n**성공**: ${successCount}/${results.length}개 소스\n**소요 시간**: ${duration.toFixed(1)}초`,
+        value: `**🆕 새 공고**: ${totalNewJobs}개\n**📦 전체 처리**: ${totalJobs}개\n**성공**: ${successCount}/${results.length}개 소스\n**소요 시간**: ${duration.toFixed(1)}초`,
         inline: false
       },
       {

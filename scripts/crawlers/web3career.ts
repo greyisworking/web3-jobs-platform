@@ -91,7 +91,12 @@ async function fetchJobDetails(jobUrl: string): Promise<Partial<JobData>> {
   return details
 }
 
-export async function crawlWeb3Career(): Promise<number> {
+interface CrawlerReturn {
+  total: number
+  new: number
+}
+
+export async function crawlWeb3Career(): Promise<CrawlerReturn> {
   console.log('🚀 Starting Web3.career crawler...')
 
   const baseUrl = 'https://web3.career'
@@ -172,6 +177,7 @@ export async function crawlWeb3Career(): Promise<number> {
   console.log(`📦 Found ${allJobs.length} jobs from Web3.career`)
 
   let savedCount = 0
+  let newCount = 0
   for (const job of allJobs) {
     try {
       // Fetch detailed information from job page (rate limited)
@@ -182,7 +188,7 @@ export async function crawlWeb3Career(): Promise<number> {
       // Parse salary if available
       const salaryInfo = parseSalary(job.salary)
 
-      const saved = await validateAndSaveJob(
+      const result = await validateAndSaveJob(
         {
           title: job.title,
           company: job.company,
@@ -210,7 +216,8 @@ export async function crawlWeb3Career(): Promise<number> {
         },
         'web3.career'
       )
-      if (saved) savedCount++
+      if (result.saved) savedCount++
+      if (result.isNew) newCount++
       await delay(100)
     } catch (error) {
       console.error(`Error saving job ${job.url}:`, error)
@@ -224,6 +231,6 @@ export async function crawlWeb3Career(): Promise<number> {
     createdAt: new Date().toISOString(),
   })
 
-  console.log(`✅ Saved ${savedCount} jobs from Web3.career`)
-  return savedCount
+  console.log(`✅ Saved ${savedCount} jobs from Web3.career (${newCount} new)`)
+  return { total: savedCount, new: newCount }
 }

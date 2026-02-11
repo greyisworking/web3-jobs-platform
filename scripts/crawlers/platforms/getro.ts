@@ -159,7 +159,12 @@ function normalizeSearchJob(raw: any): any {
 
 // ── Main crawl function ─────────────────────────────────────────────
 
-export async function crawlGetroBoard(config: GetroConfig): Promise<number> {
+export interface CrawlerReturn {
+  total: number
+  new: number
+}
+
+export async function crawlGetroBoard(config: GetroConfig): Promise<CrawlerReturn> {
   const {
     baseUrl,
     source,
@@ -209,12 +214,12 @@ export async function crawlGetroBoard(config: GetroConfig): Promise<number> {
     const $ = await fetchHTML(`${baseUrl}/jobs?page=1`)
     if (!$) {
       console.error(`❌ Failed to fetch ${displayName}`)
-      return 0
+      return { total: 0, new: 0 }
     }
     const nextData = parseNextData($)
     if (!nextData) {
       console.error(`❌ Could not find __NEXT_DATA__ on ${displayName}`)
-      return 0
+      return { total: 0, new: 0 }
     }
     allJobs = extractJobsFromNextData(nextData, $, config)
     const total = nextData?.props?.pageProps?.initialState?.jobs?.total
@@ -240,6 +245,7 @@ export async function crawlGetroBoard(config: GetroConfig): Promise<number> {
 
   // ── Save jobs ──
   let savedCount = 0
+  let newCount = 0
   for (const job of allJobs) {
     try {
       const title = job.title || job.name
@@ -329,7 +335,7 @@ export async function crawlGetroBoard(config: GetroConfig): Promise<number> {
       const companyLogo = job.company?.logo || job.organization?.logo || job.organization?.logoUrl || job.logo || null
       const companyWebsite = job.company?.website || job.organization?.website || null
 
-      const saved = await validateAndSaveJob(
+      const result = await validateAndSaveJob(
         {
           title,
           company,
@@ -353,7 +359,8 @@ export async function crawlGetroBoard(config: GetroConfig): Promise<number> {
         },
         source
       )
-      if (saved) savedCount++
+      if (result.saved) savedCount++
+      if (result.isNew) newCount++
       await delay(100)
     } catch (error) {
       console.error(`Error saving ${displayName} job:`, error)
@@ -367,6 +374,6 @@ export async function crawlGetroBoard(config: GetroConfig): Promise<number> {
     createdAt: new Date().toISOString(),
   })
 
-  console.log(`✅ Saved ${savedCount} jobs from ${displayName}`)
-  return savedCount
+  console.log(`✅ Saved ${savedCount} jobs from ${displayName} (${newCount} new)`)
+  return { total: savedCount, new: newCount }
 }

@@ -21,7 +21,12 @@ interface RemoteOKJob {
   original?: boolean
 }
 
-export async function crawlRemoteOK(): Promise<number> {
+interface CrawlerReturn {
+  total: number
+  new: number
+}
+
+export async function crawlRemoteOK(): Promise<CrawlerReturn> {
   console.log('🚀 Starting RemoteOK crawler...')
 
   const data = await fetchJSON<RemoteOKJob[]>(
@@ -31,7 +36,7 @@ export async function crawlRemoteOK(): Promise<number> {
 
   if (!data || !Array.isArray(data)) {
     console.error('❌ Failed to fetch RemoteOK JSON')
-    return 0
+    return { total: 0, new: 0 }
   }
 
   // First element is metadata/legal notice — skip it
@@ -40,6 +45,7 @@ export async function crawlRemoteOK(): Promise<number> {
   console.log(`📦 Found ${jobEntries.length} jobs from RemoteOK`)
 
   let savedCount = 0
+  let newCount = 0
   for (const job of jobEntries) {
     try {
       if (!job.position || !job.company) continue
@@ -60,7 +66,7 @@ export async function crawlRemoteOK(): Promise<number> {
       const remoteType = detectRemoteType(job.location || 'Remote')
       const companyLogo = job.company_logo || job.logo || null
 
-      const saved = await validateAndSaveJob(
+      const result = await validateAndSaveJob(
         {
           title: job.position,
           company: job.company,
@@ -84,7 +90,8 @@ export async function crawlRemoteOK(): Promise<number> {
         },
         'remoteok.com'
       )
-      if (saved) savedCount++
+      if (result.saved) savedCount++
+      if (result.isNew) newCount++
       await delay(100)
     } catch (error) {
       console.error('Error saving RemoteOK job:', error)
@@ -98,6 +105,6 @@ export async function crawlRemoteOK(): Promise<number> {
     createdAt: new Date().toISOString(),
   })
 
-  console.log(`✅ Saved ${savedCount} jobs from RemoteOK`)
-  return savedCount
+  console.log(`✅ Saved ${savedCount} jobs from RemoteOK (${newCount} new)`)
+  return { total: savedCount, new: newCount }
 }

@@ -46,10 +46,15 @@ function getSourcePriority(source: string): number {
   return 0
 }
 
+export interface SaveJobResult {
+  saved: boolean    // Whether the job was saved/updated successfully
+  isNew: boolean    // Whether this is a brand new job (not an update)
+}
+
 export async function validateAndSaveJob(
   rawJob: Record<string, unknown>,
   crawlerName: string
-): Promise<boolean> {
+): Promise<SaveJobResult> {
   const result = jobSchema.safeParse(rawJob)
 
   if (!result.success) {
@@ -65,7 +70,7 @@ export async function validateAndSaveJob(
         stack_trace: JSON.stringify({ raw: rawJob, errors: result.error.issues }),
       })
     }
-    return false
+    return { saved: false, isNew: false }
   }
 
   const job = result.data
@@ -129,7 +134,7 @@ export async function validateAndSaveJob(
             .update({ description: job.description })
             .eq('id', crossDupe.id)
         }
-        return true // Return true because job exists, just from different source
+        return { saved: true, isNew: false } // Duplicate from different source - not a new job
       }
       // New source has higher priority - deactivate the old one and continue with insert
       await supabase
@@ -193,16 +198,26 @@ export async function validateAndSaveJob(
         crawler_name: crawlerName,
         stack_trace: JSON.stringify({ job: job.url, code: error.code }),
       })
-      return false
+      return { saved: false, isNew: false }
     }
 
     // Enrich after save (non-fatal)
     if (upsertData?.id) {
       await enrichJobAfterSave(upsertData.id)
     }
+
+    // Return whether this was a new job or an update
+    return { saved: true, isNew: !existingJob }
   } else {
     // Use Prisma/SQLite
+    // Check if job exists to determine if this is new or update
+    let existingJob: { id: string } | null = null
     try {
+      existingJob = await prisma.job.findUnique({
+        where: { url: job.url },
+        select: { id: true },
+      })
+
       await prisma.job.upsert({
         where: { url: job.url },
         update: {
@@ -264,11 +279,11 @@ export async function validateAndSaveJob(
       })
     } catch (error: any) {
       console.error(`[${crawlerName}] Prisma upsert failed:`, error.message)
-      return false
+      return { saved: false, isNew: false }
     }
-  }
 
-  return true
+    return { saved: true, isNew: !existingJob }
+  }
 }
 
 /**

@@ -1,6 +1,6 @@
-import { crawlGetroBoard } from './platforms'
+import { crawlGetroBoard, type CrawlerReturn } from './platforms'
 
-export async function crawlArbitrumJobs(): Promise<number> {
+export async function crawlArbitrumJobs(): Promise<CrawlerReturn> {
   return crawlGetroBoard({
     baseUrl: 'https://jobs.arbitrum.io',
     source: 'jobs.arbitrum.io',
@@ -15,8 +15,8 @@ export async function crawlArbitrumJobs(): Promise<number> {
 // Allow standalone execution: npx tsx scripts/crawlers/arbitrumjobs.ts
 if (require.main === module) {
   crawlArbitrumJobs()
-    .then((count) => {
-      console.log(`\nDone — ${count} jobs saved`)
+    .then((result) => {
+      console.log(`\nDone — ${result.total} jobs saved (${result.new} new)`)
       process.exit(0)
     })
     .catch((err) => {

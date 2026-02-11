@@ -1,6 +1,6 @@
-import { crawlGetroBoard } from './platforms'
+import { crawlGetroBoard, type CrawlerReturn } from './platforms'
 
-export async function crawlAvalancheJobs(): Promise<number> {
+export async function crawlAvalancheJobs(): Promise<CrawlerReturn> {
   return crawlGetroBoard({
     baseUrl: 'https://jobs.avax.network',
     source: 'jobs.avax.network',
@@ -15,8 +15,8 @@ export async function crawlAvalancheJobs(): Promise<number> {
 // Allow standalone execution: npx tsx scripts/crawlers/avalanchejobs.ts
 if (require.main === module) {
   crawlAvalancheJobs()
-    .then((count) => {
-      console.log(`\nDone — ${count} jobs saved`)
+    .then((result) => {
+      console.log(`\nDone — ${result.total} jobs saved (${result.new} new)`)
       process.exit(0)
     })
     .catch((err) => {

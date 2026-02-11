@@ -1,6 +1,6 @@
-import { crawlGetroBoard } from './platforms'
+import { crawlGetroBoard, type CrawlerReturn } from './platforms'
 
-export async function crawlSolanaJobs(): Promise<number> {
+export async function crawlSolanaJobs(): Promise<CrawlerReturn> {
   return crawlGetroBoard({
     baseUrl: 'https://jobs.solana.com',
     source: 'jobs.solana.com',

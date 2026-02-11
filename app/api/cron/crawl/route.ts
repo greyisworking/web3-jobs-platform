@@ -57,7 +57,9 @@ export async function GET(request: Request) {
       }
 
       try {
-        const count = await crawler.fn()
+        const result = await crawler.fn()
+        // Handle both old (number) and new ({ total, new }) return types
+        const count = typeof result === 'number' ? result : result.total
         results.push({ source: crawler.name, count })
         console.log(`✅ ${crawler.name}: ${count} jobs`)
       } catch (error) {

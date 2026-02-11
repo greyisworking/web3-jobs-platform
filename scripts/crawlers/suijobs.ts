@@ -1,6 +1,6 @@
-import { crawlGetroBoard } from './platforms'
+import { crawlGetroBoard, type CrawlerReturn } from './platforms'
 
-export async function crawlSuiJobs(): Promise<number> {
+export async function crawlSuiJobs(): Promise<CrawlerReturn> {
   return crawlGetroBoard({
     baseUrl: 'https://jobs.sui.io',
     source: 'jobs.sui.io',

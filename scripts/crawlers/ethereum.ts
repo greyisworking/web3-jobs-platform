@@ -34,7 +34,12 @@ interface AshbyResponse {
   jobs: AshbyJob[]
 }
 
-export async function crawlEthereumJobs(): Promise<number> {
+interface CrawlerReturn {
+  total: number
+  new: number
+}
+
+export async function crawlEthereumJobs(): Promise<CrawlerReturn> {
   console.log('🚀 Starting Ethereum Foundation Jobs crawler...')
 
   let data: AshbyResponse | null = null
@@ -52,17 +57,18 @@ export async function crawlEthereumJobs(): Promise<number> {
     data = response.data
   } catch (error) {
     console.error('❌ Failed to fetch Ethereum Foundation jobs from Ashby API:', error)
-    return 0
+    return { total: 0, new: 0 }
   }
 
   if (!data?.jobs || !Array.isArray(data.jobs)) {
     console.error('❌ Unexpected Ashby API response format')
-    return 0
+    return { total: 0, new: 0 }
   }
 
   console.log(`📦 Found ${data.jobs.length} jobs from Ethereum Foundation`)
 
   let savedCount = 0
+  let newCount = 0
   for (const job of data.jobs) {
     try {
       if (!job.title) continue
@@ -81,7 +87,7 @@ export async function crawlEthereumJobs(): Promise<number> {
       const experienceLevel = description ? detectExperienceLevel(description) : null
       const remoteType = job.isRemote ? 'Remote' : detectRemoteType(location)
 
-      const saved = await validateAndSaveJob(
+      const result = await validateAndSaveJob(
         {
           title: job.title,
           company: 'Ethereum Foundation',
@@ -106,7 +112,8 @@ export async function crawlEthereumJobs(): Promise<number> {
         },
         'ethereum.foundation'
       )
-      if (saved) savedCount++
+      if (result.saved) savedCount++
+      if (result.isNew) newCount++
       await delay(100)
     } catch (error) {
       console.error('Error saving Ethereum Foundation job:', error)
@@ -120,6 +127,6 @@ export async function crawlEthereumJobs(): Promise<number> {
     createdAt: new Date().toISOString(),
   })
 
-  console.log(`✅ Saved ${savedCount} jobs from Ethereum Foundation`)
-  return savedCount
+  console.log(`✅ Saved ${savedCount} jobs from Ethereum Foundation (${newCount} new)`)
+  return { total: savedCount, new: newCount }
 }

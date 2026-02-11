@@ -126,7 +126,12 @@ async function fetchDescriptionFromDetailPage(
   }
 }
 
-export async function crawlWeb3KRJobs(): Promise<number> {
+interface CrawlerReturn {
+  total: number
+  new: number
+}
+
+export async function crawlWeb3KRJobs(): Promise<CrawlerReturn> {
   console.log('🚀 Starting Web3 KR Jobs crawler...')
 
   let browser
@@ -357,6 +362,7 @@ export async function crawlWeb3KRJobs(): Promise<number> {
     await detailPage.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36')
 
     let savedCount = 0
+    let newCount = 0
     for (const job of jobs) {
       try {
         // Skip jobs with no real title, title is a URL, or is the site header
@@ -382,7 +388,7 @@ export async function crawlWeb3KRJobs(): Promise<number> {
           await delay(1000) // Rate limit between detail page fetches
         }
 
-        const saved = await validateAndSaveJob(
+        const result = await validateAndSaveJob(
           {
             title: job.title,
             company: job.company,
@@ -400,7 +406,8 @@ export async function crawlWeb3KRJobs(): Promise<number> {
           },
           'web3kr.jobs'
         )
-        if (saved) savedCount++
+        if (result.saved) savedCount++
+        if (result.isNew) newCount++
         await delay(100)
       } catch (error) {
         console.error('Error saving Web3 KR job:', error)
@@ -416,8 +423,8 @@ export async function crawlWeb3KRJobs(): Promise<number> {
       createdAt: new Date().toISOString(),
     })
 
-    console.log(`✅ Saved ${savedCount} jobs from Web3 KR Jobs`)
-    return savedCount
+    console.log(`✅ Saved ${savedCount} jobs from Web3 KR Jobs (${newCount} new)`)
+    return { total: savedCount, new: newCount }
   } catch (error) {
     console.error('❌ Web3 KR Jobs crawler error:', error)
 
@@ -428,7 +435,7 @@ export async function crawlWeb3KRJobs(): Promise<number> {
       createdAt: new Date().toISOString(),
     })
 
-    return 0
+    return { total: 0, new: 0 }
   } finally {
     if (browser) {
       await browser.close()

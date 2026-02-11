@@ -3,7 +3,12 @@ import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { delay } from '../utils'
 
-export async function crawlRocketPunch(): Promise<number> {
+interface CrawlerReturn {
+  total: number
+  new: number
+}
+
+export async function crawlRocketPunch(): Promise<CrawlerReturn> {
   console.log('🚀 Starting 로켓펀치 crawler...')
 
   let browser
@@ -72,9 +77,10 @@ export async function crawlRocketPunch(): Promise<number> {
     console.log(`📦 Found ${jobs.length} jobs from 로켓펀치`)
 
     let savedCount = 0
+    let newCount = 0
     for (const job of jobs) {
       try {
-        const saved = await validateAndSaveJob(
+        const result = await validateAndSaveJob(
           {
             title: job.title,
             company: job.company,
@@ -89,7 +95,8 @@ export async function crawlRocketPunch(): Promise<number> {
           },
           'rocketpunch.com'
         )
-        if (saved) savedCount++
+        if (result.saved) savedCount++
+        if (result.isNew) newCount++
         await delay(100)
       } catch (error) {
         console.error('Error saving 로켓펀치 job:', error)
@@ -103,8 +110,8 @@ export async function crawlRocketPunch(): Promise<number> {
       createdAt: new Date().toISOString(),
     })
 
-    console.log(`✅ Saved ${savedCount} jobs from 로켓펀치`)
-    return savedCount
+    console.log(`✅ Saved ${savedCount} jobs from 로켓펀치 (${newCount} new)`)
+    return { total: savedCount, new: newCount }
   } catch (error) {
     console.error('❌ RocketPunch crawler error:', error)
 
@@ -115,7 +122,7 @@ export async function crawlRocketPunch(): Promise<number> {
       createdAt: new Date().toISOString(),
     })
 
-    return 0
+    return { total: 0, new: 0 }
   } finally {
     if (browser) {
       await browser.close()

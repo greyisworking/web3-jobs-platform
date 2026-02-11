@@ -55,7 +55,12 @@ async function crawlCompanyJobs(
  * Master crawler: iterates all priority companies with career pages,
  * dispatches to platform-specific crawlers, and saves jobs.
  */
-export async function crawlPriorityCompanies(): Promise<number> {
+interface CrawlerReturn {
+  total: number
+  new: number
+}
+
+export async function crawlPriorityCompanies(): Promise<CrawlerReturn> {
   console.log('🚀 Starting Priority Companies crawler...')
 
   const companiesWithCareers = PRIORITY_COMPANIES.filter(
@@ -65,6 +70,7 @@ export async function crawlPriorityCompanies(): Promise<number> {
   console.log(`📋 ${companiesWithCareers.length} companies with career pages to crawl`)
 
   let totalSaved = 0
+  let totalNew = 0
 
   for (const company of companiesWithCareers) {
     try {
@@ -79,9 +85,10 @@ export async function crawlPriorityCompanies(): Promise<number> {
       const jobs = await crawlCompanyJobs(company.careerPlatform, slug, company.name)
 
       let companySaved = 0
+      let companyNew = 0
       for (const job of jobs) {
         try {
-          const saved = await validateAndSaveJob(
+          const result = await validateAndSaveJob(
             {
               title: job.title,
               company: job.company,
@@ -97,7 +104,8 @@ export async function crawlPriorityCompanies(): Promise<number> {
             },
             `priority:${company.careerPlatform}`
           )
-          if (saved) companySaved++
+          if (result.saved) companySaved++
+          if (result.isNew) companyNew++
           await delay(100)
         } catch (error) {
           console.error(`    Error saving job "${job.title}" from ${company.name}:`, error)
@@ -105,7 +113,8 @@ export async function crawlPriorityCompanies(): Promise<number> {
       }
 
       totalSaved += companySaved
-      console.log(`    ✅ ${company.name}: ${companySaved}/${jobs.length} jobs saved`)
+      totalNew += companyNew
+      console.log(`    ✅ ${company.name}: ${companySaved}/${jobs.length} jobs saved (${companyNew} new)`)
 
       // Rate limit between companies
       await delay(500)
@@ -124,6 +133,6 @@ export async function crawlPriorityCompanies(): Promise<number> {
     })
   }
 
-  console.log(`✅ Priority Companies: ${totalSaved} total jobs saved`)
-  return totalSaved
+  console.log(`✅ Priority Companies: ${totalSaved} total jobs saved (${totalNew} new)`)
+  return { total: totalSaved, new: totalNew }
 }
