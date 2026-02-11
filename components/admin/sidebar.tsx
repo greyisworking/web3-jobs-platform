@@ -82,8 +82,8 @@ const navSections: NavSection[] = [
     items: [
       {
         href: '/admin/monitoring',
-        label: '전체 현황',
-        description: '크롤링, 서버 상태를 한눈에 봐요',
+        label: '크롤링 현황',
+        description: '채용 공고 자동 수집 현황',
         icon: <Activity className="h-4 w-4" />
       },
       {
@@ -95,7 +95,7 @@ const navSections: NavSection[] = [
       {
         href: '/admin/monitoring/proxies',
         label: '프록시 상태',
-        description: '크롤링용 IP 서버 상태예요. 정상이어야 크롤링이 잘 돼요',
+        description: '크롤링용 서버 상태 확인',
         icon: <Radio className="h-4 w-4" />
       },
       {
@@ -112,14 +112,14 @@ const navSections: NavSection[] = [
     items: [
       {
         href: '/admin/newsletter',
-        label: '뉴스레터',
-        description: '주간 뉴스레터를 만들고 발송해요',
+        label: '뉴스레터 생성',
+        description: '매주 채용 뉴스레터 만들기',
         icon: <Mail className="h-4 w-4" />
       },
       {
         href: '/admin/content-generator',
-        label: '콘텐츠 생성',
-        description: 'AI로 콘텐츠를 자동 생성해요',
+        label: '콘텐츠 생성기',
+        description: 'AI로 글쓰기 (루디움/NEUN용)',
         icon: <Sparkles className="h-4 w-4" />
       },
     ],
