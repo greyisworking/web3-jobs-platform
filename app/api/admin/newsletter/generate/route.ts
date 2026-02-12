@@ -171,6 +171,148 @@ function formatSalary(job: JobData): string {
   return job.salary || '-'
 }
 
+// Job category definitions
+const JOB_CATEGORIES: Record<string, { emoji: string; label: string; roles: string[] }> = {
+  engineering: {
+    emoji: '💻',
+    label: 'Engineering',
+    roles: ['Engineering', 'Developer', 'Backend', 'Frontend', 'Full Stack', 'DevOps', 'SRE', 'Infrastructure', 'Blockchain Developer', 'Smart Contract', 'Protocol Engineer'],
+  },
+  security: {
+    emoji: '🔐',
+    label: 'Security',
+    roles: ['Security', 'Security Engineer', 'Security Researcher', 'Auditor', 'Penetration Tester', 'CISO'],
+  },
+  product_design: {
+    emoji: '🎨',
+    label: 'Product & Design',
+    roles: ['Product', 'Design', 'UI/UX', 'UX', 'Product Manager', 'Product Designer', 'Graphic Designer', 'Creative'],
+  },
+  business_ops: {
+    emoji: '📊',
+    label: 'Business & Operations',
+    roles: ['Operations', 'Business', 'Finance', 'Legal', 'HR', 'People', 'Admin', 'Strategy', 'BD', 'Business Development', 'Partnerships', 'Sales', 'Account'],
+  },
+  marketing_community: {
+    emoji: '📢',
+    label: 'Marketing & Community',
+    roles: ['Marketing', 'Community', 'Growth', 'Social Media', 'Content', 'PR', 'Communications', 'Brand', 'Copywriter'],
+  },
+  other: {
+    emoji: '🌟',
+    label: 'Other',
+    roles: [],
+  },
+}
+
+// Country flag emojis
+const COUNTRY_FLAGS: Record<string, string> = {
+  'usa': '🇺🇸', 'united states': '🇺🇸', 'us': '🇺🇸', 'new york': '🇺🇸', 'san francisco': '🇺🇸', 'california': '🇺🇸', 'texas': '🇺🇸', 'miami': '🇺🇸',
+  'korea': '🇰🇷', 'south korea': '🇰🇷', 'seoul': '🇰🇷', '한국': '🇰🇷', '서울': '🇰🇷',
+  'uk': '🇬🇧', 'united kingdom': '🇬🇧', 'london': '🇬🇧', 'england': '🇬🇧',
+  'germany': '🇩🇪', 'berlin': '🇩🇪', 'munich': '🇩🇪',
+  'france': '🇫🇷', 'paris': '🇫🇷',
+  'switzerland': '🇨🇭', 'zurich': '🇨🇭', 'zug': '🇨🇭',
+  'singapore': '🇸🇬',
+  'japan': '🇯🇵', 'tokyo': '🇯🇵',
+  'china': '🇨🇳', 'hong kong': '🇭🇰', 'hk': '🇭🇰',
+  'taiwan': '🇹🇼', 'taipei': '🇹🇼',
+  'canada': '🇨🇦', 'toronto': '🇨🇦', 'vancouver': '🇨🇦',
+  'australia': '🇦🇺', 'sydney': '🇦🇺', 'melbourne': '🇦🇺',
+  'netherlands': '🇳🇱', 'amsterdam': '🇳🇱',
+  'portugal': '🇵🇹', 'lisbon': '🇵🇹',
+  'spain': '🇪🇸', 'madrid': '🇪🇸', 'barcelona': '🇪🇸',
+  'uae': '🇦🇪', 'dubai': '🇦🇪', 'abu dhabi': '🇦🇪',
+  'india': '🇮🇳', 'bangalore': '🇮🇳', 'mumbai': '🇮🇳',
+  'vietnam': '🇻🇳', 'ho chi minh': '🇻🇳',
+  'thailand': '🇹🇭', 'bangkok': '🇹🇭',
+  'indonesia': '🇮🇩', 'jakarta': '🇮🇩',
+  'philippines': '🇵🇭', 'manila': '🇵🇭',
+  'europe': '🇪🇺', 'eu': '🇪🇺',
+  'remote': '🌐', 'worldwide': '🌐', 'global': '🌐', 'anywhere': '🌐',
+}
+
+function getCountryFlag(location: string | null): string {
+  if (!location) return '🌐'
+  const lower = location.toLowerCase()
+
+  // Check for remote first
+  if (lower.includes('remote') || lower.includes('worldwide') || lower.includes('global') || lower.includes('anywhere')) {
+    return '🌐'
+  }
+
+  // Check for country/city matches
+  for (const [key, flag] of Object.entries(COUNTRY_FLAGS)) {
+    if (lower.includes(key)) {
+      return flag
+    }
+  }
+
+  return '🌐' // Default to global if unknown
+}
+
+function categorizeJob(job: JobData): string {
+  const role = (job.role || job.title || '').toLowerCase()
+
+  for (const [categoryKey, category] of Object.entries(JOB_CATEGORIES)) {
+    if (categoryKey === 'other') continue
+    for (const roleKeyword of category.roles) {
+      if (role.includes(roleKeyword.toLowerCase())) {
+        return categoryKey
+      }
+    }
+  }
+
+  return 'other'
+}
+
+interface CategorizedJobs {
+  [category: string]: VerifiedJob[]
+}
+
+function selectAndCategorizeJobs(jobs: VerifiedJob[], maxPerCategory = 7, totalMax = 30): CategorizedJobs {
+  // Sort jobs by selection criteria:
+  // 1. Salary disclosed (has salaryMin or salary)
+  // 2. Has VC backers
+  // 3. Most recent (crawledAt or postedDate would need to be added)
+  const scoredJobs = jobs.map(job => ({
+    job,
+    score: (job.salaryMin || job.salary ? 10 : 0) + (job.backers && job.backers.length > 0 ? 5 : 0),
+  }))
+
+  scoredJobs.sort((a, b) => b.score - a.score)
+
+  // Categorize jobs
+  const categorized: CategorizedJobs = {}
+  const selectedIds = new Set<string>()
+  let totalSelected = 0
+
+  // First pass: assign to categories
+  for (const { job } of scoredJobs) {
+    if (totalSelected >= totalMax) break
+
+    const category = categorizeJob(job)
+    if (!categorized[category]) {
+      categorized[category] = []
+    }
+
+    if (categorized[category].length < maxPerCategory && !selectedIds.has(job.id)) {
+      categorized[category].push(job)
+      selectedIds.add(job.id)
+      totalSelected++
+    }
+  }
+
+  // Remove empty categories
+  for (const key of Object.keys(categorized)) {
+    if (categorized[key].length === 0) {
+      delete categorized[key]
+    }
+  }
+
+  return categorized
+}
+
 function generateMarkdown(
   jobs: VerifiedJob[],
   stats: GenerateRequest['stats'],
@@ -186,14 +328,9 @@ function generateMarkdown(
 
   const intro = customIntro || "gm ser, this week's Web3 job market is heating up 🔥"
 
-  // Featured jobs (is_featured or top 10)
-  const featuredJobs = jobs
-    .filter(j => j.is_featured)
-    .slice(0, 10)
-
-  const displayJobs = featuredJobs.length >= 5
-    ? featuredJobs
-    : jobs.slice(0, 10)
+  // Categorize and select jobs
+  const categorizedJobs = selectAndCategorizeJobs(jobs)
+  const totalSelectedJobs = Object.values(categorizedJobs).reduce((sum, jobs) => sum + jobs.length, 0)
 
   let md = `# 🚀 NEUN Weekly | ${week}
 
@@ -203,23 +340,37 @@ ${intro}
 - New listings: **${stats.totalJobs}**
 - Top role: **${topRole?.[0] || 'Engineering'}** (${topRolePercent}%)
 - Remote rate: **${stats.remoteRate}%**
+- Curated picks: **${totalSelectedJobs}** jobs across **${Object.keys(categorizedJobs).length}** categories
 
-## 🔥 Featured Positions
-
-| Company | Role | Location | Salary |
-|---------|------|----------|--------|
 `
 
-  for (const job of displayJobs) {
-    const jobUrl = `${SITE_URL}/jobs/${job.id}?${utmParams}`
-    const salary = formatSalary(job)
-    const verifyIcon = job.verificationStatus === 'verified' ? '' : job.verificationStatus === 'warning' ? ' ⚠️' : ' ❌'
-    md += `| [${job.company}](${jobUrl})${verifyIcon} | [${job.title}](${jobUrl}) | ${job.location || 'Remote'} | ${salary} |\n`
+  // Generate category sections in preferred order
+  const categoryOrder = ['engineering', 'security', 'product_design', 'business_ops', 'marketing_community', 'other']
+
+  for (const categoryKey of categoryOrder) {
+    const categoryJobs = categorizedJobs[categoryKey]
+    if (!categoryJobs || categoryJobs.length === 0) continue
+
+    const category = JOB_CATEGORIES[categoryKey]
+    md += `## ${category.emoji} ${category.label} (${categoryJobs.length} jobs)
+
+| Company | Role | Salary |
+|---------|------|--------|
+`
+
+    for (const job of categoryJobs) {
+      const jobUrl = `${SITE_URL}/jobs/${job.id}?${utmParams}`
+      const salary = formatSalary(job)
+      const flag = getCountryFlag(job.location)
+      const verifyIcon = job.verificationStatus === 'verified' ? '' : job.verificationStatus === 'warning' ? ' ⚠️' : ''
+      md += `| [${job.company}](${jobUrl}) ${flag}${verifyIcon} | [${job.title}](${jobUrl}) | ${salary} |\n`
+    }
+
+    md += '\n'
   }
 
   // Trends section
-  md += `
-## 📈 This Week's Trends
+  md += `## 📈 This Week's Trends
 `
 
   // Top companies
@@ -268,30 +419,56 @@ function generateHtml(
 
   const intro = customIntro || "gm ser, this week's Web3 job market is heating up 🔥"
 
-  const featuredJobs = jobs
-    .filter(j => j.is_featured)
-    .slice(0, 10)
-  const displayJobs = featuredJobs.length >= 5
-    ? featuredJobs
-    : jobs.slice(0, 10)
+  // Categorize and select jobs
+  const categorizedJobs = selectAndCategorizeJobs(jobs)
+  const totalSelectedJobs = Object.values(categorizedJobs).reduce((sum, jobs) => sum + jobs.length, 0)
 
-  let jobRows = ''
-  for (const job of displayJobs) {
-    const jobUrl = `${SITE_URL}/jobs/${job.id}?${utmParams}`
-    const salary = formatSalary(job)
-    const verifyIcon = job.verificationStatus === 'verified' ? '✅' : job.verificationStatus === 'warning' ? '⚠️' : '❌'
-    jobRows += `
-      <tr>
-        <td style="padding: 12px; border-bottom: 1px solid #1e293b;">
-          <a href="${jobUrl}" style="color: #22c55e; text-decoration: none;">${job.company}</a>
-          <span style="font-size: 10px; margin-left: 4px;">${verifyIcon}</span>
-        </td>
-        <td style="padding: 12px; border-bottom: 1px solid #1e293b;">
-          <a href="${jobUrl}" style="color: #ffffff; text-decoration: none;">${job.title}</a>
-        </td>
-        <td style="padding: 12px; border-bottom: 1px solid #1e293b; color: #94a3b8;">${job.location || 'Remote'}</td>
-        <td style="padding: 12px; border-bottom: 1px solid #1e293b; color: #22c55e;">${salary}</td>
-      </tr>`
+  // Generate category sections HTML
+  let categorySectionsHtml = ''
+  const categoryOrder = ['engineering', 'security', 'product_design', 'business_ops', 'marketing_community', 'other']
+
+  for (const categoryKey of categoryOrder) {
+    const categoryJobs = categorizedJobs[categoryKey]
+    if (!categoryJobs || categoryJobs.length === 0) continue
+
+    const category = JOB_CATEGORIES[categoryKey]
+
+    let jobRows = ''
+    for (const job of categoryJobs) {
+      const jobUrl = `${SITE_URL}/jobs/${job.id}?${utmParams}`
+      const salary = formatSalary(job)
+      const flag = getCountryFlag(job.location)
+      const verifyIcon = job.verificationStatus === 'verified' ? '' : job.verificationStatus === 'warning' ? ' ⚠️' : ''
+      jobRows += `
+        <tr>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #1e293b;">
+            <a href="${jobUrl}" style="color: #22c55e; text-decoration: none;">${job.company}</a>
+            <span style="margin-left: 4px;">${flag}</span>${verifyIcon}
+          </td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #1e293b;">
+            <a href="${jobUrl}" style="color: #ffffff; text-decoration: none;">${job.title}</a>
+          </td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #1e293b; color: #22c55e;">${salary}</td>
+        </tr>`
+    }
+
+    categorySectionsHtml += `
+    <!-- ${category.label} Section -->
+    <div style="margin-bottom: 32px;">
+      <h3 style="color: #ffffff; font-size: 18px; margin-bottom: 12px;">${category.emoji} ${category.label} <span style="color: #94a3b8; font-size: 14px; font-weight: normal;">(${categoryJobs.length} jobs)</span></h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background-color: #1e293b;">
+            <th style="padding: 10px 12px; text-align: left; color: #94a3b8; font-size: 11px; text-transform: uppercase;">Company</th>
+            <th style="padding: 10px 12px; text-align: left; color: #94a3b8; font-size: 11px; text-transform: uppercase;">Role</th>
+            <th style="padding: 10px 12px; text-align: left; color: #94a3b8; font-size: 11px; text-transform: uppercase;">Salary</th>
+          </tr>
+        </thead>
+        <tbody style="color: #e2e8f0; font-size: 14px;">
+          ${jobRows}
+        </tbody>
+      </table>
+    </div>`
   }
 
   let topCompaniesHtml = ''
@@ -329,24 +506,12 @@ function generateHtml(
         <li>New listings: <strong>${stats.totalJobs}</strong></li>
         <li>Top role: <strong>${topRole?.[0] || 'Engineering'}</strong> (${topRolePercent}%)</li>
         <li>Remote rate: <strong>${stats.remoteRate}%</strong></li>
+        <li>Curated picks: <strong>${totalSelectedJobs}</strong> jobs across <strong>${Object.keys(categorizedJobs).length}</strong> categories</li>
       </ul>
     </div>
 
-    <!-- Featured Positions -->
-    <h3 style="color: #ffffff; font-size: 18px; margin-bottom: 16px;">🔥 Featured Positions</h3>
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 32px;">
-      <thead>
-        <tr style="background-color: #1e293b;">
-          <th style="padding: 12px; text-align: left; color: #94a3b8; font-size: 12px; text-transform: uppercase;">Company</th>
-          <th style="padding: 12px; text-align: left; color: #94a3b8; font-size: 12px; text-transform: uppercase;">Role</th>
-          <th style="padding: 12px; text-align: left; color: #94a3b8; font-size: 12px; text-transform: uppercase;">Location</th>
-          <th style="padding: 12px; text-align: left; color: #94a3b8; font-size: 12px; text-transform: uppercase;">Salary</th>
-        </tr>
-      </thead>
-      <tbody style="color: #e2e8f0; font-size: 14px;">
-        ${jobRows}
-      </tbody>
-    </table>
+    <!-- Job Categories -->
+    ${categorySectionsHtml}
 
     <!-- Top Companies -->
     <h3 style="color: #ffffff; font-size: 18px; margin-bottom: 16px;">🏢 Companies to Watch</h3>
