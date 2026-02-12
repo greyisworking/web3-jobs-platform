@@ -251,17 +251,65 @@ function getCountryFlag(location: string | null): string {
   return '🌐' // Default to global if unknown
 }
 
-function categorizeJob(job: JobData): string {
-  const role = (job.role || job.title || '').toLowerCase()
+// Non-engineering job titles that should not be in Engineering category
+const NON_ENGINEERING_TITLES = [
+  'virtual assistant', 'assistant', 'receptionist', 'coordinator',
+  'recruiter', 'talent', 'writer', 'editor', 'analyst',
+  'manager', 'director', 'head of', 'chief', 'officer',
+  'counsel', 'lawyer', 'accountant', 'bookkeeper',
+]
 
-  for (const [categoryKey, category] of Object.entries(JOB_CATEGORIES)) {
-    if (categoryKey === 'other') continue
-    for (const roleKeyword of category.roles) {
-      if (role.includes(roleKeyword.toLowerCase())) {
-        return categoryKey
-      }
-    }
+function categorizeJob(job: JobData): string {
+  const title = (job.title || '').toLowerCase()
+  const roleField = (job.role || '').toLowerCase()
+
+  // 1. Check title first for Security keywords (highest priority)
+  if (title.includes('security') || title.includes('auditor') || title.includes('penetration') || title.includes('ciso')) {
+    return 'security'
   }
+
+  // 2. Check for non-engineering titles to prevent misclassification
+  const isNonEngineeringTitle = NON_ENGINEERING_TITLES.some(t => title.includes(t))
+
+  // 3. Check title for specific category keywords
+  // Product & Design
+  if (title.includes('product manager') || title.includes('product designer') ||
+      title.includes('ui/ux') || title.includes('ux designer') || title.includes('ui designer') ||
+      title.includes('graphic designer') || title.includes('motion designer') || title.includes('creative director')) {
+    return 'product_design'
+  }
+
+  // Marketing & Community
+  if (title.includes('marketing') || title.includes('community') || title.includes('growth') ||
+      title.includes('social media') || title.includes('content') || title.includes('communications') ||
+      title.includes('brand') || title.includes('copywriter') || title.includes('pr ') || title.includes('events')) {
+    return 'marketing_community'
+  }
+
+  // Business & Operations
+  if (title.includes('business development') || title.includes('partnerships') || title.includes('sales') ||
+      title.includes('finance') || title.includes('accounting') || title.includes('accountant') ||
+      title.includes('legal') || title.includes('counsel') || title.includes('compliance') ||
+      title.includes('operations') || title.includes('hr ') || title.includes('human resources') ||
+      title.includes('people') || title.includes('recruiter') || title.includes('talent')) {
+    return 'business_ops'
+  }
+
+  // Engineering - but exclude non-engineering titles
+  if (!isNonEngineeringTitle && (
+      title.includes('engineer') || title.includes('developer') || title.includes('architect') ||
+      title.includes('devops') || title.includes('sre') || title.includes('infrastructure') ||
+      title.includes('backend') || title.includes('frontend') || title.includes('full stack') ||
+      title.includes('smart contract') || title.includes('protocol') || title.includes('blockchain dev'))) {
+    return 'engineering'
+  }
+
+  // 4. Fall back to role field
+  if (roleField.includes('security')) return 'security'
+  if (roleField.includes('product') || roleField.includes('design')) return 'product_design'
+  if (roleField.includes('marketing') || roleField.includes('community') || roleField.includes('growth')) return 'marketing_community'
+  if (roleField.includes('operations') || roleField.includes('business') || roleField.includes('finance') || roleField.includes('legal')) return 'business_ops'
+  if (!isNonEngineeringTitle && roleField.includes('engineering')) return 'engineering'
 
   return 'other'
 }
