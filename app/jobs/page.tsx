@@ -88,7 +88,27 @@ function CareersContent() {
       )
     }
 
-    if (f.region) filtered = filtered.filter((job) => job.region === f.region)
+    if (f.region) {
+      if (f.region === 'Korea') {
+        // For Korea filter, also check location field for Korean cities
+        const koreaKeywords = ['korea', 'seoul', 'busan', 'daegu', 'incheon', 'gwangju', 'daejeon', 'ulsan', 'sejong', 'pangyo', 'gangnam', '한국', '서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '판교', '강남']
+        filtered = filtered.filter((job) => {
+          if (job.region === 'Korea') return true
+          const locationLower = (job.location ?? '').toLowerCase()
+          return koreaKeywords.some(k => locationLower.includes(k))
+        })
+      } else {
+        // For Global or other regions, exclude Korea-specific jobs
+        const koreaKeywords = ['korea', 'seoul', 'busan', 'daegu', 'incheon', 'gwangju', 'daejeon', 'ulsan', 'sejong', 'pangyo', 'gangnam', '한국', '서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '판교', '강남']
+        filtered = filtered.filter((job) => {
+          if (job.region === f.region) return true
+          // Exclude jobs that are actually Korean
+          const locationLower = (job.location ?? '').toLowerCase()
+          const isKoreaJob = koreaKeywords.some(k => locationLower.includes(k))
+          return !isKoreaJob
+        })
+      }
+    }
     if (f.type) filtered = filtered.filter((job) => (job.type ?? '').includes(f.type))
     if (f.sector) filtered = filtered.filter((job) => (job.sector ?? '').toLowerCase().includes(f.sector.toLowerCase()))
     if (f.backer) filtered = filtered.filter((job) => job.backers?.includes(f.backer))

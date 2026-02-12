@@ -107,6 +107,32 @@ export function cleanJobTitle(raw: string, companyName?: string): string {
   // (위험관리부서), (마케팅팀), (개발팀) etc.
   title = title.replace(/\s*\([^)]*(?:부서|팀|본부|사업부|센터|실)\)\s*$/g, '')
 
+  // ── Step 6.8: Remove English experience level patterns ──
+  // "(3+ years)", "2-7years", "Experience 3-10years", "(5+ YoE)", etc.
+  title = title.replace(/\s*\(\s*\d+\+?\s*(?:years?|yrs?|YoE)\s*\)\s*/gi, '')
+  title = title.replace(/\s*\d+-\d+\s*(?:years?|yrs?)\s*$/gi, '')
+  title = title.replace(/\s*Experience\s*\d+[-+]?\d*\s*(?:years?|yrs?)?\s*$/gi, '')
+  title = title.replace(/\s*\(\s*\d+[-–]\d+\s*(?:years?|yrs?)\s*(?:experience)?\s*\)\s*/gi, '')
+
+  // ── Step 6.9: Remove short abbreviation parentheses ──
+  // (FIG), (MLRO), (BD), (PM), (HR), etc. - typically 2-5 uppercase letters
+  title = title.replace(/\s*\(\s*[A-Z]{2,5}\s*\)\s*$/g, '')
+  // Also remove at start or middle: "Member of Strategy (FIG)" -> "Member of Strategy"
+  title = title.replace(/\s*\(\s*[A-Z]{2,5}\s*\)\s*/g, ' ')
+
+  // ── Step 6.10: Remove trailing location info that slipped through ──
+  // "Senior Engineer New York", "Developer San Francisco", etc.
+  const ENGLISH_CITIES = [
+    'New York', 'San Francisco', 'Los Angeles', 'Chicago', 'Seattle', 'Austin', 'Miami', 'Boston', 'Denver',
+    'London', 'Berlin', 'Paris', 'Amsterdam', 'Dublin', 'Lisbon', 'Barcelona', 'Madrid', 'Zurich', 'Geneva',
+    'Singapore', 'Hong Kong', 'Tokyo', 'Sydney', 'Melbourne', 'Toronto', 'Vancouver', 'Dubai',
+    'Seoul', 'Gangnam', 'Pangyo',
+  ]
+  for (const city of ENGLISH_CITIES) {
+    title = title.replace(new RegExp(`\\s+${city}\\s*$`, 'i'), '')
+    title = title.replace(new RegExp(`\\s*,\\s*${city}\\s*$`, 'i'), '')
+  }
+
   // ── Step 7: Remove trailing parenthesized experience ──
   title = title.replace(/\s*\((?:신입\/?경력|경력\s*(?:무관|\d+\s*년?\s*(?:이상)?)|신입)\)\s*$/g, '')
 

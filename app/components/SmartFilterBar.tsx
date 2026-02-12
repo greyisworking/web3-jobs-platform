@@ -30,7 +30,7 @@ const FILTER_CONFIGS = [
   {
     key: 'type' as const,
     label: 'Type',
-    options: ['Full-time', 'Part-time', 'Contract', 'Internship'],
+    options: ['Full-time', 'Contractor', 'Ambassador'],
   },
   {
     key: 'sector' as const,

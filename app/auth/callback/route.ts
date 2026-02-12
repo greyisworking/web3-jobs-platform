@@ -9,6 +9,8 @@ export async function GET(request: Request) {
   const error_description = searchParams.get('error_description')
   const next = searchParams.get('next') ?? '/jobs'
 
+  console.log('[Auth Callback] Processing callback, code:', code ? 'present' : 'missing')
+
   // Handle OAuth errors from provider
   if (error_param) {
     console.error('[Auth Callback] OAuth error:', error_param, error_description)
@@ -23,6 +25,10 @@ export async function GET(request: Request) {
   }
 
   const cookieStore = await cookies()
+
+  // Create response first for proper cookie handling
+  const response = NextResponse.redirect(`${origin}${next}`)
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -33,23 +39,31 @@ export async function GET(request: Request) {
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
+            cookiesToSet.forEach(({ name, value, options }) => {
+              // Set on both cookie store and response
               cookieStore.set(name, value, options)
-            )
-          } catch {
-            // Server Component context — ignored
+              response.cookies.set(name, value, options)
+            })
+          } catch (e) {
+            console.error('[Auth Callback] Cookie set error:', e)
           }
         },
       },
     }
   )
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code)
+  try {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
-  if (error) {
-    console.error('[Auth Callback] Session exchange error:', error.message)
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
+    if (error) {
+      console.error('[Auth Callback] Session exchange error:', error.message, error)
+      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
+    }
+
+    console.log('[Auth Callback] Session established for:', data?.user?.email)
+    return response
+  } catch (e) {
+    console.error('[Auth Callback] Unexpected error:', e)
+    return NextResponse.redirect(`${origin}/login?error=unexpected_error`)
   }
-
-  return NextResponse.redirect(`${origin}${next}`)
 }

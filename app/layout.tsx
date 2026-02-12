@@ -118,10 +118,8 @@ const themeScript = `
 
 export default function RootLayout({
   children,
-  modal,
 }: {
   children: React.ReactNode
-  modal: React.ReactNode
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -162,7 +160,6 @@ export default function RootLayout({
           <Navigation />
           <ErrorBoundary>
             {children}
-            {modal}
           </ErrorBoundary>
           <Onboarding />
           <KonamiEasterEgg />

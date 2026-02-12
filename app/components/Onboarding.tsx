@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { X, Wallet, User, Briefcase, BookmarkCheck, ArrowRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Pixelbara from './Pixelbara'
@@ -17,8 +18,18 @@ interface OnboardingProps {
 export function Onboarding({ forceShow = false, onClose }: OnboardingProps) {
   const [show, setShow] = useState(forceShow)
   const [step, setStep] = useState(0)
+  const pathname = usePathname()
+
+  // Disable onboarding for admin routes
+  const isAdminRoute = pathname?.startsWith('/admin')
 
   useEffect(() => {
+    // Don't show onboarding on admin pages
+    if (isAdminRoute) {
+      setShow(false)
+      return
+    }
+
     if (forceShow) {
       setShow(true)
       return
@@ -30,7 +41,7 @@ export function Onboarding({ forceShow = false, onClose }: OnboardingProps) {
       const timer = setTimeout(() => setShow(true), 1000)
       return () => clearTimeout(timer)
     }
-  }, [forceShow])
+  }, [forceShow, isAdminRoute])
 
   const handleClose = () => {
     setShow(false)

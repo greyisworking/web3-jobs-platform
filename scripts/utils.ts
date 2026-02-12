@@ -352,3 +352,73 @@ export function detectRole(title: string): RoleCategory {
   // Default to Engineering for web3 job boards (most common category)
   return 'Engineering'
 }
+
+/**
+ * Employment type categories for standardized filtering
+ */
+export type EmploymentType = 'Full-time' | 'Contractor' | 'Ambassador'
+
+/**
+ * Normalize employment type from raw crawled data to standard values.
+ * Maps: "full-time", "full time", "permanent" → Full-time
+ *       "contract", "contractor", "freelance" → Contractor
+ *       "ambassador", "community", "devrel", "advocate" → Ambassador
+ */
+export function normalizeEmploymentType(type: string | null | undefined, title?: string): EmploymentType {
+  const typeLower = (type ?? '').toLowerCase()
+  const titleLower = (title ?? '').toLowerCase()
+
+  // Check for Ambassador-type roles first (DevRel, Community, Ambassador positions)
+  const ambassadorKeywords = ['ambassador', 'advocate', 'devrel', 'developer relations', 'community lead', 'community manager', 'evangelist']
+  if (ambassadorKeywords.some(k => typeLower.includes(k) || titleLower.includes(k))) {
+    return 'Ambassador'
+  }
+
+  // Check for Contractor-type
+  const contractorKeywords = ['contract', 'contractor', 'freelance', 'freelancer', 'temporary', 'temp', 'consultant', 'consulting']
+  if (contractorKeywords.some(k => typeLower.includes(k))) {
+    return 'Contractor'
+  }
+
+  // Check for Full-time (default for permanent/regular positions)
+  const fulltimeKeywords = ['full-time', 'full time', 'fulltime', 'permanent', 'regular', 'employee', 'fte']
+  if (fulltimeKeywords.some(k => typeLower.includes(k))) {
+    return 'Full-time'
+  }
+
+  // Part-time maps to Full-time (since we removed Part-time option)
+  if (typeLower.includes('part-time') || typeLower.includes('part time')) {
+    return 'Full-time'
+  }
+
+  // Internship also maps to Full-time
+  if (typeLower.includes('intern')) {
+    return 'Full-time'
+  }
+
+  // Default to Full-time
+  return 'Full-time'
+}
+
+/**
+ * Detect region based on location string.
+ * Returns 'Korea' for Korean cities, 'Global' otherwise.
+ */
+export function detectRegion(location: string | null | undefined): 'Korea' | 'Global' {
+  if (!location) return 'Global'
+
+  const locationLower = location.toLowerCase()
+  const koreaKeywords = [
+    'korea', 'south korea', '한국', '대한민국',
+    'seoul', '서울', 'busan', '부산', 'daegu', '대구',
+    'incheon', '인천', 'gwangju', '광주', 'daejeon', '대전',
+    'ulsan', '울산', 'sejong', '세종', 'pangyo', '판교',
+    'gangnam', '강남', 'suwon', '수원', 'bundang', '분당',
+  ]
+
+  if (koreaKeywords.some(k => locationLower.includes(k))) {
+    return 'Korea'
+  }
+
+  return 'Global'
+}

@@ -3,8 +3,9 @@ import { PrismaClient } from '@prisma/client'
 import { jobSchema, type JobInput } from './job'
 import { findPriorityCompany } from '../priority-companies'
 import { computeBadges } from '../badges'
-import { detectRole } from '../../scripts/utils'
+import { detectRole, normalizeEmploymentType, detectRegion } from '../../scripts/utils'
 import { containsKorean, translateJobTitle, quickTranslateTerms } from '../translation'
+import { cleanJobTitle, cleanCompanyName } from '../clean-job-title'
 
 // Prisma client for SQLite fallback
 const prisma = new PrismaClient()
@@ -80,6 +81,12 @@ export async function validateAndSaveJob(
     ? translateJobTitle(job.title)
     : job.title
 
+  // Clean up job title (remove location, experience, abbreviations, etc.)
+  const cleanedTitle = cleanJobTitle(translatedTitle, job.company)
+
+  // Clean up company name (remove legal suffixes)
+  const cleanedCompany = cleanCompanyName(job.company)
+
   // Also translate description if it contains Korean
   const translateField = (text: string | null | undefined): string | null => {
     if (!text) return null
@@ -96,14 +103,21 @@ export async function validateAndSaveJob(
   const translatedBenefits = translateField(job.benefits)
 
   // Auto-detect role from title if not provided
-  const detectedRole = job.role || detectRole(translatedTitle)
+  const detectedRole = job.role || detectRole(cleanedTitle)
+
+  // Normalize employment type (Full-time, Contractor, Ambassador)
+  const normalizedType = normalizeEmploymentType(job.type, cleanedTitle)
+
+  // Auto-detect region based on location
+  const detectedRegion = job.region || detectRegion(job.location)
 
   // Use Prisma for SQLite, Supabase for production
   if (isSupabaseConfigured) {
     // ── Cross-source dedup check ──
     // Look for existing job with same normalized title + company (regardless of URL)
-    const normTitle = normalizeText(job.title)
-    const normCompany = normalizeText(job.company)
+    // Use cleaned values for better dedup matching
+    const normTitle = normalizeText(cleanedTitle)
+    const normCompany = normalizeText(cleanedCompany)
     const newPriority = getSourcePriority(job.source)
 
     // Query jobs from same company (case-insensitive) to check for duplicates
@@ -111,7 +125,7 @@ export async function validateAndSaveJob(
       .from('Job')
       .select('id, url, source, title, company, postedDate, description')
       .eq('isActive', true)
-      .ilike('company', `%${job.company.replace(/[%_]/g, '')}%`)
+      .ilike('company', `%${cleanedCompany.replace(/[%_]/g, '')}%`)
       .neq('url', job.url)
       .limit(50)
 
@@ -159,17 +173,17 @@ export async function validateAndSaveJob(
 
     const { data: upsertData, error } = await supabase.from('Job').upsert(
       {
-        title: translatedTitle,
-        company: job.company,
+        title: cleanedTitle,
+        company: cleanedCompany,
         url: job.url,
         location: job.location,
-        type: job.type,
+        type: normalizedType,
         category: job.category,
         role: detectedRole,
         salary: job.salary || null,
         tags: JSON.stringify(job.tags),
         source: job.source,
-        region: job.region,
+        region: detectedRegion,
         isActive: true,
         // Preserve original postedDate on re-crawl to maintain correct sorting
         postedDate: postedDateToUse,
@@ -221,16 +235,16 @@ export async function validateAndSaveJob(
       await prisma.job.upsert({
         where: { url: job.url },
         update: {
-          title: translatedTitle,
-          company: job.company,
+          title: cleanedTitle,
+          company: cleanedCompany,
           location: job.location,
-          type: job.type,
+          type: normalizedType,
           category: job.category,
           role: detectedRole,
           salary: job.salary || null,
           tags: JSON.stringify(job.tags),
           source: job.source,
-          region: job.region,
+          region: detectedRegion,
           isActive: true,
           postedDate: job.postedDate,
           updatedAt: new Date(),
@@ -249,17 +263,17 @@ export async function validateAndSaveJob(
           companyWebsite: job.companyWebsite || null,
         },
         create: {
-          title: translatedTitle,
-          company: job.company,
+          title: cleanedTitle,
+          company: cleanedCompany,
           url: job.url,
           location: job.location,
-          type: job.type,
+          type: normalizedType,
           category: job.category,
           role: detectedRole,
           salary: job.salary || null,
           tags: JSON.stringify(job.tags),
           source: job.source,
-          region: job.region,
+          region: detectedRegion,
           isActive: true,
           postedDate: job.postedDate,
           // Enhanced job details - use translated values
