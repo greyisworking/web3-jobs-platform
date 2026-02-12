@@ -1,14 +1,9 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { useState, useCallback, useMemo } from 'react'
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import { Sparkles, Copy, RotateCcw, Save, FileText, Briefcase, BookOpen, Loader2, Check } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 type ContentMode = 'newsletter' | 'ludium-jobs' | 'ludium-article'
 
@@ -70,6 +65,8 @@ export default function ContentGeneratorPage() {
   const [editMode, setEditMode] = useState(false)
   const [editedContent, setEditedContent] = useState<GeneratedContent | null>(null)
 
+  const supabase = useMemo(() => createSupabaseBrowserClient(), [])
+
   const handleGenerate = useCallback(async () => {
     if (!prompt.trim()) {
       setError('프롬프트를 입력해 주세요')
@@ -119,7 +116,7 @@ export default function ContentGeneratorPage() {
     } finally {
       setLoading(false)
     }
-  }, [mode, prompt])
+  }, [mode, prompt, supabase])
 
   const handleCopy = useCallback(async (text: string, field: string) => {
     await navigator.clipboard.writeText(text)
