@@ -150,22 +150,13 @@ export default function ArticleWritePage() {
     }
   }
 
-  const handleGoogleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=/articles/write`,
-      },
-    })
+  // Server-side OAuth via API routes
+  const handleGoogleLogin = () => {
+    window.location.href = '/api/auth/google?next=/articles/write'
   }
 
-  const handleKakaoLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'kakao',
-      options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=/articles/write`,
-      },
-    })
+  const handleKakaoLogin = () => {
+    window.location.href = '/api/auth/kakao?next=/articles/write'
   }
 
   // Loading state

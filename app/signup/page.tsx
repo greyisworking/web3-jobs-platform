@@ -53,60 +53,17 @@ export default function SignupPage() {
     }
   }
 
-  const handleGoogleSignup = async () => {
+  // Server-side OAuth via API routes - avoids client-side cookie sync issues
+  const handleGoogleSignup = () => {
     setError('')
     setLoading(true)
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`,
-          skipBrowserRedirect: true,
-        },
-      })
-      if (error) {
-        setError(error.message)
-        setLoading(false)
-        return
-      }
-      if (data?.url) {
-        window.location.href = data.url
-      } else {
-        setError('Google OAuth가 설정되지 않았습니다.')
-        setLoading(false)
-      }
-    } catch {
-      setError('Google 로그인 중 오류가 발생했습니다.')
-      setLoading(false)
-    }
+    window.location.href = `/api/auth/google?next=${encodeURIComponent(nextUrl)}`
   }
 
-  const handleKakaoSignup = async () => {
+  const handleKakaoSignup = () => {
     setError('')
     setLoading(true)
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'kakao',
-        options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`,
-          skipBrowserRedirect: true,
-        },
-      })
-      if (error) {
-        setError(error.message)
-        setLoading(false)
-        return
-      }
-      if (data?.url) {
-        window.location.href = data.url
-      } else {
-        setError('Kakao OAuth가 설정되지 않았습니다.')
-        setLoading(false)
-      }
-    } catch {
-      setError('카카오 로그인 중 오류가 발생했습니다.')
-      setLoading(false)
-    }
+    window.location.href = `/api/auth/kakao?next=${encodeURIComponent(nextUrl)}`
   }
 
   if (success) {

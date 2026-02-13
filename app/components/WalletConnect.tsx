@@ -189,62 +189,17 @@ export function WalletConnect() {
 
   const [oauthLoading, setOauthLoading] = useState(false)
 
-  const handleGoogleLogin = async () => {
+  // Server-side OAuth via API routes - avoids client-side cookie sync issues
+  const handleGoogleLogin = () => {
     setOauthLoading(true)
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`,
-          skipBrowserRedirect: true,
-        },
-      })
-      if (error) {
-        const { title, description } = getErrorForToast(error)
-        toast.error(title, { description })
-        setOauthLoading(false)
-        return
-      }
-      if (data?.url) {
-        window.location.href = data.url
-      } else {
-        toast.error('Google OAuth not configured')
-        setOauthLoading(false)
-      }
-    } catch (err) {
-      console.error('Google OAuth error:', err)
-      toast.error('Google login failed', { description: 'Please try again.' })
-      setOauthLoading(false)
-    }
+    // Use server-side OAuth initiation
+    window.location.href = '/api/auth/google'
   }
 
-  const handleKakaoLogin = async () => {
+  const handleKakaoLogin = () => {
     setOauthLoading(true)
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'kakao',
-        options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`,
-          skipBrowserRedirect: true,
-        },
-      })
-      if (error) {
-        const { title, description } = getErrorForToast(error)
-        toast.error(title, { description })
-        setOauthLoading(false)
-        return
-      }
-      if (data?.url) {
-        window.location.href = data.url
-      } else {
-        toast.error('Kakao OAuth not configured')
-        setOauthLoading(false)
-      }
-    } catch (err) {
-      console.error('Kakao OAuth error:', err)
-      toast.error('Kakao login failed', { description: 'Please try again.' })
-      setOauthLoading(false)
-    }
+    // Use server-side OAuth initiation
+    window.location.href = '/api/auth/kakao'
   }
 
   if (!mounted) {

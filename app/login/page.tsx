@@ -46,66 +46,19 @@ export default function LoginPage() {
     }
   }, [searchParams])
 
-  const handleGoogleLogin = async () => {
+  // Server-side OAuth via API routes - avoids client-side cookie sync issues
+  const handleGoogleLogin = () => {
     setError('')
     setLoading(true)
-    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`
-
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo,
-          skipBrowserRedirect: true,
-        },
-      })
-
-      if (error) {
-        setError(error.message)
-        setLoading(false)
-        return
-      }
-      if (data?.url) {
-        window.location.replace(data.url)
-      } else {
-        setError('Google OAuth is not configured.')
-        setLoading(false)
-      }
-    } catch (err) {
-      setError('Error during Google login.')
-      setLoading(false)
-    }
+    // Redirect to server-side OAuth handler with next URL
+    window.location.href = `/api/auth/google?next=${encodeURIComponent(nextUrl)}`
   }
 
-  const handleKakaoLogin = async () => {
+  const handleKakaoLogin = () => {
     setError('')
     setLoading(true)
-    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`
-
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'kakao',
-        options: {
-          redirectTo,
-          skipBrowserRedirect: true,
-        },
-      })
-
-      if (error) {
-        setError(error.message)
-        setLoading(false)
-        return
-      }
-      if (data?.url) {
-        window.location.replace(data.url)
-      } else {
-        setError('Kakao OAuth is not configured.')
-        setLoading(false)
-      }
-    } catch (err) {
-      setError('Error during Kakao login.')
-      setLoading(false)
-    }
+    // Redirect to server-side OAuth handler with next URL
+    window.location.href = `/api/auth/kakao?next=${encodeURIComponent(nextUrl)}`
   }
 
   return (
