@@ -13,6 +13,7 @@
  */
 
 import { decode } from 'html-entities'
+import { humanizeRuleBased, calculateAIScore } from './humanizer'
 
 // ============================================================================
 // Types
@@ -40,6 +41,8 @@ export interface FormatterOptions {
   preserveHtml?: boolean      // Keep some HTML formatting (default: false)
   extractSections?: boolean   // Extract named sections (default: true)
   maxLength?: number          // Truncate if exceeds (default: 15000)
+  humanize?: boolean          // Apply humanizer to remove AI patterns (default: true)
+  humanizeThreshold?: number  // Min AI score to trigger humanization (default: 30)
 }
 
 // ============================================================================
@@ -212,6 +215,8 @@ export function formatJobDescription(
     preserveHtml = false,
     extractSections = true,
     maxLength = 15000,
+    humanize = true,
+    humanizeThreshold = 30,
   } = options
 
   if (!rawText || typeof rawText !== 'string') {
@@ -242,6 +247,14 @@ export function formatJobDescription(
 
   // Step 6: Final cleanup
   text = finalCleanup(text)
+
+  // Step 7: Humanize (remove AI-generated patterns)
+  if (humanize) {
+    const aiScore = calculateAIScore(text)
+    if (aiScore >= humanizeThreshold) {
+      text = humanizeRuleBased(text)
+    }
+  }
 
   // Safety check: if formatting removed too much content, fallback to cleaned raw
   // This prevents the Somnia bug where content went from 5664 → 0 chars
