@@ -268,7 +268,7 @@ export default function ArticleWritePage() {
                 <>
                   {user.user_metadata?.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.user_metadata.avatar_url} alt="" className="w-5 h-5 rounded-full" />
+                    <img src={user.user_metadata.avatar_url} alt="User avatar" className="w-5 h-5 rounded-full" />
                   ) : (
                     <div className="w-5 h-5 rounded-full bg-purple-600 flex items-center justify-center text-a24-text text-xs">
                       {displayName[0].toUpperCase()}
@@ -425,7 +425,7 @@ export default function ArticleWritePage() {
                     <Blockies address={address} size={40} />
                   ) : user.user_metadata?.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.user_metadata.avatar_url} alt="" className="w-10 h-10 rounded-full" />
+                    <img src={user.user_metadata.avatar_url} alt="User avatar" className="w-10 h-10 rounded-full" />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-a24-text font-bold">
                       {displayName[0].toUpperCase()}

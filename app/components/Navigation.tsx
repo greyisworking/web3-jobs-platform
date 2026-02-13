@@ -202,7 +202,7 @@ function ProfileDropdown() {
       >
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatarUrl} alt="" className="w-5 h-5 rounded-full" />
+          <img src={avatarUrl} alt="User avatar" className="w-5 h-5 rounded-full" />
         ) : (
           <div className="w-2 h-2 bg-neun-success rounded-full animate-pulse" aria-hidden="true" />
         )}
