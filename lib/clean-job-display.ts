@@ -166,6 +166,13 @@ const SENTENCE_STARTERS = [
 function formatPlainTextDescription(text: string): string {
   let result = text
 
+  // 0) Preserve existing markdown bold patterns by temporarily replacing them
+  const boldPatterns: string[] = []
+  result = result.replace(/\*\*([^*\n]+)\*\*/g, (match, content) => {
+    boldPatterns.push(match)
+    return `__BOLD_${boldPatterns.length - 1}__`
+  })
+
   // 1) Break before section headings — capture heading to avoid partial re-matches
   //    Also handle headings at the very start of the text
   const sectionPattern = '(?:' + SECTION_HEADINGS.join('|') + ')'
@@ -232,6 +239,9 @@ function formatPlainTextDescription(text: string): string {
 
   // 11) Normalize multiple newlines (keep as \n for markdown rendering)
   result = result.replace(/\n{3,}/g, '\n\n')
+
+  // 12) Restore preserved bold patterns
+  result = result.replace(/__BOLD_(\d+)__/g, (_, idx) => boldPatterns[parseInt(idx, 10)])
 
   return result
 }
