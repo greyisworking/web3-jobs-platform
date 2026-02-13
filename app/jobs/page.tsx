@@ -35,6 +35,8 @@ function CareersContent() {
     tier1VCOnly: false,
     daoJobsOnly: false,
     tokenGatedOnly: false,
+    remoteOnly: false,
+    salaryRange: '',
   })
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
@@ -119,6 +121,52 @@ function CareersContent() {
     if (f.tier1VCOnly) filtered = filtered.filter((job) => job.backers && job.backers.length > 0)
     if (f.daoJobsOnly) filtered = filtered.filter((job) => job.is_dao_job === true)
     if (f.tokenGatedOnly) filtered = filtered.filter((job) => job.token_gate != null)
+
+    // Remote Only filter
+    if (f.remoteOnly) {
+      filtered = filtered.filter((job) =>
+        job.remoteType === 'Remote' ||
+        (job.location ?? '').toLowerCase().includes('remote') ||
+        job.region === 'Global'
+      )
+    }
+
+    // Salary Range filter
+    if (f.salaryRange) {
+      filtered = filtered.filter((job) => {
+        // Get salary values
+        let minSalary = job.salaryMin
+        let maxSalary = job.salaryMax
+
+        // Try to parse from salary string if min/max not available
+        if (!minSalary && !maxSalary && job.salary) {
+          const salaryMatch = job.salary.match(/[\d,]+/g)
+          if (salaryMatch) {
+            const values = salaryMatch.map(v => parseInt(v.replace(/,/g, '')))
+            minSalary = values[0]
+            maxSalary = values[1] || values[0]
+          }
+        }
+
+        if (!minSalary && !maxSalary) return false
+
+        const jobMax = maxSalary || minSalary || 0
+        const jobMin = minSalary || maxSalary || 0
+
+        switch (f.salaryRange) {
+          case '50k-100k':
+            return jobMax >= 50000 && jobMin <= 100000
+          case '100k-150k':
+            return jobMax >= 100000 && jobMin <= 150000
+          case '150k-200k':
+            return jobMax >= 150000 && jobMin <= 200000
+          case '200k+':
+            return jobMax >= 200000
+          default:
+            return true
+        }
+      })
+    }
 
     setFilteredJobs(filtered)
   }

@@ -14,6 +14,10 @@ interface MarkdownRendererProps {
 function preprocessContent(content: string): string {
   let processed = content
 
+  // 0. First, strip all style/class/id attributes from tags to simplify processing
+  processed = processed.replace(/\s+(?:style|class|id|data-[a-z-]+)="[^"]*"/gi, '')
+  processed = processed.replace(/\s+(?:style|class|id|data-[a-z-]+)='[^']*'/gi, '')
+
   // 1. Decode HTML entities first
   processed = processed
     .replace(/&nbsp;/gi, ' ')
@@ -43,46 +47,50 @@ function preprocessContent(content: string): string {
   // 2. Convert <br/> and <br> tags to newlines
   processed = processed.replace(/<br\s*\/?>/gi, '\n')
 
-  // 3. Convert </p> to double newlines, <p> to nothing
+  // 3. Convert </p> to double newlines, <p> to nothing (handle styled p tags too)
   processed = processed.replace(/<\/p>/gi, '\n\n')
   processed = processed.replace(/<p[^>]*>/gi, '')
 
-  // 4. Convert heading tags to markdown
-  processed = processed.replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n')
-  processed = processed.replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n')
-  processed = processed.replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n')
-  processed = processed.replace(/<h4[^>]*>(.*?)<\/h4>/gi, '#### $1\n')
-  processed = processed.replace(/<h5[^>]*>(.*?)<\/h5>/gi, '##### $1\n')
-  processed = processed.replace(/<h6[^>]*>(.*?)<\/h6>/gi, '###### $1\n')
+  // 4. Convert heading tags to markdown (with multiline support via [\s\S])
+  processed = processed.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, '\n# $1\n')
+  processed = processed.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, '\n## $1\n')
+  processed = processed.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, '\n### $1\n')
+  processed = processed.replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, '\n#### $1\n')
+  processed = processed.replace(/<h5[^>]*>([\s\S]*?)<\/h5>/gi, '\n##### $1\n')
+  processed = processed.replace(/<h6[^>]*>([\s\S]*?)<\/h6>/gi, '\n###### $1\n')
 
-  // 5. Convert bold/italic tags to markdown
-  processed = processed.replace(/<(?:strong|b)[^>]*>(.*?)<\/(?:strong|b)>/gi, '**$1**')
-  processed = processed.replace(/<(?:em|i)[^>]*>(.*?)<\/(?:em|i)>/gi, '*$1*')
-  processed = processed.replace(/<u[^>]*>(.*?)<\/u>/gi, '$1')
+  // 5. Convert bold/italic tags to markdown (multiline support)
+  processed = processed.replace(/<(?:strong|b)[^>]*>([\s\S]*?)<\/(?:strong|b)>/gi, '**$1**')
+  processed = processed.replace(/<(?:em|i)[^>]*>([\s\S]*?)<\/(?:em|i)>/gi, '*$1*')
+  processed = processed.replace(/<u[^>]*>([\s\S]*?)<\/u>/gi, '$1')
 
   // 6. Convert list items
-  processed = processed.replace(/<li[^>]*>/gi, '- ')
-  processed = processed.replace(/<\/li>/gi, '\n')
+  processed = processed.replace(/<li[^>]*>/gi, '\n- ')
+  processed = processed.replace(/<\/li>/gi, '')
   processed = processed.replace(/<\/?(?:ul|ol)[^>]*>/gi, '\n')
 
-  // 7. Strip remaining HTML tags but preserve their content
-  processed = processed.replace(/<\/?(?:div|span|a|table|tr|td|th|thead|tbody|article|section|header|footer)[^>]*>/gi, '')
+  // 7. Handle links - convert to markdown format
+  processed = processed.replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)')
 
-  // 8. Convert ● bullet points to markdown list items
+  // 8. Strip remaining HTML tags but preserve their content
+  processed = processed.replace(/<\/?(?:div|span|table|tr|td|th|thead|tbody|article|section|header|footer|nav|aside|main|figure|figcaption)[^>]*>/gi, '\n')
+
+  // 9. Remove any remaining HTML tags
+  processed = processed.replace(/<[^>]+>/g, '')
+
+  // 10. Convert ● bullet points to markdown list items
   processed = processed.replace(/^[●•◦‣⁃]\s*/gm, '- ')
   processed = processed.replace(/\n[●•◦‣⁃]\s*/g, '\n- ')
 
-  // 9. Convert numbered items like "1.Item" to "1. Item"
+  // 11. Convert numbered items like "1.Item" to "1. Item"
   processed = processed.replace(/^(\d+\.)(?=[A-Za-z])/gm, '$1 ')
 
-  // 10. Normalize multiple newlines
+  // 12. Normalize multiple newlines (max 2)
   processed = processed.replace(/\n{3,}/g, '\n\n')
 
-  // 11. Fix words that got broken by line breaks
-  processed = processed.replace(/([a-z])\n([a-z])/g, '$1$2')
-
-  // 12. Clean up extra whitespace
+  // 13. Clean up extra whitespace
   processed = processed.replace(/[ \t]+\n/g, '\n')
+  processed = processed.replace(/\n[ \t]+/g, '\n')
   processed = processed.replace(/[ \t]{2,}/g, ' ')
   processed = processed.trim()
 

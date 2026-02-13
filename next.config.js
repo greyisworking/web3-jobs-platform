@@ -5,15 +5,16 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 // Content Security Policy
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.walletconnect.com https://*.walletconnect.org;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.walletconnect.com https://*.walletconnect.org https://accounts.google.com https://apis.google.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com;
   img-src 'self' data: blob: https: http:;
   font-src 'self' https://fonts.gstatic.com;
-  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org https://rpc.walletconnect.com https://verify.walletconnect.com https://api.web3modal.com https://pulse.walletconnect.org https://*.infura.io https://*.alchemy.com https://cloudflare-eth.com https://mainnet.base.org https://arb1.arbitrum.io https://api.coingecko.com https://api.llama.fi https://vercel.live;
-  frame-src 'self' https://verify.walletconnect.com https://vercel.live;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org https://rpc.walletconnect.com https://verify.walletconnect.com https://api.web3modal.com https://pulse.walletconnect.org https://*.infura.io https://*.alchemy.com https://cloudflare-eth.com https://mainnet.base.org https://arb1.arbitrum.io https://api.coingecko.com https://api.llama.fi https://vercel.live https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://*.kakao.com https://kauth.kakao.com https://kapi.kakao.com;
+  frame-src 'self' https://verify.walletconnect.com https://vercel.live https://accounts.google.com;
+  worker-src 'self' blob:;
   object-src 'none';
   base-uri 'self';
-  form-action 'self';
+  form-action 'self' https://accounts.google.com https://kauth.kakao.com;
   frame-ancestors 'self';
   upgrade-insecure-requests;
 `.replace(/\n/g, ' ').trim()

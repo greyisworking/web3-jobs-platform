@@ -29,15 +29,31 @@ export default function ThumbnailUpload({ value, onChange }: ThumbnailUploadProp
 
     setUploading(true)
     try {
-      const fileExt = file.name.split('.').pop()
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
       const filePath = `thumbnails/${fileName}`
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data } = await supabase.storage
         .from('images')
-        .upload(filePath, file)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
 
-      if (uploadError) throw uploadError
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError)
+        // More specific error messages
+        if (uploadError.message.includes('Bucket not found')) {
+          toast.error('Storage bucket not configured. Please contact admin.')
+        } else if (uploadError.message.includes('not allowed') || uploadError.message.includes('policy')) {
+          toast.error('Upload permission denied. Please log in again.')
+        } else if (uploadError.message.includes('exceeded')) {
+          toast.error('File too large or quota exceeded.')
+        } else {
+          toast.error(`Upload failed: ${uploadError.message}`)
+        }
+        return
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('images')
@@ -47,7 +63,8 @@ export default function ThumbnailUpload({ value, onChange }: ThumbnailUploadProp
       toast.success('Thumbnail uploaded!')
     } catch (error) {
       console.error('Upload error:', error)
-      toast.error('Upload failed...')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      toast.error(`Upload failed: ${errorMessage}`)
     } finally {
       setUploading(false)
     }

@@ -15,7 +15,18 @@ export interface SmartFilters {
   tier1VCOnly: boolean
   daoJobsOnly: boolean
   tokenGatedOnly: boolean
+  remoteOnly: boolean
+  salaryRange: string
 }
+
+// Salary range options for filter
+const SALARY_RANGES = [
+  { value: '', label: 'Any Salary' },
+  { value: '50k-100k', label: '$50K - $100K' },
+  { value: '100k-150k', label: '$100K - $150K' },
+  { value: '150k-200k', label: '$150K - $200K' },
+  { value: '200k+', label: '$200K+' },
+] as const
 
 interface SmartFilterBarProps {
   onFilterChange: (filters: SmartFilters) => void
@@ -62,6 +73,8 @@ const emptyFilters: SmartFilters = {
   tier1VCOnly: false,
   daoJobsOnly: false,
   tokenGatedOnly: false,
+  remoteOnly: false,
+  salaryRange: '',
 }
 
 export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) {
@@ -78,6 +91,8 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
     tier1VCOnly: searchParams.get('tier1vc') === 'true',
     daoJobsOnly: searchParams.get('dao') === 'true',
     tokenGatedOnly: searchParams.get('tokengate') === 'true',
+    remoteOnly: searchParams.get('remote') === 'true',
+    salaryRange: searchParams.get('salary') ?? '',
   }))
 
   useEffect(() => {
@@ -98,6 +113,10 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
           if (value) params.set('dao', 'true')
         } else if (key === 'tokenGatedOnly') {
           if (value) params.set('tokengate', 'true')
+        } else if (key === 'remoteOnly') {
+          if (value) params.set('remote', 'true')
+        } else if (key === 'salaryRange') {
+          if (value) params.set('salary', value as string)
         } else if (value) {
           params.set(key, value as string)
         }
@@ -125,7 +144,8 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
   }
 
   const clearFilter = (key: keyof SmartFilters) => {
-    const next = { ...filters, [key]: key === 'tier1VCOnly' ? false : '' }
+    const booleanKeys = ['tier1VCOnly', 'daoJobsOnly', 'tokenGatedOnly', 'remoteOnly']
+    const next = { ...filters, [key]: booleanKeys.includes(key) ? false : '' }
     setFilters(next as SmartFilters)
     syncToURL(next as SmartFilters)
     onFilterChange(next as SmartFilters)
@@ -138,14 +158,14 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
   }
 
   const activeCount = Object.entries(filters).filter(([k, v]) => {
-    if (k === 'tier1VCOnly' || k === 'daoJobsOnly' || k === 'tokenGatedOnly') return v === true
+    if (k === 'tier1VCOnly' || k === 'daoJobsOnly' || k === 'tokenGatedOnly' || k === 'remoteOnly') return v === true
     return Boolean(v)
   }).length
 
   return (
     <div className="mb-8 pb-4 border-b border-a24-border dark:border-a24-dark-border">
       {/* Web3 Filter Toggles */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
         {/* VC Verified Toggle */}
         <div className="flex items-center justify-between py-3 px-4 border border-amber-500/30 bg-amber-500/5">
           <div className="flex items-center gap-2">
@@ -213,7 +233,7 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
             <span className="text-xs font-medium uppercase tracking-[0.2em] text-yellow-400">
               Token Gate
             </span>
-            <span className="ml-2 text-[10px] text-yellow-400/60">
+            <span className="ml-2 text-[10px] text-yellow-400/60 hidden sm:inline">
               holders only
             </span>
           </div>
@@ -235,6 +255,40 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
             <span
               className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white dark:bg-a24-dark-bg transition-transform duration-200 ${
                 filters.tokenGatedOnly ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Remote Only Toggle */}
+        <div className="flex items-center justify-between py-3 px-4 border border-cyan-500/30 bg-cyan-500/5">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px]">🌍</span>
+            <span className="text-xs font-medium uppercase tracking-[0.2em] text-cyan-400">
+              Remote
+            </span>
+            <span className="text-[10px] text-cyan-400/60 hidden sm:inline">
+              only
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              const next = { ...filters, remoteOnly: !filters.remoteOnly }
+              setFilters(next)
+              syncToURL(next)
+              onFilterChange(next)
+              trackEvent('filter_use', { filter_key: 'remoteOnly', filter_value: String(next.remoteOnly) })
+            }}
+            className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
+              filters.remoteOnly
+                ? 'bg-cyan-500'
+                : 'bg-a24-border dark:bg-a24-dark-border'
+            }`}
+            aria-label="Toggle Remote Only filter"
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white dark:bg-a24-dark-bg transition-transform duration-200 ${
+                filters.remoteOnly ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
           </button>
@@ -281,7 +335,7 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
               {FILTER_CONFIGS.map(({ key, label, options }) => (
                 <div key={key}>
                   <label className="block text-[10px] uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted mb-1">
@@ -301,6 +355,23 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
                   </select>
                 </div>
               ))}
+              {/* Salary Range Dropdown */}
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted mb-1">
+                  Salary
+                </label>
+                <select
+                  value={filters.salaryRange}
+                  onChange={(e) => handleChange('salaryRange', e.target.value)}
+                  className="w-full px-2 py-1.5 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface text-a24-text dark:text-a24-dark-text text-sm focus:ring-1 focus:ring-a24-text dark:focus:ring-a24-dark-text outline-none"
+                >
+                  {SALARY_RANGES.map(({ value, label }) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </motion.div>
         )}
@@ -361,6 +432,40 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
                 <button
                   onClick={() => clearFilter('tokenGatedOnly')}
                   className="hover:text-yellow-300 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </motion.span>
+            )}
+            {filters.remoteOnly && (
+              <motion.span
+                layout
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs text-cyan-400 border border-cyan-500/30"
+              >
+                🌍 Remote Only
+                <button
+                  onClick={() => clearFilter('remoteOnly')}
+                  className="hover:text-cyan-300 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </motion.span>
+            )}
+            {filters.salaryRange && (
+              <motion.span
+                layout
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs text-green-400 border border-green-500/30"
+              >
+                💰 {SALARY_RANGES.find(r => r.value === filters.salaryRange)?.label || filters.salaryRange}
+                <button
+                  onClick={() => clearFilter('salaryRange')}
+                  className="hover:text-green-300 transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>

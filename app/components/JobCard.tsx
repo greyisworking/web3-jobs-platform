@@ -22,6 +22,27 @@ function isNewJob(crawledAt: Date | string | null | undefined): boolean {
   return diffMs < NEW_JOB_THRESHOLD_MS
 }
 
+// Format relative time (e.g., "2일 전", "1주일 전")
+function formatRelativeTime(date: Date | string | null | undefined): string {
+  if (!date) return ''
+  const d = new Date(date)
+  const now = Date.now()
+  const diffMs = now - d.getTime()
+  const diffSec = Math.floor(diffMs / 1000)
+  const diffMin = Math.floor(diffSec / 60)
+  const diffHour = Math.floor(diffMin / 60)
+  const diffDay = Math.floor(diffHour / 24)
+  const diffWeek = Math.floor(diffDay / 7)
+  const diffMonth = Math.floor(diffDay / 30)
+
+  if (diffMonth > 0) return `${diffMonth}개월 전`
+  if (diffWeek > 0) return `${diffWeek}주일 전`
+  if (diffDay > 0) return `${diffDay}일 전`
+  if (diffHour > 0) return `${diffHour}시간 전`
+  if (diffMin > 0) return `${diffMin}분 전`
+  return '방금 전'
+}
+
 interface JobCardProps {
   job: Job
   index: number
@@ -104,6 +125,7 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
   const displayTitle = useMemo(() => cleanJobTitle(job.title, job.company), [job.title, job.company])
   const displayCompany = useMemo(() => cleanCompanyName(job.company), [job.company])
   const isNew = useMemo(() => isNewJob(job.crawledAt), [job.crawledAt])
+  const relativeTime = useMemo(() => formatRelativeTime(job.postedDate || job.crawledAt), [job.postedDate, job.crawledAt])
 
   // Memoize event handler (rerender-functional-setstate)
   const handleMouseEnter = useCallback(() => setHovered(true), [])
@@ -202,10 +224,17 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
           {displayTitle}
         </h3>
 
-        {/* Location */}
-        <p className="text-[13px] font-light text-a24-muted/70 dark:text-a24-dark-muted/70 mt-2 uppercase tracking-[0.15em] truncate">
-          {job.location}
-        </p>
+        {/* Location + Relative Time */}
+        <div className="flex items-center justify-between mt-2 gap-2">
+          <p className="text-[13px] font-light text-a24-muted/70 dark:text-a24-dark-muted/70 uppercase tracking-[0.15em] truncate">
+            {job.location}
+          </p>
+          {relativeTime && (
+            <span className="text-[11px] text-a24-muted/50 dark:text-a24-dark-muted/50 flex-shrink-0">
+              {relativeTime}
+            </span>
+          )}
+        </div>
       </Link>
     </motion.div>
   )

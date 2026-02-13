@@ -96,6 +96,8 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
   const [reportReason, setReportReason] = useState('')
   const [reportSubmitting, setReportSubmitting] = useState(false)
   const [showRawDescription, setShowRawDescription] = useState(false)
+  const [relatedJobs, setRelatedJobs] = useState<Job[]>([])
+  const [relatedLoading, setRelatedLoading] = useState(true)
   const hasValidUrl = isValidUrl(job.url)
   const { address } = useAccount()
   // Check if job is expired (isActive=false means expired)
@@ -108,6 +110,26 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
     // Set URL status based on basic validation
     setUrlStatus(hasValidUrl ? 'valid' : 'invalid')
   }, [job.id, job.title, job.company, hasValidUrl])
+
+  // Fetch related jobs from the same company
+  useEffect(() => {
+    async function fetchRelatedJobs() {
+      try {
+        const res = await fetch(`/api/jobs?company=${encodeURIComponent(job.company)}&limit=4`)
+        if (res.ok) {
+          const data = await res.json()
+          // Filter out the current job
+          const otherJobs = (data.jobs || []).filter((j: Job) => j.id !== job.id)
+          setRelatedJobs(otherJobs.slice(0, 3))
+        }
+      } catch (err) {
+        console.error('Failed to fetch related jobs:', err)
+      } finally {
+        setRelatedLoading(false)
+      }
+    }
+    fetchRelatedJobs()
+  }, [job.company, job.id])
 
   const handleReport = async () => {
     if (!reportReason.trim()) {
@@ -439,6 +461,47 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                     >
                       {tag}
                     </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Related Jobs from Same Company */}
+            {!relatedLoading && relatedJobs.length > 0 && (
+              <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted">
+                    이 회사의 다른 공고
+                  </h3>
+                  <Link
+                    href={`/jobs?company=${encodeURIComponent(job.company)}`}
+                    className="text-[10px] uppercase tracking-wider text-neun-primary hover:underline"
+                  >
+                    모두 보기
+                  </Link>
+                </div>
+                <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
+                <div className="space-y-3">
+                  {relatedJobs.map((relJob) => (
+                    <Link
+                      key={relJob.id}
+                      href={`/jobs/${relJob.id}`}
+                      className="block p-3 border border-a24-border dark:border-a24-dark-border hover:border-emerald-500/30 transition-colors group"
+                    >
+                      <p className="text-sm font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-primary transition-colors line-clamp-1">
+                        {cleanJobTitle(relJob.title, relJob.company)}
+                      </p>
+                      <div className="flex items-center gap-3 mt-1.5 text-[11px] text-a24-muted dark:text-a24-dark-muted">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          <span className="truncate max-w-[120px]">{relJob.location}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Briefcase className="w-3 h-3" />
+                          {relJob.type}
+                        </span>
+                      </div>
+                    </Link>
                   ))}
                 </div>
               </div>

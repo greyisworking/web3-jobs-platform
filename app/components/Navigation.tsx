@@ -2,13 +2,15 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X, ChevronDown, User, LogOut, Settings } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import LanguageSwitcher from './LanguageSwitcher'
 import NeunLogo from './NeunLogo'
 import { WalletConnect } from './WalletConnect'
 import { useAccount, useDisconnect } from 'wagmi'
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 interface DropdownItem {
   label: string
@@ -119,9 +121,34 @@ function MobileAccordion({ label, items, isActive, onClose }: NavDropdownProps &
 
 function ProfileDropdown() {
   const { address } = useAccount()
-  const { disconnect } = useDisconnect()
+  const { disconnect: disconnectWallet } = useDisconnect()
   const [open, setOpen] = useState(false)
+  const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null)
+  const [loading, setLoading] = useState(true)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const router = useRouter()
+  const supabase = createSupabaseBrowserClient()
+
+  // Listen for Supabase auth state changes
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setSupabaseUser(user)
+      setLoading(false)
+    }
+    getUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSupabaseUser(session?.user ?? null)
+      setLoading(false)
+      // Refresh page data when auth state changes
+      if (_event === 'SIGNED_IN' || _event === 'SIGNED_OUT') {
+        router.refresh()
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase, router])
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
@@ -132,9 +159,34 @@ function ProfileDropdown() {
     timeoutRef.current = setTimeout(() => setOpen(false), 150)
   }
 
-  if (!address) return <WalletConnect />
+  const handleLogout = async () => {
+    setOpen(false)
+    if (supabaseUser) {
+      await supabase.auth.signOut()
+    }
+    if (address) {
+      disconnectWallet()
+    }
+    router.refresh()
+  }
 
-  const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`
+  // Show loading state briefly
+  if (loading) {
+    return (
+      <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-a24-muted">
+        ...
+      </div>
+    )
+  }
+
+  // Not logged in - show wallet connect
+  if (!address && !supabaseUser) return <WalletConnect />
+
+  // Determine display info
+  const displayName = supabaseUser?.user_metadata?.name ||
+                      supabaseUser?.email?.split('@')[0] ||
+                      (address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'User')
+  const avatarUrl = supabaseUser?.user_metadata?.avatar_url
 
   return (
     <div
@@ -145,27 +197,32 @@ function ProfileDropdown() {
       <button
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-label={`Account menu for ${shortAddress}`}
+        aria-label={`Account menu for ${displayName}`}
         className="flex items-center gap-2 px-3 py-2 border border-neun-success/50 text-neun-success text-[10px] uppercase tracking-wider hover:bg-neun-success/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neun-success focus-visible:ring-offset-2"
       >
-        <div className="w-2 h-2 bg-neun-success rounded-full animate-pulse" aria-hidden="true" />
-        {shortAddress}
+        {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={avatarUrl} alt="" className="w-5 h-5 rounded-full" />
+        ) : (
+          <div className="w-2 h-2 bg-neun-success rounded-full animate-pulse" aria-hidden="true" />
+        )}
+        <span className="max-w-[100px] truncate">{displayName}</span>
         <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
 
       {open && (
         <div role="menu" className="absolute top-full right-0 mt-2 min-w-[180px] bg-a24-surface border border-a24-border shadow-lg shadow-neun-success/10 z-50">
           <Link
-            href="/profile"
+            href="/account"
             role="menuitem"
             className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-a24-text hover:text-neun-success hover:bg-neun-success/10 transition-colors focus-visible:outline-none focus-visible:bg-neun-success/10"
             onClick={() => setOpen(false)}
           >
             <User className="w-3.5 h-3.5" aria-hidden="true" />
-            Profile
+            Account
           </Link>
           <Link
-            href="/settings"
+            href="/account"
             role="menuitem"
             className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-a24-text hover:text-neun-success hover:bg-neun-success/10 transition-colors focus-visible:outline-none focus-visible:bg-neun-success/10"
             onClick={() => setOpen(false)}
@@ -176,14 +233,11 @@ function ProfileDropdown() {
           <div className="border-t border-a24-border" role="separator" />
           <button
             role="menuitem"
-            onClick={() => {
-              disconnect()
-              setOpen(false)
-            }}
+            onClick={handleLogout}
             className="w-full flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors focus-visible:outline-none focus-visible:bg-red-500/10"
           >
             <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
-            Disconnect
+            Logout
           </button>
         </div>
       )}

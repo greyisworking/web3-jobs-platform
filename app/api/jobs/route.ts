@@ -9,6 +9,8 @@ export async function GET(request: Request) {
     const badge = searchParams.get('badge')
     const backer = searchParams.get('backer')
     const sector = searchParams.get('sector')
+    const company = searchParams.get('company')
+    const limit = parseInt(searchParams.get('limit') || '300', 10)
     const supabase = await createSupabaseServerClient()
 
     // Only show active jobs (isActive=true)
@@ -31,7 +33,7 @@ export async function GET(request: Request) {
       .eq('isActive', true)
       .gte('crawledAt', threeMonthsAgo.toISOString())
       .order('crawledAt', { ascending: false })
-      .limit(300)
+      .limit(Math.min(limit, 300))
 
     if (badge) {
       query = query.contains('badges', [badge])
@@ -41,6 +43,9 @@ export async function GET(request: Request) {
     }
     if (sector) {
       query = query.eq('sector', sector)
+    }
+    if (company) {
+      query = query.ilike('company', `%${company}%`)
     }
 
     const { data: jobs, error } = await query
