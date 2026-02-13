@@ -207,7 +207,8 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
 
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <main className="max-w-6xl mx-auto px-6 py-12">
+      {/* pb-24 for mobile fixed bottom button clearance */}
+      <main className="max-w-6xl mx-auto px-6 py-12 pb-24 lg:pb-12">
         {/* Back link */}
         <Link
           href="/jobs"
@@ -237,21 +238,21 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
               </div>
 
               {/* Meta */}
-              <div className="flex flex-wrap gap-4 text-xs text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider mt-4">
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {job.location}
+              <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider mt-4">
+                <span className="flex items-center gap-1.5 max-w-[200px] sm:max-w-none">
+                  <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">{job.location}</span>
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Briefcase className="w-3.5 h-3.5" />
+                  <Briefcase className="w-3.5 h-3.5 flex-shrink-0" />
                   {job.type}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Globe className="w-3.5 h-3.5" />
+                  <Globe className="w-3.5 h-3.5 flex-shrink-0" />
                   {job.region}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5" />
+                  <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
                   {job.source}
                 </span>
               </div>
@@ -429,11 +430,12 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                   Tech Stack
                 </h3>
                 <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
-                <div className="flex flex-wrap gap-2">
+                {/* Mobile: horizontal scroll, Desktop: wrap */}
+                <div className="flex gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:overflow-x-visible sm:pb-0 -mx-6 px-6 sm:mx-0 sm:px-0">
                   {tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-3 py-1 text-xs border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text"
+                      className="flex-shrink-0 px-3 py-1 text-xs border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text whitespace-nowrap"
                     >
                       {tag}
                     </span>
