@@ -48,6 +48,72 @@ export function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+/**
+ * Retry wrapper with exponential backoff
+ */
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  options: {
+    maxRetries?: number
+    initialDelay?: number
+    maxDelay?: number
+    onRetry?: (attempt: number, error: Error) => void
+  } = {}
+): Promise<T> {
+  const { maxRetries = 3, initialDelay = 1000, maxDelay = 10000, onRetry } = options
+  let lastError: Error | null = null
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+
+      if (attempt === maxRetries) {
+        break
+      }
+
+      const backoffDelay = Math.min(initialDelay * Math.pow(2, attempt - 1), maxDelay)
+      if (onRetry) {
+        onRetry(attempt, lastError)
+      }
+      await delay(backoffDelay)
+    }
+  }
+
+  throw lastError
+}
+
+/**
+ * Fetch with retry logic
+ */
+export async function fetchWithRetry(
+  url: string,
+  options: {
+    headers?: Record<string, string>
+    timeout?: number
+    maxRetries?: number
+  } = {}
+): Promise<any> {
+  const { headers = {}, timeout = 15000, maxRetries = 3 } = options
+
+  return withRetry(
+    async () => {
+      const response = await axios.get(url, {
+        headers: { ...DEFAULT_HEADERS, ...headers },
+        timeout,
+      })
+      return response.data
+    },
+    {
+      maxRetries,
+      onRetry: (attempt, error) => {
+        console.log(`  ↻ Retry ${attempt}/${maxRetries} for ${url}: ${error.message}`)
+      },
+    }
+  )
+}
+
 export function cleanText(text: string): string {
   return text.replace(/\s+/g, ' ').trim()
 }

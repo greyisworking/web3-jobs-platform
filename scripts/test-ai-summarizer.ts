@@ -8,6 +8,7 @@
 import 'dotenv/config'
 import { createClient } from '@supabase/supabase-js'
 import { summarizeJobDescription, estimateCost, type JobContext } from '../lib/ai-summarizer'
+import { createSafeLikePattern } from '../lib/sanitize'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -18,7 +19,7 @@ async function getJob(companyName: string) {
   const { data } = await supabase
     .from('Job')
     .select('*')
-    .ilike('company', `%${companyName}%`)
+    .ilike('company', createSafeLikePattern(companyName))
     .not('raw_description', 'is', null)
     .limit(1)
     .single()

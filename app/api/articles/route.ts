@@ -6,8 +6,8 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createSupabaseServerClient()
     const { searchParams } = new URL(request.url)
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const offset = parseInt(searchParams.get('offset') || '0')
+    const limit = parseInt(searchParams.get('limit') || '20', 10)
+    const offset = parseInt(searchParams.get('offset') || '0', 10)
     const tag = searchParams.get('tag')
 
     let query = supabase

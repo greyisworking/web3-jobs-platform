@@ -3,7 +3,8 @@ import { mainnet, polygon, arbitrum, optimism, base } from 'wagmi/chains'
 import { injected, walletConnect, coinbaseWallet } from 'wagmi/connectors'
 
 // WalletConnect project ID - get from https://cloud.walletconnect.com
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '3a8170812b534d0ff9d794f19a901d64'
+// MUST be set in environment variables
+const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ''
 
 // Public RPC endpoints
 const RPC_URLS = {

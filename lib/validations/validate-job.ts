@@ -6,6 +6,7 @@ import { computeBadges } from '../badges'
 import { detectRole, normalizeEmploymentType, detectRegion } from '../../scripts/utils'
 import { containsKorean, translateJobTitle, quickTranslateTerms } from '../translation'
 import { cleanJobTitle, cleanCompanyName } from '../clean-job-title'
+import { createSafeLikePattern } from '../sanitize'
 
 // Prisma client for SQLite fallback
 const prisma = new PrismaClient()
@@ -125,7 +126,7 @@ export async function validateAndSaveJob(
       .from('Job')
       .select('id, url, source, title, company, postedDate, description')
       .eq('isActive', true)
-      .ilike('company', `%${cleanedCompany.replace(/[%_]/g, '')}%`)
+      .ilike('company', createSafeLikePattern(cleanedCompany))
       .neq('url', job.url)
       .limit(50)
 

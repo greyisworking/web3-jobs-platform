@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createSupabaseServerClient()
     const { searchParams } = new URL(request.url)
 
-    const limit = parseInt(searchParams.get('limit') || '50')
+    const limit = parseInt(searchParams.get('limit') || '50', 10)
 
     const { data: hunters, error } = await supabase
       .from('bounty_hunters')

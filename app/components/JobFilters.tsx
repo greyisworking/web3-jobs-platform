@@ -203,43 +203,43 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
         {filters.search && (
           <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             Search: {filters.search}
-            <button onClick={() => handleChange('search', '')} className="ml-1 hover:opacity-70">×</button>
+            <button onClick={() => handleChange('search', '')} className="ml-1 hover:opacity-70" aria-label="Clear search filter">×</button>
           </span>
         )}
         {filters.region && (
           <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             {filters.region}
-            <button onClick={() => handleChange('region', '')} className="ml-1 hover:opacity-70">×</button>
+            <button onClick={() => handleChange('region', '')} className="ml-1 hover:opacity-70" aria-label="Clear region filter">×</button>
           </span>
         )}
         {filters.type && (
           <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             {filters.type}
-            <button onClick={() => handleChange('type', '')} className="ml-1 hover:opacity-70">×</button>
+            <button onClick={() => handleChange('type', '')} className="ml-1 hover:opacity-70" aria-label="Clear type filter">×</button>
           </span>
         )}
         {filters.location && (
           <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             {filters.location}
-            <button onClick={() => handleChange('location', '')} className="ml-1 hover:opacity-70">×</button>
+            <button onClick={() => handleChange('location', '')} className="ml-1 hover:opacity-70" aria-label="Clear location filter">×</button>
           </span>
         )}
         {filters.source && (
           <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             {filters.source}
-            <button onClick={() => handleChange('source', '')} className="ml-1 hover:opacity-70">×</button>
+            <button onClick={() => handleChange('source', '')} className="ml-1 hover:opacity-70" aria-label="Clear source filter">×</button>
           </span>
         )}
         {filters.badge && (
           <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             Badge: {filters.badge}
-            <button onClick={() => handleChange('badge', '')} className="ml-1 hover:opacity-70">×</button>
+            <button onClick={() => handleChange('badge', '')} className="ml-1 hover:opacity-70" aria-label="Clear badge filter">×</button>
           </span>
         )}
         {filters.backer && (
           <span className="inline-flex items-center gap-1 px-3 py-1 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
             Backer: {filters.backer}
-            <button onClick={() => handleChange('backer', '')} className="ml-1 hover:opacity-70">×</button>
+            <button onClick={() => handleChange('backer', '')} className="ml-1 hover:opacity-70" aria-label="Clear backer filter">×</button>
           </span>
         )}
       </div>

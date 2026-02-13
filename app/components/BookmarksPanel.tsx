@@ -42,6 +42,7 @@ export default function BookmarksPanel({ open, onClose }: BookmarksPanelProps) {
               <button
                 onClick={onClose}
                 className="p-2 text-a24-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
+                aria-label="Close bookmarks panel"
               >
                 <X className="w-5 h-5" />
               </button>

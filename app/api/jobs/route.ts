@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSafeLikePattern } from '@/lib/sanitize'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,7 +46,7 @@ export async function GET(request: Request) {
       query = query.eq('sector', sector)
     }
     if (company) {
-      query = query.ilike('company', `%${company}%`)
+      query = query.ilike('company', createSafeLikePattern(company))
     }
 
     const { data: jobs, error } = await query
