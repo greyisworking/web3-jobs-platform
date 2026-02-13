@@ -1,10 +1,63 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchXML, delay, cleanText, detectExperienceLevel, detectRemoteType } from '../utils'
+import { fetchXML, fetchHTML, delay, cleanText, extractHTML, detectExperienceLevel, detectRemoteType } from '../utils'
 
 interface CrawlerReturn {
   total: number
   new: number
+}
+
+/**
+ * Fetch full job description from Remote3.co job page.
+ * RSS feed only contains meta info, not the actual JD.
+ */
+async function fetchJobDescription(jobUrl: string): Promise<string | null> {
+  try {
+    const $ = await fetchHTML(jobUrl)
+    if (!$) {
+      console.warn(`⚠️  fetchHTML returned null for: ${jobUrl}`)
+      return null
+    }
+
+    // Try Remote3-specific selectors first (Next.js CSS Modules with hash suffix)
+    // e.g., RemoteJobs_jobDescription__4e4Ch
+    const selectors = [
+      '[class*="jobDescription"]',      // Remote3 specific: RemoteJobs_jobDescription__xxx
+      '[class*="jobContent"]',          // Remote3 specific: RemoteJobs_jobContent__xxx
+      '.job-description',
+      '.job-content',
+      '.job-details',
+      '[class*="job-body"]',
+      'article',
+      '.prose',
+      'main section',
+    ]
+
+    for (const selector of selectors) {
+      const $el = $(selector)
+      if ($el.length > 0) {
+        const html = extractHTML($el.first(), $)
+        if (html && html.length > 100) {
+          return html
+        }
+      }
+    }
+
+    // Fallback: try to get main content area
+    const $main = $('main').first()
+    if ($main.length > 0) {
+      const mainHtml = extractHTML($main, $)
+      if (mainHtml && mainHtml.length > 100) {
+        return mainHtml
+      }
+    }
+
+    console.warn(`⚠️  No JD found with any selector for: ${jobUrl}`)
+    return null
+  } catch (error) {
+    console.error(`❌ Error fetching job description from ${jobUrl}:`, error)
+    return null
+  }
 }
 
 export async function crawlRemote3(): Promise<CrawlerReturn> {
@@ -34,8 +87,9 @@ export async function crawlRemote3(): Promise<CrawlerReturn> {
     const rawTitle = cleanText($item.find('title').text())
     const link = cleanText($item.find('link').text())
     const pubDate = $item.find('pubDate').text()
-    // RSS feeds typically have description or content:encoded
-    const description = cleanText($item.find('description').text())
+    // RSS description is just meta info (e.g., "at Company - Full-Time - Location")
+    // We'll fetch full description from the job page
+    const rssDescription = cleanText($item.find('description').text())
       || cleanText($item.find('content\\:encoded').text())
       || null
 
@@ -50,15 +104,25 @@ export async function crawlRemote3(): Promise<CrawlerReturn> {
       company = atMatch[2].trim()
     }
 
-    jobEntries.push({ title, company, link, pubDate, description })
+    // Store RSS description temporarily, will be replaced with full JD
+    jobEntries.push({ title, company, link, pubDate, description: rssDescription })
   })
 
   let savedCount = 0
   let newCount = 0
   for (const job of jobEntries) {
     try {
-      // Extract enhanced details
-      const experienceLevel = job.description ? detectExperienceLevel(job.description) : null
+      // Fetch full job description from the job page
+      // RSS only contains meta info like "at Company - Full-Time - Worldwide"
+      let description = job.description
+      const fullDescription = await fetchJobDescription(job.link)
+      if (fullDescription && fullDescription.length > (description?.length || 0)) {
+        description = fullDescription
+        console.log(`📄 Fetched full JD for: ${job.title} (${fullDescription.length} chars)`)
+      }
+
+      // Extract enhanced details from full description
+      const experienceLevel = description ? detectExperienceLevel(description) : null
       const remoteType = detectRemoteType('Remote')
 
       const result = await validateAndSaveJob(
@@ -74,7 +138,7 @@ export async function crawlRemote3(): Promise<CrawlerReturn> {
           region: 'Global',
           postedDate: job.pubDate ? new Date(job.pubDate) : new Date(),
           // Enhanced job details
-          description: job.description,
+          description,
           experienceLevel,
           remoteType: remoteType || 'Remote',
         },
@@ -82,7 +146,9 @@ export async function crawlRemote3(): Promise<CrawlerReturn> {
       )
       if (result.saved) savedCount++
       if (result.isNew) newCount++
-      await delay(100)
+
+      // Rate limiting to avoid being blocked
+      await delay(500)
     } catch (error) {
       console.error('Error saving Remote3 job:', error)
     }
