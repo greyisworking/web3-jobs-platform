@@ -44,7 +44,7 @@ function cleanHtmlToMarkdown(html: string): string {
   if (!html) return ''
 
   // Use cheerio to properly parse HTML
-  const $ = cheerio.load(html, { decodeEntities: true })
+  const $ = cheerio.load(html)
 
   // Remove script, style, nav, footer, header elements
   $('script, style, nav, footer, header, aside, iframe, form, noscript').remove()

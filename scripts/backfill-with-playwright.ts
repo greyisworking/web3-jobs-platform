@@ -389,7 +389,7 @@ async function fetchDescription(job: Job): Promise<string | null> {
 // ============ Clean HTML to markdown ============
 
 function cleanHtmlToText(html: string): string {
-  const $ = cheerio.load(html, { decodeEntities: true })
+  const $ = cheerio.load(html)
 
   // Remove unwanted elements
   $('script, style, nav, footer, header, aside, iframe, form, noscript').remove()
