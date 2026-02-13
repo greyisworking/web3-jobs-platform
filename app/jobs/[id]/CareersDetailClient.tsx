@@ -381,7 +381,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                     <div className="mb-4">
                       <ExternalLink className="w-8 h-8 mx-auto text-neun-primary mb-3" />
                       <p className="text-base font-medium text-a24-text dark:text-a24-dark-text mb-2">
-                        상세 내용은 원본 사이트에서 확인하세요
+                        View full details on the original site
                       </p>
                       <p className="text-xs text-a24-muted dark:text-a24-dark-muted">
                         Full job description available on the original posting
@@ -471,13 +471,13 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted">
-                    이 회사의 다른 공고
+                    More jobs from this company
                   </h3>
                   <Link
                     href={`/jobs?company=${encodeURIComponent(job.company)}`}
                     className="text-[10px] uppercase tracking-wider text-neun-primary hover:underline"
                   >
-                    모두 보기
+                    View all
                   </Link>
                 </div>
                 <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-4" />
@@ -515,7 +515,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
               <div className="space-y-3">
                 <div className="flex items-center justify-center gap-2 w-full py-3 bg-gray-500/20 text-gray-400 text-[11px] font-light uppercase tracking-[0.35em] border border-gray-500/30">
                   <AlertTriangle className="w-4 h-4" />
-                  이 공고는 마감되었습니다
+                  This position has been closed
                 </div>
                 <a
                   href={`https://www.google.com/search?q=${encodeURIComponent(`${job.company} careers ${job.title}`)}`}
@@ -773,7 +773,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
           <div className="flex gap-2">
             <div className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-500/20 text-gray-400 text-[10px] uppercase tracking-wider">
               <AlertTriangle className="w-3.5 h-3.5" />
-              마감됨
+              Closed
             </div>
             <a
               href={`https://www.google.com/search?q=${encodeURIComponent(`${job.company} careers ${job.title}`)}`}

@@ -60,22 +60,22 @@ export function Onboarding({ forceShow = false, onClose }: OnboardingProps) {
   const steps = [
     {
       title: 'gm ser',
-      description: 'Web3 커리어를 위한 잡 보드에 오신 것을 환영합니다',
+      description: 'Welcome to the job board for Web3 careers',
       icon: <Pixelbara pose="gm" size={100} />,
     },
     {
       title: 'Browse Jobs',
-      description: 'Tier-1 VC가 투자한 회사들의 채용 공고를 확인하세요',
+      description: 'Explore job openings from Tier-1 VC-backed companies',
       icon: <Briefcase className="w-12 h-12 text-neun-primary" />,
     },
     {
       title: 'Save & Apply',
-      description: '마음에 드는 공고를 북마크하고 바로 지원하세요',
+      description: 'Bookmark jobs you like and apply directly',
       icon: <BookmarkCheck className="w-12 h-12 text-neun-primary" />,
     },
     {
       title: 'Connect',
-      description: '지갑 연결로 온체인 배지를 받거나, 소셜 로그인으로 간편하게 시작하세요',
+      description: 'Connect wallet for on-chain badges, or use social login to get started',
       icon: <Wallet className="w-12 h-12 text-neun-primary" />,
     },
   ]
@@ -214,7 +214,7 @@ export function LoginMethodExplainer() {
   return (
     <div className="space-y-4 p-4 bg-a24-bg dark:bg-a24-dark-bg border border-a24-border dark:border-a24-dark-border">
       <h3 className="text-sm font-bold text-a24-text dark:text-a24-dark-text">
-        로그인 방법 비교
+        Compare Login Methods
       </h3>
 
       <div className="space-y-3">
@@ -225,10 +225,10 @@ export function LoginMethodExplainer() {
           </div>
           <div>
             <p className="text-sm font-medium text-a24-text dark:text-a24-dark-text">
-              Web3 지갑 연결
+              Web3 Wallet
             </p>
             <p className="text-xs text-a24-muted dark:text-a24-dark-muted">
-              온체인 배지 • POAP • 채용 공고 등록 • 토큰 게이팅
+              On-chain badges • POAP • Post jobs • Token gating
             </p>
           </div>
         </div>
@@ -240,17 +240,17 @@ export function LoginMethodExplainer() {
           </div>
           <div>
             <p className="text-sm font-medium text-a24-text dark:text-a24-dark-text">
-              소셜 로그인 (Google/Kakao)
+              Social Login (Google/Kakao)
             </p>
             <p className="text-xs text-a24-muted dark:text-a24-dark-muted">
-              간편 로그인 • 북마크 저장 • 지원하기
+              Easy login • Save bookmarks • Apply to jobs
             </p>
           </div>
         </div>
       </div>
 
       <p className="text-[10px] text-a24-muted dark:text-a24-dark-muted border-t border-a24-border dark:border-a24-dark-border pt-3">
-        💡 소셜 로그인 후에도 언제든 지갑을 연결할 수 있어요
+        You can connect your wallet anytime after social login
       </p>
     </div>
   )

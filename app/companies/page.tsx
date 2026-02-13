@@ -94,7 +94,7 @@ function CompanyCard({ company, index, jobCount }: CompanyCardProps) {
           target="_blank"
           rel="noopener noreferrer"
           className="absolute bottom-4 right-4 p-2 text-a24-muted dark:text-a24-dark-muted hover:text-neun-primary transition-colors"
-          title="채용 페이지로 이동"
+          title="View careers page"
         >
           <ExternalLink className="w-4 h-4" />
         </Link>
@@ -225,7 +225,7 @@ export default function CompaniesPage() {
           <div className="flex flex-col items-center justify-center py-20">
             <Pixelbara pose="success" size={120} className="mb-4" />
             <p className="text-sm text-a24-muted dark:text-a24-dark-muted">
-              해당하는 회사가 없어요
+              No matching companies found
             </p>
           </div>
         )}

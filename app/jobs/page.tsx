@@ -231,7 +231,7 @@ function CareersContent() {
               <Link
                 href="/jobs"
                 className="p-0.5 hover:bg-neun-primary/20 rounded-full transition-colors"
-                title="필터 해제"
+                title="Clear filter"
               >
                 <X className="w-4 h-4" />
               </Link>
@@ -279,12 +279,12 @@ function CareersContent() {
               <Pixelbara pose="question" size={140} className="mx-auto mb-4" clickable />
               <p className="text-a24-muted dark:text-a24-dark-muted text-sm mb-2">
                 {jobs.length === 0
-                  ? '공고를 불러오는 중이에요...'
-                  : '해당하는 공고가 없어요'}
+                  ? 'Loading jobs...'
+                  : 'No matching jobs found'}
               </p>
               {jobs.length > 0 && (
                 <p className="text-a24-muted/60 dark:text-a24-dark-muted/60 text-xs">
-                  다른 필터를 선택하거나 검색어를 바꿔보세요
+                  Try different filters or search terms
                 </p>
               )}
             </div>

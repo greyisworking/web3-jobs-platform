@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/articles - Create article (wallet-connected users or admin)
+// POST /api/articles - Create article (authenticated users)
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createSupabaseServerClient()
@@ -53,6 +53,8 @@ export async function POST(request: NextRequest) {
       author_address,
       author_ens,
       author_name,
+      author_email,
+      author_avatar,
       reading_time,
     } = body
 
@@ -60,33 +62,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title, slug, and content are required' }, { status: 400 })
     }
 
-    // Wallet-based auth - if author_address is provided, use that
-    // Otherwise fall back to admin auth
-    let authorId = null
-    let finalAuthorName = author_name || 'Anonymous'
-    let finalAuthorAddress = author_address || null
-    let finalAuthorEns = author_ens || null
-
-    if (!author_address) {
-      // Check admin auth for non-wallet submissions
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        return NextResponse.json({ error: 'Wallet connection or admin auth required' }, { status: 401 })
-      }
-
-      const { data: admin } = await supabase
-        .from('admins')
-        .select('id')
-        .eq('id', user.id)
-        .single()
-
-      if (!admin) {
-        return NextResponse.json({ error: 'Admin access required for non-wallet submissions' }, { status: 403 })
-      }
-
-      authorId = user.id
-      finalAuthorName = user.email?.split('@')[0] || 'NEUN'
+    // Get authenticated user
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
+
+    // Use provided author info or fall back to user data
+    const authorId = user.id
+    const finalAuthorName = author_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous'
+    const finalAuthorAddress = author_address || null
+    const finalAuthorEns = author_ens || null
+    const finalAuthorEmail = author_email || user.email || null
+    const finalAuthorAvatar = author_avatar || user.user_metadata?.avatar_url || null
 
     const { data: article, error } = await supabase
       .from('articles')
@@ -101,6 +89,8 @@ export async function POST(request: NextRequest) {
         author_name: finalAuthorName,
         author_address: finalAuthorAddress,
         author_ens: finalAuthorEns,
+        author_email: finalAuthorEmail,
+        author_avatar: finalAuthorAvatar,
         reading_time: reading_time || 1,
         published,
         published_at: published ? new Date().toISOString() : null,

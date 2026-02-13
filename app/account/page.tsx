@@ -151,7 +151,7 @@ export default function AccountPage() {
             </div>
           ) : savedJobs.length === 0 ? (
             <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted">
-              저장된 공고가 없습니다. Careers 페이지에서 북마크해 보세요.
+              No saved jobs yet. Bookmark jobs from the Careers page.
             </p>
           ) : (
             <div className="space-y-3">

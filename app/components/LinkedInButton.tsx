@@ -37,7 +37,7 @@ export default function LinkedInButton({
       className={cn(baseStyles, variantStyles[variant], className)}
     >
       <PixelLinkedIn size={14} />
-      <span>LinkedIn에서도 확인</span>
+      <span>View on LinkedIn</span>
     </a>
   )
 }
@@ -84,7 +84,7 @@ export function LinkedInSearchButton({ keywords, location, className }: LinkedIn
       )}
     >
       <PixelLinkedIn size={12} />
-      <span>LinkedIn 검색 열기</span>
+      <span>Search on LinkedIn</span>
     </a>
   )
 }

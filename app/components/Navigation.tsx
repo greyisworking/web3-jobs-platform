@@ -200,12 +200,6 @@ function ProfileDropdown() {
         aria-label={`Account menu for ${displayName}`}
         className="flex items-center gap-2 px-3 py-2 border border-neun-success/50 text-neun-success text-[10px] uppercase tracking-wider hover:bg-neun-success/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neun-success focus-visible:ring-offset-2"
       >
-        {avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatarUrl} alt="User avatar" className="w-5 h-5 rounded-full" />
-        ) : (
-          <div className="w-2 h-2 bg-neun-success rounded-full animate-pulse" aria-hidden="true" />
-        )}
         <span className="max-w-[100px] truncate">{displayName}</span>
         <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>

@@ -3,6 +3,7 @@
 import { useEffect, useCallback, useSyncExternalStore } from 'react'
 import { toast } from 'sonner'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import { ensureCSRFToken } from '@/lib/csrf-client'
 
 export interface BookmarkItem {
   jobId: string
@@ -108,13 +109,16 @@ export function useBookmarks(): UseBookmarksReturn {
 
         const res = await fetch('/api/bookmarks', {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-csrf-token': ensureCSRFToken(),
+          },
           body: JSON.stringify({ jobId: job.id }),
         })
 
         if (!res.ok) {
           setBookmarks(prev) // rollback
-          toast.error('북마크 제거 실패')
+          toast.error('Failed to remove bookmark')
           return
         }
 
@@ -134,13 +138,16 @@ export function useBookmarks(): UseBookmarksReturn {
 
         const res = await fetch('/api/bookmarks', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-csrf-token': ensureCSRFToken(),
+          },
           body: JSON.stringify({ jobId: job.id }),
         })
 
         if (!res.ok) {
           setBookmarks(prev) // rollback
-          toast.error('북마크 추가 실패')
+          toast.error('Failed to add bookmark')
           return
         }
 

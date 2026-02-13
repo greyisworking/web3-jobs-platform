@@ -22,7 +22,7 @@ function isNewJob(crawledAt: Date | string | null | undefined): boolean {
   return diffMs < NEW_JOB_THRESHOLD_MS
 }
 
-// Format relative time (e.g., "2일 전", "1주일 전")
+// Format relative time (e.g., "2d ago", "1w ago")
 function formatRelativeTime(date: Date | string | null | undefined): string {
   if (!date) return ''
   const d = new Date(date)
@@ -35,12 +35,12 @@ function formatRelativeTime(date: Date | string | null | undefined): string {
   const diffWeek = Math.floor(diffDay / 7)
   const diffMonth = Math.floor(diffDay / 30)
 
-  if (diffMonth > 0) return `${diffMonth}개월 전`
-  if (diffWeek > 0) return `${diffWeek}주일 전`
-  if (diffDay > 0) return `${diffDay}일 전`
-  if (diffHour > 0) return `${diffHour}시간 전`
-  if (diffMin > 0) return `${diffMin}분 전`
-  return '방금 전'
+  if (diffMonth > 0) return `${diffMonth}mo ago`
+  if (diffWeek > 0) return `${diffWeek}w ago`
+  if (diffDay > 0) return `${diffDay}d ago`
+  if (diffHour > 0) return `${diffHour}h ago`
+  if (diffMin > 0) return `${diffMin}m ago`
+  return 'just now'
 }
 
 interface JobCardProps {

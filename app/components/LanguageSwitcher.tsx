@@ -42,7 +42,7 @@ export default function LanguageSwitcher() {
       className="px-2 py-1 text-sm font-medium text-a24-text-muted dark:text-a24-dark-text-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
       aria-label={locale === 'en' ? 'Switch to Korean' : 'Switch to English'}
     >
-      {locale === 'en' ? '한국어' : 'EN'}
+      {locale === 'en' ? 'KO' : 'EN'}
     </button>
   )
 }
