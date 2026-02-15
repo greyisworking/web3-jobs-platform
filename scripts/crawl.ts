@@ -11,6 +11,11 @@ import { crawlSolanaJobs } from './crawlers/solanajobs'
 import { crawlEthereumJobs } from './crawlers/ethereum'
 import { crawlAvalancheJobs } from './crawlers/avalanchejobs'
 import { crawlArbitrumJobs } from './crawlers/arbitrumjobs'
+import { crawlCryptocurrencyJobs } from './crawlers/cryptocurrencyjobs'
+import { crawlCryptoJobs } from './crawlers/cryptojobs'
+import { crawlWellfound } from './crawlers/wellfound'
+import { crawlSuperteamEarn } from './crawlers/superteam'
+import { crawlBaseHirechain } from './crawlers/basehirechain'
 import axios from 'axios'
 
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || ''
@@ -63,7 +68,7 @@ async function main() {
   // 시작 알림
   await sendDiscordNotification(
     '🚀 크롤링 시작!',
-    '12개 채용 사이트에서 공고를 수집하고 있어요.\n완료되면 다시 알려드릴게요!',
+    '17개 채용 사이트에서 공고를 수집하고 있어요.\n완료되면 다시 알려드릴게요!',
     0x3498db
   )
 
@@ -83,6 +88,11 @@ async function main() {
     { name: 'ethereum.foundation', fn: crawlEthereumJobs },
     { name: 'jobs.avax.network', fn: crawlAvalancheJobs },
     { name: 'jobs.arbitrum.io', fn: crawlArbitrumJobs },
+    { name: 'cryptocurrencyjobs.co', fn: crawlCryptocurrencyJobs },
+    { name: 'crypto.jobs', fn: crawlCryptoJobs },
+    { name: 'wellfound.com', fn: crawlWellfound },
+    { name: 'talent.superteam.fun', fn: crawlSuperteamEarn },
+    { name: 'base.hirechain.io', fn: crawlBaseHirechain },
   ]
 
   for (const crawler of crawlers) {

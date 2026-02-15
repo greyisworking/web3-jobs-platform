@@ -31,12 +31,17 @@ const SOURCE_PRIORITY: Record<string, number> = {
   'web3kr.jobs': 80,
   'web3.career': 70,
   'cryptojobslist.com': 60,
+  'cryptocurrencyjobs.co': 60,
   'jobs.sui.io': 50,
   'jobs.solana.com': 50,
   'jobs.arbitrum.io': 50,
   'jobs.avax.network': 50,
+  'crypto.jobs': 45,
+  'talent.superteam.fun': 45,
+  'wellfound.com': 40,
   'remoteok.com': 40,
   'remote3.co': 40,
+  'base.hirechain.io': 35,
   'rocketpunch.com': 30,
 }
 

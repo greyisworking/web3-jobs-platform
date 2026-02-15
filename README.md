@@ -1,202 +1,251 @@
-# 🌐 Web3 Jobs Platform
+# NEUN - Web3 Jobs Platform
 
-글로벌 & 국내 Web3 채용 공고를 40개 이상의 사이트에서 자동으로 수집하는 플랫폼
+> Web3/블록체인 채용 공고를 글로벌 40+ 사이트에서 자동으로 수집하는 플랫폼
 
-## ✨ 주요 기능
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green?logo=supabase)](https://supabase.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 
-- 📡 **자동 크롤링**: 40+ 사이트에서 실시간 채용 공고 수집
-- 🌍 **글로벌 & 국내**: 해외 및 한국 Web3 채용 정보 통합
-- 🔍 **스마트 검색**: 직무, 지역, 회사별 필터링
-- 📊 **통계 대시보드**: 실시간 채용 시장 인사이트
-- 🚀 **빠른 업데이트**: 매일 자동 갱신
+## Features
 
-## 🎯 크롤링 대상 사이트 (40+)
+- **Auto Crawling**: 12+ 사이트에서 실시간 채용 공고 수집
+- **Global & Korea**: 해외 및 한국 Web3 채용 정보 통합
+- **Smart Search**: 직무, 지역, 회사, VC 백커별 필터링
+- **Trust Score**: VC 포트폴리오 기반 신뢰도 검증
+- **Web3 Native**: 지갑 연결, 북마크, Job 제출 기능
+- **AI Powered**: Claude API 활용 콘텐츠 요약 및 번역
 
-### Tier 1 (높은 우선순위)
-- web3.career
-- Web3Jobs
-- Wellfound
-- Web3 KR Jobs
+## Tech Stack
 
-### Tier 2 (중간 우선순위)
-- CryptocurrencyJobs.co
-- CryptoJobsList
-- Remote3.co
-- 원티드 (Web3 필터)
-- 로켓펀치 (블록체인)
-- 잡코리아 (Web3.0)
+### Frontend
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Next.js | 15 | App Router, SSR/SSG |
+| React | 19 | UI Components |
+| TypeScript | 5 | Type Safety |
+| Tailwind CSS | 3.4 | Styling |
+| Radix UI | - | Headless Components |
+| Framer Motion | 12 | Animations |
+| Recharts | 3 | Data Visualization |
 
-### Tier 3 (생태계별)
-- Sui Jobs
-- Ethereum Foundation
-- Solana Jobs
-- Avalanche Jobs
-- 그 외 27개 사이트...
+### Backend
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Supabase | - | PostgreSQL Database, Auth |
+| Prisma | 6 | ORM (로컬 개발용) |
+| Zod | 4 | Schema Validation |
 
-## ⚙️ 환경변수 설정
+### Web3
+| Technology | Purpose |
+|------------|---------|
+| wagmi | React Hooks for Ethereum |
+| viem | Low-level Ethereum Interface |
+| WalletConnect | Multi-wallet Support |
+| MetaMask SDK | MetaMask Integration |
+| Coinbase Wallet | Coinbase Integration |
 
-`.env.example`을 복사해서 `.env` 파일을 만드세요:
+### Crawler
+| Technology | Purpose |
+|------------|---------|
+| Axios | HTTP Client |
+| Cheerio | HTML Parsing |
+| Puppeteer | Dynamic Site Crawling |
+| Playwright | E2E Testing |
+
+### AI & Analytics
+| Technology | Purpose |
+|------------|---------|
+| Anthropic Claude | AI Summarization |
+| Discord Webhooks | Notifications |
+
+## Quick Start
+
+### 1. Clone & Install
 
 ```bash
-cp .env.example .env
-```
-
-**필수 환경변수:**
-- `NEXT_PUBLIC_SUPABASE_URL` - Supabase 프로젝트 URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase 익명 키
-
-**선택 환경변수:**
-- `ANTHROPIC_API_KEY` - AI 콘텐츠 생성용
-- `DISCORD_WEBHOOK_URL` - 알림용
-- `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` - 지갑 연결용
-
-자세한 내용은 `.env.example` 파일을 참고하세요.
-
-## 🚀 빠른 시작
-
-### 1. 의존성 설치
-
-```bash
+git clone https://github.com/your-repo/web3-jobs-platform.git
+cd web3-jobs-platform
 npm install
 ```
 
-### 2. 데이터베이스 설정
+### 2. Environment Setup
 
 ```bash
+cp .env.example .env.local
+# .env.local 파일을 열어 필수 환경변수 입력
+```
+
+### 3. Database Setup
+
+```bash
+# Prisma 로컬 개발용 (SQLite)
 npx prisma db push
+
+# 또는 Supabase 연결 확인
+npm run check:db
 ```
 
-### 3. 크롤링 실행
-
-```bash
-npm run crawl
-```
-
-### 4. 개발 서버 시작
+### 4. Run Development Server
 
 ```bash
 npm run dev
 ```
 
-브라우저에서 `http://localhost:3000` 열기
+브라우저에서 http://localhost:3000 열기
 
-## 📋 주요 명령어
+### 5. Run Crawler (Optional)
 
 ```bash
-# 개발 서버 시작
-npm run dev
-
-# 크롤링 실행
 npm run crawl
-
-# 데이터베이스 마이그레이션
-npm run db:push
-
-# Prisma Studio (DB GUI)
-npm run db:studio
-
-# 프로덕션 빌드
-npm run build
-
-# 프로덕션 실행
-npm start
 ```
 
-## 🗂️ 프로젝트 구조
+## Project Structure
 
 ```
 web3-jobs-platform/
-├── app/                    # Next.js App Router
-│   ├── page.tsx           # 메인 페이지
-│   ├── layout.tsx         # 루트 레이아웃
-│   └── globals.css        # 글로벌 스타일
-├── scripts/               # 크롤링 스크립트
-│   ├── crawl.ts          # 메인 크롤러
-│   ├── utils.ts          # 유틸리티 함수
-│   └── crawlers/         # 개별 사이트 크롤러
-│       ├── web3career.ts
-│       ├── web3jobs.ts
-│       └── web3krjobs.ts
-├── lib/                   # 라이브러리
-│   └── prisma.ts         # Prisma 클라이언트
-├── prisma/               # 데이터베이스
-│   └── schema.prisma     # DB 스키마
-└── package.json          # 프로젝트 설정
+├── app/                          # Next.js App Router
+│   ├── (routes)/                 # 페이지 라우트
+│   │   ├── jobs/                 # 채용 공고 목록/상세
+│   │   ├── companies/            # 회사 목록
+│   │   ├── investors/            # VC 투자사 목록
+│   │   ├── ecosystems/           # 생태계별 분류
+│   │   ├── bounties/             # 바운티 프로그램
+│   │   └── articles/             # 아티클/뉴스
+│   ├── admin/                    # 관리자 대시보드
+│   ├── api/                      # API Routes
+│   │   ├── jobs/                 # 채용 API
+│   │   ├── auth/                 # 인증 API
+│   │   ├── admin/                # 관리자 API
+│   │   ├── cron/                 # 스케줄 작업
+│   │   └── trust/                # 신뢰도 API
+│   ├── components/               # 공통 컴포넌트
+│   │   ├── badges/               # 뱃지 컴포넌트
+│   │   └── ui/                   # UI 기본 컴포넌트
+│   └── auth/                     # 인증 콜백
+├── scripts/                      # 크롤러 & 유틸리티
+│   ├── crawl.ts                  # 메인 크롤러 진입점
+│   ├── crawlers/                 # 개별 사이트 크롤러
+│   │   ├── platforms/            # ATS 플랫폼 크롤러
+│   │   └── utils/                # 크롤러 유틸리티
+│   └── utils/                    # 공통 유틸리티
+├── lib/                          # 라이브러리 & 헬퍼
+│   ├── api/                      # API 클라이언트
+│   ├── i18n/                     # 다국어 지원
+│   ├── security/                 # 보안 유틸리티
+│   └── validations/              # 유효성 검사
+├── components/                   # 전역 컴포넌트
+│   ├── admin/                    # 관리자 컴포넌트
+│   └── ui/                       # shadcn/ui 컴포넌트
+├── hooks/                        # Custom React Hooks
+├── types/                        # TypeScript 타입 정의
+├── prisma/                       # Prisma 스키마 & 마이그레이션
+├── supabase/                     # Supabase 설정
+├── tests/                        # 테스트 파일
+│   └── load/                     # k6 부하 테스트
+├── docs/                         # 프로젝트 문서
+└── public/                       # 정적 파일
 ```
 
-## 🛠️ 기술 스택
+## Scripts
 
-- **Frontend**: Next.js 15, React 19, Tailwind CSS
-- **Backend**: Node.js, TypeScript
-- **Database**: SQLite (개발), PostgreSQL (프로덕션)
-- **ORM**: Prisma
-- **Crawler**: Axios, Cheerio, Puppeteer
+### Development
+```bash
+npm run dev              # 개발 서버 시작
+npm run build            # 프로덕션 빌드
+npm run start            # 프로덕션 서버 시작
+npm run lint             # ESLint 검사
+```
 
-## 📊 데이터베이스 스키마
+### Database
+```bash
+npm run db:push          # Prisma 스키마 푸시
+npm run db:studio        # Prisma Studio GUI
+```
 
-### Job (채용 공고)
-- 제목, 회사, 위치, 타입
-- 카테고리, 설명, URL
-- 급여, 태그, 출처
-- 지역 (Global/Korea)
-- 게시일, 크롤링일
+### Crawling
+```bash
+npm run crawl            # 전체 크롤링 실행
+npm run schedule         # 스케줄러 실행
+npm run dev:all          # 개발 서버 + 스케줄러 동시 실행
+```
 
-### CrawlLog (크롤링 로그)
-- 출처, 상태, 공고 수
-- 에러 메시지, 생성일
+### Data Management
+```bash
+npm run check:expired    # 만료된 공고 확인
+npm run validate         # 공고 데이터 유효성 검사
+npm run refresh:featured # Featured 점수 갱신
+npm run fix:descriptions # 설명 데이터 정리
+```
 
-## 🔄 크롤링 로드맵
+### Testing
+```bash
+npm run test:all         # 전체 테스트
+npm run test:unit        # 단위 테스트
+npm run test:api         # API 테스트
+npm run test:e2e         # E2E 테스트
+npm run test:load        # 부하 테스트 (k6)
+```
 
-### Week 1-2: 프로젝트 세팅 ✅
-- Next.js + TypeScript 설정
-- Prisma + SQLite 설정
-- 기본 UI 구축
+### Translation & AI
+```bash
+npm run translate:korean      # 한국어 번역 (드라이런)
+npm run translate:korean:apply # 한국어 번역 적용
+npm run translate:ai          # AI 번역 (Claude)
+```
 
-### Week 3-4: Tier 1 크롤러 (진행 중)
-- ✅ web3.career
-- ✅ Web3Jobs
-- ✅ Web3 KR Jobs
-- ⏳ Wellfound
+### Newsletter
+```bash
+npm run newsletter       # 주간 뉴스레터 생성
+npm run newsletter:output # 뉴스레터 파일 출력
+```
 
-### Week 5-8: Tier 2 크롤러
-- 13개 Web3 전문 플랫폼
-- 원티드, 로켓펀치, 잡코리아
+## Documentation
 
-### Week 9-12: Tier 3 크롤러
-- 11개 생태계별 채용 페이지
-- Sui, Ethereum, Solana 등
+- [Database Schema](docs/DATABASE.md) - 데이터베이스 스키마 문서
+- [Crawlers Guide](docs/CRAWLERS.md) - 크롤러 목록 및 가이드
+- [Design Principles](docs/DESIGN_PRINCIPLES.md) - UI/UX 디자인 원칙
+- [Performance Guide](docs/optimization-guide.md) - 성능 최적화 가이드
 
-### Week 13-15: 고급 기능
-- 필터링 & 검색
-- 알림 시스템
-- API 개발
+## Environment Variables
 
-### Week 16-18: 최적화 & 배포
-- 성능 최적화
-- 자동화 스케줄링
-- 프로덕션 배포
+자세한 환경변수 설명은 [.env.example](.env.example) 참고
 
-## 🌟 향후 계획
+### Required
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase 프로젝트 URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase Anonymous Key
 
-- [ ] Puppeteer를 활용한 동적 사이트 크롤링
-- [ ] 이메일 알림 기능
-- [ ] 북마크 & 지원 추적
-- [ ] 급여 데이터 분석
-- [ ] REST API 제공
-- [ ] 모바일 앱
+### Optional
+- `SUPABASE_SERVICE_ROLE_KEY` - Supabase Service Role Key (서버 전용)
+- `ANTHROPIC_API_KEY` - Claude API Key
+- `DISCORD_WEBHOOK_URL` - Discord 알림 웹훅
+- `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` - WalletConnect 프로젝트 ID
 
-## 📝 라이선스
+## Deployment
 
-MIT License
+### Vercel (Recommended)
+```bash
+vercel deploy
+```
 
-## 👥 기여하기
+### Docker
+```bash
+docker build -t neun-web3-jobs .
+docker run -p 3000:3000 neun-web3-jobs
+```
 
-이슈와 PR은 언제나 환영입니다!
+## Contributing
 
-## 📧 문의
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
-문제가 있으면 GitHub Issues에 등록해주세요.
+## License
+
+MIT License - see [LICENSE](LICENSE) for details
 
 ---
 
-Made with ❤️ for the Web3 Community
+Built with love for the Web3 Community

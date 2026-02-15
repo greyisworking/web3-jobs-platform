@@ -86,6 +86,19 @@ function parseTags(tags: string | null | undefined): string[] {
   }
 }
 
+function parseBackers(backers: string | string[] | null | undefined): string[] {
+  if (!backers) return []
+  if (Array.isArray(backers)) return backers.filter(Boolean)
+  // Handle JSON string from Supabase
+  try {
+    const parsed = JSON.parse(backers)
+    return Array.isArray(parsed) ? parsed.filter(Boolean) : []
+  } catch {
+    // Fallback: comma-separated string
+    return backers.split(',').map((b) => b.trim()).filter(Boolean)
+  }
+}
+
 interface CareersDetailClientProps {
   job: Job
 }
@@ -168,13 +181,16 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
   // Truncate address helper
   const truncateAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
 
+  // Parse backers from JSON string if needed
+  const backers = parseBackers(job.backers)
+
   // Get priority company data for trust check
   const priorityCompany = findPriorityCompany(job.company)
 
   // Calculate trust score
   const trustScore = calculateTrustScore({
     name: job.company,
-    backers: job.backers,
+    backers: backers,
     hasToken: priorityCompany?.hasToken,
     isDoxxed: true, // Assume doxxed if in priority list
     isAudited: undefined, // Unknown
@@ -602,7 +618,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
             </div>
 
             {/* Trust Status - Different display based on verification level */}
-            {hasVCBacking(job.backers) ? (
+            {hasVCBacking(backers) ? (
               // VC Portfolio Company - No warnings needed
               <div className="p-4 border border-amber-500/30 bg-amber-500/5">
                 <div className="flex items-center gap-2 mb-2">
@@ -660,19 +676,19 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
             )}
 
             {/* VC Backers in sidebar */}
-            {job.backers && job.backers.length > 0 && (
+            {backers.length > 0 && (
               <div className="p-4 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface space-y-3">
                 <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted">
                   VC Backers
                 </h3>
                 <div className="flex flex-wrap gap-1.5">
-                  {job.backers.map((backer) => (
+                  {backers.map((backer) => (
                     <GlowBadge key={backer} name={backer} />
                   ))}
                 </div>
 
                 {(() => {
-                  const priorityBacker = findPriorityBacker(job.backers!)
+                  const priorityBacker = findPriorityBacker(backers)
                   const reason = priorityBacker ? VC_REASONS[priorityBacker] : null
                   if (!reason) return null
                   return (
