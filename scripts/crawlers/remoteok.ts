@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchJSON, delay, detectExperienceLevel, detectRemoteType } from '../utils'
+import { fetchJSON, delay, detectExperienceLevel, detectRemoteType, getRandomUserAgent } from '../utils'
 import { cleanDescriptionHtml } from '../../lib/clean-description'
 
 interface RemoteOKJob {
@@ -31,7 +31,8 @@ export async function crawlRemoteOK(): Promise<CrawlerReturn> {
 
   const data = await fetchJSON<RemoteOKJob[]>(
     'https://remoteok.com/remote-web3-jobs.json',
-    { 'User-Agent': 'Mozilla/5.0 (compatible; Web3JobsBot/1.0)' }
+    { 'User-Agent': getRandomUserAgent() },
+    { useBrowserHeaders: true }
   )
 
   if (!data || !Array.isArray(data)) {

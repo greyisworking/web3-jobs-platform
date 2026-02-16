@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchXML, fetchHTML, delay, cleanText, extractHTML, detectExperienceLevel, detectRemoteType } from '../utils'
+import { fetchXML, fetchHTML, delay, cleanText, extractHTML, detectExperienceLevel, detectRemoteType, delayWithJitter } from '../utils'
 
 interface CrawlerReturn {
   total: number
@@ -13,7 +13,7 @@ interface CrawlerReturn {
  */
 async function fetchJobDescription(jobUrl: string): Promise<string | null> {
   try {
-    const $ = await fetchHTML(jobUrl)
+    const $ = await fetchHTML(jobUrl, { useBrowserHeaders: true })
     if (!$) {
       console.warn(`⚠️  fetchHTML returned null for: ${jobUrl}`)
       return null
@@ -147,8 +147,8 @@ export async function crawlRemote3(): Promise<CrawlerReturn> {
       if (result.saved) savedCount++
       if (result.isNew) newCount++
 
-      // Rate limiting to avoid being blocked
-      await delay(500)
+      // Rate limiting with jitter to avoid being blocked
+      await delayWithJitter(800, 500)
     } catch (error) {
       console.error('Error saving Remote3 job:', error)
     }

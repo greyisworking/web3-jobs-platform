@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchHTML, delay, cleanText, parseSalary, detectExperienceLevel, detectRemoteType } from '../utils'
+import { fetchHTML, delay, cleanText, parseSalary, detectExperienceLevel, detectRemoteType, delayWithJitter } from '../utils'
 
 interface CrawlerReturn {
   total: number
@@ -38,7 +38,7 @@ export async function crawlCryptoJobs(): Promise<CrawlerReturn> {
 
   for (const pageUrl of pages) {
     console.log(`  📄 Fetching ${pageUrl}`)
-    const $ = await fetchHTML(pageUrl)
+    const $ = await fetchHTML(pageUrl, { useBrowserHeaders: true })
 
     if (!$) {
       console.error(`  ❌ Failed to fetch ${pageUrl}`)
@@ -159,7 +159,8 @@ export async function crawlCryptoJobs(): Promise<CrawlerReturn> {
       }
     })
 
-    await delay(500)
+    // Rate limit with jitter between pages
+    await delayWithJitter(1500, 1000)
   }
 
   // Remove duplicates

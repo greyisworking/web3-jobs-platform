@@ -1,7 +1,9 @@
 import type { CheerioAPI } from 'cheerio'
+import * as cheerio from 'cheerio'
+import { chromium, Browser, Page } from 'playwright'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchHTML, delay, cleanText, extractHTML, parseSalary, detectExperienceLevel, detectRemoteType } from '../utils'
+import { fetchHTML, delay, cleanText, parseSalary, detectExperienceLevel, detectRemoteType, getRandomUserAgent, delayWithJitter } from '../utils'
 import { cleanDescriptionHtml } from '../../lib/clean-description'
 
 interface JobData {
@@ -28,24 +30,100 @@ interface JobData {
   companyWebsite?: string
 }
 
-/**
- * Fetch detailed job information from individual job page
- */
-async function fetchJobDetails(jobUrl: string): Promise<Partial<JobData>> {
-  const $ = await fetchHTML(jobUrl)
-  if (!$) return {}
+// Playwright browser instance (reused across requests)
+let browser: Browser | null = null
 
+async function getBrowser(): Promise<Browser> {
+  if (!browser) {
+    console.log('  🌐 Launching Playwright browser...')
+    browser = await chromium.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    })
+  }
+  return browser
+}
+
+async function closeBrowser(): Promise<void> {
+  if (browser) {
+    await browser.close()
+    browser = null
+  }
+}
+
+/**
+ * Fetch detailed job information using Playwright (bypasses Cloudflare)
+ */
+async function fetchJobDetailsWithPlaywright(jobUrl: string): Promise<Partial<JobData>> {
+  let page: Page | null = null
   const details: Partial<JobData> = {}
 
   try {
-    // Job description - main content area (preserve HTML for proper rendering)
-    const descriptionEl = $('.job-description, .job-content, [class*="description"], article')
-    if (descriptionEl.length) {
-      const raw = extractHTML(descriptionEl.first(), $)
-      details.description = cleanDescriptionHtml(raw)
+    const b = await getBrowser()
+    page = await b.newPage({
+      userAgent: getRandomUserAgent(),
+    })
+
+    // Set browser-like headers
+    await page.setExtraHTTPHeaders({
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    })
+
+    // Navigate with longer timeout for Cloudflare challenge
+    await page.goto(jobUrl, {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+    })
+
+    // Wait for content to render (Cloudflare challenge + JS rendering)
+    await page.waitForTimeout(2000)
+
+    // Get page content
+    const html = await page.content()
+    const $ = cheerio.load(html)
+
+    // Remove UI noise elements before extraction
+    $('nav, header, footer, aside, .apply-button, .job-actions, .share-buttons').remove()
+    $('[class*="apply"], [class*="share"], [class*="action"], button').remove()
+    $('script, style, noscript, iframe').remove()
+
+    // Job description - try multiple selectors
+    const descriptionSelectors = [
+      '.job-description-content',
+      '.job-detail-description',
+      '[class*="JobDescription"]',
+      '[class*="job-description"]',
+      '.description-section',
+      '.job-content',
+      'article .content',
+      'main .prose',
+    ]
+
+    for (const selector of descriptionSelectors) {
+      const el = $(selector)
+      if (el.length) {
+        const html = el.first().html()
+        if (html && html.length > 100) {
+          details.description = cleanDescriptionHtml(html)
+          break
+        }
+      }
     }
 
-    // Look for sections with common headers
+    // Fallback: get main content if no description found
+    if (!details.description) {
+      const mainContent = $('main').first()
+      if (mainContent.length) {
+        mainContent.find('nav, header, footer, [class*="sidebar"]').remove()
+        const html = mainContent.html()
+        if (html && html.length > 200) {
+          details.description = cleanDescriptionHtml(html)
+        }
+      }
+    }
+
+    // Extract sections from headers
     $('h2, h3, h4, strong').each((_, el) => {
       const header = cleanText($(el).text()).toLowerCase()
       const content = $(el).nextUntil('h2, h3, h4').text()
@@ -79,16 +157,19 @@ async function fetchJobDetails(jobUrl: string): Promise<Partial<JobData>> {
       }
     }
 
-    // Experience level detection
+    // Experience level and remote type detection
     const fullText = $('body').text()
     details.experienceLevel = detectExperienceLevel(fullText) || undefined
     details.remoteType = detectRemoteType(fullText) || undefined
 
-  } catch (error) {
-    console.error(`Error fetching details from ${jobUrl}:`, error)
-  }
+    await page.close()
+    return details
 
-  return details
+  } catch (error: any) {
+    console.error(`  ⚠️ Playwright error for ${jobUrl}: ${error.message}`)
+    if (page) await page.close().catch(() => {})
+    return details
+  }
 }
 
 interface CrawlerReturn {
@@ -97,15 +178,15 @@ interface CrawlerReturn {
 }
 
 export async function crawlWeb3Career(): Promise<CrawlerReturn> {
-  console.log('🚀 Starting Web3.career crawler...')
+  console.log('🚀 Starting Web3.career crawler (Playwright-enabled)...')
 
   const baseUrl = 'https://web3.career'
   let allJobs: JobData[] = []
 
-  // Crawl first 3 pages
+  // Crawl first 3 pages using browser headers
   for (let page = 1; page <= 3; page++) {
     const pageUrl = page === 1 ? `${baseUrl}/web3-jobs` : `${baseUrl}/web3-jobs?page=${page}`
-    const $ = await fetchHTML(pageUrl)
+    const $ = await fetchHTML(pageUrl, { useBrowserHeaders: true })
 
     if (!$) {
       console.error(`❌ Failed to fetch Web3.career page ${page}`)
@@ -113,14 +194,6 @@ export async function crawlWeb3Career(): Promise<CrawlerReturn> {
     }
 
     // web3.career uses a <table> with tr.table_row for each job
-    // Structure per row: 6 <td> cells
-    //   td[0]: title (h2) + company (h3) + logo
-    //   td[1]: company name (td.job-location-mobile)
-    //   td[2]: posted time
-    //   td[3]: location (td.job-location-mobile)
-    //   td[4]: salary
-    //   td[5]: tag text
-    // Some rows are ads (no data-jobid) — skip those
     $('tr.table_row').each((_, element) => {
       try {
         const $row = $(element)
@@ -171,19 +244,24 @@ export async function crawlWeb3Career(): Promise<CrawlerReturn> {
       }
     })
 
-    await delay(500) // Rate limit between pages
+    // Rate limit with jitter between pages
+    await delayWithJitter(1000, 500)
   }
 
   console.log(`📦 Found ${allJobs.length} jobs from Web3.career`)
 
   let savedCount = 0
   let newCount = 0
+  let detailErrors = 0
+
   for (const job of allJobs) {
     try {
-      // Fetch detailed information from job page (rate limited)
+      // Fetch detailed information using Playwright
       console.log(`  📄 Fetching details for: ${job.title}`)
-      const details = await fetchJobDetails(job.url)
-      await delay(300) // Rate limit detail page fetches
+      const details = await fetchJobDetailsWithPlaywright(job.url)
+
+      // Rate limit with jitter (3-5 seconds to avoid Cloudflare)
+      await delayWithJitter(3000, 2000)
 
       // Parse salary if available
       const salaryInfo = parseSalary(job.salary)
@@ -218,11 +296,18 @@ export async function crawlWeb3Career(): Promise<CrawlerReturn> {
       )
       if (result.saved) savedCount++
       if (result.isNew) newCount++
-      await delay(100)
+
+      // Track if we got description
+      if (!details.description) {
+        detailErrors++
+      }
     } catch (error) {
       console.error(`Error saving job ${job.url}:`, error)
     }
   }
+
+  // Cleanup browser
+  await closeBrowser()
 
   await supabase.from('CrawlLog').insert({
     source: 'web3.career',
@@ -231,6 +316,6 @@ export async function crawlWeb3Career(): Promise<CrawlerReturn> {
     createdAt: new Date().toISOString(),
   })
 
-  console.log(`✅ Saved ${savedCount} jobs from Web3.career (${newCount} new)`)
+  console.log(`✅ Saved ${savedCount} jobs from Web3.career (${newCount} new, ${detailErrors} without description)`)
   return { total: savedCount, new: newCount }
 }

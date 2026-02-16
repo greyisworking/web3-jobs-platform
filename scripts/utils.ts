@@ -1,32 +1,92 @@
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 
+// User-Agent rotation pool for anti-bot bypass
+const USER_AGENTS = [
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:123.0) Gecko/20100101 Firefox/123.0',
+]
+
+/**
+ * Get a random User-Agent string for anti-bot bypass
+ */
+export function getRandomUserAgent(): string {
+  return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]
+}
+
+/**
+ * Get browser-like headers for bypassing bot detection (Cloudflare, etc.)
+ */
+export function getBrowserHeaders(userAgent?: string): Record<string, string> {
+  return {
+    'User-Agent': userAgent || getRandomUserAgent(),
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'DNT': '1',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Cache-Control': 'max-age=0',
+  }
+}
+
+/**
+ * Add random jitter to delay (base + random 0-jitter ms)
+ */
+export function delayWithJitter(baseMs: number, jitterMs: number = 500): Promise<void> {
+  const actualDelay = baseMs + Math.random() * jitterMs
+  return new Promise((resolve) => setTimeout(resolve, actualDelay))
+}
+
 const DEFAULT_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
 }
 
-export async function fetchHTML(url: string): Promise<cheerio.CheerioAPI | null> {
+export async function fetchHTML(url: string, options?: { useBrowserHeaders?: boolean }): Promise<cheerio.CheerioAPI | null> {
   try {
+    const headers = options?.useBrowserHeaders ? getBrowserHeaders() : DEFAULT_HEADERS
     const response = await axios.get(url, {
-      headers: DEFAULT_HEADERS,
-      timeout: 10000,
+      headers,
+      timeout: 15000,
     })
     return cheerio.load(response.data)
-  } catch (error) {
-    console.error(`Error fetching ${url}:`, error)
+  } catch (error: any) {
+    // Log specific error codes for debugging
+    if (error.response?.status) {
+      console.error(`Error fetching ${url}: HTTP ${error.response.status}`)
+    } else {
+      console.error(`Error fetching ${url}:`, error.message || error)
+    }
     return null
   }
 }
 
-export async function fetchJSON<T = any>(url: string, headers?: Record<string, string>): Promise<T | null> {
+export async function fetchJSON<T = any>(
+  url: string,
+  headers?: Record<string, string>,
+  options?: { useBrowserHeaders?: boolean }
+): Promise<T | null> {
   try {
+    const baseHeaders = options?.useBrowserHeaders ? getBrowserHeaders() : DEFAULT_HEADERS
     const response = await axios.get<T>(url, {
-      headers: { ...DEFAULT_HEADERS, ...headers },
+      headers: { ...baseHeaders, ...headers },
       timeout: 15000,
     })
     return response.data
-  } catch (error) {
-    console.error(`Error fetching JSON from ${url}:`, error)
+  } catch (error: any) {
+    if (error.response?.status) {
+      console.error(`Error fetching JSON from ${url}: HTTP ${error.response.status}`)
+    } else {
+      console.error(`Error fetching JSON from ${url}:`, error.message || error)
+    }
     return null
   }
 }
@@ -93,14 +153,16 @@ export async function fetchWithRetry(
     headers?: Record<string, string>
     timeout?: number
     maxRetries?: number
+    useBrowserHeaders?: boolean
   } = {}
 ): Promise<any> {
-  const { headers = {}, timeout = 15000, maxRetries = 3 } = options
+  const { headers = {}, timeout = 15000, maxRetries = 3, useBrowserHeaders = true } = options
+  const baseHeaders = useBrowserHeaders ? getBrowserHeaders() : DEFAULT_HEADERS
 
   return withRetry(
     async () => {
       const response = await axios.get(url, {
-        headers: { ...DEFAULT_HEADERS, ...headers },
+        headers: { ...baseHeaders, ...headers },
         timeout,
       })
       return response.data
