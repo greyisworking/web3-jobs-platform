@@ -65,8 +65,57 @@ export function removeNoiseElements($: CheerioAPI, root?: ReturnType<CheerioAPI>
 // ─── Text-level noise removal (post-extraction & DB cleanup) ────────────────
 
 /**
+ * Clean description HTML while PRESERVING formatting tags.
+ * Use this when you have HTML content and want to keep structure for rendering.
+ */
+export function cleanDescriptionHtml(html: string): string {
+  if (!html) return ''
+
+  let cleaned = html
+
+  // ── Remove script, style, and other non-content tags ──
+  cleaned = cleaned.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+  cleaned = cleaned.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+  cleaned = cleaned.replace(/<noscript[^>]*>[\s\S]*?<\/noscript>/gi, '')
+  cleaned = cleaned.replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, '')
+  cleaned = cleaned.replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '')
+  cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, '')
+
+  // ── Remove inline styles and classes but keep the tags ──
+  cleaned = cleaned.replace(/\s+style="[^"]*"/gi, '')
+  cleaned = cleaned.replace(/\s+class="[^"]*"/gi, '')
+  cleaned = cleaned.replace(/\s+id="[^"]*"/gi, '')
+
+  // ── Normalize HTML entities ──
+  cleaned = cleaned
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+
+  // ── Remove empty tags ──
+  cleaned = cleaned.replace(/<(\w+)[^>]*>\s*<\/\1>/gi, '')
+
+  // ── Normalize whitespace ──
+  cleaned = cleaned.replace(/\n[ \t]*\n/g, '\n\n')
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n')
+  cleaned = cleaned.replace(/[ \t]+/g, ' ')
+  cleaned = cleaned.trim()
+
+  // ── Truncate to 10 000 chars ──
+  if (cleaned.length > 10000) {
+    cleaned = cleaned.slice(0, 10000)
+  }
+
+  return cleaned
+}
+
+/**
  * Comprehensive text-based description cleaning.
  * Removes source-site UI text, recommendations, salary widgets, etc.
+ * NOTE: This strips ALL HTML tags. Use cleanDescriptionHtml() if you need to preserve formatting.
  */
 export function cleanDescriptionText(text: string): string {
   if (!text) return ''

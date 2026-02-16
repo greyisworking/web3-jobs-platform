@@ -1,7 +1,7 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { fetchHTML, delay, cleanText, parseSalary, detectExperienceLevel, detectRemoteType } from '../utils'
-import { cleanDescriptionText } from '../../lib/clean-description'
+import { cleanDescriptionHtml } from '../../lib/clean-description'
 import { parseStringPromise } from 'xml2js'
 import axios from 'axios'
 
@@ -39,18 +39,14 @@ async function fetchJobDetails(jobUrl: string): Promise<{
   const details: Record<string, any> = {}
 
   try {
-    // Job description - inside .prose div
+    // Job description - inside .prose div (preserve HTML for proper rendering)
     const proseEl = $('.prose')
     if (proseEl.length) {
-      // Get the HTML content and convert to clean text
+      // Get the HTML content and clean while preserving structure
       let descHtml = proseEl.html() || ''
-      // Remove script tags and clean
-      descHtml = descHtml.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
 
-      // Extract text with proper line breaks
-      const descText = proseEl.text()
-      if (descText.length > 100) {
-        details.description = cleanDescriptionText(descText.slice(0, 8000))
+      if (descHtml.length > 100) {
+        details.description = cleanDescriptionHtml(descHtml.slice(0, 10000))
       }
 
       // Extract sections from headers
@@ -220,7 +216,7 @@ export async function crawlCryptocurrencyJobs(): Promise<CrawlerReturn> {
         // Use RSS description as fallback if no detailed description
         let description = details.description
         if (!description && rssDescription) {
-          description = cleanDescriptionText(rssDescription)
+          description = cleanDescriptionHtml(rssDescription)
         }
 
         // Determine location and type
