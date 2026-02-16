@@ -186,7 +186,6 @@ function ProfileDropdown() {
   const displayName = supabaseUser?.user_metadata?.name ||
                       supabaseUser?.email?.split('@')[0] ||
                       (address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'User')
-  const avatarUrl = supabaseUser?.user_metadata?.avatar_url
 
   return (
     <div

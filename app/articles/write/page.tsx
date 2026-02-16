@@ -11,7 +11,7 @@ import type { User } from '@supabase/supabase-js'
 import RichTextEditor from '@/app/components/RichTextEditor'
 import ThumbnailUpload from '@/app/components/ThumbnailUpload'
 import Pixelbara from '@/app/components/Pixelbara'
-import Blockies, { truncateAddress } from '@/app/components/Blockies'
+import { truncateAddress } from '@/app/components/Blockies'
 import { WalletConnect } from '@/app/components/WalletConnect'
 import Web3Badges from '@/app/components/Web3Badges'
 
@@ -258,25 +258,8 @@ export default function ArticleWritePage() {
 
           <div className="flex items-center gap-4">
             {/* Connected User/Wallet Info */}
-            <div className="flex items-center gap-2 text-sm text-a24-muted">
-              {isConnected && address ? (
-                <>
-                  <Blockies address={address} size={20} />
-                  <span>{displayName}</span>
-                </>
-              ) : (
-                <>
-                  {user.user_metadata?.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.user_metadata.avatar_url} alt="User avatar" className="w-5 h-5 rounded-full" />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full bg-purple-600 flex items-center justify-center text-a24-text text-xs">
-                      {displayName[0].toUpperCase()}
-                    </div>
-                  )}
-                  <span>{displayName}</span>
-                </>
-              )}
+            <div className="text-sm text-a24-muted">
+              <span>{displayName}</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -420,23 +403,11 @@ export default function ArticleWritePage() {
                 <h3 className="text-xs uppercase tracking-wider text-a24-muted mb-4 font-medium">
                   Publishing As
                 </h3>
-                <div className="flex items-center gap-3">
-                  {isConnected && address ? (
-                    <Blockies address={address} size={40} />
-                  ) : user.user_metadata?.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.user_metadata.avatar_url} alt="User avatar" className="w-10 h-10 rounded-full" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-a24-text font-bold">
-                      {displayName[0].toUpperCase()}
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-a24-text font-medium">{displayName}</p>
-                    <p className="text-xs text-a24-muted">
-                      {isConnected ? truncateAddress(address!) : user.email}
-                    </p>
-                  </div>
+                <div>
+                  <p className="text-a24-text font-medium">{displayName}</p>
+                  <p className="text-xs text-a24-muted">
+                    {isConnected ? truncateAddress(address!) : user.email}
+                  </p>
                 </div>
               </div>
 
