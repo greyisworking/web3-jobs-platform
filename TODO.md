@@ -31,6 +31,10 @@ Last Updated: 2026-02-16 16:30 KST
 
 ### February 2026 (Week 3)
 
+- [x] 크롤러 안정화 작업
+  - 공통 HTML 유틸 분리 (scripts/utils/htmlParser.ts)
+  - 크롤러별 테스트 추가 (vitest)
+  - npm run test:crawlers 스크립트 추가
 - [x] JD HTML 엔티티 디코딩 버그 수정 (&lt;div&gt; → 정상 렌더링)
 - [x] 크롤러 우회 (User-Agent rotation, Browser headers, Playwright)
 - [x] Formatted/Raw 토글 복구 (raw_description 저장)

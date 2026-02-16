@@ -7,6 +7,7 @@
  */
 
 import type { CheerioAPI } from 'cheerio'
+import { decodeHtmlEntities } from '../scripts/utils/htmlParser'
 
 // ─── DOM-level noise removal (for crawling) ─────────────────────────────────
 
@@ -86,14 +87,8 @@ export function cleanDescriptionHtml(html: string): string {
   cleaned = cleaned.replace(/\s+class="[^"]*"/gi, '')
   cleaned = cleaned.replace(/\s+id="[^"]*"/gi, '')
 
-  // ── Normalize HTML entities ──
-  cleaned = cleaned
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
+  // ── Decode HTML entities (using shared utility) ──
+  cleaned = decodeHtmlEntities(cleaned)
 
   // ── Remove empty tags ──
   cleaned = cleaned.replace(/<(\w+)[^>]*>\s*<\/\1>/gi, '')
@@ -122,19 +117,11 @@ export function cleanDescriptionText(text: string): string {
 
   let cleaned = text
 
+  // ── Decode HTML entities first (using shared utility) ──
+  cleaned = decodeHtmlEntities(cleaned)
+
   // ── Strip leftover HTML tags ──
   cleaned = cleaned.replace(/<[^>]+>/g, '')
-
-  // ── HTML entities ──
-  cleaned = cleaned
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&[a-z]+;/gi, ' ')
-    .replace(/&#\d+;/g, ' ')
 
   // ── Normalize whitespace before pattern matching ──
   // Convert "\n \n" (newline + spaces + newline) to clean double newline
