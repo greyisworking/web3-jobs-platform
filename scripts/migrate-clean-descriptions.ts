@@ -38,7 +38,7 @@ async function main() {
       .select('id, title, description, source')
       .not('description', 'is', null)
       .range(offset, offset + BATCH_SIZE - 1)
-      .order('createdAt', { ascending: false })
+      .order('crawledAt', { ascending: false })
 
     if (error) {
       console.error('Error fetching jobs:', error)
