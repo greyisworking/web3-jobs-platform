@@ -2,14 +2,24 @@ import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { fetchHTML, delay, cleanText, parseSalary, detectExperienceLevel, detectRemoteType } from '../utils'
 import { cleanDescriptionText } from '../../lib/clean-description'
+import { parseStringPromise } from 'xml2js'
+import axios from 'axios'
 
 interface CrawlerReturn {
   total: number
   new: number
 }
 
+interface RssItem {
+  title: string[]
+  description: string[]
+  link: string[]
+  pubDate: string[]
+  guid: string[]
+}
+
 /**
- * Fetch job details from individual job page
+ * Fetch and parse job details from individual job page
  */
 async function fetchJobDetails(jobUrl: string): Promise<{
   description?: string
@@ -19,50 +29,98 @@ async function fetchJobDetails(jobUrl: string): Promise<{
   experienceLevel?: string
   remoteType?: string
   companyLogo?: string
-  companyWebsite?: string
+  location?: string
+  type?: string
+  tags?: string[]
 }> {
   const $ = await fetchHTML(jobUrl)
   if (!$) return {}
 
-  const details: Record<string, string | undefined> = {}
+  const details: Record<string, any> = {}
 
   try {
-    // Job description - main content area
-    const descriptionEl = $('article, .job-description, [class*="description"], .content, main')
-    if (descriptionEl.length) {
-      // Get text content, clean it up
-      let rawText = descriptionEl.first().text()
-      // Remove excessive whitespace
-      rawText = rawText.replace(/\s+/g, ' ').trim()
-      if (rawText.length > 100) {
-        details.description = cleanDescriptionText(rawText.slice(0, 5000))
+    // Job description - inside .prose div
+    const proseEl = $('.prose')
+    if (proseEl.length) {
+      // Get the HTML content and convert to clean text
+      let descHtml = proseEl.html() || ''
+      // Remove script tags and clean
+      descHtml = descHtml.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+
+      // Extract text with proper line breaks
+      const descText = proseEl.text()
+      if (descText.length > 100) {
+        details.description = cleanDescriptionText(descText.slice(0, 8000))
+      }
+
+      // Extract sections from headers
+      proseEl.find('h2, h3').each((_, el) => {
+        const header = cleanText($(el).text()).toLowerCase()
+        let content = ''
+
+        // Get all content until next header
+        let nextEl = $(el).next()
+        while (nextEl.length && !nextEl.is('h2, h3')) {
+          content += nextEl.text() + '\n'
+          nextEl = nextEl.next()
+        }
+        content = cleanText(content)
+
+        if (content.length > 50) {
+          if (header.includes('requirement') || header.includes('qualif') || header.includes('skills')) {
+            details.requirements = content.slice(0, 3000)
+          }
+          if (header.includes('responsib') || header.includes('what you') || header.includes('duties')) {
+            details.responsibilities = content.slice(0, 3000)
+          }
+          if (header.includes('benefit') || header.includes('perk') || header.includes('offer') || header.includes('nice to have')) {
+            details.benefits = content.slice(0, 2000)
+          }
+        }
+      })
+    }
+
+    // Extract metadata from sidebar
+    // Location
+    const locationSection = $('h3:contains("Location")').next('ul')
+    if (locationSection.length) {
+      details.location = cleanText(locationSection.text())
+    }
+
+    // Job type
+    const typeSection = $('h3:contains("Job type")').next('ul')
+    if (typeSection.length) {
+      const typeText = cleanText(typeSection.text()).toLowerCase()
+      if (typeText.includes('full-time')) details.type = 'Full-time'
+      else if (typeText.includes('part-time')) details.type = 'Part-time'
+      else if (typeText.includes('contract')) details.type = 'Contract'
+      else if (typeText.includes('internship')) details.type = 'Internship'
+    }
+
+    // Keywords/Tags - from "Keywords" section only
+    const keywordsSection = $('h3:contains("Keywords")').next('ul')
+    if (keywordsSection.length) {
+      const tags: string[] = []
+      keywordsSection.find('a').each((_, el) => {
+        const tag = cleanText($(el).text())
+        // Only include valid tech-related tags
+        if (tag.length > 1 && tag.length < 40) {
+          tags.push(tag)
+        }
+      })
+      if (tags.length > 0) {
+        details.tags = tags.slice(0, 10)
       }
     }
 
-    // Look for specific sections
-    $('h2, h3, h4, strong').each((_, el) => {
-      const header = cleanText($(el).text()).toLowerCase()
-      const nextContent = $(el).nextAll().first().text()
-      const content = cleanText(nextContent || '')
-
-      if (content.length > 50) {
-        if (header.includes('requirement') || header.includes('qualif') || header.includes('skills') || header.includes('experience')) {
-          details.requirements = content.slice(0, 2000)
-        }
-        if (header.includes('responsib') || header.includes('what you') || header.includes('duties') || header.includes('role')) {
-          details.responsibilities = content.slice(0, 2000)
-        }
-        if (header.includes('benefit') || header.includes('perk') || header.includes('offer') || header.includes('compensation')) {
-          details.benefits = content.slice(0, 2000)
-        }
-      }
-    })
-
     // Company logo
-    const logoImg = $('img[src*="logo"], .company-logo img, [class*="company"] img').first()
+    const logoImg = $('img[alt$="logo"]').first()
     if (logoImg.length) {
-      const logoSrc = logoImg.attr('src')
-      if (logoSrc && !logoSrc.includes('placeholder') && logoSrc.startsWith('http')) {
+      let logoSrc = logoImg.attr('data-src') || logoImg.attr('src')
+      if (logoSrc && !logoSrc.includes('placeholder')) {
+        if (!logoSrc.startsWith('http')) {
+          logoSrc = `https://cryptocurrencyjobs.co${logoSrc}`
+        }
         details.companyLogo = logoSrc
       }
     }
@@ -81,229 +139,154 @@ async function fetchJobDetails(jobUrl: string): Promise<{
 
 /**
  * CryptocurrencyJobs.co Crawler
- * Crawls the main jobs listing page and extracts job data from HTML
+ * Uses RSS feed for reliable job listing extraction
  */
 export async function crawlCryptocurrencyJobs(): Promise<CrawlerReturn> {
   console.log('🚀 Starting CryptocurrencyJobs crawler...')
 
-  const baseUrl = 'https://cryptocurrencyjobs.co'
-  const pages = [
-    `${baseUrl}/`,  // Main page
-    `${baseUrl}/web3/`,  // Web3 specific jobs
-    `${baseUrl}/engineering/`,  // Engineering jobs
-    `${baseUrl}/remote/`,  // Remote jobs
-  ]
+  const rssUrl = 'https://cryptocurrencyjobs.co/index.xml'
 
-  const allJobs: Array<{
-    title: string
-    company: string
-    url: string
-    location: string
-    type: string
-    category: string
-    salary?: string
-    tags: string[]
-  }> = []
+  try {
+    // Fetch RSS feed
+    const response = await axios.get(rssUrl, {
+      timeout: 15000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        'Accept': 'application/rss+xml, application/xml, text/xml',
+      },
+    })
 
-  const seenUrls = new Set<string>()
+    // Parse RSS XML
+    const rssData = await parseStringPromise(response.data)
+    const items: RssItem[] = rssData?.rss?.channel?.[0]?.item || []
 
-  for (const pageUrl of pages) {
-    console.log(`  📄 Fetching ${pageUrl}`)
-    const $ = await fetchHTML(pageUrl)
+    console.log(`📦 Found ${items.length} jobs from RSS feed`)
 
-    if (!$) {
-      console.error(`  ❌ Failed to fetch ${pageUrl}`)
-      continue
-    }
+    // Limit to recent jobs (first 100)
+    const jobItems = items.slice(0, 100)
 
-    // Find job listings - they are typically in <a> tags that link to job pages
-    // The URL pattern is: /category/company-job-title/
-    $('a[href*="/"][href$="/"]').each((_, el) => {
+    let savedCount = 0
+    let newCount = 0
+
+    for (const item of jobItems) {
       try {
-        const $el = $(el)
-        const href = $el.attr('href') || ''
+        const fullTitle = item.title?.[0] || ''
+        const url = item.link?.[0] || item.guid?.[0] || ''
+        const rssDescription = item.description?.[0] || ''
+        const pubDate = item.pubDate?.[0] || ''
 
-        // Filter for job links (they have category prefix and job slug)
-        // Pattern: /engineering/company-job-title/ or /marketing/company-job-title/
-        const jobUrlPattern = /^\/(engineering|marketing|sales|design|product|operations|community|legal|finance|data|defi|nft|web3|remote|full-time|part-time|contract)\/.+\/$/
-        if (!jobUrlPattern.test(href)) return
+        if (!fullTitle || !url) continue
 
-        // Skip if URL looks like a category page (no hyphen in slug)
-        const slug = href.split('/').filter(Boolean)[1] || ''
-        if (!slug.includes('-')) return
-
-        const fullUrl = href.startsWith('http') ? href : `${baseUrl}${href}`
-
-        // Skip duplicates
-        if (seenUrls.has(fullUrl)) return
-        seenUrls.add(fullUrl)
-
-        // Try to get title from this link or parent container
-        let title = cleanText($el.text())
-
-        // If title is too short, it might be a badge - look for nearby title
-        if (title.length < 5 || title.length > 200) {
-          // Look in parent or sibling elements
-          const parent = $el.parent().parent()
-          const possibleTitle = parent.find('a').first().text()
-          if (possibleTitle.length > 5 && possibleTitle.length < 200) {
-            title = cleanText(possibleTitle)
-          }
-        }
-
-        // Skip if still no valid title
-        if (title.length < 5) return
-
-        // Try to extract company name from parent container
+        // Parse "Job Title at Company" format
+        const titleMatch = fullTitle.match(/^(.+?)\s+at\s+(.+)$/i)
+        let title = fullTitle
         let company = 'Unknown'
-        const parentContainer = $el.closest('li, article, div[class*="job"], div[class*="card"]')
-        if (parentContainer.length) {
-          // Look for company link (usually links to /company/name/)
-          const companyLink = parentContainer.find('a[href*="/company/"]')
-          if (companyLink.length) {
-            company = cleanText(companyLink.text())
-          } else {
-            // Look for any text that might be company name
-            const allText = parentContainer.text()
-            // Company name is usually before "Remote" or location
-            const match = allText.match(/([A-Z][a-zA-Z0-9\s&.]+)(?=\s*Remote|\s*Full-Time|\s*Part-Time|\s*Contract)/i)
-            if (match) {
-              company = cleanText(match[1])
-            }
-          }
-        }
 
-        // Extract location
-        let location = 'Remote'
-        const locationText = parentContainer?.text() || ''
-        if (locationText.toLowerCase().includes('remote')) {
-          location = 'Remote'
-        } else {
-          // Look for location patterns
-          const locationMatch = locationText.match(/([\w\s,]+(?:USA|UK|Europe|Asia|Germany|France|Singapore|UAE))/i)
-          if (locationMatch) {
-            location = cleanText(locationMatch[1])
-          }
-        }
-
-        // Extract employment type
-        let type = 'Full-time'
-        if (locationText.toLowerCase().includes('contract')) {
-          type = 'Contract'
-        } else if (locationText.toLowerCase().includes('part-time')) {
-          type = 'Part-time'
+        if (titleMatch) {
+          title = titleMatch[1].trim()
+          company = titleMatch[2].trim()
         }
 
         // Extract category from URL
-        const category = href.split('/')[1] || 'Engineering'
-        const normalizedCategory = category.charAt(0).toUpperCase() + category.slice(1)
-
-        // Extract salary if visible
-        let salary: string | undefined
-        const salaryMatch = locationText.match(/(\$[\d,]+K?\s*[-–]\s*\$?[\d,]+K?|£[\d,]+K?\s*[-–]\s*£?[\d,]+K?|€[\d,]+K?\s*[-–]\s*€?[\d,]+K?)/i)
-        if (salaryMatch) {
-          salary = salaryMatch[1]
+        // URL format: /category/company-job-title/
+        const urlMatch = url.match(/cryptocurrencyjobs\.co\/([^/]+)\//)
+        let category = 'Engineering'
+        if (urlMatch) {
+          const rawCategory = urlMatch[1]
+          const categoryMap: Record<string, string> = {
+            'engineering': 'Engineering',
+            'design': 'Design',
+            'marketing': 'Marketing',
+            'sales': 'Sales',
+            'product': 'Product',
+            'operations': 'Operations',
+            'finance': 'Finance',
+            'community': 'Community',
+            'customer-support': 'Customer Support',
+            'non-tech': 'Non-Tech',
+            'other': 'Other',
+          }
+          category = categoryMap[rawCategory] || 'Engineering'
         }
 
-        // Extract tags from badges
-        const tags: string[] = []
-        parentContainer?.find('a[href^="/"]').each((_, badge) => {
-          const badgeText = cleanText($(badge).text())
-          if (badgeText.length > 1 && badgeText.length < 30) {
-            const lowerBadge = badgeText.toLowerCase()
-            // Skip common non-tag badges
-            if (!['featured', 'today', 'remote', 'full-time', 'part-time', 'contract'].includes(lowerBadge)) {
-              tags.push(badgeText)
-            }
-          }
-        })
+        // Fetch job details (limit to first 50 for rate limiting)
+        let details: any = {}
+        if (savedCount < 50) {
+          console.log(`  📄 Fetching: ${title.slice(0, 50)}...`)
+          details = await fetchJobDetails(url)
+          await delay(300)
+        }
 
-        allJobs.push({
-          title,
-          company,
-          url: fullUrl,
-          location,
-          type,
-          category: ['Engineering', 'Marketing', 'Sales', 'Design', 'Product', 'Operations', 'Community'].includes(normalizedCategory)
-            ? normalizedCategory
-            : 'Engineering',
-          salary,
-          tags: tags.slice(0, 10), // Limit tags
-        })
+        // Use RSS description as fallback if no detailed description
+        let description = details.description
+        if (!description && rssDescription) {
+          description = cleanDescriptionText(rssDescription)
+        }
+
+        // Determine location and type
+        const location = details.location || 'Remote'
+        const type = details.type || 'Full-time'
+
+        // Build tags - only from keywords, add Web3/Blockchain defaults
+        const tags: string[] = ['Web3', 'Blockchain']
+        if (details.tags) {
+          tags.push(...details.tags)
+        }
+
+        const result = await validateAndSaveJob(
+          {
+            title,
+            company,
+            url,
+            location,
+            type,
+            category,
+            tags: [...new Set(tags)].slice(0, 10), // Dedupe and limit
+            source: 'cryptocurrencyjobs.co',
+            region: 'Global',
+            postedDate: pubDate ? new Date(pubDate) : new Date(),
+            description,
+            requirements: details.requirements,
+            responsibilities: details.responsibilities,
+            benefits: details.benefits,
+            experienceLevel: details.experienceLevel,
+            remoteType: details.remoteType,
+            companyLogo: details.companyLogo,
+          },
+          'cryptocurrencyjobs.co'
+        )
+
+        if (result.saved) savedCount++
+        if (result.isNew) newCount++
+
+        await delay(100)
       } catch (error) {
-        // Skip invalid entries
+        console.error(`  Error processing job:`, error)
       }
+    }
+
+    // Log crawl result
+    await supabase.from('CrawlLog').insert({
+      source: 'cryptocurrencyjobs.co',
+      status: 'success',
+      jobCount: savedCount,
+      createdAt: new Date().toISOString(),
     })
 
-    await delay(500) // Rate limit between pages
+    console.log(`✅ Saved ${savedCount} jobs from CryptocurrencyJobs (${newCount} new)`)
+    return { total: savedCount, new: newCount }
+
+  } catch (error: any) {
+    console.error('❌ Failed to fetch RSS feed:', error.message)
+
+    await supabase.from('CrawlLog').insert({
+      source: 'cryptocurrencyjobs.co',
+      status: 'failed',
+      jobCount: 0,
+      error: error.message,
+      createdAt: new Date().toISOString(),
+    })
+
+    return { total: 0, new: 0 }
   }
-
-  // Remove duplicates by URL
-  const uniqueJobs = Array.from(new Map(allJobs.map(j => [j.url, j])).values())
-
-  console.log(`📦 Found ${uniqueJobs.length} unique jobs from CryptocurrencyJobs`)
-
-  let savedCount = 0
-  let newCount = 0
-
-  for (const job of uniqueJobs) {
-    try {
-      // Fetch job details for first 50 jobs only (rate limiting)
-      let details = {}
-      if (savedCount < 50) {
-        console.log(`  📄 Fetching details: ${job.title.slice(0, 50)}...`)
-        details = await fetchJobDetails(job.url)
-        await delay(300)
-      }
-
-      // Parse salary
-      const salaryInfo = parseSalary(job.salary)
-
-      const result = await validateAndSaveJob(
-        {
-          title: job.title,
-          company: job.company,
-          url: job.url,
-          location: job.location,
-          type: job.type,
-          category: job.category,
-          salary: job.salary,
-          tags: job.tags,
-          source: 'cryptocurrencyjobs.co',
-          region: 'Global',
-          postedDate: new Date(),
-          // Enhanced details
-          description: (details as any).description,
-          requirements: (details as any).requirements,
-          responsibilities: (details as any).responsibilities,
-          benefits: (details as any).benefits,
-          salaryMin: salaryInfo.min,
-          salaryMax: salaryInfo.max,
-          salaryCurrency: salaryInfo.currency,
-          experienceLevel: (details as any).experienceLevel,
-          remoteType: (details as any).remoteType,
-          companyLogo: (details as any).companyLogo,
-        },
-        'cryptocurrencyjobs.co'
-      )
-
-      if (result.saved) savedCount++
-      if (result.isNew) newCount++
-
-      await delay(100)
-    } catch (error) {
-      console.error(`  Error saving job ${job.url}:`, error)
-    }
-  }
-
-  // Log crawl result
-  await supabase.from('CrawlLog').insert({
-    source: 'cryptocurrencyjobs.co',
-    status: 'success',
-    jobCount: savedCount,
-    createdAt: new Date().toISOString(),
-  })
-
-  console.log(`✅ Saved ${savedCount} jobs from CryptocurrencyJobs (${newCount} new)`)
-  return { total: savedCount, new: newCount }
 }
