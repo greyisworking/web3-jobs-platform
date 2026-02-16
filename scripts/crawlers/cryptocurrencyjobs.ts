@@ -176,11 +176,49 @@ export async function crawlCryptocurrencyJobs(): Promise<CrawlerReturn> {
         // Parse "Job Title at Company" format
         const titleMatch = fullTitle.match(/^(.+?)\s+at\s+(.+)$/i)
         let title = fullTitle
-        let company = 'Unknown'
+        let company = ''
 
         if (titleMatch) {
           title = titleMatch[1].trim()
           company = titleMatch[2].trim()
+        }
+
+        // Fallback: Extract company from URL if not found in title
+        // URL format: /category/company-job-slug/
+        if (!company) {
+          const urlSlugMatch = url.match(/cryptocurrencyjobs\.co\/[^/]+\/([^/]+)/)
+          if (urlSlugMatch) {
+            const slug = urlSlugMatch[1]
+            // Extract company from slug (first part before job title words)
+            // e.g., "dialectic-senior-finance-manager" -> "dialectic"
+            // e.g., "sei-foundation-chief-of-staff" -> "sei-foundation"
+            const slugParts = slug.split('-')
+            // Find where job title starts (common job words)
+            const jobWords = ['senior', 'junior', 'lead', 'head', 'chief', 'staff', 'principal', 'associate', 'manager', 'engineer', 'developer', 'designer', 'analyst', 'specialist', 'coordinator', 'director', 'vp', 'marketing', 'sales', 'product', 'tech', 'software', 'web', 'web3', 'blockchain', 'crypto', 'defi', 'backend', 'frontend', 'fullstack', 'full-stack', 'devops', 'data', 'growth', 'community', 'content', 'social', 'legal', 'finance', 'hr', 'ops', 'operations', 'business', 'partner', 'talent', 'recruiter', 'recruiting', 'counsel', 'deputy', 'commercial']
+
+            let companyParts: string[] = []
+            for (const part of slugParts) {
+              if (jobWords.includes(part.toLowerCase())) break
+              companyParts.push(part)
+            }
+
+            if (companyParts.length > 0) {
+              // Convert slug to proper company name (capitalize, handle common patterns)
+              company = companyParts
+                .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+                .join(' ')
+                .replace(/\bLi Fi\b/i, 'LI.FI')
+                .replace(/\bDefi\b/i, 'DeFi')
+                .replace(/\bNft\b/i, 'NFT')
+                .replace(/\bDao\b/i, 'DAO')
+                .replace(/\bAi\b/i, 'AI')
+            }
+          }
+        }
+
+        // Final fallback
+        if (!company) {
+          company = 'Unknown'
         }
 
         // Extract category from URL
@@ -205,13 +243,11 @@ export async function crawlCryptocurrencyJobs(): Promise<CrawlerReturn> {
           category = categoryMap[rawCategory] || 'Engineering'
         }
 
-        // Fetch job details (limit to first 50 for rate limiting)
+        // Fetch job details for all jobs (with rate limiting)
         let details: any = {}
-        if (savedCount < 50) {
-          console.log(`  📄 Fetching: ${title.slice(0, 50)}...`)
-          details = await fetchJobDetails(url)
-          await delay(300)
-        }
+        console.log(`  📄 Fetching: ${title.slice(0, 50)}...`)
+        details = await fetchJobDetails(url)
+        await delay(200)
 
         // Use RSS description as fallback if no detailed description
         let description = details.description
