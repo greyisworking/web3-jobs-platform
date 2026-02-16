@@ -1,4 +1,4 @@
-import { fetchJSON, delay } from '../../utils'
+import { fetchJSON } from '../../utils'
 import type { PlatformJob } from './index'
 
 interface AshbyJob {
@@ -9,53 +9,37 @@ interface AshbyJob {
   team?: string
   employmentType?: string
   jobUrl?: string
+  applyUrl?: string
   publishedAt?: string
   isRemote?: boolean
   descriptionHtml?: string
   descriptionPlain?: string
-}
-
-interface AshbyJobDetail {
-  id: string
-  title: string
-  descriptionHtml?: string
-  descriptionPlain?: string
-  info?: {
-    descriptionHtml?: string
-    descriptionPlain?: string
+  compensation?: {
+    compensationTierSummary?: string
+    summaryComponents?: Array<{
+      compensationType: string
+      minValue?: number
+      maxValue?: number
+      currencyCode?: string
+    }>
   }
 }
 
 interface AshbyResponse {
+  apiVersion?: string
   jobs: AshbyJob[]
 }
 
 /**
- * Fetch full job description from Ashby's job detail API.
- * The listing API only returns summary (About section).
- * Detail API returns full JD including Responsibilities/Qualifications.
- */
-async function fetchJobDetail(orgSlug: string, jobId: string): Promise<string | null> {
-  const detailUrl = `https://api.ashbyhq.com/posting-api/job-board/${orgSlug}/jobs/${jobId}`
-  const detail = await fetchJSON<AshbyJobDetail>(detailUrl)
-
-  if (!detail) return null
-
-  // Ashby detail API may return description in different fields
-  return detail.descriptionHtml
-    || detail.descriptionPlain
-    || detail.info?.descriptionHtml
-    || detail.info?.descriptionPlain
-    || null
-}
-
-/**
  * Crawl jobs from Ashby's public posting API.
- * API: GET https://api.ashbyhq.com/posting-api/job-board/{org}
- * Detail API: GET https://api.ashbyhq.com/posting-api/job-board/{org}/jobs/{jobId}
+ * API: GET https://api.ashbyhq.com/posting-api/job-board/{org}?includeCompensation=true
+ *
+ * Note: The list API returns full job descriptions (descriptionHtml).
+ * The detail API (/jobs/{jobId}) requires authentication and is not public.
  */
 export async function crawlAshbyJobs(orgSlug: string, companyName: string): Promise<PlatformJob[]> {
-  const url = `https://api.ashbyhq.com/posting-api/job-board/${orgSlug}`
+  // Include compensation data in the request
+  const url = `https://api.ashbyhq.com/posting-api/job-board/${orgSlug}?includeCompensation=true`
   const data = await fetchJSON<AshbyResponse>(url)
 
   if (!data?.jobs || !Array.isArray(data.jobs)) {
@@ -72,29 +56,38 @@ export async function crawlAshbyJobs(orgSlug: string, companyName: string): Prom
     if (job.isRemote) locationParts.push('Remote')
     const location = locationParts.length > 0
       ? [...new Set(locationParts)].join(', ')
-      : 'Seoul, Korea'
+      : 'Remote'
 
-    // Fetch full job description from detail API
-    let description = job.descriptionHtml || job.descriptionPlain || undefined
-    const fullDescription = await fetchJobDetail(orgSlug, job.id)
-    if (fullDescription && fullDescription.length > (description?.length || 0)) {
-      description = fullDescription
+    // Use description from list API (already includes full JD)
+    const description = job.descriptionHtml || job.descriptionPlain || undefined
+
+    // Extract salary from compensation data
+    let salary: string | undefined
+    if (job.compensation?.compensationTierSummary) {
+      salary = job.compensation.compensationTierSummary
+    } else if (job.compensation?.summaryComponents?.length) {
+      const salaryComp = job.compensation.summaryComponents.find(
+        c => c.compensationType === 'Salary' || c.compensationType === 'BaseSalary'
+      )
+      if (salaryComp && salaryComp.minValue && salaryComp.maxValue) {
+        const currency = salaryComp.currencyCode || 'USD'
+        salary = `${currency} ${salaryComp.minValue.toLocaleString()} - ${salaryComp.maxValue.toLocaleString()}`
+      }
     }
 
     jobs.push({
       title: job.title,
       company: companyName,
       url: job.jobUrl || `https://jobs.ashbyhq.com/${orgSlug}/${job.id}`,
+      applyUrl: job.applyUrl,
       location,
       type: job.employmentType || 'Full-time',
       category: job.department || job.team || 'Engineering',
       tags: [],
       postedDate: job.publishedAt ? new Date(job.publishedAt) : new Date(),
       description,
+      salary,
     })
-
-    // Rate limiting to avoid API throttling
-    await delay(200)
   }
 
   return jobs

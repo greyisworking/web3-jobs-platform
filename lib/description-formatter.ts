@@ -140,8 +140,9 @@ const BOILERPLATE_PATTERNS = [
   /please\s+mention\s+[A-Z]+\s+in\s+your\s+application.*$/gim,
   /when\s+applying.*mention.*word.*$/gim,
   /include\s+the\s+word\s+[A-Z]+.*$/gim,
-  // Standalone spam keywords (all caps, 6+ letters, surrounded by whitespace)
-  /(?:^|\s)(CANDYSHOP|YELLOWBIRD|PIZZATIME|MOONBEAM|STARLIGHT|BLOCKCHAIN|CRYPTOJOB)(?:\s|$)/gi,
+  // Standalone spam keywords (all caps, contextual fake words for spam detection)
+  // NOTE: Removed BLOCKCHAIN as it's a legitimate term in web3 job postings
+  /(?:^|\s)(CANDYSHOP|YELLOWBIRD|PIZZATIME)(?:\s|$)/gi,
 ]
 
 // Base64-like spam prevention codes
@@ -559,25 +560,38 @@ function convertToMarkdown(text: string): string {
 
 function detectSectionHeader(line: string): string | null {
   // Remove leading symbols that might indicate a header
-  const cleaned = line.replace(/^[#\*\-•]+\s*/, '').replace(/:$/, '')
+  const cleaned = line.replace(/^[#\*\-•]+\s*/, '').replace(/:$/, '').trim()
 
+  // IMPORTANT: Only match if the ENTIRE line is a header
+  // Don't match "About Us: Content here" - only "About Us" or "About Us:"
+  // Check if line has substantial content after the header pattern
   for (const { pattern, heading } of SECTION_HEADERS) {
     if (pattern.test(cleaned)) {
-      return heading
+      // If the cleaned line is just the header pattern (with maybe trailing colon), it's a header
+      // If there's substantial content after, it's NOT a header line
+      const originalWithoutColon = line.replace(/:$/, '').trim()
+      if (originalWithoutColon.length <= heading.length + 15) {
+        // Allow some variation in header text (up to ~15 chars extra)
+        return heading
+      }
+      // Line has content after header - not a standalone header
+      return null
     }
   }
 
   // Check for ALL CAPS headers (likely section headers)
+  // Must be standalone (no lowercase content after)
   if (/^[A-Z\s]{5,50}$/.test(cleaned) && !cleaned.includes('  ')) {
     // Title case it
     return cleaned.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())
   }
 
   // Check for headers ending with colon (common pattern)
+  // Only if the line ENDS with colon (standalone header)
   if (line.endsWith(':') && line.length < 60 && !line.includes('.')) {
-    const headerText = line.slice(0, -1)
-    // Check if it matches common header words
-    if (/^(?:about|overview|description|summary|details|requirements?|qualifications?|responsibilities|duties|benefits?|perks?|compensation|salary|stack|skills?|experience|education)/i.test(headerText)) {
+    const headerText = line.slice(0, -1).trim()
+    // Check if it matches common header words AND is short enough to be a header
+    if (headerText.length < 40 && /^(?:about|overview|description|summary|details|requirements?|qualifications?|responsibilities|duties|benefits?|perks?|compensation|salary|stack|skills?|experience|education)/i.test(headerText)) {
       return headerText
     }
   }
