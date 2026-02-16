@@ -45,14 +45,14 @@ function isValidLocation(location: string | null): boolean {
   return true
 }
 
-function hasSkills(skills: string | null): boolean {
-  if (!skills) return false
-  // Skills stored as JSON array or comma-separated
+function hasTags(tags: string | null): boolean {
+  if (!tags) return false
+  // Tags stored as JSON array or comma-separated
   try {
-    const parsed = JSON.parse(skills)
+    const parsed = JSON.parse(tags)
     return Array.isArray(parsed) && parsed.length > 0
   } catch {
-    return skills.trim().length > 0
+    return tags.trim().length > 0
   }
 }
 
@@ -63,9 +63,9 @@ interface JobRow {
   company: string | null
   location: string | null
   salary: string | null
-  employmentType: string | null
-  skills: string | null
-  applyUrl: string | null
+  type: string | null
+  tags: string | null
+  url: string | null
   crawledAt: string | null
   isActive: boolean
 }
@@ -83,7 +83,7 @@ export async function GET() {
     while (hasMore) {
       const { data: jobs, error } = await supabase
         .from('Job')
-        .select('source, title, description, company, location, salary, employmentType, skills, applyUrl, crawledAt, isActive')
+        .select('source, title, description, company, location, salary, type, tags, url, crawledAt, isActive')
         .eq('isActive', true)
         .range(offset, offset + BATCH_SIZE - 1)
 
@@ -182,15 +182,15 @@ export async function GET() {
       if (job.salary && job.salary.trim()) {
         metrics.withSalary++
       }
-      if (job.employmentType && job.employmentType.trim()) {
+      if (job.type && job.type.trim()) {
         metrics.withEmploymentType++
       }
-      if (hasSkills(job.skills)) {
+      if (hasTags(job.tags)) {
         metrics.withSkills++
       }
 
       // Link quality
-      if (job.applyUrl && job.applyUrl.startsWith('http')) {
+      if (job.url && job.url.startsWith('http')) {
         metrics.withApplyUrl++
       }
 
@@ -284,9 +284,9 @@ export async function GET() {
     const overallJdRate = calcRate(j => (j.description?.trim().length || 0) > 50)
     const overallHtmlErrorRate = calcRate(j => hasHtmlEntities(j.description))
     const overallSalaryRate = calcRate(j => !!(j.salary && j.salary.trim()))
-    const overallEmploymentTypeRate = calcRate(j => !!(j.employmentType && j.employmentType.trim()))
-    const overallSkillsRate = calcRate(j => hasSkills(j.skills))
-    const overallApplyUrlRate = calcRate(j => !!(j.applyUrl && j.applyUrl.startsWith('http')))
+    const overallEmploymentTypeRate = calcRate(j => !!(j.type && j.type.trim()))
+    const overallSkillsRate = calcRate(j => hasTags(j.tags))
+    const overallApplyUrlRate = calcRate(j => !!(j.url && j.url.startsWith('http')))
     const overallOldJobsRate = calcRate(j => j.crawledAt ? new Date(j.crawledAt) < sixtyDaysAgo : false)
 
     const overallMetadataAvg = (overallSalaryRate + overallEmploymentTypeRate + overallSkillsRate) / 3
