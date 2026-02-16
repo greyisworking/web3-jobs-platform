@@ -2,7 +2,7 @@
 
 > 현재 진행 상황 및 백로그
 
-Last Updated: 2026-02-16
+Last Updated: 2026-02-16 14:50 KST
 
 ---
 
@@ -16,14 +16,27 @@ Last Updated: 2026-02-16
 | Admin Dashboard | ✅ Complete | Fully functional |
 | Web3 Integration | ✅ Complete | Wallet connection working |
 | AI Features | ✅ Complete | Claude integration |
+| DB Tables | ⚠️ Partial | bookmarks 테이블 필요 |
 | Testing | ⚠️ Partial | Unit/API tests done |
 | Documentation | 🔄 In Progress | 80% |
+
+### Live Stats (2026-02-16)
+- Total Active Jobs: **1,300**
+- Jobs with Description: **1,268**
+- Jobs with Raw Description: **1,086**
 
 ---
 
 ## Recently Completed
 
-### February 2026
+### February 2026 (Week 3)
+
+- [x] 크롤러 우회 (User-Agent rotation, Browser headers, Playwright)
+- [x] Formatted/Raw 토글 복구 (raw_description 저장)
+- [x] 리포트 기능 수정 (JobReport 테이블 생성)
+- [x] CSRF 보호 적용 (report, bookmark API)
+
+### February 2026 (Earlier)
 
 - [x] VC BACKERS 섹션 렌더링 버그 수정 (JSON 파싱 이슈)
 - [x] 프로젝트 문서화 (README, DATABASE, CRAWLERS)
@@ -135,7 +148,10 @@ Last Updated: 2026-02-16
 | Issue | Priority | Status |
 |-------|----------|--------|
 | ~~VC BACKERS 섹션 안 보임~~ | High | ✅ Fixed |
-| 일부 크롤러 타임아웃 | Medium | 🔄 Monitoring |
+| ~~Formatted/Raw 토글 안 보임~~ | High | ✅ Fixed |
+| ~~리포트 기능 DB 에러~~ | High | ✅ Fixed |
+| bookmarks 테이블 미생성 | High | ⚠️ SQL 실행 필요 |
+| 일부 크롤러 타임아웃 | Medium | ✅ Playwright 적용 |
 | 다크모드 일부 컬러 불일치 | Low | Backlog |
 
 ### Technical Debt
