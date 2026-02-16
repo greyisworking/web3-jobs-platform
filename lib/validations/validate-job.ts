@@ -7,6 +7,7 @@ import { detectRole, normalizeEmploymentType, detectRegion } from '../../scripts
 import { containsKorean, translateJobTitle, quickTranslateTerms } from '../translation'
 import { cleanJobTitle, cleanCompanyName } from '../clean-job-title'
 import { createSafeLikePattern } from '../sanitize'
+import { formatJobDescription, needsFormatting } from '../description-formatter'
 
 // Prisma client for SQLite fallback
 const prisma = new PrismaClient()
@@ -103,7 +104,23 @@ export async function validateAndSaveJob(
       .trim()
   }
 
-  const translatedDescription = translateField(job.description)
+  // Store original description for raw_description field
+  const rawDescription = job.description || null
+
+  // Format and translate description
+  let formattedDescription: string | null = null
+  if (job.description) {
+    // First format the description (clean HTML, structure as markdown)
+    if (needsFormatting(job.description)) {
+      const formatResult = formatJobDescription(job.description)
+      formattedDescription = formatResult.formatted
+    } else {
+      formattedDescription = job.description
+    }
+    // Then translate if contains Korean
+    formattedDescription = translateField(formattedDescription)
+  }
+
   const translatedRequirements = translateField(job.requirements)
   const translatedResponsibilities = translateField(job.responsibilities)
   const translatedBenefits = translateField(job.benefits)
@@ -166,16 +183,18 @@ export async function validateAndSaveJob(
     // Check if job already exists by URL to preserve original values
     const { data: existingJob } = await supabase
       .from('Job')
-      .select('id, postedDate, description')
+      .select('id, postedDate, description, raw_description')
       .eq('url', job.url)
       .single()
 
     // Use existing postedDate if available, otherwise use new one
     const postedDateToUse = existingJob?.postedDate || job.postedDate?.toISOString()
 
-    // For description: use translated value if provided, otherwise keep existing
+    // For description: use formatted value if provided, otherwise keep existing
     // This allows re-crawl to ADD descriptions to jobs that didn't have them
-    const descriptionToUse = translatedDescription || existingJob?.description || null
+    const descriptionToUse = formattedDescription || existingJob?.description || null
+    // Preserve raw_description (original unformatted) - don't overwrite if exists
+    const rawDescriptionToUse = existingJob?.raw_description || rawDescription || null
 
     const { data: upsertData, error } = await supabase.from('Job').upsert(
       {
@@ -196,6 +215,7 @@ export async function validateAndSaveJob(
         updatedAt: new Date().toISOString(),
         // Enhanced job details - use translated values, preserve existing if no new value
         description: descriptionToUse,
+        raw_description: rawDescriptionToUse,  // Original unformatted description for toggle
         requirements: translatedRequirements || null,
         responsibilities: translatedResponsibilities || null,
         benefits: translatedBenefits || null,
@@ -254,8 +274,8 @@ export async function validateAndSaveJob(
           isActive: true,
           postedDate: job.postedDate,
           updatedAt: new Date(),
-          // Enhanced job details - use translated values
-          description: translatedDescription || null,
+          // Enhanced job details - use formatted/translated values
+          description: formattedDescription || null,
           requirements: translatedRequirements || null,
           responsibilities: translatedResponsibilities || null,
           benefits: translatedBenefits || null,
@@ -282,8 +302,8 @@ export async function validateAndSaveJob(
           region: detectedRegion,
           isActive: true,
           postedDate: job.postedDate,
-          // Enhanced job details - use translated values
-          description: translatedDescription || null,
+          // Enhanced job details - use formatted/translated values
+          description: formattedDescription || null,
           requirements: translatedRequirements || null,
           responsibilities: translatedResponsibilities || null,
           benefits: translatedBenefits || null,

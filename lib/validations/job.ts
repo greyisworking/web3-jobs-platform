@@ -32,6 +32,7 @@ export const jobSchema = z.object({
   badges: z.array(z.string()).nullable().optional(),
   // Enhanced job details
   description: z.string().nullable().optional(),
+  raw_description: z.string().nullable().optional(),  // Original unformatted description
   requirements: z.string().nullable().optional(),
   responsibilities: z.string().nullable().optional(),
   benefits: z.string().nullable().optional(),

@@ -15,7 +15,8 @@ model Job {
   type        String   // Full-time, Part-time, Contract, Remote
   category    String   // Engineering, Design, Marketing, etc.
   role        String?  // Engineering, Product, Design, Marketing/Growth, Business Development, Operations/HR, Community/Support
-  description String?  // Full job description (HTML/Markdown)
+  description String?  // Full job description (formatted/cleaned)
+  raw_description String? // Original unformatted description (for toggle feature)
   url         String   @unique
   salary      String?
   tags        String?  // JSON string array
