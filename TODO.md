@@ -2,7 +2,7 @@
 
 > 현재 진행 상황 및 백로그
 
-Last Updated: 2026-02-16 14:50 KST
+Last Updated: 2026-02-16 16:30 KST
 
 ---
 
@@ -31,6 +31,7 @@ Last Updated: 2026-02-16 14:50 KST
 
 ### February 2026 (Week 3)
 
+- [x] JD HTML 엔티티 디코딩 버그 수정 (&lt;div&gt; → 정상 렌더링)
 - [x] 크롤러 우회 (User-Agent rotation, Browser headers, Playwright)
 - [x] Formatted/Raw 토글 복구 (raw_description 저장)
 - [x] 리포트 기능 수정 (JobReport 테이블 생성)
@@ -147,6 +148,7 @@ Last Updated: 2026-02-16 14:50 KST
 
 | Issue | Priority | Status |
 |-------|----------|--------|
+| ~~JD HTML 엔티티 안 디코딩됨~~ | High | ✅ Fixed |
 | ~~VC BACKERS 섹션 안 보임~~ | High | ✅ Fixed |
 | ~~Formatted/Raw 토글 안 보임~~ | High | ✅ Fixed |
 | ~~리포트 기능 DB 에러~~ | High | ✅ Fixed |

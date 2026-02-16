@@ -19,9 +19,17 @@ function preprocessContent(content: string): string {
   processed = processed.replace(/\s+(?:style|class|id|data-[a-z-]+)='[^']*'/gi, '')
 
   // 1. Decode HTML entities first
+  // Handle double-encoded entities first (e.g., &amp;lt; -> &lt;)
+  processed = processed
+    .replace(/&amp;lt;/gi, '&lt;')
+    .replace(/&amp;gt;/gi, '&gt;')
+    .replace(/&amp;quot;/gi, '&quot;')
+    .replace(/&amp;amp;/gi, '&amp;')
+    .replace(/&amp;nbsp;/gi, '&nbsp;')
+
+  // Now decode single-encoded entities
   processed = processed
     .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>')
     .replace(/&quot;/gi, '"')
@@ -43,6 +51,8 @@ function preprocessContent(content: string): string {
     .replace(/&#8220;/gi, '"')
     .replace(/&#8221;/gi, '"')
     .replace(/&#\d+;/g, '') // Remove remaining numeric entities
+    // Decode &amp; LAST to avoid breaking other entities
+    .replace(/&amp;/gi, '&')
 
   // 2. Convert <br/> and <br> tags to newlines
   processed = processed.replace(/<br\s*\/?>/gi, '\n')

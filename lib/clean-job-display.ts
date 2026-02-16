@@ -277,7 +277,17 @@ export function cleanJobDisplay(html: string | null | undefined): string {
   }
 
   // Fix common encoding issues (HTML entities that weren't decoded)
+  // IMPORTANT: Decode &lt; and &gt; BEFORE &amp; to handle double-encoded entities
+  // e.g., &amp;lt; -> &lt; -> < (if we decode &amp; first, we'd miss the second step)
   cleaned = cleaned
+    // First pass: decode &lt; and &gt; (these might be double-encoded as &amp;lt;)
+    .replace(/&amp;lt;/gi, '&lt;')
+    .replace(/&amp;gt;/gi, '&gt;')
+    .replace(/&amp;quot;/gi, '&quot;')
+    .replace(/&amp;amp;/gi, '&amp;')
+    // Second pass: decode all HTML entities
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
     .replace(/&#39;/g, "'")
     .replace(/&apos;/g, "'")
     .replace(/&#x27;/g, "'")
@@ -292,7 +302,32 @@ export function cleanJobDisplay(html: string | null | undefined): string {
     .replace(/&hellip;/g, '...')
     .replace(/&nbsp;/g, ' ')
 
-  // Convert <br/> tags to newlines for markdown rendering
+  // After decoding entities, strip HTML tags (they were encoded, now decoded)
+  // Convert common HTML tags to appropriate markdown/text
+  cleaned = cleaned
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<p[^>]*>/gi, '')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<div[^>]*>/gi, '')
+    .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '\n## $1\n')
+    .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '\n## $1\n')
+    .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '\n### $1\n')
+    .replace(/<h[4-6][^>]*>(.*?)<\/h[4-6]>/gi, '\n#### $1\n')
+    .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**')
+    .replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**')
+    .replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*')
+    .replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*')
+    .replace(/<li[^>]*>/gi, '\n- ')
+    .replace(/<\/li>/gi, '')
+    .replace(/<\/?(?:ul|ol)[^>]*>/gi, '\n')
+    .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)')
+    .replace(/<span[^>]*>/gi, '')
+    .replace(/<\/span>/gi, '')
+    // Remove any remaining HTML tags
+    .replace(/<[^>]+>/g, ' ')
+
+  // Convert <br/> tags to newlines for markdown rendering (legacy, keeping for safety)
   cleaned = cleaned.replace(/<br\s*\/?>/gi, '\n')
 
   // Clean up whitespace
