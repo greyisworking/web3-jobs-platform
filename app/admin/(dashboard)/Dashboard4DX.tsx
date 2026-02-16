@@ -62,6 +62,28 @@ interface MetricsData {
   lastUpdated: string
 }
 
+interface CrawlerQualitySource {
+  source: string
+  total: number
+  jdSuccessRate: number
+  companySuccessRate: number
+  htmlErrorRate: number
+  qualityScore: number
+}
+
+interface CrawlerQualityData {
+  sources: CrawlerQualitySource[]
+  summary: {
+    totalJobs: number
+    totalSources: number
+    jdSuccessRate: number
+    companySuccessRate: number
+    htmlErrorRate: number
+    qualityScore: number
+  }
+  lastUpdated: string
+}
+
 type ScoreStatus = 'green' | 'yellow' | 'red'
 type TrendDirection = 'up' | 'down' | 'neutral'
 
@@ -218,16 +240,27 @@ function FullChart({ data }: { data: { date: string; clicks: number }[] }) {
 
 export function Dashboard4DX() {
   const [metrics, setMetrics] = useState<MetricsData | null>(null)
+  const [crawlerQuality, setCrawlerQuality] = useState<CrawlerQualityData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const fetchMetrics = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/metrics')
-      if (!res.ok) throw new Error('Failed to fetch metrics')
-      const data = await res.json()
-      setMetrics(data)
+      const [metricsRes, qualityRes] = await Promise.all([
+        fetch('/api/admin/metrics'),
+        fetch('/api/admin/crawler-quality'),
+      ])
+
+      if (!metricsRes.ok) throw new Error('Failed to fetch metrics')
+      const metricsData = await metricsRes.json()
+      setMetrics(metricsData)
+
+      if (qualityRes.ok) {
+        const qualityData = await qualityRes.json()
+        setCrawlerQuality(qualityData)
+      }
+
       setError(null)
     } catch (err) {
       setError('메트릭을 불러오는데 실패했습니다')
@@ -429,36 +462,92 @@ export function Dashboard4DX() {
         </div>
       </div>
 
-      {/* Crawler Details */}
+      {/* Crawler Quality Metrics */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Clock className="w-5 h-5" />
-            크롤러 상세 현황 (최근 7일)
+            크롤러 품질 지표
           </CardTitle>
           <CardDescription>
-            소스별 활성 공고 수 및 상태
+            소스별 데이터 품질 분석 - 어떤 크롤러를 개선해야 하는지 확인하세요
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Summary Cards */}
+          {crawlerQuality && (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+              <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <p className="text-2xl font-bold">{crawlerQuality.summary.totalJobs.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">총 공고</p>
+              </div>
+              <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <p className={`text-2xl font-bold ${crawlerQuality.summary.jdSuccessRate >= 90 ? 'text-green-600' : crawlerQuality.summary.jdSuccessRate >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
+                  {crawlerQuality.summary.jdSuccessRate}%
+                </p>
+                <p className="text-xs text-muted-foreground">JD 성공률</p>
+              </div>
+              <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <p className={`text-2xl font-bold ${crawlerQuality.summary.companySuccessRate >= 90 ? 'text-green-600' : crawlerQuality.summary.companySuccessRate >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
+                  {crawlerQuality.summary.companySuccessRate}%
+                </p>
+                <p className="text-xs text-muted-foreground">회사명 성공률</p>
+              </div>
+              <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <p className={`text-2xl font-bold ${crawlerQuality.summary.htmlErrorRate <= 5 ? 'text-green-600' : crawlerQuality.summary.htmlErrorRate <= 15 ? 'text-yellow-600' : 'text-red-600'}`}>
+                  {crawlerQuality.summary.htmlErrorRate}%
+                </p>
+                <p className="text-xs text-muted-foreground">HTML 오류율</p>
+              </div>
+              <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <p className={`text-2xl font-bold ${crawlerQuality.summary.qualityScore >= 90 ? 'text-green-600' : crawlerQuality.summary.qualityScore >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
+                  {crawlerQuality.summary.qualityScore}
+                </p>
+                <p className="text-xs text-muted-foreground">전체 품질 점수</p>
+              </div>
+            </div>
+          )}
+
+          {/* Quality Table */}
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>소스</TableHead>
                 <TableHead className="text-right">공고 수</TableHead>
-                <TableHead className="text-right">비율</TableHead>
+                <TableHead className="text-right">JD 성공률</TableHead>
+                <TableHead className="text-right">회사명 성공률</TableHead>
+                <TableHead className="text-right">HTML 오류</TableHead>
+                <TableHead className="text-right">품질 점수</TableHead>
                 <TableHead className="text-right">상태</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {metrics.leadMeasures.crawler.sources.slice(0, 10).map((source) => {
-                const percentage = (source.count / metrics.leadMeasures.crawler.activeJobs) * 100
-                const status = source.count > 50 ? 'green' : source.count > 10 ? 'yellow' : 'red'
+              {crawlerQuality?.sources.map((source) => {
+                const status: ScoreStatus = source.qualityScore >= 90 ? 'green' : source.qualityScore >= 70 ? 'yellow' : 'red'
                 return (
                   <TableRow key={source.source}>
                     <TableCell className="font-medium">{source.source}</TableCell>
-                    <TableCell className="text-right">{source.count.toLocaleString()}</TableCell>
-                    <TableCell className="text-right">{percentage.toFixed(1)}%</TableCell>
+                    <TableCell className="text-right">{source.total.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">
+                      <span className={source.jdSuccessRate >= 90 ? 'text-green-600' : source.jdSuccessRate >= 70 ? 'text-yellow-600' : 'text-red-600'}>
+                        {source.jdSuccessRate}%
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <span className={source.companySuccessRate >= 90 ? 'text-green-600' : source.companySuccessRate >= 70 ? 'text-yellow-600' : 'text-red-600'}>
+                        {source.companySuccessRate}%
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <span className={source.htmlErrorRate <= 5 ? 'text-green-600' : source.htmlErrorRate <= 15 ? 'text-yellow-600' : 'text-red-600'}>
+                        {source.htmlErrorRate}%
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right font-bold">
+                      <span className={status === 'green' ? 'text-green-600' : status === 'yellow' ? 'text-yellow-600' : 'text-red-600'}>
+                        {source.qualityScore}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-right">
                       <Badge variant={status === 'green' ? 'default' : status === 'yellow' ? 'secondary' : 'destructive'}>
                         {status === 'green' ? '정상' : status === 'yellow' ? '주의' : '부족'}
@@ -469,11 +558,28 @@ export function Dashboard4DX() {
               })}
             </TableBody>
           </Table>
-          {metrics.leadMeasures.crawler.sources.length > 10 && (
-            <p className="text-sm text-muted-foreground text-center mt-4">
-              외 {metrics.leadMeasures.crawler.sources.length - 10}개 소스
+
+          {/* Legend */}
+          <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+            <p className="text-sm font-medium mb-2">품질 점수 기준</p>
+            <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                90점 이상: 정상
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
+                70~89점: 주의
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-3 h-3 bg-red-500 rounded-full"></span>
+                70점 미만: 부족
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              * 품질 점수 = (JD 성공률 × 40%) + (회사명 성공률 × 30%) + ((100 - HTML 오류율) × 30%)
             </p>
-          )}
+          </div>
         </CardContent>
       </Card>
     </div>
