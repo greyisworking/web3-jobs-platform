@@ -65,9 +65,25 @@ interface MetricsData {
 interface CrawlerQualitySource {
   source: string
   total: number
-  jdSuccessRate: number
+  // Basic info
+  titleSuccessRate: number
   companySuccessRate: number
+  locationRate: number
+  // JD quality
+  jdSuccessRate: number
+  avgJdLength: number
+  shortJdRate: number
   htmlErrorRate: number
+  // Metadata
+  salaryRate: number
+  employmentTypeRate: number
+  skillsRate: number
+  // Links
+  applyUrlRate: number
+  // Staleness
+  oldJobsRate: number
+  oldJobs: number
+  // Overall
   qualityScore: number
 }
 
@@ -76,9 +92,24 @@ interface CrawlerQualityData {
   summary: {
     totalJobs: number
     totalSources: number
-    jdSuccessRate: number
+    sourcesAt90Plus: number
+    // Basic info
+    titleSuccessRate: number
     companySuccessRate: number
+    locationRate: number
+    // JD quality
+    jdSuccessRate: number
     htmlErrorRate: number
+    // Metadata
+    salaryRate: number
+    employmentTypeRate: number
+    skillsRate: number
+    // Links
+    applyUrlRate: number
+    // Staleness
+    oldJobsRate: number
+    oldJobs: number
+    // Overall
     qualityScore: number
   }
   lastUpdated: string
@@ -333,106 +364,195 @@ export function Dashboard4DX() {
         </Button>
       </div>
 
-      {/* WIG Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 border-2 border-neun-primary/30">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-neun-primary" />
-                  WIG (최중요 목표)
-                </CardTitle>
-                <CardDescription className="mt-1">
-                  월간 Apply 클릭 1,000회 달성
-                </CardDescription>
+      {/* WIG Section - Crawler Quality 90+ by Feb 28 */}
+      {crawlerQuality && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2 border-2 border-neun-primary/30">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-neun-primary" />
+                    WIG (최중요 목표)
+                  </CardTitle>
+                  <CardDescription className="mt-1">
+                    2월 28일까지 모든 크롤러 품질 점수 90점 이상
+                  </CardDescription>
+                </div>
+                <StatusBadge status={crawlerQuality.summary.sourcesAt90Plus === crawlerQuality.summary.totalSources ? 'green' : crawlerQuality.summary.sourcesAt90Plus >= crawlerQuality.summary.totalSources * 0.7 ? 'yellow' : 'red'} />
               </div>
-              <StatusBadge status={wigStatus} />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-baseline gap-4">
-                <span className="text-5xl font-bold text-neun-primary">
-                  {metrics.wig.current.toLocaleString()}
-                </span>
-                <span className="text-2xl text-muted-foreground">
-                  / {metrics.wig.target.toLocaleString()}회
-                </span>
-                <div className="flex items-center gap-1 ml-auto">
-                  <TrendIcon direction={getTrendDirection(metrics.wig.trend)} />
-                  <span className={`text-sm ${metrics.wig.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {metrics.wig.trend >= 0 ? '+' : ''}{metrics.wig.trend.toFixed(1)}%
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-baseline gap-4">
+                  <span className="text-5xl font-bold text-neun-primary">
+                    {crawlerQuality.summary.sourcesAt90Plus}
                   </span>
+                  <span className="text-2xl text-muted-foreground">
+                    / {crawlerQuality.summary.totalSources}개 크롤러
+                  </span>
+                  <div className="flex items-center gap-2 ml-auto">
+                    <span className={`text-lg font-bold ${crawlerQuality.summary.qualityScore >= 90 ? 'text-green-600' : crawlerQuality.summary.qualityScore >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      평균 {crawlerQuality.summary.qualityScore}점
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>90점 이상 달성률</span>
+                    <span className="font-medium">
+                      {crawlerQuality.summary.totalSources > 0
+                        ? Math.round((crawlerQuality.summary.sourcesAt90Plus / crawlerQuality.summary.totalSources) * 100)
+                        : 0}%
+                    </span>
+                  </div>
+                  <Progress
+                    value={crawlerQuality.summary.totalSources > 0
+                      ? (crawlerQuality.summary.sourcesAt90Plus / crawlerQuality.summary.totalSources) * 100
+                      : 0}
+                    className="h-3"
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">
+                      {Math.ceil((new Date('2026-02-28').getTime() - Date.now()) / (1000 * 60 * 60 * 24))}
+                    </p>
+                    <p className="text-xs text-muted-foreground">남은 일수</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-red-600">
+                      {crawlerQuality.summary.totalSources - crawlerQuality.summary.sourcesAt90Plus}
+                    </p>
+                    <p className="text-xs text-muted-foreground">개선 필요</p>
+                  </div>
+                  <div className="text-center">
+                    <p className={`text-2xl font-bold ${crawlerQuality.summary.qualityScore >= 90 ? 'text-green-600' : 'text-yellow-600'}`}>
+                      {90 - crawlerQuality.summary.qualityScore > 0 ? `+${90 - crawlerQuality.summary.qualityScore}` : '달성!'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">목표 점수까지</p>
+                  </div>
+                </div>
+
+                {/* Sources needing improvement */}
+                <div className="pt-4 border-t">
+                  <p className="text-sm font-medium mb-3">개선 필요 크롤러</p>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {crawlerQuality.sources
+                      .filter(s => s.qualityScore < 90)
+                      .sort((a, b) => a.qualityScore - b.qualityScore)
+                      .map(source => (
+                        <div key={source.source} className="flex items-center justify-between text-sm">
+                          <a href={`/admin/jobs?source=${encodeURIComponent(source.source)}`} className="hover:underline text-blue-600">
+                            {source.source}
+                          </a>
+                          <div className="flex items-center gap-2">
+                            <span className={`font-medium ${source.qualityScore >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
+                              {source.qualityScore}점
+                            </span>
+                            <span className="text-muted-foreground text-xs">
+                              (+{90 - source.qualityScore} 필요)
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    {crawlerQuality.sources.filter(s => s.qualityScore < 90).length === 0 && (
+                      <p className="text-green-600 text-sm">🎉 모든 크롤러가 90점 이상입니다!</p>
+                    )}
+                  </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>진행률</span>
-                  <span className="font-medium">{metrics.wig.progress.toFixed(1)}%</span>
-                </div>
-                <Progress value={metrics.wig.progress} className="h-3" />
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t">
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{daysRemaining}</p>
-                  <p className="text-xs text-muted-foreground">남은 일수</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{dailyRequired}</p>
-                  <p className="text-xs text-muted-foreground">일 평균 필요</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold">
-                    {metrics.wig.target - metrics.wig.current}
-                  </p>
-                  <p className="text-xs text-muted-foreground">남은 클릭 수</p>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t">
-                <p className="text-sm font-medium mb-3">일별 Apply 클릭 추이 (최근 14일)</p>
-                <FullChart data={metrics.wig.chartData} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Weekly Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
-              주간 추이
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {metrics.wig.weeklyData.map((week, i) => (
-                <div key={week.week} className="flex items-center gap-3">
-                  <span className="text-sm w-16">{week.week}</span>
-                  <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-6 overflow-hidden">
+          {/* Quality Targets */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                품질 목표
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* JD Success Rate */}
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>JD 성공률</span>
+                    <span className={crawlerQuality.summary.jdSuccessRate >= 95 ? 'text-green-600' : 'text-yellow-600'}>
+                      {crawlerQuality.summary.jdSuccessRate}% / 95%
+                    </span>
+                  </div>
+                  <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-4 overflow-hidden">
                     <div
-                      className={`h-full ${i === metrics.wig.weeklyData.length - 1 ? 'bg-neun-primary' : 'bg-neun-primary/50'} transition-all`}
-                      style={{ width: `${Math.min(100, (week.clicks / 250) * 100)}%` }}
+                      className={`h-full ${crawlerQuality.summary.jdSuccessRate >= 95 ? 'bg-green-500' : 'bg-yellow-500'} transition-all`}
+                      style={{ width: `${Math.min(100, (crawlerQuality.summary.jdSuccessRate / 95) * 100)}%` }}
                     />
                   </div>
-                  <span className="text-sm font-medium w-12 text-right">{week.clicks}</span>
                 </div>
-              ))}
-            </div>
 
-            <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-              <p className="text-sm font-medium">목표 달성을 위해</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                앞으로 주당 평균 <span className="font-bold text-neun-primary">{Math.ceil((metrics.wig.target - metrics.wig.current) / Math.ceil(daysRemaining / 7))}회</span>가 필요합니다
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                {/* Company Success Rate */}
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>회사명 성공률</span>
+                    <span className={crawlerQuality.summary.companySuccessRate >= 99 ? 'text-green-600' : 'text-yellow-600'}>
+                      {crawlerQuality.summary.companySuccessRate}% / 99%
+                    </span>
+                  </div>
+                  <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-4 overflow-hidden">
+                    <div
+                      className={`h-full ${crawlerQuality.summary.companySuccessRate >= 99 ? 'bg-green-500' : 'bg-yellow-500'} transition-all`}
+                      style={{ width: `${Math.min(100, (crawlerQuality.summary.companySuccessRate / 99) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* HTML Error Rate */}
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>HTML 오류율</span>
+                    <span className={crawlerQuality.summary.htmlErrorRate <= 0 ? 'text-green-600' : crawlerQuality.summary.htmlErrorRate <= 5 ? 'text-yellow-600' : 'text-red-600'}>
+                      {crawlerQuality.summary.htmlErrorRate}% → 0%
+                    </span>
+                  </div>
+                  <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-4 overflow-hidden">
+                    <div
+                      className={`h-full ${crawlerQuality.summary.htmlErrorRate <= 0 ? 'bg-green-500' : crawlerQuality.summary.htmlErrorRate <= 5 ? 'bg-yellow-500' : 'bg-red-500'} transition-all`}
+                      style={{ width: `${100 - Math.min(100, crawlerQuality.summary.htmlErrorRate * 5)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Expired Jobs Warning */}
+              {crawlerQuality.summary.oldJobs > 0 && (
+                <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <p className="text-sm font-medium flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
+                    <AlertTriangle className="w-4 h-4" />
+                    만료 공고 주의
+                  </p>
+                  <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                    <a href="/admin/jobs?filter=old" className="hover:underline">
+                      {crawlerQuality.summary.oldJobs.toLocaleString()}개 공고가 60일 이상 지났습니다
+                    </a>
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <p className="text-sm font-medium">Lead Measures</p>
+                <ul className="text-xs text-muted-foreground mt-2 space-y-1">
+                  <li>• JD 목표: 95% 이상</li>
+                  <li>• 회사명 목표: 99% 이상</li>
+                  <li>• HTML 오류: 0%</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Lead Measures - Scoreboard */}
       <div>
@@ -478,127 +598,229 @@ export function Dashboard4DX() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Clock className="w-5 h-5" />
-            크롤러 품질 지표
+            크롤러 품질 지표 (세분화)
           </CardTitle>
           <CardDescription>
-            소스별 데이터 품질 분석 - 어떤 크롤러를 개선해야 하는지 확인하세요
+            소스별 데이터 품질 분석 - 기본 정보, JD 품질, 메타데이터, 링크 품질
           </CardDescription>
         </CardHeader>
         <CardContent>
           {/* Summary Cards */}
           {crawlerQuality && (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-              <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                <p className="text-2xl font-bold">{crawlerQuality.summary.totalJobs.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">총 공고</p>
+            <div className="space-y-4 mb-6">
+              {/* Row 1: Basic Info */}
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-2">기본 정보</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className="text-2xl font-bold">{crawlerQuality.summary.totalJobs.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">총 공고</p>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className={`text-2xl font-bold ${crawlerQuality.summary.titleSuccessRate >= 95 ? 'text-green-600' : crawlerQuality.summary.titleSuccessRate >= 80 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      {crawlerQuality.summary.titleSuccessRate}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">직무명 품질</p>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className={`text-2xl font-bold ${crawlerQuality.summary.companySuccessRate >= 99 ? 'text-green-600' : crawlerQuality.summary.companySuccessRate >= 90 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      {crawlerQuality.summary.companySuccessRate}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">회사명 성공률</p>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className={`text-2xl font-bold ${crawlerQuality.summary.locationRate >= 70 ? 'text-green-600' : crawlerQuality.summary.locationRate >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      {crawlerQuality.summary.locationRate}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">위치 정보율</p>
+                  </div>
+                </div>
               </div>
-              <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                <p className={`text-2xl font-bold ${crawlerQuality.summary.jdSuccessRate >= 90 ? 'text-green-600' : crawlerQuality.summary.jdSuccessRate >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
-                  {crawlerQuality.summary.jdSuccessRate}%
-                </p>
-                <p className="text-xs text-muted-foreground">JD 성공률</p>
+
+              {/* Row 2: JD Quality */}
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-2">JD 품질</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className={`text-2xl font-bold ${crawlerQuality.summary.jdSuccessRate >= 95 ? 'text-green-600' : crawlerQuality.summary.jdSuccessRate >= 80 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      {crawlerQuality.summary.jdSuccessRate}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">JD 존재율 (50자+)</p>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className={`text-2xl font-bold ${crawlerQuality.summary.htmlErrorRate <= 0 ? 'text-green-600' : crawlerQuality.summary.htmlErrorRate <= 5 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      {crawlerQuality.summary.htmlErrorRate}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">HTML 오류율</p>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className={`text-2xl font-bold ${crawlerQuality.summary.qualityScore >= 90 ? 'text-green-600' : crawlerQuality.summary.qualityScore >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      {crawlerQuality.summary.qualityScore}
+                    </p>
+                    <p className="text-xs text-muted-foreground">전체 품질 점수</p>
+                  </div>
+                </div>
               </div>
-              <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                <p className={`text-2xl font-bold ${crawlerQuality.summary.companySuccessRate >= 90 ? 'text-green-600' : crawlerQuality.summary.companySuccessRate >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
-                  {crawlerQuality.summary.companySuccessRate}%
-                </p>
-                <p className="text-xs text-muted-foreground">회사명 성공률</p>
+
+              {/* Row 3: Metadata */}
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-2">메타데이터</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className={`text-2xl font-bold ${crawlerQuality.summary.salaryRate >= 30 ? 'text-green-600' : crawlerQuality.summary.salaryRate >= 10 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      {crawlerQuality.summary.salaryRate}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">급여 정보율</p>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className={`text-2xl font-bold ${crawlerQuality.summary.employmentTypeRate >= 50 ? 'text-green-600' : crawlerQuality.summary.employmentTypeRate >= 30 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      {crawlerQuality.summary.employmentTypeRate}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">고용형태 정보율</p>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className={`text-2xl font-bold ${crawlerQuality.summary.skillsRate >= 50 ? 'text-green-600' : crawlerQuality.summary.skillsRate >= 30 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      {crawlerQuality.summary.skillsRate}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">스킬 정보율</p>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className={`text-2xl font-bold ${crawlerQuality.summary.applyUrlRate >= 95 ? 'text-green-600' : crawlerQuality.summary.applyUrlRate >= 80 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      {crawlerQuality.summary.applyUrlRate}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">지원링크 유효율</p>
+                  </div>
+                </div>
               </div>
-              <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                <p className={`text-2xl font-bold ${crawlerQuality.summary.htmlErrorRate <= 5 ? 'text-green-600' : crawlerQuality.summary.htmlErrorRate <= 15 ? 'text-yellow-600' : 'text-red-600'}`}>
-                  {crawlerQuality.summary.htmlErrorRate}%
-                </p>
-                <p className="text-xs text-muted-foreground">HTML 오류율</p>
-              </div>
-              <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                <p className={`text-2xl font-bold ${crawlerQuality.summary.qualityScore >= 90 ? 'text-green-600' : crawlerQuality.summary.qualityScore >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
-                  {crawlerQuality.summary.qualityScore}
-                </p>
-                <p className="text-xs text-muted-foreground">전체 품질 점수</p>
+
+              {/* Row 4: Staleness */}
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-2">만료 공고</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className={`text-center p-3 rounded-lg ${crawlerQuality.summary.oldJobsRate <= 5 ? 'bg-green-50 dark:bg-green-900/20' : crawlerQuality.summary.oldJobsRate <= 15 ? 'bg-yellow-50 dark:bg-yellow-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                    <p className={`text-2xl font-bold ${crawlerQuality.summary.oldJobsRate <= 5 ? 'text-green-600' : crawlerQuality.summary.oldJobsRate <= 15 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      {crawlerQuality.summary.oldJobsRate}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">60일+ 오래된 공고율</p>
+                  </div>
+                  <a href="/admin/jobs?filter=old" className={`text-center p-3 rounded-lg hover:opacity-80 transition-opacity ${crawlerQuality.summary.oldJobs === 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-yellow-50 dark:bg-yellow-900/20'}`}>
+                    <p className={`text-2xl font-bold ${crawlerQuality.summary.oldJobs === 0 ? 'text-green-600' : 'text-yellow-600'}`}>
+                      {crawlerQuality.summary.oldJobs.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-muted-foreground">만료 처리 대상 공고</p>
+                  </a>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Quality Table */}
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>소스</TableHead>
-                <TableHead className="text-right">공고 수</TableHead>
-                <TableHead className="text-right">JD 성공률</TableHead>
-                <TableHead className="text-right">회사명 성공률</TableHead>
-                <TableHead className="text-right">HTML 오류</TableHead>
-                <TableHead className="text-right">품질 점수</TableHead>
-                <TableHead className="text-right">상태</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {crawlerQuality?.sources.map((source) => {
-                const status: ScoreStatus = source.qualityScore >= 90 ? 'green' : source.qualityScore >= 70 ? 'yellow' : 'red'
-                return (
-                  <TableRow key={source.source} className="hover:bg-muted/50 cursor-pointer">
-                    <TableCell className="font-medium">
-                      <a href={`/admin/jobs?source=${encodeURIComponent(source.source)}`} className="hover:text-blue-600 hover:underline">
-                        {source.source}
-                      </a>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <a href={`/admin/jobs?source=${encodeURIComponent(source.source)}`} className="hover:underline">
+          {/* Quality Table - Detailed */}
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>소스</TableHead>
+                  <TableHead className="text-right">공고</TableHead>
+                  <TableHead className="text-right" title="직무명 품질">직무명</TableHead>
+                  <TableHead className="text-right" title="회사명 성공률">회사</TableHead>
+                  <TableHead className="text-right" title="JD 존재율">JD</TableHead>
+                  <TableHead className="text-right" title="평균 JD 길이">JD길이</TableHead>
+                  <TableHead className="text-right" title="HTML 오류율">HTML</TableHead>
+                  <TableHead className="text-right" title="급여 정보율">급여</TableHead>
+                  <TableHead className="text-right" title="지원링크 유효율">링크</TableHead>
+                  <TableHead className="text-right" title="60일 이상 오래된 공고">오래됨</TableHead>
+                  <TableHead className="text-right">점수</TableHead>
+                  <TableHead className="text-right">상태</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {crawlerQuality?.sources.map((source) => {
+                  const status: ScoreStatus = source.qualityScore >= 90 ? 'green' : source.qualityScore >= 70 ? 'yellow' : 'red'
+                  return (
+                    <TableRow key={source.source} className="hover:bg-muted/50">
+                      <TableCell className="font-medium">
+                        <a href={`/admin/jobs?source=${encodeURIComponent(source.source)}`} className="hover:text-blue-600 hover:underline">
+                          {source.source}
+                        </a>
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
                         {source.total.toLocaleString()}
-                      </a>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <a
-                        href={`/admin/jobs?source=${encodeURIComponent(source.source)}&filter=no-jd`}
-                        className={`hover:underline ${source.jdSuccessRate >= 90 ? 'text-green-600' : source.jdSuccessRate >= 70 ? 'text-yellow-600' : 'text-red-600'}`}
-                        title="JD 없는 공고 보기"
-                      >
-                        {source.jdSuccessRate}%
-                      </a>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <a
-                        href={`/admin/jobs?source=${encodeURIComponent(source.source)}&filter=unknown-company`}
-                        className={`hover:underline ${source.companySuccessRate >= 90 ? 'text-green-600' : source.companySuccessRate >= 70 ? 'text-yellow-600' : 'text-red-600'}`}
-                        title="UNKNOWN 회사 공고 보기"
-                      >
-                        {source.companySuccessRate}%
-                      </a>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <a
-                        href={`/admin/jobs?source=${encodeURIComponent(source.source)}&filter=html-errors`}
-                        className={`hover:underline ${source.htmlErrorRate <= 5 ? 'text-green-600' : source.htmlErrorRate <= 15 ? 'text-yellow-600' : 'text-red-600'}`}
-                        title="HTML 오류 공고 보기"
-                      >
-                        {source.htmlErrorRate}%
-                      </a>
-                    </TableCell>
-                    <TableCell className="text-right font-bold">
-                      <span className={status === 'green' ? 'text-green-600' : status === 'yellow' ? 'text-yellow-600' : 'text-red-600'}>
-                        {source.qualityScore}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <a
-                        href={status !== 'green' ? `/admin/jobs?source=${encodeURIComponent(source.source)}&filter=${source.jdSuccessRate < source.companySuccessRate ? 'no-jd' : 'unknown-company'}` : '#'}
-                        className={status !== 'green' ? 'cursor-pointer' : 'cursor-default'}
-                      >
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
+                        <span className={source.titleSuccessRate >= 95 ? 'text-green-600' : source.titleSuccessRate >= 80 ? 'text-yellow-600' : 'text-red-600'}>
+                          {source.titleSuccessRate}%
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
+                        <a
+                          href={`/admin/jobs?source=${encodeURIComponent(source.source)}&filter=unknown-company`}
+                          className={`hover:underline ${source.companySuccessRate >= 99 ? 'text-green-600' : source.companySuccessRate >= 90 ? 'text-yellow-600' : 'text-red-600'}`}
+                        >
+                          {source.companySuccessRate}%
+                        </a>
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
+                        <a
+                          href={`/admin/jobs?source=${encodeURIComponent(source.source)}&filter=no-jd`}
+                          className={`hover:underline ${source.jdSuccessRate >= 95 ? 'text-green-600' : source.jdSuccessRate >= 80 ? 'text-yellow-600' : 'text-red-600'}`}
+                        >
+                          {source.jdSuccessRate}%
+                        </a>
+                      </TableCell>
+                      <TableCell className="text-right text-sm text-muted-foreground">
+                        {source.avgJdLength > 0 ? source.avgJdLength.toLocaleString() : '-'}
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
+                        <a
+                          href={`/admin/jobs?source=${encodeURIComponent(source.source)}&filter=html-errors`}
+                          className={`hover:underline ${source.htmlErrorRate <= 0 ? 'text-green-600' : source.htmlErrorRate <= 5 ? 'text-yellow-600' : 'text-red-600'}`}
+                        >
+                          {source.htmlErrorRate}%
+                        </a>
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
+                        <span className={source.salaryRate >= 30 ? 'text-green-600' : source.salaryRate >= 10 ? 'text-yellow-600' : 'text-muted-foreground'}>
+                          {source.salaryRate}%
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
+                        <span className={source.applyUrlRate >= 95 ? 'text-green-600' : source.applyUrlRate >= 80 ? 'text-yellow-600' : 'text-red-600'}>
+                          {source.applyUrlRate}%
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
+                        {source.oldJobs > 0 ? (
+                          <a
+                            href={`/admin/jobs?source=${encodeURIComponent(source.source)}&filter=old`}
+                            className="text-yellow-600 hover:underline"
+                          >
+                            {source.oldJobs}
+                          </a>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-bold">
+                        <span className={status === 'green' ? 'text-green-600' : status === 'yellow' ? 'text-yellow-600' : 'text-red-600'}>
+                          {source.qualityScore}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
                         <Badge variant={status === 'green' ? 'default' : status === 'yellow' ? 'secondary' : 'destructive'}>
                           {status === 'green' ? '정상' : status === 'yellow' ? '주의' : '부족'}
                         </Badge>
-                      </a>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </div>
 
           {/* Legend */}
           <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
             <p className="text-sm font-medium mb-2">품질 점수 기준</p>
-            <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+            <div className="flex flex-wrap gap-4 text-xs text-muted-foreground mb-3">
               <span className="flex items-center gap-1">
                 <span className="w-3 h-3 bg-green-500 rounded-full"></span>
                 90점 이상: 정상
@@ -612,9 +834,18 @@ export function Dashboard4DX() {
                 70점 미만: 부족
               </span>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              * 품질 점수 = (JD 성공률 × 40%) + (회사명 성공률 × 30%) + ((100 - HTML 오류율) × 30%)
+            <p className="text-xs text-muted-foreground">
+              * 품질 점수 계산식:
             </p>
+            <ul className="text-xs text-muted-foreground mt-1 space-y-0.5 ml-2">
+              <li>• 직무명 품질: 10%</li>
+              <li>• 회사명 성공률: 15%</li>
+              <li>• JD 성공률: 25%</li>
+              <li>• HTML 오류 없음: 15%</li>
+              <li>• 위치 정보: 10%</li>
+              <li>• 메타데이터(급여/고용형태/스킬 평균): 15%</li>
+              <li>• 지원링크 유효: 10%</li>
+            </ul>
           </div>
         </CardContent>
       </Card>

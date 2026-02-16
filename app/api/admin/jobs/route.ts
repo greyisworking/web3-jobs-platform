@@ -56,6 +56,10 @@ export async function GET(request: NextRequest) {
   const needsClientFilter = filter === 'no-jd' || filter === 'html-errors'
   const fetchLimit = needsClientFilter ? Math.max(pageSize * 10, 500) : pageSize
 
+  // Calculate date thresholds
+  const sixtyDaysAgo = new Date()
+  sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60)
+
   let query = supabase
     .from('Job')
     .select('*', { count: 'exact' })
@@ -81,6 +85,10 @@ export async function GET(request: NextRequest) {
       break
     case 'unknown-company':
       query = query.or('company.is.null,company.eq.UNKNOWN,company.eq.unknown,company.eq.')
+      break
+    case 'old':
+      // Jobs older than 60 days
+      query = query.lt('crawledAt', sixtyDaysAgo.toISOString())
       break
     case 'no-jd':
     case 'html-errors':

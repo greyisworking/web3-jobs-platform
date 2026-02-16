@@ -11,7 +11,7 @@ import axios from 'axios'
 import 'dotenv/config'
 
 // Max age in days before auto-expiring
-const MAX_JOB_AGE_DAYS = 90
+const MAX_JOB_AGE_DAYS = 60
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -110,7 +110,11 @@ async function expireByDeadlineOrAge(): Promise<{ deadlineExpired: number; ageEx
   // 1. Expire jobs with past deadlines
   const { data: deadlineJobs, error: deadlineError } = await supabase
     .from('Job')
-    .update({ isActive: false })
+    .update({
+      isActive: false,
+      deactivatedAt: now.toISOString(),
+      deactivationReason: 'deadline_passed',
+    })
     .eq('isActive', true)
     .lt('deadline', now.toISOString())
     .select('id')
@@ -126,7 +130,11 @@ async function expireByDeadlineOrAge(): Promise<{ deadlineExpired: number; ageEx
   // 2. Expire jobs older than MAX_JOB_AGE_DAYS
   const { data: ageJobs, error: ageError } = await supabase
     .from('Job')
-    .update({ isActive: false })
+    .update({
+      isActive: false,
+      deactivatedAt: now.toISOString(),
+      deactivationReason: `expired_${MAX_JOB_AGE_DAYS}_days`,
+    })
     .eq('isActive', true)
     .lt('postedDate', maxAgeDate.toISOString())
     .select('id')
@@ -190,7 +198,11 @@ async function checkExpiredJobs(options: { limit?: number; all?: boolean } = {})
       // Mark as expired by setting isActive=false
       const { error: updateError } = await supabase
         .from('Job')
-        .update({ isActive: false })
+        .update({
+          isActive: false,
+          deactivatedAt: new Date().toISOString(),
+          deactivationReason: reason === 'Closed text detected' ? 'closed_text' : 'broken_url',
+        })
         .eq('id', job.id)
 
       if (updateError) {

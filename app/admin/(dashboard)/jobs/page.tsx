@@ -14,6 +14,7 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
+  Clock,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -45,7 +46,7 @@ interface Job {
   isActive: boolean
 }
 
-type FilterType = 'all' | 'today' | 'no-jd' | 'unknown-company' | 'html-errors'
+type FilterType = 'all' | 'today' | 'no-jd' | 'unknown-company' | 'html-errors' | 'old'
 
 export default function AdminJobsPage() {
   const router = useRouter()
@@ -124,6 +125,7 @@ export default function AdminJobsPage() {
     'no-jd': 'JD 없음',
     'unknown-company': 'UNKNOWN 회사',
     'html-errors': 'HTML 오류',
+    'old': '60일+ 오래됨',
   }
 
   return (
@@ -168,6 +170,7 @@ export default function AdminJobsPage() {
                   <SelectItem value="no-jd">JD 없는 공고</SelectItem>
                   <SelectItem value="unknown-company">UNKNOWN 회사</SelectItem>
                   <SelectItem value="html-errors">HTML 오류 있는 공고</SelectItem>
+                  <SelectItem value="old">60일 이상 오래된 공고</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -238,12 +241,15 @@ export default function AdminJobsPage() {
                     const hasJd = job.description && job.description.trim().length > 50
                     const isUnknownCompany = !job.company || job.company.toUpperCase() === 'UNKNOWN'
                     const hasHtmlErrors = hasHtmlEntities(job.description)
+                    const sixtyDaysAgo = new Date()
+                    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60)
+                    const isOld = new Date(job.crawledAt) < sixtyDaysAgo
 
                     return (
                       <TableRow key={job.id}>
                         <TableCell>
                           <div className="font-medium line-clamp-1">{job.title}</div>
-                          <div className="flex gap-1 mt-1">
+                          <div className="flex flex-wrap gap-1 mt-1">
                             {!hasJd && (
                               <Badge variant="destructive" className="text-[10px]">
                                 <FileText className="w-3 h-3 mr-1" />
@@ -260,6 +266,12 @@ export default function AdminJobsPage() {
                               <Badge variant="outline" className="text-[10px] text-yellow-600">
                                 <AlertTriangle className="w-3 h-3 mr-1" />
                                 HTML
+                              </Badge>
+                            )}
+                            {isOld && (
+                              <Badge variant="outline" className="text-[10px] text-orange-600">
+                                <Clock className="w-3 h-3 mr-1" />
+                                60일+
                               </Badge>
                             )}
                           </div>
