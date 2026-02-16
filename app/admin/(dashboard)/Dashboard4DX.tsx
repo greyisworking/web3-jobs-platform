@@ -137,6 +137,7 @@ function ScoreCard({
   icon: Icon,
   description,
   trend,
+  href,
 }: {
   title: string
   value: number
@@ -145,6 +146,7 @@ function ScoreCard({
   icon: any
   description?: string
   trend?: number
+  href?: string
 }) {
   const status = target ? getScoreStatus(value, target) : 'green'
   const trendDirection = trend !== undefined ? getTrendDirection(trend) : 'neutral'
@@ -155,38 +157,43 @@ function ScoreCard({
     red: 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800',
   }
 
+  const Wrapper = href ? 'a' : 'div'
+  const wrapperProps = href ? { href, className: 'block cursor-pointer' } : {}
+
   return (
-    <Card className={`${bgColors[status]} border-2 transition-all hover:shadow-md`}>
-      <CardContent className="pt-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
-            <div className={`p-2 rounded-lg ${status === 'green' ? 'bg-green-100 dark:bg-green-900' : status === 'yellow' ? 'bg-yellow-100 dark:bg-yellow-900' : 'bg-red-100 dark:bg-red-900'}`}>
-              <Icon className="w-4 h-4" />
+    <Wrapper {...wrapperProps}>
+      <Card className={`${bgColors[status]} border-2 transition-all hover:shadow-md ${href ? 'hover:scale-[1.02] cursor-pointer' : ''}`}>
+        <CardContent className="pt-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`p-2 rounded-lg ${status === 'green' ? 'bg-green-100 dark:bg-green-900' : status === 'yellow' ? 'bg-yellow-100 dark:bg-yellow-900' : 'bg-red-100 dark:bg-red-900'}`}>
+                <Icon className="w-4 h-4" />
+              </div>
+              <span className="text-sm font-medium text-muted-foreground">{title}</span>
             </div>
-            <span className="text-sm font-medium text-muted-foreground">{title}</span>
+            {trend !== undefined && <TrendIcon direction={trendDirection} />}
           </div>
-          {trend !== undefined && <TrendIcon direction={trendDirection} />}
-        </div>
-        <div className="mt-3">
-          <span className="text-2xl font-bold">
-            {value.toLocaleString()}{unit}
-          </span>
-          {target && (
-            <span className="text-sm text-muted-foreground ml-2">
-              / {target.toLocaleString()}{unit}
+          <div className="mt-3">
+            <span className="text-2xl font-bold">
+              {value.toLocaleString()}{unit}
             </span>
-          )}
-        </div>
-        {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
-        )}
-        {target && (
-          <div className="mt-2">
-            <Progress value={(value / target) * 100} className="h-1.5" />
+            {target && (
+              <span className="text-sm text-muted-foreground ml-2">
+                / {target.toLocaleString()}{unit}
+              </span>
+            )}
           </div>
-        )}
-      </CardContent>
-    </Card>
+          {description && (
+            <p className="text-xs text-muted-foreground mt-1">{description}</p>
+          )}
+          {target && (
+            <div className="mt-2">
+              <Progress value={(value / target) * 100} className="h-1.5" />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </Wrapper>
   )
 }
 
@@ -440,24 +447,28 @@ export function Dashboard4DX() {
             target={metrics.leadMeasures.crawler.targetJobs}
             icon={Briefcase}
             description={`목표: ${metrics.leadMeasures.crawler.targetJobs.toLocaleString()}개 이상`}
+            href="/admin/jobs"
           />
           <ScoreCard
             title="오늘 신규 공고"
             value={metrics.leadMeasures.crawler.todayNewJobs}
             icon={Zap}
             description="오늘 크롤링된 새 공고"
+            href="/admin/jobs?filter=today"
           />
           <ScoreCard
             title="총 북마크"
             value={metrics.leadMeasures.users.bookmarks}
             icon={Bookmark}
             description="유저 참여 지표"
+            href="/admin/bookmarks"
           />
           <ScoreCard
             title="신고 접수"
             value={metrics.leadMeasures.users.reports}
             icon={AlertTriangle}
             description="확인 필요"
+            href="/admin/reports"
           />
         </div>
       </div>
@@ -525,23 +536,43 @@ export function Dashboard4DX() {
               {crawlerQuality?.sources.map((source) => {
                 const status: ScoreStatus = source.qualityScore >= 90 ? 'green' : source.qualityScore >= 70 ? 'yellow' : 'red'
                 return (
-                  <TableRow key={source.source}>
-                    <TableCell className="font-medium">{source.source}</TableCell>
-                    <TableCell className="text-right">{source.total.toLocaleString()}</TableCell>
+                  <TableRow key={source.source} className="hover:bg-muted/50 cursor-pointer">
+                    <TableCell className="font-medium">
+                      <a href={`/admin/jobs?source=${encodeURIComponent(source.source)}`} className="hover:text-blue-600 hover:underline">
+                        {source.source}
+                      </a>
+                    </TableCell>
                     <TableCell className="text-right">
-                      <span className={source.jdSuccessRate >= 90 ? 'text-green-600' : source.jdSuccessRate >= 70 ? 'text-yellow-600' : 'text-red-600'}>
+                      <a href={`/admin/jobs?source=${encodeURIComponent(source.source)}`} className="hover:underline">
+                        {source.total.toLocaleString()}
+                      </a>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <a
+                        href={`/admin/jobs?source=${encodeURIComponent(source.source)}&filter=no-jd`}
+                        className={`hover:underline ${source.jdSuccessRate >= 90 ? 'text-green-600' : source.jdSuccessRate >= 70 ? 'text-yellow-600' : 'text-red-600'}`}
+                        title="JD 없는 공고 보기"
+                      >
                         {source.jdSuccessRate}%
-                      </span>
+                      </a>
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className={source.companySuccessRate >= 90 ? 'text-green-600' : source.companySuccessRate >= 70 ? 'text-yellow-600' : 'text-red-600'}>
+                      <a
+                        href={`/admin/jobs?source=${encodeURIComponent(source.source)}&filter=unknown-company`}
+                        className={`hover:underline ${source.companySuccessRate >= 90 ? 'text-green-600' : source.companySuccessRate >= 70 ? 'text-yellow-600' : 'text-red-600'}`}
+                        title="UNKNOWN 회사 공고 보기"
+                      >
                         {source.companySuccessRate}%
-                      </span>
+                      </a>
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className={source.htmlErrorRate <= 5 ? 'text-green-600' : source.htmlErrorRate <= 15 ? 'text-yellow-600' : 'text-red-600'}>
+                      <a
+                        href={`/admin/jobs?source=${encodeURIComponent(source.source)}&filter=html-errors`}
+                        className={`hover:underline ${source.htmlErrorRate <= 5 ? 'text-green-600' : source.htmlErrorRate <= 15 ? 'text-yellow-600' : 'text-red-600'}`}
+                        title="HTML 오류 공고 보기"
+                      >
                         {source.htmlErrorRate}%
-                      </span>
+                      </a>
                     </TableCell>
                     <TableCell className="text-right font-bold">
                       <span className={status === 'green' ? 'text-green-600' : status === 'yellow' ? 'text-yellow-600' : 'text-red-600'}>
@@ -549,9 +580,14 @@ export function Dashboard4DX() {
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Badge variant={status === 'green' ? 'default' : status === 'yellow' ? 'secondary' : 'destructive'}>
-                        {status === 'green' ? '정상' : status === 'yellow' ? '주의' : '부족'}
-                      </Badge>
+                      <a
+                        href={status !== 'green' ? `/admin/jobs?source=${encodeURIComponent(source.source)}&filter=${source.jdSuccessRate < source.companySuccessRate ? 'no-jd' : 'unknown-company'}` : '#'}
+                        className={status !== 'green' ? 'cursor-pointer' : 'cursor-default'}
+                      >
+                        <Badge variant={status === 'green' ? 'default' : status === 'yellow' ? 'secondary' : 'destructive'}>
+                          {status === 'green' ? '정상' : status === 'yellow' ? '주의' : '부족'}
+                        </Badge>
+                      </a>
                     </TableCell>
                   </TableRow>
                 )

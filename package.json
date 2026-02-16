@@ -38,6 +38,7 @@
     "test:html": "vitest run scripts/__tests__/htmlParser.test.ts",
     "test:validate-db": "vitest run scripts/__tests__/validate-db.test.ts",
     "migrate:clean-desc": "tsx scripts/migrate-clean-descriptions.ts",
+    "quality:record": "tsx scripts/record-crawler-quality.ts",
     "migrate:clean-desc:dry": "tsx scripts/migrate-clean-descriptions.ts --dry-run",
     "test:qa": "tsx tests/qa-phase7-tests.ts",
     "test:qa:report": "tsx tests/qa-phase7-tests.ts --report",

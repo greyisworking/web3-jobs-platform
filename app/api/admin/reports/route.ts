@@ -11,7 +11,7 @@ export async function GET() {
     const { data: reports, error } = await supabase
       .from('JobReport')
       .select('*')
-      .order('createdAt', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(100)
 
     if (error) {
@@ -22,18 +22,19 @@ export async function GET() {
       throw error
     }
 
-    // Enrich with job data
-    const enrichedReports = await Promise.all(
-      (reports || []).map(async (report) => {
-        const { data: job } = await supabase
-          .from('Job')
-          .select('id, title, company, postedBy, reportCount, isHidden')
-          .eq('id', report.jobId)
-          .single()
+    // Enrich with job data - batch fetch for performance
+    const jobIds = [...new Set((reports || []).map(r => r.job_id).filter(Boolean))]
+    const { data: jobs } = await supabase
+      .from('Job')
+      .select('id, title, company, source, isActive')
+      .in('id', jobIds)
 
-        return { ...report, job }
-      })
-    )
+    const jobMap = new Map(jobs?.map(j => [j.id, j]) || [])
+
+    const enrichedReports = (reports || []).map(report => ({
+      ...report,
+      job: jobMap.get(report.job_id) || null,
+    }))
 
     return NextResponse.json({ reports: enrichedReports })
   } catch (error) {
