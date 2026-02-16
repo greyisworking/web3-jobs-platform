@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Eye, Loader2, X, Plus, Wallet, Shield } from 'lucide-react'
+import { ArrowLeft, Save, Eye, Loader2, X, Plus, Wallet, Shield, FileEdit } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAccount, useEnsName } from 'wagmi'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
@@ -20,8 +20,21 @@ const SUGGESTED_TAGS = [
   'Development', 'Research', 'Tutorial', 'Opinion', 'News'
 ]
 
+interface Draft {
+  id: string
+  slug: string
+  title: string
+  excerpt: string | null
+  content: string
+  cover_image: string | null
+  tags: string[] | null
+  updated_at: string
+}
+
 export default function ArticleWritePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const editSlug = searchParams.get('edit')
   const supabase = createSupabaseBrowserClient()
 
   // Auth state
@@ -31,6 +44,12 @@ export default function ArticleWritePage() {
   // Wallet state (optional)
   const { address, isConnected } = useAccount()
   const { data: ensName } = useEnsName({ address })
+
+  // Draft state
+  const [drafts, setDrafts] = useState<Draft[]>([])
+  const [showDraftBanner, setShowDraftBanner] = useState(false)
+  const [editingDraft, setEditingDraft] = useState<Draft | null>(null)
+  const [loadingDraft, setLoadingDraft] = useState(false)
 
   const [loading, setLoading] = useState(false)
   const [tagInput, setTagInput] = useState('')
@@ -59,6 +78,67 @@ export default function ArticleWritePage() {
     return () => subscription.unsubscribe()
   }, [supabase.auth])
 
+  // Fetch drafts when user is authenticated
+  useEffect(() => {
+    if (user && !editSlug) {
+      fetchDrafts()
+    }
+  }, [user, editSlug])
+
+  // Load specific draft if editing
+  useEffect(() => {
+    if (user && editSlug) {
+      loadDraftForEditing(editSlug)
+    }
+  }, [user, editSlug])
+
+  const fetchDrafts = async () => {
+    try {
+      const res = await fetch('/api/articles/drafts')
+      if (res.ok) {
+        const data = await res.json()
+        if (data.drafts.length > 0) {
+          setDrafts(data.drafts)
+          setShowDraftBanner(true)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch drafts:', error)
+    }
+  }
+
+  const loadDraftForEditing = async (slug: string) => {
+    setLoadingDraft(true)
+    try {
+      const res = await fetch(`/api/articles/${slug}`)
+      if (res.ok) {
+        const data = await res.json()
+        const article = data.article
+        setEditingDraft(article)
+        setForm({
+          title: article.title || '',
+          slug: article.slug || '',
+          excerpt: article.excerpt || '',
+          content: article.content || '',
+          cover_image: article.cover_image || '',
+          tags: article.tags || [],
+          published: article.published || false,
+        })
+      } else {
+        toast.error('Draft not found')
+        router.push('/articles/write')
+      }
+    } catch (error) {
+      toast.error('Failed to load draft')
+    } finally {
+      setLoadingDraft(false)
+    }
+  }
+
+  const continueDraft = (draft: Draft) => {
+    router.push(`/articles/write?edit=${draft.slug}`)
+  }
+
   const generateSlug = (title: string) => {
     return title
       .toLowerCase()
@@ -73,7 +153,8 @@ export default function ArticleWritePage() {
     setForm((prev) => ({
       ...prev,
       title,
-      slug: generateSlug(title),
+      // Only auto-generate slug for new articles
+      slug: editingDraft ? prev.slug : generateSlug(title),
     }))
   }
 
@@ -123,26 +204,49 @@ export default function ArticleWritePage() {
             author_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous',
           }
 
-      const res = await fetch('/api/articles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...form,
-          published: publish,
-          ...authorInfo,
-          author_email: user.email,
-          author_avatar: user.user_metadata?.avatar_url || null,
-          reading_time: readingTime,
-        }),
-      })
+      // If editing, use PUT; otherwise POST
+      if (editingDraft) {
+        const res = await fetch(`/api/articles/${editingDraft.slug}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...form,
+            published: publish,
+            reading_time: readingTime,
+          }),
+        })
 
-      if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || 'Failed to create article')
+        if (!res.ok) {
+          const error = await res.json()
+          throw new Error(error.error || 'Failed to update article')
+        }
+
+        const data = await res.json()
+        toast.success(publish ? 'Article published!' : 'Draft saved!')
+        router.push(`/articles/${data.article.slug}`)
+      } else {
+        const res = await fetch('/api/articles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...form,
+            published: publish,
+            ...authorInfo,
+            author_email: user.email,
+            author_avatar: user.user_metadata?.avatar_url || null,
+            reading_time: readingTime,
+          }),
+        })
+
+        if (!res.ok) {
+          const error = await res.json()
+          throw new Error(error.error || 'Failed to create article')
+        }
+
+        const data = await res.json()
+        toast.success(publish ? 'Article published!' : 'Draft saved!')
+        router.push(`/articles/${data.article.slug}`)
       }
-
-      const data = await res.json()
-      router.push(`/articles/${data.article.slug}`)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Something went wrong... NGMI 😢')
     } finally {
@@ -160,7 +264,7 @@ export default function ArticleWritePage() {
   }
 
   // Loading state
-  if (authLoading) {
+  if (authLoading || loadingDraft) {
     return (
       <div className="min-h-screen bg-a24-bg flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-a24-muted animate-spin" />
@@ -245,16 +349,65 @@ export default function ArticleWritePage() {
 
   return (
     <div className="min-h-screen bg-a24-bg">
+      {/* Draft Recovery Banner */}
+      {showDraftBanner && drafts.length > 0 && !editingDraft && (
+        <div className="bg-purple-600/10 border-b border-purple-500/20">
+          <div className="max-w-6xl mx-auto px-6 py-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <FileEdit className="w-5 h-5 text-purple-400" />
+                <p className="text-sm text-a24-text">
+                  <span className="text-purple-400 font-medium">
+                    {drafts.length} draft{drafts.length > 1 ? 's' : ''} saved
+                  </span>
+                  {' '}&mdash; Continue where you left off?
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {drafts.length === 1 ? (
+                  <button
+                    onClick={() => continueDraft(drafts[0])}
+                    className="px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-700 text-white transition-colors"
+                  >
+                    Continue &ldquo;{drafts[0].title || 'Untitled'}&rdquo;
+                  </button>
+                ) : (
+                  <Link
+                    href="/articles/drafts"
+                    className="px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-700 text-white transition-colors"
+                  >
+                    View Drafts
+                  </Link>
+                )}
+                <button
+                  onClick={() => setShowDraftBanner(false)}
+                  className="p-1.5 text-a24-muted hover:text-a24-text transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="border-b border-a24-border">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/articles"
-            className="inline-flex items-center gap-2 text-sm text-a24-muted hover:text-a24-text transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/articles"
+              className="inline-flex items-center gap-2 text-sm text-a24-muted hover:text-a24-text transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Link>
+            {editingDraft && (
+              <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs uppercase tracking-wider">
+                Editing Draft
+              </span>
+            )}
+          </div>
 
           <div className="flex items-center gap-4">
             {/* Connected User/Wallet Info */}
@@ -410,6 +563,24 @@ export default function ArticleWritePage() {
                   </p>
                 </div>
               </div>
+
+              {/* My Drafts Link */}
+              {drafts.length > 0 && !editingDraft && (
+                <Link
+                  href="/articles/drafts"
+                  className="block border border-purple-500/30 bg-purple-500/5 p-4 hover:border-purple-500/50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileEdit className="w-4 h-4 text-purple-400" />
+                      <span className="text-sm text-a24-text">My Drafts</span>
+                    </div>
+                    <span className="px-2 py-0.5 bg-purple-600/20 text-purple-400 text-xs">
+                      {drafts.length}
+                    </span>
+                  </div>
+                </Link>
+              )}
 
               {/* Wallet Connection - Clearly Optional */}
               {!isConnected && (

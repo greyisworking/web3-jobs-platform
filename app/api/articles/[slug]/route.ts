@@ -33,7 +33,7 @@ export async function GET(
   }
 }
 
-// PUT /api/articles/[slug] - Update article (admin only)
+// PUT /api/articles/[slug] - Update article (author or admin)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -42,33 +42,52 @@ export async function PUT(
     const { slug } = await params
     const supabase = await createSupabaseServerClient()
 
-    // Check admin auth
+    // Check auth
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Get the article first
+    const { data: existingArticle, error: fetchError } = await supabase
+      .from('articles')
+      .select('id, author_id, published')
+      .eq('slug', slug)
+      .single()
+
+    if (fetchError || !existingArticle) {
+      return NextResponse.json({ error: 'Article not found' }, { status: 404 })
+    }
+
+    // Check if user is author or admin
+    const isAuthor = existingArticle.author_id === user.id
     const { data: admin } = await supabase
       .from('admins')
       .select('id')
       .eq('id', user.id)
       .single()
 
-    if (!admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+    if (!isAuthor && !admin) {
+      return NextResponse.json({ error: 'Not authorized to edit this article' }, { status: 403 })
     }
 
     const body = await request.json()
-    const { title, excerpt, content, cover_image, published } = body
+    const { title, slug: newSlug, excerpt, content, cover_image, tags, published } = body
 
-    const updateData: Record<string, unknown> = {}
+    const updateData: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    }
     if (title !== undefined) updateData.title = title.slice(0, 60)
+    if (newSlug !== undefined) updateData.slug = newSlug
     if (excerpt !== undefined) updateData.excerpt = excerpt
     if (content !== undefined) updateData.content = content
     if (cover_image !== undefined) updateData.cover_image = cover_image
+    if (tags !== undefined) updateData.tags = tags
     if (published !== undefined) {
       updateData.published = published
-      if (published) updateData.published_at = new Date().toISOString()
+      if (published && !existingArticle.published) {
+        updateData.published_at = new Date().toISOString()
+      }
     }
 
     const { data: article, error } = await supabase
@@ -87,7 +106,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/articles/[slug] - Delete article (admin only)
+// DELETE /api/articles/[slug] - Delete article (author can delete own drafts, admin can delete any)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -96,20 +115,35 @@ export async function DELETE(
     const { slug } = await params
     const supabase = await createSupabaseServerClient()
 
-    // Check admin auth
+    // Check auth
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Get the article first
+    const { data: article, error: fetchError } = await supabase
+      .from('articles')
+      .select('id, author_id, published')
+      .eq('slug', slug)
+      .single()
+
+    if (fetchError || !article) {
+      return NextResponse.json({ error: 'Article not found' }, { status: 404 })
+    }
+
+    // Check if user is author or admin
+    const isAuthor = article.author_id === user.id
     const { data: admin } = await supabase
       .from('admins')
       .select('id')
       .eq('id', user.id)
       .single()
 
-    if (!admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+    // Authors can only delete their own unpublished drafts
+    // Admins can delete anything
+    if (!admin && (!isAuthor || article.published)) {
+      return NextResponse.json({ error: 'Not authorized to delete this article' }, { status: 403 })
     }
 
     const { error } = await supabase
