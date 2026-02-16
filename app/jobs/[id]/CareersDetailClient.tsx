@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import type { Job } from '@/types/job'
 import { trackEvent } from '@/lib/analytics'
 import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
+import { ensureCSRFToken } from '@/lib/csrf-client'
 import { cleanJobDisplay, cleanJobDisplayWithSections } from '@/lib/clean-job-display'
 import MarkdownRenderer from '@/app/components/MarkdownRenderer'
 import BookmarkButton from '@/app/components/BookmarkButton'
@@ -154,7 +155,10 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
     try {
       const res = await fetch('/api/jobs/report', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': ensureCSRFToken(),
+        },
         body: JSON.stringify({
           jobId: job.id,
           reason: reportReason,

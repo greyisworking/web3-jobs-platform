@@ -64,13 +64,15 @@ export async function POST(req: NextRequest) {
     // Initialize client at runtime
     const supabase = getSupabaseClient()
 
-    // Insert report into database
+    // Insert report into database (table name matches Prisma model: JobReport)
     const { error } = await supabase
-      .from('job_reports')
+      .from('JobReport')
       .insert({
-        job_id: jobId,
+        id: crypto.randomUUID(),
+        jobId: jobId,
         reason,
-        reported_at: new Date().toISOString(),
+        reporterIp: ip !== 'unknown' ? ip : null,
+        createdAt: new Date().toISOString(),
       })
 
     if (error) {
