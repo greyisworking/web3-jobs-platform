@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 // Standalone Supabase client for scripts (crawlers, migrations, etc.)
