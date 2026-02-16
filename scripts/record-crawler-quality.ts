@@ -58,13 +58,13 @@ function isValidLocation(location: string | null): boolean {
   return true
 }
 
-function hasSkills(skills: string | null): boolean {
-  if (!skills) return false
+function hasTags(tags: string | null): boolean {
+  if (!tags) return false
   try {
-    const parsed = JSON.parse(skills)
+    const parsed = JSON.parse(tags)
     return Array.isArray(parsed) && parsed.length > 0
   } catch {
-    return skills.trim().length > 0
+    return tags.trim().length > 0
   }
 }
 
@@ -75,9 +75,9 @@ interface JobRow {
   company: string | null
   location: string | null
   salary: string | null
-  employmentType: string | null
-  skills: string | null
-  applyUrl: string | null
+  type: string | null
+  tags: string | null
+  url: string | null
   crawledAt: string | null
 }
 
@@ -97,7 +97,7 @@ async function main() {
   while (hasMore) {
     const { data: jobs, error } = await supabase
       .from('Job')
-      .select('source, title, description, company, location, salary, employmentType, skills, applyUrl, crawledAt')
+      .select('source, title, description, company, location, salary, type, tags, url, crawledAt')
       .eq('isActive', true)
       .range(offset, offset + BATCH_SIZE - 1)
 
@@ -132,8 +132,8 @@ async function main() {
     withHtmlErrors: number
     withSalary: number
     withEmploymentType: number
-    withSkills: number
-    withApplyUrl: number
+    withTags: number
+    withUrl: number
     oldJobs: number
     descriptionLengths: number[]
   }>()
@@ -151,8 +151,8 @@ async function main() {
         withHtmlErrors: 0,
         withSalary: 0,
         withEmploymentType: 0,
-        withSkills: 0,
-        withApplyUrl: 0,
+        withTags: 0,
+        withUrl: 0,
         oldJobs: 0,
         descriptionLengths: [],
       })
@@ -177,9 +177,9 @@ async function main() {
     if (isValidLocation(job.location)) metrics.withLocation++
     if (hasHtmlEntities(job.description)) metrics.withHtmlErrors++
     if (job.salary?.trim()) metrics.withSalary++
-    if (job.employmentType?.trim()) metrics.withEmploymentType++
-    if (hasSkills(job.skills)) metrics.withSkills++
-    if (job.applyUrl?.startsWith('http')) metrics.withApplyUrl++
+    if (job.type?.trim()) metrics.withEmploymentType++
+    if (hasTags(job.tags)) metrics.withTags++
+    if (job.url?.startsWith('http')) metrics.withUrl++
     if (job.crawledAt && new Date(job.crawledAt) < sixtyDaysAgo) metrics.oldJobs++
   }
 
@@ -195,9 +195,9 @@ async function main() {
     const locationRate = rate(metrics.withLocation)
     const htmlErrorRate = rate(metrics.withHtmlErrors)
     const salaryRate = rate(metrics.withSalary)
-    const employmentTypeRate = rate(metrics.withEmploymentType)
-    const skillsRate = rate(metrics.withSkills)
-    const applyUrlRate = rate(metrics.withApplyUrl)
+    const typeRate = rate(metrics.withEmploymentType)
+    const tagsRate = rate(metrics.withTags)
+    const urlRate = rate(metrics.withUrl)
     const oldJobsRate = rate(metrics.oldJobs)
 
     const avgJdLength = metrics.descriptionLengths.length > 0
@@ -205,7 +205,7 @@ async function main() {
       : 0
 
     // New comprehensive quality score
-    const metadataAvg = (salaryRate + employmentTypeRate + skillsRate) / 3
+    const metadataAvg = (salaryRate + typeRate + tagsRate) / 3
     const qualityScore = Math.round(
       (titleSuccessRate * 0.10) +
       (companySuccessRate * 0.15) +
@@ -213,7 +213,7 @@ async function main() {
       ((100 - htmlErrorRate) * 0.15) +
       (locationRate * 0.10) +
       (metadataAvg * 0.15) +
-      (applyUrlRate * 0.10)
+      (urlRate * 0.10)
     )
 
     return {
@@ -225,9 +225,9 @@ async function main() {
       location_rate: locationRate,
       html_error_rate: htmlErrorRate,
       salary_rate: salaryRate,
-      employment_type_rate: employmentTypeRate,
-      skills_rate: skillsRate,
-      apply_url_rate: applyUrlRate,
+      employment_type_rate: typeRate,
+      tags_rate: tagsRate,
+      url_rate: urlRate,
       old_jobs_rate: oldJobsRate,
       avg_jd_length: avgJdLength,
       quality_score: qualityScore,
@@ -246,8 +246,8 @@ async function main() {
     'Loc%'.padStart(6) +
     'HTML%'.padStart(7) +
     'Sal%'.padStart(6) +
-    'Skill%'.padStart(7) +
-    'Link%'.padStart(7) +
+    'Tags%'.padStart(7) +
+    'URL%'.padStart(7) +
     'Old%'.padStart(6) +
     'Score'.padStart(7) +
     'Status'.padStart(10)
@@ -267,8 +267,8 @@ async function main() {
         (r.location_rate + '%').padStart(6) +
         (r.html_error_rate + '%').padStart(7) +
         (r.salary_rate + '%').padStart(6) +
-        (r.skills_rate + '%').padStart(7) +
-        (r.apply_url_rate + '%').padStart(7) +
+        (r.tags_rate + '%').padStart(7) +
+        (r.url_rate + '%').padStart(7) +
         (r.old_jobs_rate + '%').padStart(6) +
         r.quality_score.toString().padStart(7) +
         status.padStart(10)
@@ -319,8 +319,8 @@ async function main() {
   const overallLocation = allJobs.filter(j => isValidLocation(j.location)).length
   const overallHtml = allJobs.filter(j => hasHtmlEntities(j.description)).length
   const overallSalary = allJobs.filter(j => j.salary?.trim()).length
-  const overallSkills = allJobs.filter(j => hasSkills(j.skills)).length
-  const overallApplyUrl = allJobs.filter(j => j.applyUrl?.startsWith('http')).length
+  const overallTags = allJobs.filter(j => hasTags(j.tags)).length
+  const overallUrl = allJobs.filter(j => j.url?.startsWith('http')).length
   const overallOld = allJobs.filter(j => j.crawledAt && new Date(j.crawledAt) < sixtyDaysAgo).length
 
   // Count sources at 90+
@@ -343,8 +343,8 @@ async function main() {
   console.log('')
   console.log('   Metadata:')
   console.log(`     Salary Info:         ${(overallSalary / overallTotal * 100).toFixed(1)}%`)
-  console.log(`     Skills Info:         ${(overallSkills / overallTotal * 100).toFixed(1)}%`)
-  console.log(`     Apply URL Valid:     ${(overallApplyUrl / overallTotal * 100).toFixed(1)}%`)
+  console.log(`     Tags Info:           ${(overallTags / overallTotal * 100).toFixed(1)}%`)
+  console.log(`     URL Valid:           ${(overallUrl / overallTotal * 100).toFixed(1)}%`)
   console.log('')
   console.log('   Staleness:')
   console.log(`     60+ Days Old:        ${overallOld.toLocaleString()} (${(overallOld / overallTotal * 100).toFixed(1)}%)`)

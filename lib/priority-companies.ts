@@ -144,8 +144,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'New York, USA',
     hasToken: true,
     stage: 'Series B',
-    careerUrl: 'https://boards.greenhouse.io/uniswaplabs',
-    careerPlatform: 'greenhouse',
+    careerUrl: 'https://jobs.ashbyhq.com/uniswap',
+    careerPlatform: 'ashby',
   },
   {
     name: 'OpenSea',
@@ -1096,8 +1096,8 @@ export const PRIORITY_COMPANIES: PriorityCompany[] = [
     office_location: 'Remote',
     hasToken: true,
     stage: 'Series B',
-    careerUrl: 'https://careers.story.foundation/',
-    careerPlatform: 'greenhouse',
+    careerUrl: null,  // Job board inactive as of 2026-02
+    careerPlatform: null,
   },
   {
     name: 'Farcaster',
