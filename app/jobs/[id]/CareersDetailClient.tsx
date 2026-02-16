@@ -389,31 +389,34 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
               </div>
             ) : (
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
-                <div className="p-8 bg-gradient-to-br from-neun-primary/10 via-a24-surface/50 to-neun-primary/5 dark:from-neun-primary/20 dark:via-a24-dark-surface/50 dark:to-neun-primary/10 border-2 border-neun-primary/30 text-center relative overflow-hidden">
-                  {/* Animated background pulse */}
-                  <div className="absolute inset-0 bg-neun-primary/5 animate-pulse" />
+                <h3 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
+                  Job Description
+                </h3>
+                <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-6" />
 
-                  <div className="relative z-10">
-                    <div className="mb-4">
-                      <ExternalLink className="w-8 h-8 mx-auto text-neun-primary mb-3" />
-                      <p className="text-base font-medium text-a24-text dark:text-a24-dark-text mb-2">
-                        View full details on the original site
-                      </p>
-                      <p className="text-xs text-a24-muted dark:text-a24-dark-muted">
-                        Full job description available on the original posting
-                      </p>
+                <div className="p-6 border border-neun-primary/20 bg-gradient-to-br from-neun-primary/5 to-transparent">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-neun-primary/10 border border-neun-primary/20">
+                      <ExternalLink className="w-5 h-5 text-neun-primary" />
                     </div>
-                    <a
-                      href={job.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'no_description_cta' })}
-                      className="group inline-flex items-center gap-3 px-8 py-4 bg-neun-primary text-white font-bold text-base uppercase tracking-wider hover:bg-neun-primary-hover hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-neun-primary/30"
-                    >
-                      <ExternalLink className="w-5 h-5" />
-                      View Full Details & Apply
-                      <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
-                    </a>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-a24-text dark:text-a24-dark-text mb-1">
+                        View on {job.source || 'original site'}
+                      </p>
+                      <p className="text-xs text-a24-muted dark:text-a24-dark-muted mb-4">
+                        Full job description and application form available on the original posting.
+                      </p>
+                      <a
+                        href={job.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'no_description_cta' })}
+                        className="group inline-flex items-center gap-2 px-4 py-2 bg-neun-primary text-white text-xs font-medium uppercase tracking-wider hover:bg-neun-primary-hover transition-all"
+                      >
+                        View & Apply
+                        <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
