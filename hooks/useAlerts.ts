@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { useAuth } from '@/lib/auth-context'
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import type { User } from '@supabase/supabase-js'
 
 export type AlertFrequency = 'daily' | 'weekly' | 'instant'
 
@@ -20,13 +21,22 @@ export interface JobAlert {
 }
 
 export function useAlerts() {
-  const { user } = useAuth()
+  const [user, setUser] = useState<User | null>(null)
   const [alerts, setAlerts] = useState<JobAlert[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const supabase = createSupabaseBrowserClient()
+
+  // Fetch user on mount
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+    })
+  }, [supabase.auth])
 
   const fetchAlerts = useCallback(async () => {
-    if (!user) {
+    const { data: { user: currentUser } } = await supabase.auth.getUser()
+    if (!currentUser) {
       setAlerts([])
       setLoading(false)
       return
@@ -45,7 +55,7 @@ export function useAlerts() {
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [supabase.auth])
 
   useEffect(() => {
     fetchAlerts()
@@ -58,7 +68,8 @@ export function useAlerts() {
     minSalary?: number
     frequency?: AlertFrequency
   }) => {
-    if (!user) return null
+    const { data: { user: currentUser } } = await supabase.auth.getUser()
+    if (!currentUser) return null
 
     try {
       const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content
@@ -83,7 +94,7 @@ export function useAlerts() {
       setError(err instanceof Error ? err.message : 'Failed to create alert')
       return null
     }
-  }, [user])
+  }, [supabase.auth])
 
   const updateAlert = useCallback(async (id: string, updates: Partial<{
     keywords: string[]
@@ -93,7 +104,8 @@ export function useAlerts() {
     frequency: AlertFrequency
     isActive: boolean
   }>) => {
-    if (!user) return null
+    const { data: { user: currentUser } } = await supabase.auth.getUser()
+    if (!currentUser) return null
 
     try {
       const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content
@@ -118,10 +130,11 @@ export function useAlerts() {
       setError(err instanceof Error ? err.message : 'Failed to update alert')
       return null
     }
-  }, [user])
+  }, [supabase.auth])
 
   const deleteAlert = useCallback(async (id: string) => {
-    if (!user) return false
+    const { data: { user: currentUser } } = await supabase.auth.getUser()
+    if (!currentUser) return false
 
     try {
       const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content
@@ -142,7 +155,7 @@ export function useAlerts() {
       setError(err instanceof Error ? err.message : 'Failed to delete alert')
       return false
     }
-  }, [user])
+  }, [supabase.auth])
 
   return {
     alerts,

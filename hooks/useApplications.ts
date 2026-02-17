@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { useAuth } from '@/lib/auth-context'
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 
 export type ApplicationStatus =
   | 'interested'
@@ -33,12 +33,13 @@ export interface JobApplication {
 }
 
 export function useApplications() {
-  const { user } = useAuth()
   const [applications, setApplications] = useState<JobApplication[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const supabase = createSupabaseBrowserClient()
 
   const fetchApplications = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       setApplications([])
       setLoading(false)
@@ -58,7 +59,7 @@ export function useApplications() {
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [supabase.auth])
 
   useEffect(() => {
     fetchApplications()
@@ -73,6 +74,7 @@ export function useApplications() {
       nextStepDate?: string
     }
   ) => {
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
     try {
@@ -104,9 +106,10 @@ export function useApplications() {
       setError(err instanceof Error ? err.message : 'Failed to track application')
       return null
     }
-  }, [user, fetchApplications])
+  }, [supabase.auth, fetchApplications])
 
   const removeApplication = useCallback(async (jobId: string) => {
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return false
 
     try {
@@ -128,7 +131,7 @@ export function useApplications() {
       setError(err instanceof Error ? err.message : 'Failed to remove application')
       return false
     }
-  }, [user])
+  }, [supabase.auth])
 
   const getApplicationStatus = useCallback((jobId: string) => {
     return applications.find(a => a.job_id === jobId)

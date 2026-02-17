@@ -12,6 +12,7 @@ import { ensureCSRFToken } from '@/lib/csrf-client'
 import { cleanJobDisplay, cleanJobDisplayWithSections } from '@/lib/clean-job-display'
 import MarkdownRenderer from '@/app/components/MarkdownRenderer'
 import BookmarkButton from '@/app/components/BookmarkButton'
+import ApplicationTracker from '@/app/components/ApplicationTracker'
 import GlowBadge from '@/app/components/GlowBadge'
 import { TrustCheckList, SimpleTrustCheckList, hasVCBacking } from '@/app/components/TrustBadge'
 import { simpleCompanyTrustCheck, isTrustedSource, isUserPostedJob } from '@/lib/trust-check'
@@ -623,6 +624,13 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
               </span>
               <BookmarkButton job={{ id: job.id, title: job.title, company: job.company }} />
             </div>
+
+            {/* Application Tracker */}
+            <ApplicationTracker
+              jobId={job.id}
+              jobTitle={job.title}
+              company={job.company}
+            />
 
             {/* Trust Status - Different display based on verification level */}
             {hasVCBacking(backers) ? (
