@@ -1,14 +1,21 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Jobs Flow', () => {
+  // Skip onboarding modal by setting localStorage before each test
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('neun-onboarding-seen', '1')
+    })
+  })
+
   test('homepage loads and shows jobs', async ({ page }) => {
     await page.goto('/')
 
     // Check page title
     await expect(page).toHaveTitle(/NEUN/)
 
-    // Check for job cards
-    const jobCards = page.locator('[data-testid="job-card"], .job-card, article')
+    // Check for job cards (Link elements with href="/jobs/...")
+    const jobCards = page.locator('a[href^="/jobs/"]')
     await expect(jobCards.first()).toBeVisible({ timeout: 10000 })
   })
 
@@ -33,8 +40,8 @@ test.describe('Jobs Flow', () => {
   test('job detail page loads', async ({ page }) => {
     await page.goto('/')
 
-    // Click first job card
-    const firstJob = page.locator('[data-testid="job-card"] a, .job-card a, article a').first()
+    // Click first job card link
+    const firstJob = page.locator('a[href^="/jobs/"]').first()
 
     if (await firstJob.isVisible()) {
       await firstJob.click()
