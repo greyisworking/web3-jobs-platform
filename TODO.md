@@ -2,7 +2,7 @@
 
 > 현재 진행 상황 및 백로그
 
-Last Updated: 2026-02-16 16:30 KST
+Last Updated: 2026-02-18 KST
 
 ---
 
@@ -11,23 +11,47 @@ Last Updated: 2026-02-16 16:30 KST
 | Category | Status | Progress |
 |----------|--------|----------|
 | Core Features | ✅ Complete | 100% |
-| Crawlers | ✅ Complete | 12/12 active |
+| Crawlers | ✅ Complete | 15/15 active |
+| Crawler Quality | ✅ Complete | **15/15 at 90+ points** |
 | UI/UX | ✅ Complete | Production ready |
-| Admin Dashboard | ✅ Complete | Fully functional |
+| Admin Dashboard | ✅ Complete | 4DX Dashboard with WIG tracking |
 | Web3 Integration | ✅ Complete | Wallet connection working |
 | AI Features | ✅ Complete | Claude integration |
 | DB Tables | ⚠️ Partial | bookmarks 테이블 필요 |
 | Testing | ⚠️ Partial | Unit/API tests done |
 | Documentation | 🔄 In Progress | 80% |
 
-### Live Stats (2026-02-16)
-- Total Active Jobs: **1,300**
-- Jobs with Description: **1,268**
-- Jobs with Raw Description: **1,086**
+### Live Stats (2026-02-18)
+- Total Active Jobs: **636**
+- Total Crawler Sources: **15**
+- Average Quality Score: **94점**
+- Sources at 90+: **15/15 (100%)**
 
 ---
 
 ## Recently Completed
+
+### February 2026 (Week 4) - WIG 달성! 🎉
+
+- [x] **WIG 목표 달성: 15/15 크롤러 90점 이상**
+  - 2월 28일 목표 → 2월 18일 조기 달성
+  - 전체 품질 점수: 94점
+- [x] remote3.co 품질 개선 (80점 → 90점)
+  - 위치 정보 추가 (Remote - US/EU/Global 등)
+- [x] cryptocurrencyjobs.co 품질 개선 (89점 → 95점)
+  - 86개 공고 위치 정보 추가
+- [x] priority:greenhouse 품질 개선 (89점 → 94점)
+  - 80개 공고 스킬 태그 추가
+- [x] priority:lever 품질 개선 (88점 → 93점)
+  - 11개 공고 스킬 태그 추가
+- [x] jobs.solana.com JD backfill 스크립트 작성
+  - Greenhouse, Ashby, Lever, Workable, Notion 지원
+- [x] rocketpunch.com 크롤러 개선 (100점 달성)
+  - 상세페이지 JD 크롤링 추가
+  - 한국어 → 영어 번역 (description)
+  - 원본 한국어 보존 (raw_description)
+- [x] HTML 엔티티 클린업 마이그레이션 실행 (91개 정리)
+- [x] Admin 4DX 대시보드에 크롤러 품질 테이블 추가
 
 ### February 2026 (Week 3)
 
@@ -71,6 +95,8 @@ Last Updated: 2026-02-16 16:30 KST
   - 구조화된 데이터 (JSON-LD) 개선
 
 ### Medium Priority
+
+- [x] ~~**크롤러 품질 90점 달성**~~ ✅ 완료 (2026-02-18)
 
 - [ ] **크롤러 안정성 개선**
   - 프록시 로테이션
@@ -130,8 +156,9 @@ Last Updated: 2026-02-16 16:30 KST
 #### Data Quality
 - [ ] 중복 공고 자동 병합
 - [ ] 회사명 정규화
-- [ ] 위치 정보 표준화
+- [x] 위치 정보 표준화 (Remote - Region 형식)
 - [ ] 연봉 데이터 정규화
+- [x] 스킬 태그 자동 추출
 
 #### Security
 - [ ] Rate Limiting 강화
@@ -171,7 +198,14 @@ Last Updated: 2026-02-16 16:30 KST
 
 ## Release Notes
 
-### v1.0.0 (Current)
+### v1.1.0 (Current - 2026-02-18)
+- **15개 크롤러 활성화** (품질 점수 전원 90점 이상)
+- Admin 4DX 대시보드 (WIG 추적)
+- 크롤러 품질 지표 세분화
+- rocketpunch.com 한국어 JD 번역 시스템
+- jobs.solana.com JD backfill 지원
+
+### v1.0.0 (2026-02)
 - 12개 크롤러 활성화
 - 지갑 연결 (MetaMask, WalletConnect, Coinbase)
 - Job 검색 & 필터링
@@ -180,10 +214,10 @@ Last Updated: 2026-02-16 16:30 KST
 - Trust Score 시스템
 - AI 요약 & 번역
 
-### v1.1.0 (Planned)
+### v1.2.0 (Planned)
 - 이메일 알림
 - 지원 추적
-- 크롤러 안정성 개선
+- 크롤러 안정성 개선 (프록시 로테이션)
 - SEO 최적화
 
 ### v2.0.0 (Future)
