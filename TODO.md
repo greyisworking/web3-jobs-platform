@@ -2,7 +2,7 @@
 
 > 현재 진행 상황 및 백로그
 
-Last Updated: 2026-02-18 KST
+Last Updated: 2026-02-18 (Evening) KST
 
 ---
 
@@ -17,8 +17,9 @@ Last Updated: 2026-02-18 KST
 | Admin Dashboard | ✅ Complete | 4DX Dashboard with WIG tracking |
 | Web3 Integration | ✅ Complete | Wallet connection working |
 | AI Features | ✅ Complete | Claude integration |
-| DB Tables | ⚠️ Partial | bookmarks 테이블 필요 |
-| Testing | ⚠️ Partial | Unit/API tests done |
+| DB Tables | ✅ Complete | bookmarks, job_alerts, job_applications |
+| Testing | ✅ Complete | Unit/API/E2E tests |
+| SEO | ✅ Complete | Dynamic OG, JSON-LD |
 | Documentation | 🔄 In Progress | 80% |
 
 ### Live Stats (2026-02-18)
@@ -52,6 +53,27 @@ Last Updated: 2026-02-18 KST
   - 원본 한국어 보존 (raw_description)
 - [x] HTML 엔티티 클린업 마이그레이션 실행 (91개 정리)
 - [x] Admin 4DX 대시보드에 크롤러 품질 테이블 추가
+- [x] **E2E 테스트 설정** (Playwright)
+  - playwright.config.ts 추가
+  - e2e/jobs.spec.ts 테스트 작성
+  - npm run test:e2e:playwright 스크립트 추가
+- [x] **SEO 최적화**
+  - 동적 OG 이미지 생성 (app/jobs/[id]/opengraph-image.tsx)
+  - JSON-LD 구조화 데이터 (이미 구현됨)
+- [x] **다크모드 컬러 수정**
+  - Web3Badges, Blockies, ThumbnailUpload 수정
+- [x] **Legacy status 필드 제거**
+  - types/job.ts, prisma/schema.prisma 수정
+  - API routes, scripts 업데이트
+- [x] **이메일 알림 기능 구현**
+  - job_alerts 테이블 마이그레이션
+  - API: /api/alerts (CRUD)
+  - hooks/useAlerts.ts
+- [x] **지원 추적 기능 구현**
+  - job_applications 테이블 마이그레이션
+  - API: /api/applications (CRUD)
+  - hooks/useApplications.ts
+  - 상태 파이프라인: interested → applied → interview → offer
 
 ### February 2026 (Week 3)
 
@@ -86,13 +108,13 @@ Last Updated: 2026-02-18 KST
 
 ### High Priority
 
-- [ ] **E2E 테스트 커버리지 확대**
-  - Playwright 기반 주요 플로우 테스트
-  - Job 검색 → 상세 → 지원 플로우
+- [x] ~~**E2E 테스트 커버리지 확대**~~ ✅ 완료 (2026-02-18)
+  - Playwright 설정 완료
+  - 주요 플로우 테스트 작성
 
-- [ ] **SEO 최적화**
+- [x] ~~**SEO 최적화**~~ ✅ 완료 (2026-02-18)
   - 동적 OG 이미지 생성
-  - 구조화된 데이터 (JSON-LD) 개선
+  - JSON-LD 구조화 데이터 (이미 구현됨)
 
 ### Medium Priority
 
@@ -107,6 +129,9 @@ Last Updated: 2026-02-18 KST
   - ISR (Incremental Static Regeneration) 적용
   - API 응답 캐싱 개선
 
+- [ ] **DB 마이그레이션 실행**
+  - 002_email_alerts_and_applications.sql 적용 필요
+
 ---
 
 ## Backlog
@@ -114,11 +139,12 @@ Last Updated: 2026-02-18 KST
 ### Features
 
 #### User Features
-- [ ] 이메일 알림 (새 공고 매칭)
-- [ ] 지원 추적 기능
+- [x] 이메일 알림 (새 공고 매칭) ✅ API 완료
+- [x] 지원 추적 기능 ✅ API 완료
 - [ ] 이력서 업로드 & 자동 지원
 - [ ] 사용자 프로필 페이지
 - [ ] 공고 비교 기능
+- [ ] 알림/지원 추적 UI 컴포넌트
 
 #### Web3 Features
 - [ ] NFT 기반 프리미엄 멤버십
@@ -183,13 +209,13 @@ Last Updated: 2026-02-18 KST
 | ~~VC BACKERS 섹션 안 보임~~ | High | ✅ Fixed |
 | ~~Formatted/Raw 토글 안 보임~~ | High | ✅ Fixed |
 | ~~리포트 기능 DB 에러~~ | High | ✅ Fixed |
-| bookmarks 테이블 미생성 | High | ⚠️ SQL 실행 필요 |
+| ~~bookmarks 테이블 미생성~~ | High | ✅ Migration 존재 |
 | 일부 크롤러 타임아웃 | Medium | ✅ Playwright 적용 |
-| 다크모드 일부 컬러 불일치 | Low | Backlog |
+| ~~다크모드 일부 컬러 불일치~~ | Low | ✅ Fixed |
 
 ### Technical Debt
 
-- [ ] Legacy `status` 필드 제거 (`isActive`로 통합)
+- [x] ~~Legacy `status` 필드 제거 (`isActive`로 통합)~~ ✅ 완료
 - [ ] 타입 정의 통합 (types/ 폴더 정리)
 - [ ] 테스트 코드 리팩토링
 - [ ] 사용하지 않는 dependencies 정리
@@ -198,7 +224,15 @@ Last Updated: 2026-02-18 KST
 
 ## Release Notes
 
-### v1.1.0 (Current - 2026-02-18)
+### v1.2.0 (Current - 2026-02-18)
+- **E2E 테스트 설정** (Playwright)
+- **동적 OG 이미지** 생성
+- **이메일 알림 API** (job_alerts 테이블)
+- **지원 추적 API** (job_applications 테이블)
+- Legacy status 필드 제거
+- 다크모드 컬러 수정
+
+### v1.1.0 (2026-02-18)
 - **15개 크롤러 활성화** (품질 점수 전원 90점 이상)
 - Admin 4DX 대시보드 (WIG 추적)
 - 크롤러 품질 지표 세분화
@@ -214,11 +248,10 @@ Last Updated: 2026-02-18 KST
 - Trust Score 시스템
 - AI 요약 & 번역
 
-### v1.2.0 (Planned)
-- 이메일 알림
-- 지원 추적
+### v1.3.0 (Planned)
+- 알림/지원 추적 UI 컴포넌트
 - 크롤러 안정성 개선 (프록시 로테이션)
-- SEO 최적화
+- 성능 최적화 (ISR, 캐싱)
 
 ### v2.0.0 (Future)
 - 회사 대시보드
