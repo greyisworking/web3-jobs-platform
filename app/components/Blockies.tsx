@@ -48,7 +48,7 @@ export default function Blockies({ address, size = 40, className = '' }: Blockie
     // Fallback for invalid address
     return (
       <div
-        className={`bg-gray-600 ${className}`}
+        className={`bg-gray-300 dark:bg-gray-600 ${className}`}
         style={{ width: size, height: size }}
       />
     )

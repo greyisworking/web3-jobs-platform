@@ -107,7 +107,7 @@ export default function ThumbnailUpload({ value, onChange }: ThumbnailUploadProp
         <button
           type="button"
           onClick={() => onChange('')}
-          className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black/90 text-white transition-colors opacity-0 group-hover:opacity-100"
+          className="absolute top-2 right-2 p-1.5 bg-gray-800/70 hover:bg-gray-800/90 text-white transition-colors opacity-0 group-hover:opacity-100"
         >
           <X className="w-4 h-4" />
         </button>

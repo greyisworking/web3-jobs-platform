@@ -74,7 +74,7 @@ export default function Web3Badges({ address: propAddress, showSync = false, com
   if (loading) {
     return (
       <div className="animate-pulse">
-        <div className="h-6 bg-gray-800 rounded w-32" />
+        <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-32" />
       </div>
     )
   }
@@ -105,7 +105,7 @@ export default function Web3Badges({ address: propAddress, showSync = false, com
 
   // Full display
   return (
-    <div className="bg-gray-900/50 border border-gray-800 p-4">
+    <div className="bg-gray-100 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -114,7 +114,7 @@ export default function Web3Badges({ address: propAddress, showSync = false, com
             <p className="text-white font-medium">
               {profile?.ens_name || profile?.display_name || truncateAddress(address)}
             </p>
-            <p className="text-xs text-gray-500 font-mono">
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">
               {truncateAddress(address)}
             </p>
           </div>
@@ -124,7 +124,7 @@ export default function Web3Badges({ address: propAddress, showSync = false, com
           <button
             onClick={handleSync}
             disabled={syncing}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-400 text-xs transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-3 h-3 ${syncing ? 'animate-spin' : ''}`} />
             {syncing ? 'Syncing...' : 'Sync'}

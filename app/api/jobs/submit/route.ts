@@ -158,7 +158,6 @@ export async function POST(request: NextRequest) {
         region,
         postedDate: new Date().toISOString(),
         isActive: true,
-        status: 'active',
         postedBy: walletAddress.toLowerCase(),
         reportCount: 0,
         isHidden: false,
@@ -190,7 +189,6 @@ export async function POST(request: NextRequest) {
             region,
             postedDate: new Date().toISOString(),
             isActive: true,
-            status: 'active',
           })
           .select('id')
           .single()

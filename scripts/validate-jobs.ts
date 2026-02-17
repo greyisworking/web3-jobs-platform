@@ -109,7 +109,6 @@ async function main() {
         .from('Job')
         .update({
           isActive: false,
-          status,
           last_validated: now,
         })
         .eq('id', job.id)
@@ -120,7 +119,6 @@ async function main() {
       await supabase
         .from('Job')
         .update({
-          status: 'active',
           last_validated: now,
         })
         .eq('id', job.id)

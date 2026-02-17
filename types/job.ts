@@ -24,7 +24,6 @@ export interface Job {
   postedDate: Date | null
   crawledAt?: Date | string | null  // When job was added to our DB (for NEW badge)
   isActive?: boolean // true = active, false = expired
-  status?: string // deprecated, use isActive instead
   backers?: string[] | null
   sector?: string | null
   office_location?: string | null
