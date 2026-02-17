@@ -2,7 +2,7 @@
 
 > 현재 진행 상황 및 백로그
 
-Last Updated: 2026-02-18 (Evening) KST
+Last Updated: 2026-02-18 (Night) KST
 
 ---
 
@@ -18,7 +18,7 @@ Last Updated: 2026-02-18 (Evening) KST
 | Web3 Integration | ✅ Complete | Wallet connection working |
 | AI Features | ✅ Complete | Claude integration |
 | DB Tables | ✅ Complete | bookmarks, job_alerts, job_applications |
-| Testing | ✅ Complete | Unit/API/E2E tests |
+| Testing | ✅ Complete | Unit/API/E2E (10/10 pass) |
 | SEO | ✅ Complete | Dynamic OG, JSON-LD |
 | Documentation | 🔄 In Progress | 80% |
 
@@ -34,6 +34,15 @@ Last Updated: 2026-02-18 (Evening) KST
 
 ### February 2026 (Week 4) - WIG 달성! 🎉
 
+- [x] **알림/지원 추적 UI 컴포넌트 구현**
+  - ApplicationTracker 컴포넌트 (Job 상세 페이지)
+  - Account 페이지에 Job Alerts 섹션 추가
+  - Account 페이지에 Application Tracker 섹션 추가
+  - hooks 수정: Supabase 클라이언트 직접 사용
+- [x] **E2E 테스트 수정 (10/10 통과)**
+  - Playwright selector 수정 (job card 매칭)
+  - Onboarding modal bypass (localStorage 설정)
+  - .gitignore에 테스트 결과 폴더 추가
 - [x] **WIG 목표 달성: 15/15 크롤러 90점 이상**
   - 2월 28일 목표 → 2월 18일 조기 달성
   - 전체 품질 점수: 94점
@@ -140,11 +149,11 @@ Last Updated: 2026-02-18 (Evening) KST
 
 #### User Features
 - [x] 이메일 알림 (새 공고 매칭) ✅ API 완료
-- [x] 지원 추적 기능 ✅ API 완료
+- [x] 지원 추적 기능 ✅ API + UI 완료
 - [ ] 이력서 업로드 & 자동 지원
 - [ ] 사용자 프로필 페이지
 - [ ] 공고 비교 기능
-- [ ] 알림/지원 추적 UI 컴포넌트
+- [x] 알림/지원 추적 UI 컴포넌트 ✅
 
 #### Web3 Features
 - [ ] NFT 기반 프리미엄 멤버십
@@ -225,10 +234,12 @@ Last Updated: 2026-02-18 (Evening) KST
 ## Release Notes
 
 ### v1.2.0 (Current - 2026-02-18)
-- **E2E 테스트 설정** (Playwright)
+- **E2E 테스트 설정** (Playwright, 10/10 통과)
 - **동적 OG 이미지** 생성
-- **이메일 알림 API** (job_alerts 테이블)
-- **지원 추적 API** (job_applications 테이블)
+- **이메일 알림 API + UI** (job_alerts 테이블)
+- **지원 추적 API + UI** (job_applications 테이블)
+- ApplicationTracker 컴포넌트 (Job 상세 페이지)
+- Account 페이지 알림/지원 추적 섹션
 - Legacy status 필드 제거
 - 다크모드 컬러 수정
 
@@ -249,9 +260,9 @@ Last Updated: 2026-02-18 (Evening) KST
 - AI 요약 & 번역
 
 ### v1.3.0 (Planned)
-- 알림/지원 추적 UI 컴포넌트
 - 크롤러 안정성 개선 (프록시 로테이션)
 - 성능 최적화 (ISR, 캐싱)
+- 이력서 업로드 & 자동 지원
 
 ### v2.0.0 (Future)
 - 회사 대시보드
