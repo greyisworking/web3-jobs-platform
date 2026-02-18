@@ -15,24 +15,33 @@ interface JobsResponse {
   stats: Stats
 }
 
-const fetcher = (url: string) => fetch(url).then(res => res.json())
+// Optimized fetcher with error handling
+const fetcher = async (url: string) => {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error('Failed to fetch')
+  return res.json()
+}
 
 /**
  * Hook for fetching jobs with SWR caching
- * - Caches data for 5 minutes
- * - Revalidates on focus
- * - Deduplicates requests
+ * - Aggressive caching: 5 minute refresh interval
+ * - Stale-while-revalidate pattern
+ * - Error retry with backoff
  */
 export function useJobs() {
   const { data, error, isLoading, mutate } = useSWR<JobsResponse>(
     '/api/jobs',
     fetcher,
     {
-      revalidateOnFocus: false, // Don't refetch on window focus
-      revalidateOnReconnect: true, // Refetch on reconnect
-      dedupingInterval: 60000, // Dedupe requests within 1 minute
-      refreshInterval: 300000, // Refresh every 5 minutes
-      keepPreviousData: true, // Keep old data while fetching new
+      revalidateOnFocus: false,      // Don't refetch on window focus (saves requests)
+      revalidateOnReconnect: true,   // Refetch on network reconnect
+      revalidateIfStale: true,       // Revalidate if data is stale
+      dedupingInterval: 60000,       // Dedupe requests within 1 minute
+      refreshInterval: 300000,       // Refresh every 5 minutes
+      keepPreviousData: true,        // Keep old data while fetching new
+      errorRetryCount: 3,            // Retry failed requests 3 times
+      errorRetryInterval: 5000,      // Wait 5 seconds between retries
+      focusThrottleInterval: 60000,  // Throttle focus events to 1/min
     }
   )
 

@@ -21,6 +21,10 @@ const ContentSecurityPolicy = `
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Performance optimizations
+  compress: true,               // Enable gzip compression
+  poweredByHeader: false,       // Remove X-Powered-By header
+
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',

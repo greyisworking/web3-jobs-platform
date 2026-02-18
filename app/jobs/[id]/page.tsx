@@ -4,15 +4,33 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import type { Job } from '@/types/job'
 import CareersDetailClient from './CareersDetailClient'
 
-// Force dynamic rendering to always fetch fresh data
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+// ISR: Revalidate every 5 minutes
+export const revalidate = 300
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.wtf'
+
+/**
+ * Pre-render the most recent 50 jobs at build time for faster initial load
+ */
+export async function generateStaticParams() {
+  try {
+    const supabase = await createSupabaseServerClient()
+    const { data: jobs } = await supabase
+      .from('Job')
+      .select('id')
+      .eq('isActive', true)
+      .order('crawledAt', { ascending: false })
+      .limit(50)
+
+    return (jobs ?? []).map((job) => ({ id: job.id }))
+  } catch {
+    return []
+  }
+}
 
 async function getJob(id: string): Promise<Job | null> {
   const supabase = await createSupabaseServerClient()
