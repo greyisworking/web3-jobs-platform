@@ -147,8 +147,9 @@ Last Updated: 2026-02-18 (Night) KST
   - SWR 클라이언트 캐싱 최적화
   - Prefetch 유틸리티 추가
 
-- [ ] **DB 마이그레이션 실행**
-  - 002_email_alerts_and_applications.sql 적용 필요
+- [x] **DB 마이그레이션 실행** ✅
+  - 002_email_alerts_and_applications.sql 적용 완료
+  - 019_crawler_errors.sql 적용 완료
 
 ---
 
