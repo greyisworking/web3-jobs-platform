@@ -141,9 +141,11 @@ Last Updated: 2026-02-18 (Night) KST
   - 재시도 로직 강화
   - 에러 모니터링 대시보드
 
-- [ ] **성능 최적화**
+- [x] **성능 최적화** ✅
   - ISR (Incremental Static Regeneration) 적용
-  - API 응답 캐싱 개선
+  - API 응답 캐싱 개선 (in-memory cache + CDN headers)
+  - SWR 클라이언트 캐싱 최적화
+  - Prefetch 유틸리티 추가
 
 - [ ] **DB 마이그레이션 실행**
   - 002_email_alerts_and_applications.sql 적용 필요
@@ -247,6 +249,11 @@ Last Updated: 2026-02-18 (Night) KST
 - **지원 추적 API + UI** (job_applications 테이블)
 - **크롤러 안정성 개선**
   - 프록시 로테이션, Circuit Breaker, 에러 트래킹
+- **성능 최적화**
+  - ISR (5분 재검증) + 빌드 시 상위 50개 Job 사전 렌더링
+  - In-memory cache + CDN 캐시 헤더
+  - SWR 클라이언트 캐싱 최적화
+  - Prefetch 유틸리티
 - ApplicationTracker 컴포넌트 (Job 상세 페이지)
 - Account 페이지 알림/지원 추적 섹션
 - Legacy status 필드 제거
@@ -269,9 +276,9 @@ Last Updated: 2026-02-18 (Night) KST
 - AI 요약 & 번역
 
 ### v1.3.0 (Planned)
-- 성능 최적화 (ISR, 캐싱)
 - 이력서 업로드 & 자동 지원
 - 크롤러 에러 모니터링 UI
+- Redis 캐싱 레이어
 
 ### v2.0.0 (Future)
 - 회사 대시보드
