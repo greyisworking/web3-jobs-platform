@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createPublicSupabaseClient } from '@/lib/supabase-public'
 import type { Job } from '@/types/job'
 import CareersDetailClient from './CareersDetailClient'
 
@@ -18,7 +18,7 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.wtf'
  */
 export async function generateStaticParams() {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = createPublicSupabaseClient()
     const { data: jobs } = await supabase
       .from('Job')
       .select('id')
@@ -33,7 +33,7 @@ export async function generateStaticParams() {
 }
 
 async function getJob(id: string): Promise<Job | null> {
-  const supabase = await createSupabaseServerClient()
+  const supabase = createPublicSupabaseClient()
   const { data, error } = await supabase
     .from('Job')
     .select('*')
