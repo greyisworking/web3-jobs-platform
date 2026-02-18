@@ -6,6 +6,7 @@ import { crawlCryptoJobsList } from './crawlers/cryptojobslist'
 import { crawlRemote3 } from './crawlers/remote3'
 import { crawlRemoteOK } from './crawlers/remoteok'
 import { crawlRocketPunch } from './crawlers/rocketpunch'
+import { crawlWanted } from './crawlers/wanted'
 import { crawlSuiJobs } from './crawlers/suijobs'
 import { crawlSolanaJobs } from './crawlers/solanajobs'
 import { crawlEthereumJobs } from './crawlers/ethereum'
@@ -68,7 +69,7 @@ async function main() {
   // 시작 알림
   await sendDiscordNotification(
     '🚀 크롤링 시작!',
-    '17개 채용 사이트에서 공고를 수집하고 있어요.\n완료되면 다시 알려드릴게요!',
+    '18개 채용 사이트에서 공고를 수집하고 있어요.\n완료되면 다시 알려드릴게요!',
     0x3498db
   )
 
@@ -83,6 +84,7 @@ async function main() {
     { name: 'remote3.co', fn: crawlRemote3 },
     { name: 'remoteok.com', fn: crawlRemoteOK },
     { name: 'rocketpunch.com', fn: crawlRocketPunch },
+    { name: 'wanted.co.kr', fn: crawlWanted },
     { name: 'jobs.sui.io', fn: crawlSuiJobs },
     { name: 'jobs.solana.com', fn: crawlSolanaJobs },
     { name: 'ethereum.foundation', fn: crawlEthereumJobs },
