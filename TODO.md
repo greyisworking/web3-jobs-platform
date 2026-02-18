@@ -34,6 +34,13 @@ Last Updated: 2026-02-18 (Night) KST
 
 ### February 2026 (Week 4) - WIG 달성! 🎉
 
+- [x] **크롤러 안정성 개선**
+  - 프록시 로테이션 (CRAWLER_PROXIES 환경변수)
+  - Circuit Breaker 패턴 (연속 실패 시 자동 중단)
+  - 에러 트래킹 (CrawlerErrors 테이블)
+  - Resilient Fetch (재시도, 백오프)
+  - Rate-limited fetcher per domain
+  - Admin API: /api/admin/crawler-health
 - [x] **알림/지원 추적 UI 컴포넌트 구현**
   - ApplicationTracker 컴포넌트 (Job 상세 페이지)
   - Account 페이지에 Job Alerts 섹션 추가
@@ -129,7 +136,7 @@ Last Updated: 2026-02-18 (Night) KST
 
 - [x] ~~**크롤러 품질 90점 달성**~~ ✅ 완료 (2026-02-18)
 
-- [ ] **크롤러 안정성 개선**
+- [x] **크롤러 안정성 개선** ✅
   - 프록시 로테이션
   - 재시도 로직 강화
   - 에러 모니터링 대시보드
@@ -238,6 +245,8 @@ Last Updated: 2026-02-18 (Night) KST
 - **동적 OG 이미지** 생성
 - **이메일 알림 API + UI** (job_alerts 테이블)
 - **지원 추적 API + UI** (job_applications 테이블)
+- **크롤러 안정성 개선**
+  - 프록시 로테이션, Circuit Breaker, 에러 트래킹
 - ApplicationTracker 컴포넌트 (Job 상세 페이지)
 - Account 페이지 알림/지원 추적 섹션
 - Legacy status 필드 제거
@@ -260,9 +269,9 @@ Last Updated: 2026-02-18 (Night) KST
 - AI 요약 & 번역
 
 ### v1.3.0 (Planned)
-- 크롤러 안정성 개선 (프록시 로테이션)
 - 성능 최적화 (ISR, 캐싱)
 - 이력서 업로드 & 자동 지원
+- 크롤러 에러 모니터링 UI
 
 ### v2.0.0 (Future)
 - 회사 대시보드
