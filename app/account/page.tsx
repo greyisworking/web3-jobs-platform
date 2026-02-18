@@ -145,6 +145,14 @@ export default function AccountPage() {
                 {user?.app_metadata?.provider ?? 'email'}
               </p>
             </div>
+            <div className="pt-2">
+              <Link
+                href="/profile"
+                className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+              >
+                Edit Profile &rarr;
+              </Link>
+            </div>
           </div>
         </section>
 

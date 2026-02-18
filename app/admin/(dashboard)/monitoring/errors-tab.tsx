@@ -136,27 +136,38 @@ export function MonitoringErrorsTab() {
                           {log.message}
                         </TableCell>
                         <TableCell>
-                          {log.stack_trace && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                setExpandedId(
-                                  expandedId === log.id ? null : log.id
-                                )
-                              }
-                            >
-                              {expandedId === log.id ? '숨김' : '보기'}
-                            </Button>
-                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              setExpandedId(
+                                expandedId === log.id ? null : log.id
+                              )
+                            }
+                          >
+                            {expandedId === log.id ? '숨김' : '보기'}
+                          </Button>
                         </TableCell>
                       </TableRow>
-                      {expandedId === log.id && log.stack_trace && (
+                      {expandedId === log.id && (
                         <TableRow key={`${log.id}-trace`}>
                           <TableCell colSpan={5} className="bg-muted">
-                            <pre className="text-xs whitespace-pre-wrap font-mono p-2 max-h-60 overflow-auto">
-                              {log.stack_trace}
-                            </pre>
+                            <div className="p-2 space-y-2">
+                              {log.url && (
+                                <p className="text-xs"><strong>URL:</strong> {log.url}</p>
+                              )}
+                              {log.status_code && (
+                                <p className="text-xs"><strong>Status:</strong> {log.status_code}</p>
+                              )}
+                              {log.error_type && (
+                                <p className="text-xs"><strong>Type:</strong> {log.error_type}</p>
+                              )}
+                              {log.stack_trace && (
+                                <pre className="text-xs whitespace-pre-wrap font-mono mt-2 max-h-60 overflow-auto border p-2 rounded">
+                                  {log.stack_trace}
+                                </pre>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       )}

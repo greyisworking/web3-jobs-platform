@@ -9,6 +9,10 @@ export interface ErrorLog {
   crawler_name: string | null
   stack_trace: string | null
   created_at: string
+  // Additional fields from CrawlerErrors
+  url?: string | null
+  status_code?: number | null
+  error_type?: string | null
 }
 
 export interface ErrorLogsFilters {

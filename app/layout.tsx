@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Caveat, Press_Start_2P, Space_Grotesk } from 'next/font/google'
 import { Toaster } from 'sonner'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import WebVitals from './components/WebVitals'
 import Navigation from './components/Navigation'
 import PageTransition from './components/PageTransition'
@@ -12,6 +14,7 @@ import ServiceWorkerRegistration from './components/ServiceWorkerRegistration'
 // PWAInstallPrompt moved to page.tsx inline (no longer global popup)
 import ErrorBoundary from './components/ErrorBoundary'
 import Onboarding from './components/Onboarding'
+import CompareBar from './components/CompareBar'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], weight: ['200', '300', '400', '500', '700'], display: 'swap', variable: '--font-body' })
@@ -164,6 +167,7 @@ export default function RootLayout({
           <Onboarding />
           <KonamiEasterEgg />
           <TouchGrassReminder />
+          <CompareBar />
           <ServiceWorkerRegistration />
           {/* PWA install button now inline on home page */}
           <Toaster
@@ -176,6 +180,8 @@ export default function RootLayout({
           />
           </I18nProvider>
         </Web3Provider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
