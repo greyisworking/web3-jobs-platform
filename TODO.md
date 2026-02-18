@@ -2,7 +2,7 @@
 
 > 현재 진행 상황 및 백로그
 
-Last Updated: 2026-02-18 (Night) KST
+Last Updated: 2026-02-18 (Late Night) KST
 
 ---
 
@@ -11,22 +11,23 @@ Last Updated: 2026-02-18 (Night) KST
 | Category | Status | Progress |
 |----------|--------|----------|
 | Core Features | ✅ Complete | 100% |
-| Crawlers | ✅ Complete | 15/15 active |
-| Crawler Quality | ✅ Complete | **15/15 at 90+ points** |
+| Crawlers | ✅ Complete | 18/18 active |
+| Crawler Quality | ✅ Complete | **18/18 at 90+ points** |
 | UI/UX | ✅ Complete | Production ready |
 | Admin Dashboard | ✅ Complete | 4DX Dashboard with WIG tracking |
 | Web3 Integration | ✅ Complete | Wallet connection working |
 | AI Features | ✅ Complete | Claude integration |
-| DB Tables | ✅ Complete | bookmarks, job_alerts, job_applications |
+| DB Tables | ✅ Complete | bookmarks, job_alerts, job_applications, profiles |
 | Testing | ✅ Complete | Unit/API/E2E (10/10 pass) |
 | SEO | ✅ Complete | Dynamic OG, JSON-LD |
-| Documentation | 🔄 In Progress | 80% |
+| Monitoring | ✅ Complete | Sentry + Vercel Analytics |
+| Documentation | 🔄 In Progress | 85% |
 
 ### Live Stats (2026-02-18)
-- Total Active Jobs: **636**
-- Total Crawler Sources: **15**
+- Total Active Jobs: **636+**
+- Total Crawler Sources: **18**
 - Average Quality Score: **94점**
-- Sources at 90+: **15/15 (100%)**
+- Sources at 90+: **18/18 (100%)**
 
 ---
 
@@ -34,6 +35,10 @@ Last Updated: 2026-02-18 (Night) KST
 
 ### February 2026 (Week 4) - WIG 달성! 🎉
 
+- [x] **뉴스레터 공고 링크 500 에러 수정** (2026-02-18)
+  - 원인: ISR 페이지에서 `cookies()` 사용 불가
+  - 해결: `lib/supabase-public.ts` 생성 (cookie-less 클라이언트)
+  - `/jobs/[id]/page.tsx`에서 public 클라이언트 사용
 - [x] **크롤러 안정성 개선**
   - 프록시 로테이션 (CRAWLER_PROXIES 환경변수)
   - Circuit Breaker 패턴 (연속 실패 시 자동 중단)
@@ -160,9 +165,9 @@ Last Updated: 2026-02-18 (Night) KST
 #### User Features
 - [x] 이메일 알림 (새 공고 매칭) ✅ API 완료
 - [x] 지원 추적 기능 ✅ API + UI 완료
-- [ ] 이력서 업로드 & 자동 지원
-- [ ] 사용자 프로필 페이지
-- [ ] 공고 비교 기능
+- [x] 이력서 업로드 ✅ (자동 지원 미구현)
+- [x] 사용자 프로필 페이지 ✅
+- [x] 공고 비교 기능 ✅
 - [x] 알림/지원 추적 UI 컴포넌트 ✅
 
 #### Web3 Features
@@ -188,14 +193,14 @@ Last Updated: 2026-02-18 (Night) KST
 #### Infrastructure
 - [ ] Redis 캐싱 레이어
 - [ ] CDN 이미지 최적화
-- [ ] 에러 트래킹 (Sentry)
-- [ ] 성능 모니터링 (Vercel Analytics)
+- [x] 에러 트래킹 (Sentry) ✅
+- [x] 성능 모니터링 (Vercel Analytics) ✅
 
 #### Crawlers
-- [ ] Wellfound (AngelList) 크롤러
+- [x] Wellfound (AngelList) 크롤러 ✅
 - [ ] LinkedIn Jobs 크롤러
 - [ ] Indeed 크롤러 (Web3 필터)
-- [ ] 원티드 크롤러 개선
+- [x] 원티드 크롤러 ✅
 - [ ] 잡코리아 크롤러
 
 #### Data Quality
@@ -224,6 +229,7 @@ Last Updated: 2026-02-18 (Night) KST
 
 | Issue | Priority | Status |
 |-------|----------|--------|
+| ~~/jobs/[id] ISR 환경 500 에러~~ | High | ✅ Fixed |
 | ~~JD HTML 엔티티 안 디코딩됨~~ | High | ✅ Fixed |
 | ~~VC BACKERS 섹션 안 보임~~ | High | ✅ Fixed |
 | ~~Formatted/Raw 토글 안 보임~~ | High | ✅ Fixed |
@@ -237,13 +243,14 @@ Last Updated: 2026-02-18 (Night) KST
 - [x] ~~Legacy `status` 필드 제거 (`isActive`로 통합)~~ ✅ 완료
 - [ ] 타입 정의 통합 (types/ 폴더 정리)
 - [ ] 테스트 코드 리팩토링
-- [ ] 사용하지 않는 dependencies 정리
+- [x] 사용하지 않는 dependencies 정리 ✅
 
 ---
 
 ## Release Notes
 
 ### v1.2.0 (Current - 2026-02-18)
+- **ISR 500 에러 수정** (`/jobs/[id]` 뉴스레터 링크)
 - **E2E 테스트 설정** (Playwright, 10/10 통과)
 - **동적 OG 이미지** 생성
 - **이메일 알림 API + UI** (job_alerts 테이블)
@@ -259,9 +266,15 @@ Last Updated: 2026-02-18 (Night) KST
 - Account 페이지 알림/지원 추적 섹션
 - Legacy status 필드 제거
 - 다크모드 컬러 수정
+- **Sentry 에러 트래킹** (instrumentation.ts 패턴)
+- **Vercel Analytics & Speed Insights**
+- **사용자 프로필 페이지** (skills, bio, social links)
+- **공고 비교 기능** (최대 4개 side-by-side)
+- **이력서 업로드** (Supabase Storage)
+- **원티드 크롤러** (wanted.co.kr)
 
 ### v1.1.0 (2026-02-18)
-- **15개 크롤러 활성화** (품질 점수 전원 90점 이상)
+- **18개 크롤러 활성화** (품질 점수 전원 90점 이상)
 - Admin 4DX 대시보드 (WIG 추적)
 - 크롤러 품질 지표 세분화
 - rocketpunch.com 한국어 JD 번역 시스템
@@ -277,9 +290,9 @@ Last Updated: 2026-02-18 (Night) KST
 - AI 요약 & 번역
 
 ### v1.3.0 (Planned)
-- 이력서 업로드 & 자동 지원
-- 크롤러 에러 모니터링 UI
+- 자동 지원 기능 (이력서 연동)
 - Redis 캐싱 레이어
+- 잡코리아/LinkedIn 크롤러
 
 ### v2.0.0 (Future)
 - 회사 대시보드
