@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchHTML, delay, cleanText, parseSalary, detectExperienceLevel, detectRemoteType, delayWithJitter } from '../utils'
+import { delay, cleanText, delayWithJitter } from '../utils'
+import { resilientFetchHTML } from './lib/resilient-fetch'
 
 interface CrawlerReturn {
   total: number
@@ -38,7 +39,10 @@ export async function crawlCryptoJobs(): Promise<CrawlerReturn> {
 
   for (const pageUrl of pages) {
     console.log(`  📄 Fetching ${pageUrl}`)
-    const $ = await fetchHTML(pageUrl, { useBrowserHeaders: true })
+    const $ = await resilientFetchHTML(pageUrl, {
+      source: 'crypto.jobs',
+      maxRetries: 3,
+    })
 
     if (!$) {
       console.error(`  ❌ Failed to fetch ${pageUrl}`)
