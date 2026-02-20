@@ -299,6 +299,7 @@ export default function Navigation() {
               isActive={isJobsActive}
             />
             <Link href="/companies" className={linkClass(isActive('/companies'))}>Companies</Link>
+            <Link href="/learn" className={linkClass(isActive('/learn'))}>Learn</Link>
             <Link href="/investors" className={linkClass(isActive('/investors'))}>Investors</Link>
             <NavDropdown
               label="Community"
@@ -351,6 +352,13 @@ export default function Navigation() {
                 className={`block py-3 border-b border-a24-border ${linkClass(isActive('/companies'))}`}
               >
                 Companies
+              </Link>
+              <Link
+                href="/learn"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/learn'))}`}
+              >
+                Learn
               </Link>
               <Link
                 href="/investors"
