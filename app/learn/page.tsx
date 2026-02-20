@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
 import {
   Landmark,
@@ -54,18 +54,20 @@ function DomainCard({
       }`}
     >
       <div className="flex items-start gap-4">
+        {/* Rounded icon with domain color */}
         <div
-          className={`p-3 border transition-colors ${
+          className={`p-3 rounded-full transition-colors ${
             isSelected
-              ? 'border-neun-success text-neun-success'
-              : 'border-a24-border dark:border-a24-dark-border text-a24-muted dark:text-a24-dark-muted group-hover:border-neun-success/50 group-hover:text-neun-success'
+              ? 'bg-neun-success/20 text-neun-success'
+              : domain.color
           }`}
         >
           <Icon className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
+          {/* Normal case title, slightly larger */}
           <h3
-            className={`text-sm font-medium uppercase tracking-wider mb-2 transition-colors ${
+            className={`text-base font-medium mb-2 transition-colors ${
               isSelected
                 ? 'text-neun-success'
                 : 'text-a24-text dark:text-a24-dark-text group-hover:text-neun-success'
@@ -73,19 +75,21 @@ function DomainCard({
           >
             {domain.name}
           </h3>
-          <p className="text-xs text-a24-muted dark:text-a24-dark-muted leading-relaxed mb-4">
+          <p className="text-sm text-a24-muted dark:text-a24-dark-muted leading-relaxed mb-4">
             {domain.description}
           </p>
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted">
+            {/* Lowercase steps */}
+            <span className="text-xs text-a24-muted dark:text-a24-dark-muted">
               {domain.stepCount} steps
             </span>
+            {/* Natural job link */}
             <Link
               href={`/jobs?tags=${domain.jobFilterTag}`}
               onClick={(e) => e.stopPropagation()}
-              className="text-[10px] uppercase tracking-wider text-neun-success hover:underline"
+              className="text-xs text-neun-success hover:underline"
             >
-              &rarr; {domain.jobCount} jobs
+              {domain.jobCount} jobs hiring &rarr;
             </Link>
           </div>
         </div>
@@ -109,7 +113,7 @@ function StepAccordion({
         onClick={onToggle}
         className="w-full flex items-start gap-4 py-5 text-left group"
       >
-        <span className="text-[10px] font-mono text-neun-success mt-0.5">
+        <span className="text-xs font-mono text-neun-success mt-0.5">
           {step.number}
         </span>
         <div className="flex-1 min-w-0">
@@ -148,7 +152,7 @@ function StepAccordion({
                 <p className="text-sm text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors truncate">
                   {resource.title}
                 </p>
-                <p className="text-[10px] text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider mt-1">
+                <p className="text-xs text-a24-muted dark:text-a24-dark-muted mt-1">
                   {resource.source} &middot; {resource.duration}
                 </p>
               </div>
@@ -161,7 +165,7 @@ function StepAccordion({
       {isOpen && step.resources.length === 0 && (
         <div className="pl-10 pb-5">
           <p className="text-xs text-a24-muted dark:text-a24-dark-muted italic">
-            Resources coming soon...
+            resources coming soon...
           </p>
         </div>
       )}
@@ -172,6 +176,7 @@ function StepAccordion({
 export default function LearnPage() {
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null)
   const [openStepIndex, setOpenStepIndex] = useState<number>(0)
+  const detailRef = useRef<HTMLElement>(null)
 
   const handleDomainClick = (domain: Domain) => {
     if (selectedDomain?.id === domain.id) {
@@ -180,6 +185,10 @@ export default function LearnPage() {
     } else {
       setSelectedDomain(domain)
       setOpenStepIndex(0)
+      // Scroll to detail section after a short delay
+      setTimeout(() => {
+        detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 150)
     }
   }
 
@@ -193,11 +202,11 @@ export default function LearnPage() {
       <main id="main-content" className="max-w-6xl mx-auto px-6 py-20 md:py-32">
         {/* Hero */}
         <section className="text-center mb-16 md:mb-24">
-          <h1 className="text-3xl md:text-4xl font-light uppercase tracking-[0.4em] text-a24-text dark:text-a24-dark-text mb-4">
+          <h1 className="text-3xl md:text-4xl font-light uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text mb-4">
             Learn Web3
           </h1>
           <p className="text-sm md:text-base text-a24-muted dark:text-a24-dark-muted font-light">
-            Pick a domain. Follow the steps. Land the job.
+            no jargon. no overwhelm. just pick a topic and start.
           </p>
           <div className="w-12 h-px bg-neun-success mx-auto mt-8" />
         </section>
@@ -219,23 +228,26 @@ export default function LearnPage() {
 
         {/* Selected Domain Detail */}
         {selectedDomain && (
-          <section className="mb-16 border border-a24-border dark:border-a24-dark-border bg-a24-surface/30 dark:bg-a24-dark-surface/30">
+          <section
+            ref={detailRef}
+            className="mb-16 border border-a24-border dark:border-a24-dark-border bg-a24-surface/30 dark:bg-a24-dark-surface/30 scroll-mt-5"
+          >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-a24-border dark:border-a24-dark-border">
               <div className="flex items-center gap-4">
                 {(() => {
                   const Icon = iconMap[selectedDomain.icon] || Globe
                   return (
-                    <div className="p-2 border border-neun-success text-neun-success">
+                    <div className={`p-3 rounded-full ${selectedDomain.color}`}>
                       <Icon className="w-5 h-5" />
                     </div>
                   )
                 })()}
                 <div>
-                  <h2 className="text-lg font-medium uppercase tracking-wider text-a24-text dark:text-a24-dark-text">
+                  <h2 className="text-lg font-medium text-a24-text dark:text-a24-dark-text">
                     {selectedDomain.name}
                   </h2>
-                  <p className="text-xs text-a24-muted dark:text-a24-dark-muted mt-1">
+                  <p className="text-sm text-a24-muted dark:text-a24-dark-muted mt-1">
                     {selectedDomain.description}
                   </p>
                 </div>
@@ -261,22 +273,22 @@ export default function LearnPage() {
               ))}
             </div>
 
-            {/* Jobs CTA */}
+            {/* Jobs CTA - NEUN tone */}
             <div className="p-6 border-t border-a24-border dark:border-a24-dark-border bg-neun-success/5">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium text-a24-text dark:text-a24-dark-text">
-                    Ready to apply?
+                  <p className="text-sm text-a24-text dark:text-a24-dark-text">
+                    ready to apply?
                   </p>
                   <p className="text-xs text-a24-muted dark:text-a24-dark-muted mt-1">
-                    {selectedDomain.jobCount} open positions related to {selectedDomain.name} on NEUN
+                    {selectedDomain.jobCount} {selectedDomain.jobFilterTag} jobs on neun rn.
                   </p>
                 </div>
                 <Link
                   href={`/jobs?tags=${selectedDomain.jobFilterTag}`}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-neun-success text-white text-[11px] uppercase tracking-wider font-medium hover:bg-neun-success/90 transition-colors"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-neun-success text-white text-sm font-medium hover:bg-neun-success/90 transition-colors"
                 >
-                  View {selectedDomain.name} Jobs
+                  view {selectedDomain.jobFilterTag} jobs
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -288,7 +300,7 @@ export default function LearnPage() {
         {!selectedDomain && (
           <section className="text-center py-12 border-t border-a24-border dark:border-a24-dark-border">
             <p className="text-sm text-a24-muted dark:text-a24-dark-muted mb-4">
-              Not sure where to start?
+              not sure where to start?
             </p>
             <button
               onClick={() => {
@@ -297,7 +309,7 @@ export default function LearnPage() {
               }}
               className="inline-flex items-center gap-2 text-sm text-neun-success hover:underline"
             >
-              Start with Blockchain Basics
+              start with blockchain basics
               <ArrowRight className="w-4 h-4" />
             </button>
           </section>

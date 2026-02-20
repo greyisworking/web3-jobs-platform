@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import {
@@ -216,7 +216,6 @@ function InvestorCard({ vc, index }: { vc: VCData; index: number }) {
 // ============ Main Component ============
 function EcosystemContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const tabParam = searchParams.get('tab')
   const [activeTab, setActiveTab] = useState<'companies' | 'investors'>(
     tabParam === 'investors' ? 'investors' : 'companies'
@@ -230,20 +229,12 @@ function EcosystemContent() {
   // Investors state
   const [selectedVCTier, setSelectedVCTier] = useState<'all' | 'top' | 'major' | 'notable'>('all')
 
-  // Sync tab with URL
-  useEffect(() => {
-    if (tabParam === 'investors' && activeTab !== 'investors') {
-      setActiveTab('investors')
-    } else if (tabParam === 'companies' && activeTab !== 'companies') {
-      setActiveTab('companies')
-    } else if (!tabParam && activeTab !== 'companies') {
-      setActiveTab('companies')
-    }
-  }, [tabParam, activeTab])
-
+  // Handle tab change without page navigation
   const handleTabChange = (tab: 'companies' | 'investors') => {
+    if (tab === activeTab) return
     setActiveTab(tab)
-    router.push(`/ecosystem?tab=${tab}`, { scroll: false })
+    // Update URL without navigation (no page reload)
+    window.history.replaceState(null, '', `/ecosystem?tab=${tab}`)
   }
 
   // Companies data

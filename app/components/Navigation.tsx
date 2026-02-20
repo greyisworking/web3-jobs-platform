@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X, ChevronDown, User, LogOut, Settings } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
-import LanguageSwitcher from './LanguageSwitcher'
 import NeunLogo from './NeunLogo'
 import { WalletConnect } from './WalletConnect'
 import { useAccount, useDisconnect } from 'wagmi'
@@ -304,14 +303,11 @@ export default function Navigation() {
           <div className="hidden md:flex items-center gap-3">
             {/* Connect / Profile dropdown */}
             <ProfileDropdown />
-
-            <LanguageSwitcher />
             <ThemeToggle />
           </div>
 
           {/* Mobile menu button */}
           <div className="flex md:hidden items-center gap-3">
-            <LanguageSwitcher />
             <ThemeToggle />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
