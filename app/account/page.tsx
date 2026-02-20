@@ -8,7 +8,14 @@ import type { User } from '@supabase/supabase-js'
 import Footer from '../components/Footer'
 import { useAlerts, type AlertFrequency } from '@/hooks/useAlerts'
 import { useApplications, APPLICATION_STATUS_CONFIG } from '@/hooks/useApplications'
-import { Bell, BellOff, Plus, X, Clock } from 'lucide-react'
+import { Bell, BellOff, Plus, X, Clock, FileText } from 'lucide-react'
+
+interface Draft {
+  id: string
+  slug: string
+  title: string
+  updated_at: string
+}
 
 interface SavedJob {
   id: string
@@ -31,6 +38,8 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true)
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([])
   const [bookmarksLoading, setBookmarksLoading] = useState(true)
+  const [drafts, setDrafts] = useState<Draft[]>([])
+  const [draftsLoading, setDraftsLoading] = useState(true)
   const [showAlertForm, setShowAlertForm] = useState(false)
   const [newAlertKeywords, setNewAlertKeywords] = useState('')
   const [newAlertFrequency, setNewAlertFrequency] = useState<AlertFrequency>('daily')
@@ -70,6 +79,18 @@ export default function AccountPage() {
         // ignore
       }
       setBookmarksLoading(false)
+
+      // Fetch drafts
+      try {
+        const draftsRes = await fetch('/api/articles/drafts')
+        if (draftsRes.ok) {
+          const draftsData = await draftsRes.json()
+          setDrafts(draftsData.drafts ?? [])
+        }
+      } catch {
+        // ignore
+      }
+      setDraftsLoading(false)
     }
     init()
   }, [router, supabase.auth])
@@ -192,6 +213,57 @@ export default function AccountPage() {
                   >
                     Remove
                   </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* My Drafts */}
+        <section className="mb-16">
+          <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
+            My Drafts
+          </h2>
+          <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-6" />
+
+          {draftsLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="w-5 h-5 border border-a24-muted dark:border-a24-dark-muted border-t-a24-text dark:border-t-a24-dark-text rounded-full animate-spin" />
+            </div>
+          ) : drafts.length === 0 ? (
+            <div className="text-center py-6">
+              <FileText className="w-8 h-8 mx-auto mb-3 text-a24-muted/50 dark:text-a24-dark-muted/50" />
+              <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted">
+                No drafts yet. Start writing articles from the Community page.
+              </p>
+              <Link
+                href="/articles/write"
+                className="inline-block mt-4 text-[10px] uppercase tracking-[0.25em] text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+              >
+                Write Article &rarr;
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {drafts.map((draft) => (
+                <div
+                  key={draft.id}
+                  className="flex items-center justify-between py-3 border-b border-a24-border dark:border-a24-dark-border"
+                >
+                  <Link href={`/articles/write?edit=${draft.slug}`} className="min-w-0 mr-4 group">
+                    <p className="text-sm font-light text-a24-text dark:text-a24-dark-text truncate group-hover:underline underline-offset-2 decoration-1">
+                      {draft.title || 'Untitled Draft'}
+                    </p>
+                    <p className="text-[11px] font-light text-a24-muted dark:text-a24-dark-muted uppercase tracking-[0.15em]">
+                      Updated {new Date(draft.updated_at).toLocaleDateString()}
+                    </p>
+                  </Link>
+                  <Link
+                    href={`/articles/write?edit=${draft.slug}`}
+                    className="flex-shrink-0 text-[10px] uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+                  >
+                    Edit
+                  </Link>
                 </div>
               ))}
             </div>
