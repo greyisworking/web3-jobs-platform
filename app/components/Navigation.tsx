@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu, X, ChevronDown, User, LogOut, Settings } from 'lucide-react'
+import { Menu, X, ChevronDown, User, LogOut, Settings, FileText, Bookmark } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import LanguageSwitcher from './LanguageSwitcher'
 import NeunLogo from './NeunLogo'
@@ -206,14 +206,24 @@ function ProfileDropdown() {
       {open && (
         <div role="menu" className="absolute top-full right-0 mt-2 min-w-[180px] bg-a24-surface border border-a24-border shadow-lg shadow-neun-success/10 z-50">
           <Link
-            href="/account"
+            href="/articles/drafts"
             role="menuitem"
             className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-a24-text hover:text-neun-success hover:bg-neun-success/10 transition-colors focus-visible:outline-none focus-visible:bg-neun-success/10"
             onClick={() => setOpen(false)}
           >
-            <User className="w-3.5 h-3.5" aria-hidden="true" />
-            Account
+            <FileText className="w-3.5 h-3.5" aria-hidden="true" />
+            My Drafts
           </Link>
+          <Link
+            href="/account#bookmarks"
+            role="menuitem"
+            className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-a24-text hover:text-neun-success hover:bg-neun-success/10 transition-colors focus-visible:outline-none focus-visible:bg-neun-success/10"
+            onClick={() => setOpen(false)}
+          >
+            <Bookmark className="w-3.5 h-3.5" aria-hidden="true" />
+            Bookmarks
+          </Link>
+          <div className="border-t border-a24-border" role="separator" />
           <Link
             href="/account"
             role="menuitem"
@@ -274,7 +284,6 @@ export default function Navigation() {
 
   const communityDropdownItems: DropdownItem[] = [
     { label: 'Articles', href: '/articles' },
-    { label: 'My Drafts', href: '/articles/drafts' },
     { label: 'Transparency', href: '/transparency' },
   ]
 
