@@ -9,22 +9,29 @@ async function getJobCounts(): Promise<Record<string, number>> {
   // Get all job filter tags
   const tags = domains.map(d => d.jobFilterTag)
 
-  // Query job counts for each tag
-  // Jobs are filtered by tags array containing the tag (case-insensitive)
+  // 3 months ago for freshness filter (same as jobs API)
+  const threeMonthsAgo = new Date()
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
+
+  // Query job counts for each tag in parallel
+  const results = await Promise.all(
+    tags.map(async (tag) => {
+      // Search in tags array, title, or description
+      const { count, error } = await supabase
+        .from('Job')
+        .select('*', { count: 'exact', head: true })
+        .eq('isActive', true)
+        .gte('crawledAt', threeMonthsAgo.toISOString())
+        .or(`tags.cs.{${tag}},title.ilike.%${tag}%,category.ilike.%${tag}%`)
+
+      return { tag, count: error ? 0 : (count ?? 0) }
+    })
+  )
+
+  // Convert to record
   const counts: Record<string, number> = {}
-
-  for (const tag of tags) {
-    const { count, error } = await supabase
-      .from('Job')
-      .select('*', { count: 'exact', head: true })
-      .or(`tags.ilike.%${tag}%,title.ilike.%${tag}%,description.ilike.%${tag}%`)
-      .eq('status', 'active')
-
-    if (!error && count !== null) {
-      counts[tag] = count
-    } else {
-      counts[tag] = 0
-    }
+  for (const { tag, count } of results) {
+    counts[tag] = count
   }
 
   return counts
