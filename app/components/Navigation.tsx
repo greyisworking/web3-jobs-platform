@@ -258,7 +258,7 @@ export default function Navigation() {
   }
 
   const isJobsActive = isActive('/jobs') || isActive('/bounties') || isActive('/ecosystems')
-  const isCommunityActive = isActive('/articles') || isActive('/meme') || isActive('/transparency')
+  const isCommunityActive = isActive('/articles') || isActive('/transparency')
 
   const linkClass = (active: boolean) =>
     `text-[11px] uppercase tracking-[0.3em] font-light transition-colors ${
@@ -275,7 +275,6 @@ export default function Navigation() {
   const communityDropdownItems: DropdownItem[] = [
     { label: 'Articles', href: '/articles' },
     { label: 'My Drafts', href: '/articles/drafts' },
-    { label: 'Meme', href: '/meme', highlight: true },
     { label: 'Transparency', href: '/transparency' },
   ]
 

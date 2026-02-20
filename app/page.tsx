@@ -162,31 +162,6 @@ export default function Home() {
       </ScrollReveal>
 
       {/* Meme Generator CTA */}
-      <ScrollReveal>
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 p-6 sm:p-8 bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-lg">
-            <div className="flex items-center gap-4 sm:gap-6">
-              <Pixelbara pose="bling" size={80} clickable className="flex-shrink-0" />
-              <div className="min-w-0">
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 sm:mb-2">
-                  Make Memes Not War
-                </h3>
-                <p className="text-gray-400 text-xs sm:text-sm">
-                  Create viral pixelbara memes. fr fr.
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/meme"
-              className="group flex items-center justify-center gap-2 sm:gap-3 w-full md:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all hover:scale-105 whitespace-nowrap flex-shrink-0"
-            >
-              <span className="text-base sm:text-xl" aria-hidden="true">:3</span>
-              <span className="text-sm sm:text-base">Generate Meme</span>
-              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:translate-x-1 flex-shrink-0" />
-            </Link>
-          </div>
-        </section>
-      </ScrollReveal>
 
       {/* PWA Install — mobile only, inline */}
       <section className="max-w-7xl mx-auto px-6 pb-6">
