@@ -76,6 +76,12 @@ const nextConfig = {
       // /careers -> /jobs (alias)
       { source: '/careers', destination: '/jobs', permanent: true },
       { source: '/ko/careers', destination: '/ko/jobs', permanent: true },
+      // /companies -> /ecosystem
+      { source: '/companies', destination: '/ecosystem?tab=companies', permanent: true },
+      { source: '/ko/companies', destination: '/ko/ecosystem?tab=companies', permanent: true },
+      // /investors -> /ecosystem?tab=investors
+      { source: '/investors', destination: '/ecosystem?tab=investors', permanent: true },
+      { source: '/ko/investors', destination: '/ko/ecosystem?tab=investors', permanent: true },
     ]
   },
   // i18n rewrites - map /ko/* to /* (same pages, different locale)

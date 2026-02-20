@@ -258,7 +258,6 @@ export default function Navigation() {
   }
 
   const isJobsActive = isActive('/jobs') || isActive('/bounties') || isActive('/ecosystems')
-  const isCommunityActive = isActive('/articles') || isActive('/transparency')
 
   const linkClass = (active: boolean) =>
     `text-[11px] uppercase tracking-[0.3em] font-light transition-colors ${
@@ -270,11 +269,6 @@ export default function Navigation() {
   const jobsDropdownItems: DropdownItem[] = [
     { label: 'All Jobs', href: '/jobs' },
     { label: 'Bounties', href: '/bounties' },
-  ]
-
-  const communityDropdownItems: DropdownItem[] = [
-    { label: 'Articles', href: '/articles' },
-    { label: 'Transparency', href: '/transparency' },
   ]
 
   return (
@@ -298,14 +292,9 @@ export default function Navigation() {
               items={jobsDropdownItems}
               isActive={isJobsActive}
             />
-            <Link href="/companies" className={linkClass(isActive('/companies'))}>Companies</Link>
+            <Link href="/ecosystem" className={linkClass(isActive('/ecosystem'))}>Ecosystem</Link>
             <Link href="/learn" className={linkClass(isActive('/learn'))}>Learn</Link>
-            <Link href="/investors" className={linkClass(isActive('/investors'))}>Investors</Link>
-            <NavDropdown
-              label="Community"
-              items={communityDropdownItems}
-              isActive={isCommunityActive}
-            />
+            <Link href="/account" className={linkClass(isActive('/account'))}>Account</Link>
           </div>
 
           {/* Mobile: Logo */}
@@ -347,11 +336,11 @@ export default function Navigation() {
                 onClose={() => setMobileMenuOpen(false)}
               />
               <Link
-                href="/companies"
+                href="/ecosystem"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/companies'))}`}
+                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/ecosystem'))}`}
               >
-                Companies
+                Ecosystem
               </Link>
               <Link
                 href="/learn"
@@ -361,18 +350,12 @@ export default function Navigation() {
                 Learn
               </Link>
               <Link
-                href="/investors"
+                href="/account"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/investors'))}`}
+                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/account'))}`}
               >
-                Investors
+                Account
               </Link>
-              <MobileAccordion
-                label="Community"
-                items={communityDropdownItems}
-                isActive={isCommunityActive}
-                onClose={() => setMobileMenuOpen(false)}
-              />
 
               <div className="pt-4 pb-2">
                 <div className="py-2">
