@@ -1,8 +1,14 @@
 /**
- * Crawler Utility: Format Description
+ * @deprecated This file is DEPRECATED as of 2026-02-21
  *
- * Formats job descriptions before saving to database.
- * Preserves original in raw_description field.
+ * Description formatting has been moved to frontend-side sanitization.
+ * See: lib/sanitize-description.ts (sanitization)
+ * See: app/components/JobDescription.tsx (rendering)
+ *
+ * Crawlers now save raw descriptions directly via validate-job.ts.
+ * Frontend sanitizes HTML before rendering with sanitize-html.
+ *
+ * This file is kept for backward compatibility but should not be used.
  */
 
 import { formatJobDescription, needsFormatting } from '../../../lib/description-formatter'

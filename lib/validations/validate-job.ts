@@ -7,7 +7,8 @@ import { detectRole, normalizeEmploymentType, detectRegion } from '../../scripts
 import { containsKorean, translateJobTitle, quickTranslateTerms } from '../translation'
 import { cleanJobTitle, cleanCompanyName } from '../clean-job-title'
 import { createSafeLikePattern } from '../sanitize'
-import { formatJobDescription, needsFormatting } from '../description-formatter'
+// NOTE: Formatting removed - raw descriptions saved, sanitized on frontend
+// import { formatJobDescription, needsFormatting } from '../description-formatter'
 
 // Prisma client for SQLite fallback
 const prisma = new PrismaClient()
@@ -104,21 +105,16 @@ export async function validateAndSaveJob(
       .trim()
   }
 
-  // Store original description for raw_description field
-  const rawDescription = job.description || null
-
-  // Format and translate description
-  let formattedDescription: string | null = null
+  // Store raw description - no formatting, frontend sanitizes
+  // Truncate extremely long descriptions (50,000 char limit)
+  const MAX_DESCRIPTION_LENGTH = 50000
+  let rawDescription: string | null = null
   if (job.description) {
-    // First format the description (clean HTML, structure as markdown)
-    if (needsFormatting(job.description)) {
-      const formatResult = formatJobDescription(job.description)
-      formattedDescription = formatResult.formatted
-    } else {
-      formattedDescription = job.description
-    }
-    // Then translate if contains Korean
-    formattedDescription = translateField(formattedDescription)
+    rawDescription = job.description.length > MAX_DESCRIPTION_LENGTH
+      ? job.description.slice(0, MAX_DESCRIPTION_LENGTH)
+      : job.description
+    // Translate Korean terms if present
+    rawDescription = translateField(rawDescription)
   }
 
   const translatedRequirements = translateField(job.requirements)
@@ -190,11 +186,11 @@ export async function validateAndSaveJob(
     // Use existing postedDate if available, otherwise use new one
     const postedDateToUse = existingJob?.postedDate || job.postedDate?.toISOString()
 
-    // For description: use formatted value if provided, otherwise keep existing
-    // This allows re-crawl to ADD descriptions to jobs that didn't have them
-    const descriptionToUse = formattedDescription || existingJob?.description || null
-    // Preserve raw_description (original unformatted) - don't overwrite if exists
-    const rawDescriptionToUse = existingJob?.raw_description || rawDescription || null
+    // For description: use raw value if provided, otherwise keep existing
+    // Frontend sanitizes during rendering
+    const descriptionToUse = rawDescription || existingJob?.description || null
+    // raw_description field deprecated but kept for backward compatibility
+    const rawDescriptionToUse = existingJob?.raw_description || null
 
     const { data: upsertData, error } = await supabase.from('Job').upsert(
       {
@@ -275,7 +271,7 @@ export async function validateAndSaveJob(
           postedDate: job.postedDate,
           updatedAt: new Date(),
           // Enhanced job details - use formatted/translated values
-          description: formattedDescription || null,
+          description: rawDescription || null,
           requirements: translatedRequirements || null,
           responsibilities: translatedResponsibilities || null,
           benefits: translatedBenefits || null,
@@ -303,7 +299,7 @@ export async function validateAndSaveJob(
           isActive: true,
           postedDate: job.postedDate,
           // Enhanced job details - use formatted/translated values
-          description: formattedDescription || null,
+          description: rawDescription || null,
           requirements: translatedRequirements || null,
           responsibilities: translatedResponsibilities || null,
           benefits: translatedBenefits || null,

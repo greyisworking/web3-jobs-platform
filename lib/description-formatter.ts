@@ -1,10 +1,17 @@
 /**
- * Job Description Formatter
+ * @deprecated This file is DEPRECATED as of 2026-02-21
  *
- * Cleans and formats raw job descriptions into readable markdown.
- * This is the foundation for the AI summary pipeline (Phase 2).
+ * Description formatting has been moved to frontend-side sanitization.
+ * See: lib/sanitize-description.ts (sanitization)
+ * See: app/components/JobDescription.tsx (rendering)
  *
- * Processing Pipeline:
+ * Crawlers now save raw descriptions directly via validate-job.ts.
+ * Frontend sanitizes HTML before rendering with sanitize-html.
+ *
+ * This file is kept for backward compatibility with migrate-descriptions.ts
+ * but should not be used for new code.
+ *
+ * Old Pipeline (deprecated):
  * 1. Raw text cleanup (HTML entities, tags, whitespace)
  * 2. Boilerplate removal (Apply now, social links, etc.)
  * 3. Section header detection and markdown conversion

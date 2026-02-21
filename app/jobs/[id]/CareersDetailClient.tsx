@@ -11,6 +11,7 @@ import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import { ensureCSRFToken } from '@/lib/csrf-client'
 import { cleanJobDisplay, cleanJobDisplayWithSections } from '@/lib/clean-job-display'
 import MarkdownRenderer from '@/app/components/MarkdownRenderer'
+import JobDescription from '@/app/components/JobDescription'
 import BookmarkButton from '@/app/components/BookmarkButton'
 import ApplicationTracker from '@/app/components/ApplicationTracker'
 import GlowBadge from '@/app/components/GlowBadge'
@@ -382,13 +383,9 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                     {job.raw_description}
                   </div>
                 ) : (
-                  <MarkdownRenderer
-                    content={cleanJobDisplayWithSections(job.description, {
-                      requirements: !!job.requirements,
-                      responsibilities: !!job.responsibilities,
-                      benefits: !!job.benefits,
-                    })}
-                    className="text-sm text-a24-text dark:text-a24-dark-text leading-relaxed"
+                  <JobDescription
+                    content={job.description}
+                    className="text-sm"
                   />
                 )}
               </div>
