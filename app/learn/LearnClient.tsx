@@ -67,9 +67,9 @@ function DomainCard({
       onClick={onClick}
       className={`group w-full text-left p-6 border transition-all duration-300 ${
         isSelected
-          ? 'border-neun-success bg-neun-success/5'
+          ? 'border-neun-success bg-neun-success/5 ring-1 ring-neun-success/30'
           : isDimmed
-          ? 'border-a24-border/50 dark:border-a24-dark-border/50 opacity-40'
+          ? 'border-a24-border/50 dark:border-a24-dark-border/50 opacity-50 pointer-events-none'
           : 'border-a24-border dark:border-a24-dark-border hover:border-neun-success/50 hover:bg-a24-surface/50 dark:hover:bg-a24-dark-surface/50'
       }`}
     >
@@ -127,7 +127,7 @@ function ResourceCard({ resource }: { resource: Resource }) {
       href={resource.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-start gap-3 p-3 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border border-a24-border dark:border-a24-dark-border hover:border-neun-success/50 transition-colors group"
+      className="flex items-start gap-3 p-3 hover:bg-a24-surface/50 dark:hover:bg-a24-dark-surface/50 transition-colors group"
     >
       <div className="mt-0.5">
         <Icon className={`w-4 h-4 ${colorClass}`} />
@@ -184,9 +184,14 @@ function StepAccordion({
       </button>
 
       {isOpen && step.resources.length > 0 && (
-        <div className="pl-10 pb-5 space-y-3">
+        <div className="pl-10 pb-5">
           {step.resources.map((resource, idx) => (
-            <ResourceCard key={idx} resource={resource} />
+            <div
+              key={idx}
+              className={idx > 0 ? 'border-t border-a24-border/50 dark:border-a24-dark-border/50' : ''}
+            >
+              <ResourceCard resource={resource} />
+            </div>
           ))}
         </div>
       )}
@@ -263,7 +268,7 @@ export default function LearnClient({ domains }: LearnClientProps) {
         {selectedDomain && (
           <section
             ref={detailRef}
-            className="mb-16 border border-a24-border dark:border-a24-dark-border bg-a24-surface/30 dark:bg-a24-dark-surface/30 scroll-mt-5"
+            className="mb-16 border border-a24-border dark:border-a24-dark-border bg-a24-surface/30 dark:bg-a24-dark-surface/30 scroll-mt-20"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-a24-border dark:border-a24-dark-border">
