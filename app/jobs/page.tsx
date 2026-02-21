@@ -21,6 +21,7 @@ const PAGE_SIZE = 12
 function CareersContent() {
   const searchParams = useSearchParams()
   const companyFilter = searchParams.get('company') || ''
+  const queryFilter = searchParams.get('q') || ''
   // Use SWR for caching and deduplication
   const { jobs, stats, isLoading } = useJobs()
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([])
@@ -40,13 +41,21 @@ function CareersContent() {
   })
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
+  // Initialize search query from URL parameter
+  useEffect(() => {
+    if (queryFilter && !searchQuery) {
+      setSearchQuery(queryFilter)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryFilter])
+
   // Update filtered jobs when jobs data changes or company filter changes
   useEffect(() => {
     if (jobs.length > 0) {
-      applyAllFilters(smartFilters, selectedVC, searchQuery, companyFilter)
+      applyAllFilters(smartFilters, selectedVC, searchQuery || queryFilter, companyFilter)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobs, companyFilter])
+  }, [jobs, companyFilter, queryFilter])
 
   // Reset visible count when filters change
   useEffect(() => {

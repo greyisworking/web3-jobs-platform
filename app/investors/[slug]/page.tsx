@@ -211,7 +211,7 @@ export default function InvestorDetailPage() {
       <main className="max-w-6xl mx-auto px-6 pt-24 pb-12">
         {/* Back link */}
         <Link
-          href="/investors"
+          href="/ecosystem?tab=investors"
           className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text mb-8 transition-colors"
         >
           <ArrowLeft className="w-3 h-3" />

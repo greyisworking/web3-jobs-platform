@@ -234,8 +234,19 @@ function EcosystemContent() {
     if (tab === activeTab) return
     setActiveTab(tab)
     // Update URL without navigation (no page reload)
-    window.history.replaceState(null, '', `/ecosystem?tab=${tab}`)
+    window.history.pushState(null, '', `/ecosystem?tab=${tab}`)
   }
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search)
+      const tab = params.get('tab')
+      setActiveTab(tab === 'investors' ? 'investors' : 'companies')
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
 
   // Companies data
   const jobCounts = useMemo(() => {

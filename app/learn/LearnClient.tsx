@@ -105,7 +105,7 @@ function DomainCard({
             </span>
             {/* Natural job link */}
             <Link
-              href={`/jobs?tags=${domain.jobFilterTag}`}
+              href={`/jobs?q=${domain.jobFilterTag}`}
               onClick={(e) => e.stopPropagation()}
               className="text-xs text-neun-success hover:underline"
             >
@@ -324,7 +324,7 @@ export default function LearnClient({ domains }: LearnClientProps) {
                   </p>
                 </div>
                 <Link
-                  href={`/jobs?tags=${selectedDomain.jobFilterTag}`}
+                  href={`/jobs?q=${selectedDomain.jobFilterTag}`}
                   className="flex items-center gap-2 px-5 py-2.5 bg-neun-success text-white text-sm font-medium hover:bg-neun-success/90 transition-colors"
                 >
                   view {selectedDomain.jobFilterTag} jobs
