@@ -24,8 +24,8 @@ const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || ''
 
 // Timeout settings
 const OVERALL_TIMEOUT_MS = 30 * 60 * 1000  // 30 minutes max
-const PER_SOURCE_TIMEOUT_MS = 3 * 60 * 1000  // 3 minutes per source
-const PRIORITY_COMPANIES_TIMEOUT_MS = 5 * 60 * 1000  // 5 minutes for priority-companies
+const PER_SOURCE_TIMEOUT_MS = 5 * 60 * 1000  // 5 minutes per source
+const PRIORITY_COMPANIES_TIMEOUT_MS = 8 * 60 * 1000  // 8 minutes for priority-companies
 
 // Wrap crawler with timeout
 async function withTimeout<T>(
