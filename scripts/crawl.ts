@@ -25,6 +25,7 @@ const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || ''
 // Timeout settings
 const OVERALL_TIMEOUT_MS = 30 * 60 * 1000  // 30 minutes max
 const PER_SOURCE_TIMEOUT_MS = 3 * 60 * 1000  // 3 minutes per source
+const PRIORITY_COMPANIES_TIMEOUT_MS = 5 * 60 * 1000  // 5 minutes for priority-companies
 
 // Wrap crawler with timeout
 async function withTimeout<T>(
@@ -115,7 +116,7 @@ async function main() {
   console.log('\n📌 Active Crawlers\n')
 
   const crawlers = [
-    { name: 'priority-companies', fn: crawlPriorityCompanies },
+    { name: 'priority-companies', fn: crawlPriorityCompanies, timeout: PRIORITY_COMPANIES_TIMEOUT_MS },
     { name: 'web3.career', fn: crawlWeb3Career },
     { name: 'web3kr.jobs', fn: crawlWeb3KRJobs },
     { name: 'cryptojobslist.com', fn: crawlCryptoJobsList },
@@ -141,8 +142,9 @@ async function main() {
     checkOverallTimeout()
 
     const crawlerStartTime = Date.now()
+    const timeout = crawler.timeout || PER_SOURCE_TIMEOUT_MS
     try {
-      const result = await withTimeout(crawler.fn(), PER_SOURCE_TIMEOUT_MS, crawler.name)
+      const result = await withTimeout(crawler.fn(), timeout, crawler.name)
       // Handle both old (number) and new ({ total, new }) return types
       const total = typeof result === 'number' ? result : result.total
       const newCount = typeof result === 'number' ? 0 : result.new
