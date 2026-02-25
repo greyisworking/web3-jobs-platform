@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu, X, ChevronDown, User, LogOut, Settings } from 'lucide-react'
+import { Menu, X, ChevronDown, User, LogOut } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import NeunLogo from './NeunLogo'
 import { WalletConnect } from './WalletConnect'
@@ -289,23 +289,12 @@ function ProfileDropdown() {
             <User className="w-3.5 h-3.5" aria-hidden="true" />
             Account
           </Link>
-          <Link
-            href="/account#settings"
-            role="menuitem"
-            ref={(el) => { itemRefs.current[1] = el }}
-            className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-a24-text hover:text-neun-success hover:bg-neun-success/10 transition-colors focus-visible:outline-none focus-visible:bg-neun-success/10"
-            onClick={() => setOpen(false)}
-            onKeyDown={(e) => handleItemKeyDown(e, 1)}
-          >
-            <Settings className="w-3.5 h-3.5" aria-hidden="true" />
-            Settings
-          </Link>
           <div className="border-t border-a24-border dark:border-a24-dark-border" role="separator" />
           <button
             role="menuitem"
-            ref={(el) => { itemRefs.current[2] = el }}
+            ref={(el) => { itemRefs.current[1] = el }}
             onClick={handleLogout}
-            onKeyDown={(e) => handleItemKeyDown(e, 2)}
+            onKeyDown={(e) => handleItemKeyDown(e, 1)}
             className="w-full flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors focus-visible:outline-none focus-visible:bg-red-500/10"
           >
             <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
@@ -397,7 +386,6 @@ export default function Navigation() {
             />
             <Link href="/ecosystem" className={linkClass(isActive('/ecosystem'))}>Ecosystem</Link>
             <Link href="/learn" className={linkClass(isActive('/learn'))}>Learn</Link>
-            <Link href="/account" className={linkClass(isActive('/account'))}>Account</Link>
           </div>
 
           {/* Mobile: Logo */}
@@ -449,13 +437,15 @@ export default function Navigation() {
               >
                 Learn
               </Link>
-              <Link
-                href="/account"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/account'))}`}
-              >
-                Account
-              </Link>
+              {(mobileUser || address) && (
+                <Link
+                  href="/account"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block py-3 border-b border-a24-border ${linkClass(isActive('/account'))}`}
+                >
+                  Account
+                </Link>
+              )}
               {(mobileUser || address) && (
                 <button
                   onClick={handleMobileLogout}
