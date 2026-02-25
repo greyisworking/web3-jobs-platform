@@ -319,14 +319,38 @@ function ProfileDropdown() {
 
 export default function Navigation() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { address } = useAccount()
+  const { disconnect: disconnectWallet } = useDisconnect()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [mobileUser, setMobileUser] = useState<SupabaseUser | null>(null)
+  const supabase = createSupabaseBrowserClient()
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10)
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setMobileUser(user))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setMobileUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [supabase])
+
+  const handleMobileLogout = async () => {
+    setMobileMenuOpen(false)
+    if (mobileUser) {
+      await supabase.auth.signOut()
+    }
+    if (address) {
+      disconnectWallet()
+    }
+    router.refresh()
+  }
 
   // Don't render on admin pages
   if (pathname?.startsWith('/admin')) return null
@@ -432,6 +456,14 @@ export default function Navigation() {
               >
                 Account
               </Link>
+              {(mobileUser || address) && (
+                <button
+                  onClick={handleMobileLogout}
+                  className="w-full text-left py-3 border-b border-a24-border text-[11px] uppercase tracking-[0.3em] font-light text-red-400 hover:text-red-300 transition-colors"
+                >
+                  Logout
+                </button>
+              )}
 
               <div className="pt-4 pb-2">
                 <div className="py-2">

@@ -287,8 +287,10 @@ function CareersContent() {
             <div className="py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
               <Pixelbara pose="question" size={140} className="mx-auto mb-4" clickable />
               <p className="text-a24-muted dark:text-a24-dark-muted text-sm mb-2">
-                {jobs.length === 0
+                {isLoading
                   ? 'Loading jobs...'
+                  : jobs.length === 0
+                  ? 'No jobs available'
                   : 'No matching jobs found'}
               </p>
               {jobs.length > 0 && (

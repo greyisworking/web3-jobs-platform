@@ -40,9 +40,16 @@ function TrendBadge({ trend, change }: { trend: 'rising' | 'stable' | 'declining
   )
 }
 
-function ProgressBar({ percentage, color = 'bg-neun-success' }: { percentage: number; color?: string }) {
+function ProgressBar({ percentage, color = 'bg-neun-success', label = 'progress' }: { percentage: number; color?: string; label?: string }) {
   return (
-    <div className="h-2 bg-a24-surface dark:bg-a24-dark-surface rounded-full overflow-hidden">
+    <div
+      role="progressbar"
+      aria-valuenow={percentage}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={label}
+      className="h-2 bg-a24-surface dark:bg-a24-dark-surface rounded-full overflow-hidden"
+    >
       <div
         className={`h-full ${color} rounded-full transition-all duration-500`}
         style={{ width: `${Math.min(percentage, 100)}%` }}

@@ -142,25 +142,25 @@ export default async function LearnPage() {
   const accentMap: Record<string, { border: string; text: string; glow: string; bg: string }> = {
     emerald: {
       border: 'border-emerald-500/20 hover:border-emerald-500/60',
-      text: 'text-emerald-400',
+      text: 'text-emerald-600 dark:text-emerald-400',
       glow: 'hover:shadow-emerald-500/10',
       bg: 'bg-emerald-500/5',
     },
     blue: {
       border: 'border-blue-500/20 hover:border-blue-500/60',
-      text: 'text-blue-400',
+      text: 'text-blue-600 dark:text-blue-400',
       glow: 'hover:shadow-blue-500/10',
       bg: 'bg-blue-500/5',
     },
     amber: {
       border: 'border-amber-500/20 hover:border-amber-500/60',
-      text: 'text-amber-400',
+      text: 'text-amber-600 dark:text-amber-400',
       glow: 'hover:shadow-amber-500/10',
       bg: 'bg-amber-500/5',
     },
     purple: {
       border: 'border-purple-500/20 hover:border-purple-500/60',
-      text: 'text-purple-400',
+      text: 'text-purple-600 dark:text-purple-400',
       glow: 'hover:shadow-purple-500/10',
       bg: 'bg-purple-500/5',
     },

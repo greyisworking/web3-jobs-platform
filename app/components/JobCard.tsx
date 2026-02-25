@@ -94,7 +94,7 @@ const ReportButton = memo(function ReportButton({ jobId }: { jobId: string }) {
         onClick={toggleMenu}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
-        className="relative p-1 text-a24-muted/40 hover:text-red-500 transition-colors"
+        className="relative flex items-center justify-center min-w-[44px] min-h-[44px] p-2.5 text-a24-muted/40 hover:text-red-500 transition-colors"
         aria-label="Report this job"
       >
         <Flag className="w-3 h-3" />

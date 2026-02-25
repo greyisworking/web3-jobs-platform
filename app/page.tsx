@@ -38,16 +38,23 @@ function useViewportSize() {
 export default function Home() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const viewportSize = useViewportSize()
 
-  useEffect(() => {
+  const fetchFeaturedJobs = () => {
+    setLoading(true)
+    setError(false)
     fetch('/api/jobs/featured')
       .then((res) => res.json())
       .then((data) => {
         setJobs(data.jobs ?? [])
       })
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    fetchFeaturedJobs()
   }, [])
 
   return (
@@ -144,6 +151,19 @@ export default function Home() {
 
           {loading ? (
             <JobCardSkeletonGrid count={6} />
+          ) : error ? (
+            <div className="py-16 md:py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
+              <Pixelbara pose="empty" size={160} className="mx-auto mb-4" clickable />
+              <p className="text-a24-muted dark:text-a24-dark-muted text-base font-medium mb-4">
+                Failed to load jobs. Please try again.
+              </p>
+              <button
+                onClick={fetchFeaturedJobs}
+                className="text-[11px] uppercase tracking-[0.2em] font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 border border-emerald-500/50 px-4 py-2 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
           ) : jobs.length === 0 ? (
             <div className="py-16 md:py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
               <Pixelbara pose="empty" size={160} className="mx-auto mb-4" clickable />

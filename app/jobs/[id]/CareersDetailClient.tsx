@@ -267,11 +267,11 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
           <div className="space-y-8">
             {/* Company & Title */}
             <div>
-              <p className="text-2xl font-light uppercase tracking-[0.25em] text-a24-text dark:text-a24-dark-text mb-3">
+              <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted mb-3">
                 {cleanCompanyName(job.company)}
               </p>
               <div className="flex items-center gap-3">
-                <h1 className="text-base font-light text-a24-text dark:text-a24-dark-text">
+                <h1 className="text-xl md:text-2xl font-semibold text-a24-text dark:text-a24-dark-text">
                   {cleanJobTitle(job.title, job.company)}
                 </h1>
                 {isNew && (

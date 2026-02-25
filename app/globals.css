@@ -1376,3 +1376,67 @@ input:-webkit-autofill:focus {
     -webkit-backdrop-filter: blur(12px);
   }
 }
+
+/* ════════════════════════════════════════════
+   Reduced Motion Accessibility
+   Respects user preference for reduced motion
+   (vestibular disorders, epilepsy, etc.)
+   ════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Make stagger/fade-in content immediately visible */
+  .stagger-children > *,
+  .fade-in-section {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+  }
+
+  /* Stop infinite/decorative animations */
+  .badge-urgent,
+  .badge-recommended,
+  .badge-new-emphasis,
+  .vc-marquee,
+  .pixelbara-eyes,
+  .pixelbara-rainbow svg,
+  .skeleton,
+  .skeleton-shimmer,
+  .progress-bar-indeterminate,
+  .celebration-text,
+  .celebration-bounce,
+  .heart-animate,
+  .heart-burst,
+  .page-transition,
+  .toast-enter,
+  .toast-exit,
+  .check-animate,
+  .btn-ripple:active::after,
+  .pixel-click-effect:active::after {
+    animation: none !important;
+  }
+
+  /* Disable hover/interaction transitions */
+  .card-interactive,
+  .card-hover-lift,
+  .card-scale,
+  .card-icon-bounce .card-icon,
+  .border-glow,
+  .border-green-glow,
+  .arrow-slide,
+  .btn-green-glow,
+  .progress-bar-fill,
+  .jd-prose a,
+  .job-description a {
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Disable dark mode color transition on html */
+  html {
+    transition: none !important;
+  }
+
+  /* Disable ear wiggle hover */
+  .pixelbara-animated:hover .pixelbara-ears {
+    animation: none !important;
+  }
+}

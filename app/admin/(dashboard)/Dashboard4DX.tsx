@@ -144,9 +144,9 @@ function TrendIcon({ direction }: { direction: TrendDirection }) {
 
 function StatusBadge({ status }: { status: ScoreStatus }) {
   const colors = {
-    green: 'bg-green-100 text-green-800 border-green-200',
-    yellow: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    red: 'bg-red-100 text-red-800 border-red-200',
+    green: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border-green-200 dark:border-green-800',
+    yellow: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800',
+    red: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border-red-200 dark:border-red-800',
   }
   const labels = {
     green: '목표 달성',

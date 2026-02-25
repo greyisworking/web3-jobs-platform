@@ -125,7 +125,7 @@ export default async function CompanyDashboardPage() {
               {recentJobs.map((job) => (
                 <div
                   key={job.id}
-                  className="flex items-center justify-between p-4 bg-gray-800/50 border border-gray-700"
+                  className="flex items-center justify-between p-4 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border"
                 >
                   <div>
                     <h3 className="font-medium text-a24-text">{job.title}</h3>
@@ -181,7 +181,7 @@ export default async function CompanyDashboardPage() {
             </Link>
             <Link
               href="/company/dashboard/analytics"
-              className="block p-4 bg-gray-800/50 border border-gray-700 hover:bg-gray-800 transition-colors"
+              className="block p-4 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border hover:bg-a24-surface-hover dark:hover:bg-a24-dark-surface-hover transition-colors"
             >
               <h3 className="font-medium text-a24-text">View Analytics</h3>
               <p className="text-sm text-a24-muted mt-1">
@@ -190,7 +190,7 @@ export default async function CompanyDashboardPage() {
             </Link>
             <Link
               href="/company/dashboard/settings"
-              className="block p-4 bg-gray-800/50 border border-gray-700 hover:bg-gray-800 transition-colors"
+              className="block p-4 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border hover:bg-a24-surface-hover dark:hover:bg-a24-dark-surface-hover transition-colors"
             >
               <h3 className="font-medium text-a24-text">Company Settings</h3>
               <p className="text-sm text-a24-muted mt-1">
