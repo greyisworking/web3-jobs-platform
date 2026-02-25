@@ -260,10 +260,13 @@ export default async function CareerPage({
             <div className="p-4 border border-a24-border dark:border-a24-dark-border">
               <div className="flex items-center gap-2 text-a24-muted dark:text-a24-dark-muted mb-2">
                 <Building2 className="w-4 h-4" />
-                <span className="text-xs uppercase tracking-wider">companies</span>
+                <span className="text-xs uppercase tracking-wider">vc-backed</span>
               </div>
-              <p className="text-2xl font-light text-a24-text dark:text-a24-dark-text">
-                {skillsData.stats?.companiesHiring || 0}
+              <p className="text-2xl font-light text-neun-success">
+                {skillsData.stats?.vcBackedJobs || 0}
+              </p>
+              <p className="text-xs text-a24-muted dark:text-a24-dark-muted mt-1">
+                from {skillsData.stats?.vcBackedCompanies || 0} top companies
               </p>
             </div>
 
@@ -295,10 +298,15 @@ export default async function CareerPage({
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
           {/* Skills from JD Analysis */}
           <section>
-            <h2 className="text-lg font-medium text-a24-text dark:text-a24-dark-text mb-6 flex items-center gap-2">
+            <h2 className="text-lg font-medium text-a24-text dark:text-a24-dark-text mb-2 flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-neun-success" />
               Skills Employers Want
             </h2>
+            {skillsData?.stats?.vcBackedJobs && skillsData.stats.vcBackedJobs > 0 && (
+              <p className="text-xs text-a24-muted dark:text-a24-dark-muted mb-6">
+                weighted by {skillsData.stats.vcBackedJobs} jobs from VC-backed companies
+              </p>
+            )}
 
             {skillsData?.skills ? (
               <div className="space-y-6">

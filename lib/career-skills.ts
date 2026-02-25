@@ -1,4 +1,8 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { findPriorityCompany } from '@/lib/priority-companies'
+
+// VC weighting for skill analysis
+const VC_WEIGHT = 2  // Jobs from VC-backed companies count 2x
 
 // Career path definitions with title patterns
 export const careerPaths: Record<string, {
@@ -170,7 +174,9 @@ export interface CareerSkillsData {
   }
   stats: {
     totalJobs: number
+    vcBackedJobs: number  // Jobs from VC-backed companies
     companiesHiring: number
+    vcBackedCompanies: number  // VC-backed companies hiring
     experienceLevels: Record<string, number>
     locations: Record<string, number>
     jobTypes: Record<string, number>
@@ -214,14 +220,27 @@ export async function getCareerSkills(careerSlug: string): Promise<CareerSkillsD
       return career.titlePatterns.some(pattern => titleLower.includes(pattern))
     })
 
-    // Extract and count skills
+    // Extract and count skills with VC weighting
     const skillCounts: Record<string, number> = {}
     const experienceLevelCounts: Record<string, number> = {}
     const locationCounts: Record<string, number> = {}
     const typeCounts: Record<string, number> = {}
     const companiesHiring: Set<string> = new Set()
+    const vcBackedCompanies: Set<string> = new Set()
+    let vcBackedJobCount = 0
+    let totalWeightedJobs = 0  // For percentage calculation
 
     for (const job of matchingJobs) {
+      // Check if company is VC-backed
+      const isVcBacked = findPriorityCompany(job.company) !== null
+      const weight = isVcBacked ? VC_WEIGHT : 1
+      totalWeightedJobs += weight
+
+      if (isVcBacked) {
+        vcBackedJobCount++
+        vcBackedCompanies.add(job.company)
+      }
+
       // Combine text sources for skill extraction
       const textToAnalyze = [
         job.title || '',
@@ -229,9 +248,10 @@ export async function getCareerSkills(careerSlug: string): Promise<CareerSkillsD
         job.description || '',
       ].join(' ')
 
+      // Apply weight to skill counts
       const skills = extractSkills(textToAnalyze)
       for (const skill of skills) {
-        skillCounts[skill] = (skillCounts[skill] || 0) + 1
+        skillCounts[skill] = (skillCounts[skill] || 0) + weight
       }
 
       // Count experience levels
@@ -257,13 +277,14 @@ export async function getCareerSkills(careerSlug: string): Promise<CareerSkillsD
       companiesHiring.add(job.company)
     }
 
-    // Sort skills by frequency
+    // Sort skills by weighted frequency
     const sortedSkills = Object.entries(skillCounts)
       .sort((a, b) => b[1] - a[1])
       .map(([skill, count]) => ({
         skill,
         count,
-        percentage: matchingJobs.length > 0 ? Math.round((count / matchingJobs.length) * 100) : 0,
+        // Use weighted total for percentage (VC jobs count 2x)
+        percentage: totalWeightedJobs > 0 ? Math.round((count / totalWeightedJobs) * 100) : 0,
       }))
 
     // Categorize skills
@@ -279,7 +300,9 @@ export async function getCareerSkills(careerSlug: string): Promise<CareerSkillsD
       },
       stats: {
         totalJobs: matchingJobs.length,
+        vcBackedJobs: vcBackedJobCount,
         companiesHiring: companiesHiring.size,
+        vcBackedCompanies: vcBackedCompanies.size,
         experienceLevels: experienceLevelCounts,
         locations: locationCounts,
         jobTypes: typeCounts,
@@ -290,7 +313,11 @@ export async function getCareerSkills(careerSlug: string): Promise<CareerSkillsD
         niceToHave: niceToHave,
         all: sortedSkills,
       },
-      sampleCompanies: Array.from(companiesHiring).slice(0, 10),
+      // Prioritize VC-backed companies in sample list
+      sampleCompanies: [
+        ...Array.from(vcBackedCompanies).slice(0, 8),
+        ...Array.from(companiesHiring).filter(c => !vcBackedCompanies.has(c)).slice(0, 2),
+      ].slice(0, 10),
     }
   } catch {
     return null
