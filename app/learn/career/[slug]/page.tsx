@@ -16,6 +16,7 @@ import {
   ExternalLink,
 } from 'lucide-react'
 import Footer from '@/app/components/Footer'
+import { getCareerSkills } from '@/lib/career-skills'
 
 // Career metadata
 const careerMeta: Record<string, {
@@ -199,20 +200,6 @@ const careerMeta: Record<string, {
   },
 }
 
-async function getCareerSkills(slug: string) {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-    const res = await fetch(`${baseUrl}/api/learn/career-skills?career=${slug}`, {
-      next: { revalidate: 3600 }, // Cache for 1 hour
-    })
-
-    if (!res.ok) return null
-    return res.json()
-  } catch {
-    return null
-  }
-}
-
 export default async function CareerPage({
   params,
 }: {
@@ -384,7 +371,7 @@ export default async function CareerPage({
             )}
 
             {/* Sample Companies */}
-            {skillsData?.sampleCompanies?.length > 0 && (
+            {skillsData && skillsData.sampleCompanies && skillsData.sampleCompanies.length > 0 && (
               <div className="mt-8 pt-6 border-t border-a24-border dark:border-a24-dark-border">
                 <h3 className="text-xs uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted mb-3">
                   companies hiring
