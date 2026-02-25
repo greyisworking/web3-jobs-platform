@@ -101,7 +101,7 @@ function NavDropdown({ label, items, isActive }: NavDropdownProps) {
               ref={(el) => { itemRefs.current[index] = el }}
               className={`block px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] transition-colors focus-visible:outline-none focus-visible:bg-neun-success/10 ${
                 item.highlight
-                  ? 'text-[#FF69B4] hover:text-[#FF1493] hover:bg-[#FF1493]/10'
+                  ? 'text-pink-400 hover:text-pink-500 hover:bg-pink-500/10'
                   : 'text-a24-text hover:text-neun-success hover:bg-neun-success/10'
               }`}
               onClick={() => setOpen(false)}
@@ -143,7 +143,7 @@ function MobileAccordion({ label, items, isActive, onClose }: NavDropdownProps &
               href={item.href}
               className={`py-2 text-[10px] uppercase tracking-[0.2em] transition-colors ${
                 item.highlight
-                  ? 'text-[#FF69B4] hover:text-[#FF1493]'
+                  ? 'text-pink-400 hover:text-pink-500'
                   : 'text-a24-muted hover:text-neun-success'
               }`}
               onClick={onClose}

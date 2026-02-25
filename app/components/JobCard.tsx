@@ -208,7 +208,7 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
             <div className="absolute bottom-2 right-2 opacity-30">
               <MiniPixelbara />
             </div>
-            <span className="absolute top-1 right-10 text-[9px] text-a24-muted/50 dark:text-a24-dark-muted/50 italic pointer-events-none">
+            <span aria-hidden="true" className="absolute top-1 right-10 text-[9px] text-a24-muted/50 dark:text-a24-dark-muted/50 italic pointer-events-none">
               it&apos;s giving... job
             </span>
           </>
