@@ -74,7 +74,6 @@ const sections = [
     description: 'what skills are hot? which roles are growing? data from live job posts.',
     color: 'border-emerald-500/30 hover:border-emerald-500',
     iconColor: 'text-emerald-400',
-    comingSoon: true,
   },
   {
     href: '/learn/skills',
@@ -83,7 +82,6 @@ const sections = [
     description: 'deep dives into specific skills. solidity, rust, defi, zk, and more.',
     color: 'border-amber-500/30 hover:border-amber-500',
     iconColor: 'text-amber-400',
-    comingSoon: true,
   },
   {
     href: '/learn/library',
@@ -115,47 +113,27 @@ export default function LearnPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {sections.map((section) => {
               const Icon = section.icon
-              const isDisabled = section.comingSoon
-
-              const content = (
-                <div
-                  className={`group relative p-6 border transition-all duration-300 ${section.color} ${
-                    isDisabled
-                      ? 'opacity-50 cursor-not-allowed bg-a24-surface/20 dark:bg-a24-dark-surface/20'
-                      : 'hover:bg-a24-surface/50 dark:hover:bg-a24-dark-surface/50'
-                  }`}
-                >
-                  {section.comingSoon && (
-                    <span className="absolute top-4 right-4 text-[10px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted">
-                      coming soon
-                    </span>
-                  )}
-                  <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-full bg-a24-surface/50 dark:bg-a24-dark-surface/50 ${section.iconColor}`}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="text-lg font-medium text-a24-text dark:text-a24-dark-text mb-2 group-hover:text-neun-success transition-colors">
-                        {section.title}
-                      </h2>
-                      <p className="text-sm text-a24-muted dark:text-a24-dark-muted leading-relaxed">
-                        {section.description}
-                      </p>
-                    </div>
-                    {!isDisabled && (
-                      <ArrowRight className="w-4 h-4 text-a24-muted dark:text-a24-dark-muted group-hover:text-neun-success transition-colors mt-1" />
-                    )}
-                  </div>
-                </div>
-              )
-
-              if (isDisabled) {
-                return <div key={section.href}>{content}</div>
-              }
 
               return (
                 <Link key={section.href} href={section.href}>
-                  {content}
+                  <div
+                    className={`group relative p-6 border transition-all duration-300 ${section.color} hover:bg-a24-surface/50 dark:hover:bg-a24-dark-surface/50`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`p-3 rounded-full bg-a24-surface/50 dark:bg-a24-dark-surface/50 ${section.iconColor}`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h2 className="text-lg font-medium text-a24-text dark:text-a24-dark-text mb-2 group-hover:text-neun-success transition-colors">
+                          {section.title}
+                        </h2>
+                        <p className="text-sm text-a24-muted dark:text-a24-dark-muted leading-relaxed">
+                          {section.description}
+                        </p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-a24-muted dark:text-a24-dark-muted group-hover:text-neun-success transition-colors mt-1" />
+                    </div>
+                  </div>
                 </Link>
               )
             })}
