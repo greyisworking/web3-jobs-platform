@@ -1087,3 +1087,286 @@
   content: "";
   margin-top: 0.5rem;
 }
+
+/* ════════════════════════════════════════════
+   Dark Mode Consistency Utilities
+   ════════════════════════════════════════════ */
+
+/* Smooth dark mode transition */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+/* Focus ring consistency */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-neun-success/50 focus:ring-offset-2 focus:ring-offset-a24-bg dark:focus:ring-offset-a24-dark-bg;
+}
+
+/* Text selection color */
+::selection {
+  background: rgba(34, 197, 94, 0.3);
+  color: inherit;
+}
+
+.dark ::selection {
+  background: rgba(34, 197, 94, 0.4);
+}
+
+/* Input autofill styling for dark mode */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--a24-surface) inset !important;
+  -webkit-text-fill-color: var(--a24-text) !important;
+  caret-color: var(--a24-text);
+}
+
+/* Scrollbar styling for dark mode */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--a24-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--a24-muted);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--a24-border);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--a24-muted);
+}
+
+/* Consistent card background */
+.card-bg {
+  @apply bg-white dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border;
+}
+
+/* Consistent text colors */
+.text-primary {
+  @apply text-a24-text dark:text-a24-dark-text;
+}
+
+.text-secondary {
+  @apply text-a24-muted dark:text-a24-dark-muted;
+}
+
+/* ════════════════════════════════════════════
+   Enhanced Card Hover Animations
+   ════════════════════════════════════════════ */
+
+/* Card with lift + glow effect */
+.card-interactive {
+  @apply transition-all duration-300 ease-out;
+  transform: translateY(0) scale(1);
+}
+
+.card-interactive:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 12px 24px -8px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(34, 197, 94, 0.1);
+}
+
+.dark .card-interactive:hover {
+  box-shadow:
+    0 12px 32px -8px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(34, 197, 94, 0.2);
+}
+
+/* Card with subtle scale */
+.card-scale {
+  @apply transition-transform duration-200 ease-out;
+}
+
+.card-scale:hover {
+  transform: scale(1.02);
+}
+
+.card-scale:active {
+  transform: scale(0.98);
+}
+
+/* Icon bounce on card hover */
+.card-icon-bounce .card-icon {
+  @apply transition-transform duration-300;
+}
+
+.card-icon-bounce:hover .card-icon {
+  transform: translateY(-2px) scale(1.1);
+}
+
+/* Arrow slide on hover */
+.arrow-slide {
+  @apply transition-transform duration-300;
+}
+
+.group:hover .arrow-slide {
+  transform: translateX(4px);
+}
+
+/* Border glow effect */
+.border-glow {
+  @apply transition-shadow duration-300;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+}
+
+.border-glow:hover {
+  box-shadow: 0 0 20px 2px rgba(34, 197, 94, 0.15);
+}
+
+.dark .border-glow:hover {
+  box-shadow: 0 0 24px 4px rgba(34, 197, 94, 0.2);
+}
+
+/* ════════════════════════════════════════════
+   Mobile-First Responsive Utilities
+   ════════════════════════════════════════════ */
+
+/* Touch-friendly tap targets */
+@media (pointer: coarse) {
+  .tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Larger touch areas for links */
+  .touch-link {
+    padding: 12px 16px;
+    margin: -12px -16px;
+  }
+}
+
+/* Mobile spacing adjustments */
+@media (max-width: 640px) {
+  .mobile-compact {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .mobile-stack {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mobile-full {
+    width: 100%;
+  }
+
+  .mobile-center {
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Reduce font sizes on mobile */
+  .mobile-text-sm {
+    font-size: 0.875rem;
+  }
+
+  .mobile-text-xs {
+    font-size: 0.75rem;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-2col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1025px) {
+  .desktop-3col {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .desktop-4col {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Safe area padding for notched devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Hide on mobile */
+.hide-mobile {
+  @apply hidden sm:block;
+}
+
+/* Show only on mobile */
+.show-mobile {
+  @apply block sm:hidden;
+}
+
+/* Responsive text truncation */
+.truncate-mobile {
+  @apply truncate sm:whitespace-normal sm:overflow-visible;
+}
+
+/* Mobile-optimized card grid */
+.card-grid-responsive {
+  @apply grid gap-3 sm:gap-4 md:gap-6;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .card-grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Mobile-friendly buttons */
+.btn-mobile {
+  @apply w-full sm:w-auto px-4 py-3 sm:py-2;
+}
+
+/* Responsive container with mobile padding */
+.container-responsive {
+  @apply w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Sticky header with backdrop blur on mobile */
+@supports (backdrop-filter: blur(12px)) {
+  .header-blur {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}

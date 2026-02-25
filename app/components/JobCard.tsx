@@ -50,8 +50,13 @@ interface JobCardProps {
 
 // Hoisted static values (rendering-hoist-jsx)
 const cardVariants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 16, scale: 0.98 },
+  visible: { opacity: 1, y: 0, scale: 1 },
+} as const
+
+const cardHoverVariants = {
+  rest: { y: 0, scale: 1 },
+  hover: { y: -4, scale: 1.01 },
 } as const
 
 const REPORT_REASONS = ['Spam', 'Scam/Fraud', 'Expired', 'Inappropriate', 'Duplicate'] as const
@@ -139,17 +144,23 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
       variants={cardVariants}
       initial="hidden"
       whileInView="visible"
+      whileHover="hover"
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.4, delay: (index % 6) * 0.08, ease: [0.22, 1, 0.36, 1] }}
       style={{ opacity: isFading ? opacity : undefined }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      className="will-change-transform"
     >
-      <Link
-        href={`/jobs/${job.id}`}
-        onClick={handleClick}
-        className="relative block p-3 sm:p-4 min-h-[140px] sm:h-[160px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border transition-all duration-300 ease-out group flex flex-col overflow-hidden touch-target rounded-sm hover:-translate-y-1 hover:shadow-card-hover dark:hover:shadow-card-hover-dark hover:border-emerald-500/30 dark:hover:border-emerald-500/20"
+      <motion.div
+        variants={cardHoverVariants}
+        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       >
+        <Link
+          href={`/jobs/${job.id}`}
+          onClick={handleClick}
+          className="relative block p-3 sm:p-4 min-h-[140px] sm:h-[160px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border transition-all duration-300 ease-out group flex flex-col overflow-hidden touch-target rounded-sm hover:shadow-card-hover dark:hover:shadow-card-hover-dark hover:border-emerald-500/40 dark:hover:border-emerald-500/30"
+        >
 
         {/* Von Restorff Effect: Urgent/Featured badges only */}
         {(job.is_urgent || job.is_featured) && (
@@ -236,6 +247,7 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
           )}
         </div>
       </Link>
+      </motion.div>
     </motion.div>
   )
 })

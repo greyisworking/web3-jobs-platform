@@ -5,6 +5,7 @@ import {
   Wrench,
   BookOpen,
   ArrowRight,
+  Sparkles,
 } from 'lucide-react'
 import Footer from '@/app/components/Footer'
 
@@ -17,6 +18,7 @@ const sections = [
     description: 'job-ready roadmaps based on real JDs. skills, resources, hiring trends.',
     color: 'border-blue-500/30 hover:border-blue-500',
     iconColor: 'text-blue-400',
+    bgGlow: 'group-hover:shadow-blue-500/10',
   },
   {
     href: '/learn/trends',
@@ -25,6 +27,7 @@ const sections = [
     description: 'what skills are hot? which roles are growing? data from live job posts.',
     color: 'border-emerald-500/30 hover:border-emerald-500',
     iconColor: 'text-emerald-400',
+    bgGlow: 'group-hover:shadow-emerald-500/10',
   },
   {
     href: '/learn/skills',
@@ -33,6 +36,7 @@ const sections = [
     description: 'deep dives into specific skills. solidity, rust, defi, zk, and more.',
     color: 'border-amber-500/30 hover:border-amber-500',
     iconColor: 'text-amber-400',
+    bgGlow: 'group-hover:shadow-amber-500/10',
   },
   {
     href: '/learn/library',
@@ -41,37 +45,41 @@ const sections = [
     description: 'curated articles, videos, courses. organized by topic.',
     color: 'border-purple-500/30 hover:border-purple-500',
     iconColor: 'text-purple-400',
+    bgGlow: 'group-hover:shadow-purple-500/10',
   },
 ]
 
 export default function LearnPage() {
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <main id="main-content" className="max-w-6xl mx-auto px-6 py-20 md:py-32">
+      <main id="main-content" className="container-responsive py-16 sm:py-20 md:py-32">
         {/* Hero */}
-        <section className="text-center mb-16 md:mb-24">
-          <h1 className="text-3xl md:text-4xl font-light uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text mb-4">
+        <section className="text-center mb-16 md:mb-20">
+          <div className="inline-flex items-center gap-2 text-neun-success text-xs uppercase tracking-widest mb-6">
+            <Sparkles className="w-3 h-3" />
+            <span>data-driven learning</span>
+          </div>
+          <h1 className="text-3xl md:text-5xl font-light uppercase tracking-[0.2em] text-a24-text dark:text-a24-dark-text mb-6">
             Learn Web3
           </h1>
-          <p className="text-sm md:text-base text-a24-muted dark:text-a24-dark-muted font-light max-w-xl mx-auto">
-            career paths built from real job data. know exactly what to learn.
+          <p className="text-sm md:text-base text-a24-muted dark:text-a24-dark-muted font-light max-w-md mx-auto leading-relaxed">
+            career paths built from real job data.<br className="hidden sm:block" /> know exactly what to learn.
           </p>
-          <div className="w-12 h-px bg-neun-success mx-auto mt-8" />
         </section>
 
         {/* Main Sections Grid */}
-        <section className="mb-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <section>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {sections.map((section) => {
               const Icon = section.icon
 
               return (
                 <Link key={section.href} href={section.href}>
                   <div
-                    className={`group relative p-6 border transition-all duration-300 ${section.color} hover:bg-a24-surface/50 dark:hover:bg-a24-dark-surface/50`}
+                    className={`group relative p-6 md:p-8 border card-interactive border-glow ${section.color} ${section.bgGlow} hover:bg-a24-surface/50 dark:hover:bg-a24-dark-surface/50`}
                   >
                     <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-full bg-a24-surface/50 dark:bg-a24-dark-surface/50 ${section.iconColor}`}>
+                      <div className={`p-3 rounded-full bg-a24-surface/50 dark:bg-a24-dark-surface/50 ${section.iconColor} card-icon transition-transform duration-300 group-hover:scale-110`}>
                         <Icon className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
@@ -82,7 +90,7 @@ export default function LearnPage() {
                           {section.description}
                         </p>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-a24-muted dark:text-a24-dark-muted group-hover:text-neun-success transition-colors mt-1" />
+                      <ArrowRight className="w-4 h-4 text-a24-muted dark:text-a24-dark-muted group-hover:text-neun-success arrow-slide mt-1" />
                     </div>
                   </div>
                 </Link>
@@ -91,6 +99,12 @@ export default function LearnPage() {
           </div>
         </section>
 
+        {/* Stats hint */}
+        <section className="mt-16 text-center">
+          <p className="text-xs text-a24-muted dark:text-a24-dark-muted uppercase tracking-widest">
+            powered by live job market data
+          </p>
+        </section>
       </main>
 
       <Footer />
