@@ -323,6 +323,24 @@
   animation-play-state: paused;
 }
 
+/* Learn page ticker animation */
+@keyframes learn-ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.learn-ticker {
+  animation: learn-ticker 35s linear infinite;
+}
+
+.learn-ticker:hover {
+  animation-play-state: paused;
+}
+
 /* Konami rainbow mode */
 @keyframes pixelbara-rainbow-hue {
   0% { filter: hue-rotate(0deg); }
@@ -1381,6 +1399,7 @@ input:-webkit-autofill:focus {
   .badge-recommended,
   .badge-new-emphasis,
   .vc-marquee,
+  .learn-ticker,
   .pixelbara-eyes,
   .pixelbara-rainbow svg,
   .skeleton,
