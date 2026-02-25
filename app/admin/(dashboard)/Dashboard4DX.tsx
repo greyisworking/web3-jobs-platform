@@ -233,7 +233,7 @@ function MiniChart({ data }: { data: { date: string; clicks: number }[] }) {
   const last7Days = data.slice(-7)
 
   return (
-    <div className="flex items-end gap-1 h-16">
+    <div role="img" aria-label="Click trend chart (last 7 days)" className="flex items-end gap-1 h-16">
       {last7Days.map((d, i) => (
         <div
           key={d.date}
@@ -254,7 +254,7 @@ function FullChart({ data }: { data: { date: string; clicks: number }[] }) {
   const last14Days = data.slice(-14)
 
   return (
-    <div className="space-y-2">
+    <div role="img" aria-label="Click trend chart (last 14 days)" className="space-y-2">
       <div className="flex items-end gap-1 h-32">
         {last14Days.map((d) => (
           <div

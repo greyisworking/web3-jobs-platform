@@ -836,16 +836,8 @@
   animation: progress-indeterminate 1s ease-in-out infinite;
 }
 
-/* Skeleton shimmer */
-@keyframes skeleton-shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
+/* Skeleton shimmer — same styles as .skeleton above; @keyframes defined once at line ~623 */
+/* .skeleton-shimmer is an alias for .skeleton for components that use the explicit class name */
 .skeleton-shimmer {
   background: linear-gradient(
     90deg,
@@ -857,15 +849,7 @@
   animation: skeleton-shimmer 1.5s ease-in-out infinite;
 }
 
-.dark .skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    var(--a24-surface) 25%,
-    var(--a24-border) 50%,
-    var(--a24-surface) 75%
-  );
-  background-size: 200% 100%;
-}
+/* .dark .skeleton-shimmer inherits the same CSS vars as light mode (vars swap via .dark class) */
 
 /* ── Miller's Law: Information Chunking ── */
 .info-group {

@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode, type HTMLAttributes } from 'react'
+import React, { type ReactNode, type HTMLAttributes } from 'react'
 import { cn } from '@/lib/utils'
 
 export type BadgeVariant =
@@ -88,7 +88,7 @@ export function Badge({
 // Tag Component (interactive badge)
 // ══════════════════════════════════════════════
 
-interface TagProps extends HTMLAttributes<HTMLButtonElement> {
+interface TagProps extends HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant
   size?: BadgeSize
   selected?: boolean
@@ -102,16 +102,29 @@ export function Tag({
   selected = false,
   onRemove,
   className,
+  onClick,
   children,
   ...props
 }: TagProps) {
   return (
-    <button
-      type="button"
+    <span
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onClick(e as unknown as React.MouseEvent<HTMLSpanElement>)
+              }
+            }
+          : undefined
+      }
       className={cn(
         'inline-flex items-center font-medium uppercase tracking-wider',
-        'transition-all duration-200 cursor-pointer',
-        'hover:opacity-80 active:scale-95',
+        'transition-all duration-200',
+        onClick && 'cursor-pointer hover:opacity-80 active:scale-95',
         selected
           ? 'bg-neun-primary/20 text-neun-primary border border-neun-primary/30'
           : variantStyles[variant],
@@ -141,7 +154,7 @@ export function Tag({
           </svg>
         </button>
       )}
-    </button>
+    </span>
   )
 }
 

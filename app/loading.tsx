@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Pixelbara from './components/Pixelbara'
 
 // Pixel progress bar component
@@ -28,6 +28,7 @@ function PixelProgressBar({ progress }: { progress: number }) {
 export default function Loading() {
   const [progress, setProgress] = useState(0)
   const [blink, setBlink] = useState(false)
+  const blinkTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   // Simulate progress
   useEffect(() => {
@@ -44,9 +45,12 @@ export default function Loading() {
   useEffect(() => {
     const interval = setInterval(() => {
       setBlink(true)
-      setTimeout(() => setBlink(false), 150)
+      blinkTimeoutRef.current = setTimeout(() => setBlink(false), 150)
     }, 2500)
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current)
+    }
   }, [])
 
   const message =

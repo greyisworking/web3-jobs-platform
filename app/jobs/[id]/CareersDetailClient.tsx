@@ -796,7 +796,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
       )}
 
       {/* Mobile fixed bottom Apply button */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-a24-surface dark:bg-a24-dark-surface border-t border-a24-border dark:border-a24-dark-border p-4">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-a24-surface dark:bg-a24-dark-surface border-t border-a24-border dark:border-a24-dark-border p-4 safe-bottom">
         {isExpired ? (
           <div className="flex gap-2">
             <div className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-500/20 text-gray-400 text-[10px] uppercase tracking-wider">

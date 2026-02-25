@@ -90,35 +90,6 @@ export function SkeletonButton({
 }
 
 // ══════════════════════════════════════════════
-// Job Card Skeleton
-// ══════════════════════════════════════════════
-
-export function JobCardSkeleton() {
-  return (
-    <div className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border p-4 md:p-5">
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex-1">
-          <Skeleton height={12} className="w-24 mb-2" />
-          <Skeleton height={20} className="w-full mb-1" />
-          <Skeleton height={20} className="w-3/4" />
-        </div>
-        <Skeleton width={40} height={20} />
-      </div>
-
-      <div className="flex gap-3 mb-4">
-        <Skeleton width={80} height={14} />
-        <Skeleton width={60} height={14} />
-      </div>
-
-      <div className="pt-3 border-t border-a24-border dark:border-a24-dark-border flex items-center justify-between">
-        <Skeleton width={60} height={12} />
-        <Skeleton width={16} height={16} />
-      </div>
-    </div>
-  )
-}
-
-// ══════════════════════════════════════════════
 // Company Card Skeleton
 // ══════════════════════════════════════════════
 
@@ -172,11 +143,34 @@ export function ArticleCardSkeleton() {
 // List Skeleton
 // ══════════════════════════════════════════════
 
+function InlineJobCardSkeleton() {
+  return (
+    <div className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border p-4 md:p-5">
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex-1">
+          <Skeleton height={12} className="w-24 mb-2" />
+          <Skeleton height={20} className="w-full mb-1" />
+          <Skeleton height={20} className="w-3/4" />
+        </div>
+        <Skeleton width={40} height={20} />
+      </div>
+      <div className="flex gap-3 mb-4">
+        <Skeleton width={80} height={14} />
+        <Skeleton width={60} height={14} />
+      </div>
+      <div className="pt-3 border-t border-a24-border dark:border-a24-dark-border flex items-center justify-between">
+        <Skeleton width={60} height={12} />
+        <Skeleton width={16} height={16} />
+      </div>
+    </div>
+  )
+}
+
 export function JobListSkeleton({ count = 6 }: { count?: number }) {
   return (
     <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: count }).map((_, i) => (
-        <JobCardSkeleton key={i} />
+        <InlineJobCardSkeleton key={i} />
       ))}
     </div>
   )

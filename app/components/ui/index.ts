@@ -20,7 +20,6 @@ export {
   SkeletonText,
   SkeletonAvatar,
   SkeletonButton,
-  JobCardSkeleton,
   CompanyCardSkeleton,
   ArticleCardSkeleton,
   JobListSkeleton,

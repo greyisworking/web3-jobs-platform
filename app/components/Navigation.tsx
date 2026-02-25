@@ -384,7 +384,7 @@ export default function Navigation() {
         Skip to main content
       </a>
       <header className={`sticky top-0 z-50 bg-a24-bg/95 dark:bg-a24-dark-surface/95 backdrop-blur-sm transition-all duration-300 ${scrolled ? 'border-b border-a24-border dark:border-a24-dark-border' : 'border-b border-transparent'}`}>
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           {/* Left: Logo + Nav */}
           <div className="hidden md:flex items-center gap-6">
             {/* Logo - clicks to home */}
@@ -428,7 +428,7 @@ export default function Navigation() {
         {/* Mobile Nav */}
         {mobileMenuOpen && (
           <div id="mobile-navigation" className="md:hidden border-t border-a24-border dark:border-a24-dark-border bg-a24-surface/95">
-            <nav aria-label="Mobile navigation" className="max-w-7xl mx-auto px-6 py-2">
+            <nav aria-label="Mobile navigation" className="max-w-6xl mx-auto px-6 py-2">
               <MobileAccordion
                 label="Jobs"
                 items={jobsDropdownItems}

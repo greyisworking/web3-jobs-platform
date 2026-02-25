@@ -61,7 +61,7 @@ export default function Home() {
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg pixelbara-cursor">
 
       {/* Hero Section - BOLD & IMPACTFUL */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 section-spacing-lg">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 section-spacing-lg">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -99,7 +99,7 @@ export default function Home() {
             >
               <Link
                 href="/jobs"
-                className="group inline-flex items-center justify-center gap-3 text-[12px] uppercase tracking-[0.2em] font-bold text-white bg-emerald-500 px-6 sm:px-8 py-4 hover:bg-emerald-400 hover:shadow-green-glow active:scale-95 transition-all duration-200 touch-target"
+                className="group inline-flex items-center justify-center gap-3 text-[12px] uppercase tracking-[0.2em] font-bold text-white bg-neun-success px-6 sm:px-8 py-4 hover:bg-neun-success/90 hover:shadow-green-glow active:scale-95 transition-all duration-200 touch-target"
               >
                 <MiniPixelbara className="opacity-80 group-hover:opacity-100 transition-opacity" />
                 Explore Careers
@@ -134,7 +134,7 @@ export default function Home() {
 
       {/* Featured Jobs - BOLDER */}
       <ScrollReveal>
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 section-spacing">
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 section-spacing">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline gap-2 mb-2">
             <h2 className="text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-[0.15em] text-a24-text dark:text-a24-dark-text">
               Featured Positions
@@ -147,7 +147,7 @@ export default function Home() {
               <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
           </div>
-          <div className="w-16 h-0.5 bg-emerald-500 mb-8 md:mb-10" />
+          <div className="w-12 h-px bg-neun-success mb-8 md:mb-10" />
 
           {loading ? (
             <JobCardSkeletonGrid count={6} />
@@ -184,7 +184,7 @@ export default function Home() {
       {/* Meme Generator CTA */}
 
       {/* PWA Install — mobile only, inline */}
-      <section className="max-w-7xl mx-auto px-6 pb-6">
+      <section className="max-w-6xl mx-auto px-6 pb-6">
         <PWAInstallPrompt />
       </section>
 

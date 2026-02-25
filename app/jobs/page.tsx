@@ -281,7 +281,7 @@ function CareersContent() {
               {filteredJobs.length} results
             </span>
           </div>
-          <div className="w-10 h-px bg-a24-text dark:bg-a24-dark-text mb-8" />
+          <div className="w-12 h-px bg-neun-success mb-8" />
 
           {filteredJobs.length === 0 ? (
             <div className="py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
@@ -341,7 +341,7 @@ export default function CareersPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-        <main className="max-w-6xl mx-auto px-6 py-12">
+        <main className="max-w-6xl mx-auto px-6 pt-24 pb-12">
           <JobCardSkeletonGrid count={9} showLoader={false} />
         </main>
       </div>
