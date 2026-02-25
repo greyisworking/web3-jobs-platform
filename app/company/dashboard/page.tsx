@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { Briefcase, Eye, Users, TrendingUp, Plus, ArrowRight } from 'lucide-react'
 import Pixelbara from '@/app/components/Pixelbara'
@@ -40,7 +41,7 @@ export default async function CompanyDashboardPage() {
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) return null
+  if (!user) redirect('/login')
 
   const data = await getDashboardData(user.id)
 

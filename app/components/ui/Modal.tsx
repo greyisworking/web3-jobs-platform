@@ -1,8 +1,11 @@
 'use client'
 
-import { useEffect, useCallback, type ReactNode } from 'react'
+import { useEffect, useCallback, useRef, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+const FOCUSABLE_SELECTORS =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 interface ModalProps {
   isOpen: boolean
@@ -37,30 +40,79 @@ export function Modal({
   closeOnEscape = true,
   className,
 }: ModalProps) {
-  // Handle escape key
-  const handleEscape = useCallback(
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
+
+  // Handle escape key and Tab focus trap
+  const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (closeOnEscape && e.key === 'Escape') {
         onClose()
+        return
+      }
+
+      if (e.key !== 'Tab' || !dialogRef.current) return
+
+      const focusable = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTORS)
+      ).filter((el) => !el.closest('[aria-hidden="true"]'))
+
+      if (focusable.length === 0) {
+        e.preventDefault()
+        return
+      }
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
       }
     },
     [closeOnEscape, onClose]
   )
 
-  // Lock body scroll when modal is open
+  // Lock body scroll, manage focus, and attach key handler when modal opens/closes
   useEffect(() => {
     if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement
       document.body.style.overflow = 'hidden'
-      document.addEventListener('keydown', handleEscape)
+      document.addEventListener('keydown', handleKeyDown)
+
+      // Move focus into the modal on the next frame so the DOM is painted
+      const frameId = requestAnimationFrame(() => {
+        if (!dialogRef.current) return
+        const first = dialogRef.current.querySelector<HTMLElement>(FOCUSABLE_SELECTORS)
+        if (first) {
+          first.focus()
+        } else {
+          dialogRef.current.focus()
+        }
+      })
+
+      return () => {
+        cancelAnimationFrame(frameId)
+        document.body.style.overflow = ''
+        document.removeEventListener('keydown', handleKeyDown)
+        previousFocusRef.current?.focus()
+        previousFocusRef.current = null
+      }
     } else {
       document.body.style.overflow = ''
     }
 
     return () => {
       document.body.style.overflow = ''
-      document.removeEventListener('keydown', handleEscape)
     }
-  }, [isOpen, handleEscape])
+  }, [isOpen, handleKeyDown])
 
   if (!isOpen) return null
 
@@ -75,10 +127,12 @@ export function Modal({
 
       {/* Modal */}
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
         aria-describedby={description ? 'modal-description' : undefined}
+        tabIndex={-1}
         className={cn(
           'relative w-full mx-4 animate-fade-in',
           'bg-a24-surface dark:bg-a24-dark-surface',

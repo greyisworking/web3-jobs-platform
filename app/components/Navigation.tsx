@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X, ChevronDown, User, LogOut, Settings } from 'lucide-react'
@@ -26,6 +26,8 @@ interface NavDropdownProps {
 function NavDropdown({ label, items, isActive }: NavDropdownProps) {
   const [open, setOpen] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const itemRefs = useRef<(HTMLAnchorElement | null)[]>([])
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
@@ -36,8 +38,40 @@ function NavDropdown({ label, items, isActive }: NavDropdownProps) {
     timeoutRef.current = setTimeout(() => setOpen(false), 150)
   }
 
+  const handleTriggerKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      setOpen((prev) => !prev)
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setOpen(true)
+      // Focus first item after state update
+      setTimeout(() => itemRefs.current[0]?.focus(), 0)
+    } else if (e.key === 'Escape') {
+      setOpen(false)
+    }
+  }, [])
+
+  const handleItemKeyDown = useCallback((e: React.KeyboardEvent<HTMLAnchorElement>, index: number) => {
+    if (e.key === 'Escape') {
+      setOpen(false)
+      containerRef.current?.querySelector('button')?.focus()
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      itemRefs.current[index + 1]?.focus()
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (index === 0) {
+        containerRef.current?.querySelector('button')?.focus()
+      } else {
+        itemRefs.current[index - 1]?.focus()
+      }
+    }
+  }, [])
+
   return (
     <div
+      ref={containerRef}
       className="relative"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -45,6 +79,8 @@ function NavDropdown({ label, items, isActive }: NavDropdownProps) {
       <button
         aria-expanded={open}
         aria-haspopup="menu"
+        onClick={() => setOpen((prev) => !prev)}
+        onKeyDown={handleTriggerKeyDown}
         className={`flex items-center gap-1 text-[11px] uppercase tracking-[0.3em] font-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neun-success focus-visible:ring-offset-2 ${
           isActive
             ? 'text-neun-success'
@@ -56,17 +92,20 @@ function NavDropdown({ label, items, isActive }: NavDropdownProps) {
       </button>
 
       {open && (
-        <div role="menu" className="absolute top-full left-0 mt-2 min-w-[160px] bg-a24-surface border border-a24-border shadow-lg shadow-neun-success/10 z-50">
-          {items.map((item) => (
+        <div role="menu" className="absolute top-full left-0 mt-2 min-w-[160px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border shadow-lg shadow-neun-success/10 z-50">
+          {items.map((item, index) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`block px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] transition-colors ${
+              role="menuitem"
+              ref={(el) => { itemRefs.current[index] = el }}
+              className={`block px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] transition-colors focus-visible:outline-none focus-visible:bg-neun-success/10 ${
                 item.highlight
                   ? 'text-[#FF69B4] hover:text-[#FF1493] hover:bg-[#FF1493]/10'
                   : 'text-a24-text hover:text-neun-success hover:bg-neun-success/10'
               }`}
               onClick={() => setOpen(false)}
+              onKeyDown={(e) => handleItemKeyDown(e, index)}
             >
               {item.label}
             </Link>
@@ -125,6 +164,8 @@ function ProfileDropdown() {
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null)
   const [loading, setLoading] = useState(true)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const itemRefs = useRef<(HTMLElement | null)[]>([])
   const router = useRouter()
   const supabase = createSupabaseBrowserClient()
 
@@ -158,6 +199,36 @@ function ProfileDropdown() {
     timeoutRef.current = setTimeout(() => setOpen(false), 150)
   }
 
+  const handleTriggerKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      setOpen((prev) => !prev)
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setOpen(true)
+      setTimeout(() => itemRefs.current[0]?.focus(), 0)
+    } else if (e.key === 'Escape') {
+      setOpen(false)
+    }
+  }, [])
+
+  const handleItemKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number) => {
+    if (e.key === 'Escape') {
+      setOpen(false)
+      containerRef.current?.querySelector('button')?.focus()
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      itemRefs.current[index + 1]?.focus()
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (index === 0) {
+        containerRef.current?.querySelector('button')?.focus()
+      } else {
+        itemRefs.current[index - 1]?.focus()
+      }
+    }
+  }, [])
+
   const handleLogout = async () => {
     setOpen(false)
     if (supabaseUser) {
@@ -188,6 +259,7 @@ function ProfileDropdown() {
 
   return (
     <div
+      ref={containerRef}
       className="relative"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -196,6 +268,8 @@ function ProfileDropdown() {
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label={`Account menu for ${displayName}`}
+        onClick={() => setOpen((prev) => !prev)}
+        onKeyDown={handleTriggerKeyDown}
         className="flex items-center gap-2 px-3 py-2 border border-neun-success/50 text-neun-success text-[10px] uppercase tracking-wider hover:bg-neun-success/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neun-success focus-visible:ring-offset-2"
       >
         <span className="max-w-[100px] truncate">{displayName}</span>
@@ -203,12 +277,14 @@ function ProfileDropdown() {
       </button>
 
       {open && (
-        <div role="menu" className="absolute top-full right-0 mt-2 min-w-[180px] bg-a24-surface border border-a24-border shadow-lg shadow-neun-success/10 z-50">
+        <div role="menu" className="absolute top-full right-0 mt-2 min-w-[180px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border shadow-lg shadow-neun-success/10 z-50">
           <Link
             href="/account"
             role="menuitem"
+            ref={(el) => { itemRefs.current[0] = el }}
             className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-a24-text hover:text-neun-success hover:bg-neun-success/10 transition-colors focus-visible:outline-none focus-visible:bg-neun-success/10"
             onClick={() => setOpen(false)}
+            onKeyDown={(e) => handleItemKeyDown(e, 0)}
           >
             <User className="w-3.5 h-3.5" aria-hidden="true" />
             Account
@@ -216,16 +292,20 @@ function ProfileDropdown() {
           <Link
             href="/account#settings"
             role="menuitem"
+            ref={(el) => { itemRefs.current[1] = el }}
             className="flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-a24-text hover:text-neun-success hover:bg-neun-success/10 transition-colors focus-visible:outline-none focus-visible:bg-neun-success/10"
             onClick={() => setOpen(false)}
+            onKeyDown={(e) => handleItemKeyDown(e, 1)}
           >
             <Settings className="w-3.5 h-3.5" aria-hidden="true" />
             Settings
           </Link>
-          <div className="border-t border-a24-border" role="separator" />
+          <div className="border-t border-a24-border dark:border-a24-dark-border" role="separator" />
           <button
             role="menuitem"
+            ref={(el) => { itemRefs.current[2] = el }}
             onClick={handleLogout}
+            onKeyDown={(e) => handleItemKeyDown(e, 2)}
             className="w-full flex items-center gap-2 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors focus-visible:outline-none focus-visible:bg-red-500/10"
           >
             <LogOut className="w-3.5 h-3.5" aria-hidden="true" />

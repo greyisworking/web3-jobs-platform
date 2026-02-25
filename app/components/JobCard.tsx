@@ -156,11 +156,14 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
         variants={cardHoverVariants}
         transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       >
-        <Link
-          href={`/jobs/${job.id}`}
-          onClick={handleClick}
-          className="relative block p-3 sm:p-4 min-h-[140px] sm:h-[160px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border transition-all duration-300 ease-out group flex flex-col overflow-hidden touch-target rounded-sm hover:shadow-card-hover dark:hover:shadow-card-hover-dark hover:border-emerald-500/40 dark:hover:border-emerald-500/30"
-        >
+        <div className="relative block p-3 sm:p-4 min-h-[140px] sm:h-[160px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border transition-all duration-300 ease-out group flex flex-col overflow-hidden touch-target rounded-sm hover:shadow-card-hover dark:hover:shadow-card-hover-dark hover:border-emerald-500/40 dark:hover:border-emerald-500/30">
+          {/* Stretched link covers full card area; sits behind interactive children */}
+          <Link
+            href={`/jobs/${job.id}`}
+            onClick={handleClick}
+            className="absolute inset-0 z-0"
+            aria-label={`View ${displayTitle} at ${displayCompany}`}
+          />
 
         {/* Von Restorff Effect: Urgent/Featured badges only */}
         {(job.is_urgent || job.is_featured) && (
@@ -224,7 +227,7 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation() }}>
+          <div className="relative z-10 flex items-center gap-1 flex-shrink-0">
             <ReportButton jobId={job.id} />
             <BookmarkButton job={{ id: job.id, title: job.title, company: job.company }} />
           </div>
@@ -246,7 +249,7 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
             </span>
           )}
         </div>
-      </Link>
+      </div>
       </motion.div>
     </motion.div>
   )
