@@ -16,7 +16,8 @@ on:
 jobs:
   crawl:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 35  # Slightly more than crawler's 30min timeout for cleanup
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4

@@ -13,13 +13,41 @@ import { crawlEthereumJobs } from './crawlers/ethereum'
 import { crawlAvalancheJobs } from './crawlers/avalanchejobs'
 import { crawlArbitrumJobs } from './crawlers/arbitrumjobs'
 import { crawlCryptocurrencyJobs } from './crawlers/cryptocurrencyjobs'
-import { crawlCryptoJobs } from './crawlers/cryptojobs'
-import { crawlWellfound } from './crawlers/wellfound'
-import { crawlSuperteamEarn } from './crawlers/superteam'
-import { crawlBaseHirechain } from './crawlers/basehirechain'
+// Skipped imports (403 errors or 0 results):
+// import { crawlCryptoJobs } from './crawlers/cryptojobs'
+// import { crawlWellfound } from './crawlers/wellfound'
+// import { crawlSuperteamEarn } from './crawlers/superteam'
+// import { crawlBaseHirechain } from './crawlers/basehirechain'
 import axios from 'axios'
 
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || ''
+
+// Timeout settings
+const OVERALL_TIMEOUT_MS = 30 * 60 * 1000  // 30 minutes max
+const PER_SOURCE_TIMEOUT_MS = 3 * 60 * 1000  // 3 minutes per source
+
+// Wrap crawler with timeout
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  sourceName: string
+): Promise<T> {
+  let timeoutId: NodeJS.Timeout
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`Timeout after ${timeoutMs / 1000}s`))
+    }, timeoutMs)
+  })
+
+  try {
+    const result = await Promise.race([promise, timeoutPromise])
+    clearTimeout(timeoutId!)
+    return result
+  } catch (error) {
+    clearTimeout(timeoutId!)
+    throw error
+  }
+}
 
 interface CrawlerReturn {
   total: number  // Total jobs processed (saved or updated)
@@ -62,20 +90,30 @@ async function sendDiscordNotification(title: string, description: string, color
 async function main() {
   console.log('🌐 Starting Web3 Jobs Crawler...\n')
   console.log('='.repeat(50))
-  
+  console.log(`⏱️  Overall timeout: ${OVERALL_TIMEOUT_MS / 60000} minutes`)
+  console.log(`⏱️  Per-source timeout: ${PER_SOURCE_TIMEOUT_MS / 60000} minutes`)
+  console.log(`⏭️  Skipping: crypto.jobs, wellfound.com, superteam.fun, base.hirechain.io`)
+
   const startTime = Date.now()
   const results: CrawlResult[] = []
+
+  // Overall timeout check
+  const checkOverallTimeout = () => {
+    if (Date.now() - startTime > OVERALL_TIMEOUT_MS) {
+      throw new Error(`Overall timeout exceeded (${OVERALL_TIMEOUT_MS / 60000} minutes)`)
+    }
+  }
 
   // 시작 알림
   await sendDiscordNotification(
     '🚀 크롤링 시작!',
-    '18개 채용 사이트에서 공고를 수집하고 있어요.\n완료되면 다시 알려드릴게요!',
+    '14개 채용 사이트에서 공고를 수집하고 있어요.\n(4개 소스 스킵: 403 에러/0개 결과)\n완료되면 다시 알려드릴게요!',
     0x3498db
   )
 
-  // Tier 1 크롤러
-  console.log('\n📌 Tier 1 Crawlers\n')
-  
+  // Active crawlers (excluding skipped sources)
+  console.log('\n📌 Active Crawlers\n')
+
   const crawlers = [
     { name: 'priority-companies', fn: crawlPriorityCompanies },
     { name: 'web3.career', fn: crawlWeb3Career },
@@ -91,22 +129,29 @@ async function main() {
     { name: 'jobs.avax.network', fn: crawlAvalancheJobs },
     { name: 'jobs.arbitrum.io', fn: crawlArbitrumJobs },
     { name: 'cryptocurrencyjobs.co', fn: crawlCryptocurrencyJobs },
-    { name: 'crypto.jobs', fn: crawlCryptoJobs },
-    { name: 'wellfound.com', fn: crawlWellfound },
-    { name: 'talent.superteam.fun', fn: crawlSuperteamEarn },
-    { name: 'base.hirechain.io', fn: crawlBaseHirechain },
+    // Skipped sources (403 or 0 results):
+    // - crypto.jobs (403 error)
+    // - wellfound.com (403 error)
+    // - talent.superteam.fun (0 results)
+    // - base.hirechain.io (0 results)
   ]
 
   for (const crawler of crawlers) {
+    // Check overall timeout before each crawler
+    checkOverallTimeout()
+
+    const crawlerStartTime = Date.now()
     try {
-      const result = await crawler.fn()
+      const result = await withTimeout(crawler.fn(), PER_SOURCE_TIMEOUT_MS, crawler.name)
       // Handle both old (number) and new ({ total, new }) return types
       const total = typeof result === 'number' ? result : result.total
       const newCount = typeof result === 'number' ? 0 : result.new
+      const duration = ((Date.now() - crawlerStartTime) / 1000).toFixed(1)
       results.push({ source: crawler.name, status: 'success', jobCount: total, newCount })
-      console.log(`✅ ${crawler.name}: ${total} jobs (${newCount} new)`)
+      console.log(`✅ ${crawler.name}: ${total} jobs (${newCount} new) [${duration}s]`)
     } catch (error: any) {
-      console.error(`❌ ${crawler.name}:`, error.message)
+      const duration = ((Date.now() - crawlerStartTime) / 1000).toFixed(1)
+      console.error(`❌ ${crawler.name}: ${error.message} [${duration}s]`)
       results.push({ source: crawler.name, status: 'failed', jobCount: 0, newCount: 0, error: error.message })
     }
   }
