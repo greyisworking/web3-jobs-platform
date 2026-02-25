@@ -1103,7 +1103,13 @@ html.dark {
 
 /* Focus ring consistency */
 .focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-neun-success/50 focus:ring-offset-2 focus:ring-offset-a24-bg dark:focus:ring-offset-a24-dark-bg;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  --tw-ring-color: rgba(34, 197, 94, 0.5);
+  --tw-ring-offset-color: var(--a24-bg);
+}
+
+.dark .focus-ring {
+  --tw-ring-offset-color: var(--a24-bg);
 }
 
 /* Text selection color */
