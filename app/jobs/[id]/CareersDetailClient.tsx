@@ -507,7 +507,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                     <Link
                       key={relJob.id}
                       href={`/jobs/${relJob.id}`}
-                      className="block p-3 border border-a24-border dark:border-a24-dark-border hover:border-emerald-500/30 transition-colors group"
+                      className="block p-3 border border-a24-border dark:border-a24-dark-border hover:border-neun-success/30 transition-colors group"
                     >
                       <p className="text-sm font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-primary transition-colors line-clamp-1">
                         {cleanJobTitle(relJob.title, relJob.company)}

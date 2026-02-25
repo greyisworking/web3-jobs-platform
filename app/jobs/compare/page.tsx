@@ -88,7 +88,7 @@ export default function CompareJobsPage() {
             </p>
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-2 px-6 py-3 text-[11px] uppercase tracking-[0.3em] bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 text-[11px] uppercase tracking-[0.3em] bg-neun-success hover:bg-neun-success/90 text-white transition-colors"
             >
               Browse Jobs
             </Link>
@@ -106,7 +106,7 @@ export default function CompareJobsPage() {
                       <div className="flex items-start justify-between gap-2">
                         <Link
                           href={`/jobs/${job.id}`}
-                          className="text-sm font-light text-a24-text dark:text-a24-dark-text hover:text-emerald-500 transition-colors line-clamp-2"
+                          className="text-sm font-light text-a24-text dark:text-a24-dark-text hover:text-neun-success transition-colors line-clamp-2"
                         >
                           {job.title}
                         </Link>
@@ -269,7 +269,7 @@ export default function CompareJobsPage() {
                         href={job.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-4 py-2 text-[10px] uppercase tracking-[0.2em] bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"
+                        className="inline-flex items-center gap-1 px-4 py-2 text-[10px] uppercase tracking-[0.2em] bg-neun-success hover:bg-neun-success/90 text-white transition-colors"
                       >
                         Apply <ExternalLink size={10} />
                       </a>

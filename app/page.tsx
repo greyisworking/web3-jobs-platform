@@ -141,7 +141,7 @@ export default function Home() {
             </h2>
             <Link
               href="/jobs"
-              className="group inline-flex items-center gap-2 text-[11px] sm:text-[12px] uppercase tracking-[0.2em] font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 transition-colors touch-target"
+              className="group inline-flex items-center gap-2 text-[11px] sm:text-[12px] uppercase tracking-[0.2em] font-bold text-neun-success hover:text-neun-success/80 transition-colors touch-target"
             >
               View All
               <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1" />
@@ -159,7 +159,7 @@ export default function Home() {
               </p>
               <button
                 onClick={fetchFeaturedJobs}
-                className="text-[11px] uppercase tracking-[0.2em] font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 border border-emerald-500/50 px-4 py-2 transition-colors"
+                className="text-[11px] uppercase tracking-[0.2em] font-bold text-neun-success hover:text-neun-success/80 border border-neun-success/50 px-4 py-2 transition-colors"
               >
                 Retry
               </button>

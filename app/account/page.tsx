@@ -255,7 +255,7 @@ export default function AccountPage() {
                   <div className="mt-5 pt-4 border-t border-a24-border dark:border-a24-dark-border">
                     <Link
                       href="/profile"
-                      className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-neun-success hover:text-emerald-300 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-neun-success hover:text-neun-success/80 transition-colors cursor-pointer"
                     >
                       Edit Profile <ExternalLink className="w-3 h-3" />
                     </Link>
@@ -296,7 +296,7 @@ export default function AccountPage() {
                     </p>
                     <Link
                       href="/jobs"
-                      className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-neun-success hover:text-emerald-300 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-neun-success hover:text-neun-success/80 transition-colors cursor-pointer"
                     >
                       Browse Jobs <ExternalLink className="w-3 h-3" />
                     </Link>
@@ -340,7 +340,7 @@ export default function AccountPage() {
                   {drafts.length > 0 && (
                     <Link
                       href="/articles/write"
-                      className="text-[10px] uppercase tracking-[0.2em] text-neun-success hover:text-emerald-300 transition-colors cursor-pointer"
+                      className="text-[10px] uppercase tracking-[0.2em] text-neun-success hover:text-neun-success/80 transition-colors cursor-pointer"
                     >
                       + New
                     </Link>
@@ -365,7 +365,7 @@ export default function AccountPage() {
                     </p>
                     <Link
                       href="/articles/write"
-                      className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-neun-success hover:text-emerald-300 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-neun-success hover:text-neun-success/80 transition-colors cursor-pointer"
                     >
                       Write Article <ExternalLink className="w-3 h-3" />
                     </Link>

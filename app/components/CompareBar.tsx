@@ -13,7 +13,7 @@ export default function CompareBar() {
     <div className="fixed bottom-0 left-0 right-0 z-40 bg-a24-surface dark:bg-a24-dark-surface border-t border-a24-border dark:border-a24-dark-border shadow-lg">
       <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <GitCompare size={18} className="text-emerald-500" />
+          <GitCompare size={18} className="text-neun-success" />
           <span className="text-sm text-a24-text dark:text-a24-dark-text">
             <strong>{compareCount}</strong> / {maxCompare} jobs selected
           </span>
@@ -27,7 +27,7 @@ export default function CompareBar() {
           </button>
           <Link
             href={getCompareUrl()}
-            className="flex items-center gap-2 px-4 py-2 text-[10px] uppercase tracking-[0.2em] bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-[10px] uppercase tracking-[0.2em] bg-neun-success hover:bg-neun-success/90 text-white transition-colors"
           >
             Compare Now
           </Link>

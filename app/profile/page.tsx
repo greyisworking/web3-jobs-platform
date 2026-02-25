@@ -176,7 +176,7 @@ export default function ProfilePage() {
                 value={profile?.full_name || ''}
                 onChange={(e) => setProfile(p => p ? { ...p, full_name: e.target.value } : p)}
                 placeholder="Your full name"
-                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-emerald-500 focus:outline-none"
+                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-neun-success focus:outline-none"
               />
             </div>
             <div>
@@ -188,7 +188,7 @@ export default function ProfilePage() {
                 value={profile?.headline || ''}
                 onChange={(e) => setProfile(p => p ? { ...p, headline: e.target.value } : p)}
                 placeholder="e.g., Senior Smart Contract Developer"
-                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-emerald-500 focus:outline-none"
+                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-neun-success focus:outline-none"
               />
             </div>
             <div>
@@ -200,7 +200,7 @@ export default function ProfilePage() {
                 onChange={(e) => setProfile(p => p ? { ...p, bio: e.target.value } : p)}
                 placeholder="Tell us about yourself..."
                 rows={4}
-                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-emerald-500 focus:outline-none resize-none"
+                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-neun-success focus:outline-none resize-none"
               />
             </div>
             <div>
@@ -212,7 +212,7 @@ export default function ProfilePage() {
                 value={profile?.location || ''}
                 onChange={(e) => setProfile(p => p ? { ...p, location: e.target.value } : p)}
                 placeholder="e.g., Seoul, Korea"
-                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-emerald-500 focus:outline-none"
+                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-neun-success focus:outline-none"
               />
             </div>
           </div>
@@ -232,11 +232,11 @@ export default function ProfilePage() {
               onChange={(e) => setSkillInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
               placeholder="Add a skill..."
-              className="flex-1 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-emerald-500 focus:outline-none"
+              className="flex-1 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-neun-success focus:outline-none"
             />
             <button
               onClick={addSkill}
-              className="px-4 py-2 text-[10px] uppercase tracking-[0.25em] bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"
+              className="px-4 py-2 text-[10px] uppercase tracking-[0.25em] bg-neun-success hover:bg-neun-success/90 text-white transition-colors"
             >
               Add
             </button>
@@ -280,7 +280,7 @@ export default function ProfilePage() {
                 value={profile?.website || ''}
                 onChange={(e) => setProfile(p => p ? { ...p, website: e.target.value } : p)}
                 placeholder="https://yoursite.com"
-                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-emerald-500 focus:outline-none"
+                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-neun-success focus:outline-none"
               />
             </div>
             <div>
@@ -292,7 +292,7 @@ export default function ProfilePage() {
                 value={profile?.github || ''}
                 onChange={(e) => setProfile(p => p ? { ...p, github: e.target.value } : p)}
                 placeholder="username"
-                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-emerald-500 focus:outline-none"
+                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-neun-success focus:outline-none"
               />
             </div>
             <div>
@@ -304,7 +304,7 @@ export default function ProfilePage() {
                 value={profile?.twitter || ''}
                 onChange={(e) => setProfile(p => p ? { ...p, twitter: e.target.value } : p)}
                 placeholder="username"
-                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-emerald-500 focus:outline-none"
+                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-neun-success focus:outline-none"
               />
             </div>
             <div>
@@ -316,7 +316,7 @@ export default function ProfilePage() {
                 value={profile?.linkedin || ''}
                 onChange={(e) => setProfile(p => p ? { ...p, linkedin: e.target.value } : p)}
                 placeholder="username"
-                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-emerald-500 focus:outline-none"
+                className="w-full mt-2 px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text placeholder-a24-muted dark:placeholder-a24-dark-muted focus:border-neun-success focus:outline-none"
               />
             </div>
           </div>
@@ -334,7 +334,7 @@ export default function ProfilePage() {
               type="checkbox"
               checked={profile?.is_open_to_work || false}
               onChange={(e) => setProfile(p => p ? { ...p, is_open_to_work: e.target.checked } : p)}
-              className="w-4 h-4 accent-emerald-500"
+              className="w-4 h-4 accent-neun-success"
             />
             <span className="text-sm text-a24-text dark:text-a24-dark-text">
               Open to work - Recruiters can see you&apos;re actively looking
@@ -347,7 +347,7 @@ export default function ProfilePage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-3 text-[11px] uppercase tracking-[0.3em] bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/50 text-white transition-colors"
+            className="flex items-center gap-2 px-6 py-3 text-[11px] uppercase tracking-[0.3em] bg-neun-success hover:bg-neun-success/90 disabled:bg-neun-success/50 text-white transition-colors"
           >
             {saving ? (
               <Loader2 size={14} className="animate-spin" />

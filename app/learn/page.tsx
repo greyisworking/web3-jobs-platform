@@ -350,7 +350,7 @@ export default async function LearnPage() {
                       <div className="hidden sm:block col-span-2 text-right">
                         <Link
                           href={`/learn/skills/${encodeURIComponent(skill.skill.toLowerCase())}`}
-                          className="text-[10px] uppercase tracking-[0.15em] text-neun-success hover:text-emerald-300 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
+                          className="text-[10px] uppercase tracking-[0.15em] text-neun-success hover:text-neun-success/80 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
                         >
                           Learn &rarr;
                         </Link>
