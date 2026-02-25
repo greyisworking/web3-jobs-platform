@@ -1,97 +1,230 @@
 import Link from 'next/link'
-import {
-  Compass,
-  TrendingUp,
-  Wrench,
-  BookOpen,
-  ArrowRight,
-  Sparkles,
-} from 'lucide-react'
+import { Compass, Wrench, TrendingUp } from 'lucide-react'
 import Footer from '@/app/components/Footer'
+import { createPublicSupabaseClient } from '@/lib/supabase-public'
 
-// Main sections
-const sections = [
+export const revalidate = 3600 // ISR: refresh every hour
+
+async function getLearnStats() {
+  const supabase = createPublicSupabaseClient()
+
+  const now = new Date()
+  const threeMonthsAgo = new Date()
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
+  const sixMonthsAgo = new Date()
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
+
+  // Parallel queries
+  const [totalRes, recentRes, prevRes, salaryRes] = await Promise.all([
+    // Total active jobs
+    supabase
+      .from('Job')
+      .select('id', { count: 'exact', head: true })
+      .eq('isActive', true)
+      .gte('crawledAt', threeMonthsAgo.toISOString()),
+
+    // Recent jobs with details (last 3 months)
+    supabase
+      .from('Job')
+      .select('id, title, tags, description')
+      .eq('isActive', true)
+      .gte('crawledAt', threeMonthsAgo.toISOString()),
+
+    // Previous period jobs (3-6 months ago)
+    supabase
+      .from('Job')
+      .select('id, title, tags, description')
+      .eq('isActive', true)
+      .gte('crawledAt', sixMonthsAgo.toISOString())
+      .lt('crawledAt', threeMonthsAgo.toISOString()),
+
+    // Jobs with salary data
+    supabase
+      .from('Job')
+      .select('salaryMin, salaryMax, salaryCurrency')
+      .eq('isActive', true)
+      .gte('crawledAt', threeMonthsAgo.toISOString())
+      .not('salaryMax', 'is', null)
+      .gt('salaryMax', 0),
+  ])
+
+  const totalJobs = totalRes.count || 0
+  const recentJobs = recentRes.data || []
+  const prevJobs = prevRes.data || []
+  const salaryJobs = salaryRes.data || []
+
+  // Count Solidity jobs
+  const solidityCount = recentJobs.filter(j => {
+    const text = [j.title || '', j.tags || '', j.description || ''].join(' ').toLowerCase()
+    return text.includes('solidity')
+  }).length
+
+  // Calculate Rust growth
+  const recentRust = recentJobs.filter(j => {
+    const text = [j.title || '', j.tags || '', j.description || ''].join(' ').toLowerCase()
+    return text.includes('rust')
+  }).length
+
+  const prevRust = prevJobs.filter(j => {
+    const text = [j.title || '', j.tags || '', j.description || ''].join(' ').toLowerCase()
+    return text.includes('rust')
+  }).length
+
+  const rustGrowth = prevRust > 0
+    ? Math.round(((recentRust / recentJobs.length) - (prevRust / prevJobs.length)) / (prevRust / prevJobs.length) * 100)
+    : recentRust > 0 ? 100 : 0
+
+  // Average salary (convert to USD/K)
+  const validSalaries = salaryJobs
+    .map(j => j.salaryMax)
+    .filter((s): s is number => typeof s === 'number' && s > 0 && s < 1000000)
+
+  const avgSalary = validSalaries.length > 0
+    ? Math.round(validSalaries.reduce((a, b) => a + b, 0) / validSalaries.length / 1000)
+    : 0
+
+  return { totalJobs, solidityCount, rustGrowth, avgSalary }
+}
+
+function formatNumber(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}K`
+  return n.toLocaleString()
+}
+
+const navButtons = [
   {
     href: '/learn/career',
     icon: Compass,
-    title: 'Career Paths',
-    description: 'job-ready roadmaps based on real JDs. skills, resources, hiring trends.',
-    color: 'border-blue-500/30 hover:border-blue-500',
-    iconColor: 'text-blue-400',
-    bgGlow: 'group-hover:shadow-blue-500/10',
-  },
-  {
-    href: '/learn/trends',
-    icon: TrendingUp,
-    title: 'Market Trends',
-    description: 'what skills are hot? which roles are growing? data from live job posts.',
-    color: 'border-emerald-500/30 hover:border-emerald-500',
-    iconColor: 'text-emerald-400',
-    bgGlow: 'group-hover:shadow-emerald-500/10',
+    label: 'Explore by Role',
   },
   {
     href: '/learn/skills',
     icon: Wrench,
-    title: 'Skills',
-    description: 'deep dives into specific skills. solidity, rust, defi, zk, and more.',
-    color: 'border-amber-500/30 hover:border-amber-500',
-    iconColor: 'text-amber-400',
-    bgGlow: 'group-hover:shadow-amber-500/10',
+    label: 'Explore by Skill',
   },
   {
-    href: '/learn/library',
-    icon: BookOpen,
-    title: 'Resource Library',
-    description: 'curated articles, videos, courses. organized by topic.',
-    color: 'border-purple-500/30 hover:border-purple-500',
-    iconColor: 'text-purple-400',
-    bgGlow: 'group-hover:shadow-purple-500/10',
+    href: '/learn/trends',
+    icon: TrendingUp,
+    label: 'See Trends',
   },
 ]
 
-export default function LearnPage() {
+export default async function LearnPage() {
+  const stats = await getLearnStats()
+
+  const statCards = [
+    {
+      value: formatNumber(stats.totalJobs),
+      label: 'jobs',
+      sublabel: 'analyzed',
+      accent: 'emerald',
+    },
+    {
+      value: formatNumber(stats.solidityCount),
+      label: 'Solidity',
+      sublabel: 'jobs',
+      accent: 'blue',
+    },
+    {
+      value: `${stats.rustGrowth > 0 ? '+' : ''}${stats.rustGrowth}%`,
+      label: 'Rust',
+      sublabel: 'growth',
+      accent: 'amber',
+    },
+    {
+      value: stats.avgSalary > 0 ? `$${stats.avgSalary}K` : 'N/A',
+      label: 'avg',
+      sublabel: 'salary',
+      accent: 'purple',
+    },
+  ]
+
+  const accentMap: Record<string, { border: string; text: string; glow: string; bg: string }> = {
+    emerald: {
+      border: 'border-emerald-500/20 hover:border-emerald-500/60',
+      text: 'text-emerald-400',
+      glow: 'hover:shadow-emerald-500/10',
+      bg: 'bg-emerald-500/5',
+    },
+    blue: {
+      border: 'border-blue-500/20 hover:border-blue-500/60',
+      text: 'text-blue-400',
+      glow: 'hover:shadow-blue-500/10',
+      bg: 'bg-blue-500/5',
+    },
+    amber: {
+      border: 'border-amber-500/20 hover:border-amber-500/60',
+      text: 'text-amber-400',
+      glow: 'hover:shadow-amber-500/10',
+      bg: 'bg-amber-500/5',
+    },
+    purple: {
+      border: 'border-purple-500/20 hover:border-purple-500/60',
+      text: 'text-purple-400',
+      glow: 'hover:shadow-purple-500/10',
+      bg: 'bg-purple-500/5',
+    },
+  }
+
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <main id="main-content" className="container-responsive py-16 sm:py-20 md:py-32">
-        {/* Hero */}
-        <section className="text-center mb-16 md:mb-20">
-          <div className="inline-flex items-center gap-2 text-neun-success text-xs uppercase tracking-widest mb-6">
-            <Sparkles className="w-3 h-3" />
-            <span>data-driven learning</span>
-          </div>
-          <h1 className="text-3xl md:text-5xl font-light uppercase tracking-[0.2em] text-a24-text dark:text-a24-dark-text mb-6">
-            Learn Web3
-          </h1>
-          <p className="text-sm md:text-base text-a24-muted dark:text-a24-dark-muted font-light max-w-md mx-auto leading-relaxed">
-            career paths built from real job data.<br className="hidden sm:block" /> know exactly what to learn.
+      <main id="main-content" className="container-responsive py-20 sm:py-28 md:py-36">
+
+        {/* Minimal header */}
+        <div className="mb-12 md:mb-16">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-a24-muted dark:text-a24-dark-muted mb-3 font-light">
+            web3 labor market
           </p>
+          <h1 className="text-2xl md:text-3xl font-light tracking-tight text-a24-text dark:text-a24-dark-text">
+            Market Intelligence
+          </h1>
+        </div>
+
+        {/* Bloomberg-style stat cards */}
+        <section className="mb-16 md:mb-20">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 stagger-children">
+            {statCards.map((card, i) => {
+              const colors = accentMap[card.accent]
+              return (
+                <div
+                  key={i}
+                  className={`
+                    group relative p-5 md:p-6 border transition-all duration-300
+                    ${colors.border} ${colors.glow} ${colors.bg}
+                    hover:shadow-lg
+                  `}
+                >
+                  {/* Top accent line */}
+                  <div className={`absolute top-0 left-0 right-0 h-px ${colors.bg} opacity-0 group-hover:opacity-100 transition-opacity`}
+                    style={{ background: `linear-gradient(90deg, transparent, var(--tw-shadow-color, currentColor), transparent)` }}
+                  />
+
+                  <div className={`text-2xl md:text-3xl lg:text-4xl font-light tracking-tight ${colors.text} mb-2 tabular-nums`}>
+                    {card.value}
+                  </div>
+                  <div className="text-xs text-a24-muted dark:text-a24-dark-muted uppercase tracking-widest font-light leading-relaxed">
+                    {card.label}
+                    <br />
+                    {card.sublabel}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </section>
 
-        {/* Main Sections Grid */}
-        <section>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            {sections.map((section) => {
-              const Icon = section.icon
-
+        {/* Navigation buttons */}
+        <section className="mb-16">
+          <div className="flex flex-col sm:flex-row gap-3">
+            {navButtons.map((btn) => {
+              const Icon = btn.icon
               return (
-                <Link key={section.href} href={section.href}>
-                  <div
-                    className={`group relative p-6 md:p-8 border card-interactive border-glow ${section.color} ${section.bgGlow} hover:bg-a24-surface/50 dark:hover:bg-a24-dark-surface/50`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-full bg-a24-surface/50 dark:bg-a24-dark-surface/50 ${section.iconColor} card-icon transition-transform duration-300 group-hover:scale-110`}>
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <h2 className="text-lg font-medium text-a24-text dark:text-a24-dark-text mb-2 group-hover:text-neun-success transition-colors">
-                          {section.title}
-                        </h2>
-                        <p className="text-sm text-a24-muted dark:text-a24-dark-muted leading-relaxed">
-                          {section.description}
-                        </p>
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-a24-muted dark:text-a24-dark-muted group-hover:text-neun-success arrow-slide mt-1" />
-                    </div>
+                <Link key={btn.href} href={btn.href} className="flex-1">
+                  <div className="group flex items-center justify-center gap-3 px-6 py-4 border border-a24-border dark:border-a24-dark-border hover:border-neun-success/50 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5">
+                    <Icon className="w-4 h-4 text-a24-muted dark:text-a24-dark-muted group-hover:text-neun-success transition-colors" />
+                    <span className="text-sm font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors tracking-wide">
+                      {btn.label}
+                    </span>
                   </div>
                 </Link>
               )
@@ -99,14 +232,14 @@ export default function LearnPage() {
           </div>
         </section>
 
-        {/* Stats hint */}
-        <section className="mt-16 text-center">
-          <p className="text-xs text-a24-muted dark:text-a24-dark-muted uppercase tracking-widest">
-            powered by live job market data
+        {/* Powered by line */}
+        <div className="text-center">
+          <p className="text-[10px] text-a24-muted/50 dark:text-a24-dark-muted/50 uppercase tracking-[0.3em] font-light">
+            live data &middot; updated hourly
           </p>
-        </section>
-      </main>
+        </div>
 
+      </main>
       <Footer />
     </div>
   )
