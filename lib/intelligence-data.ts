@@ -39,6 +39,21 @@ function classifyRole(title: string): string {
   return 'other'
 }
 
+// ── Level classification (by title keywords) ──
+const LEVEL_PATTERNS: Record<string, string[]> = {
+  entry: ['junior', 'jr.', 'jr ', 'entry level', 'entry-level', 'intern', 'associate', 'graduate', 'trainee'],
+  senior: ['senior', 'sr.', 'sr ', 'staff', 'principal', 'distinguished'],
+  lead: ['lead', 'head of', 'director', 'vp ', 'vice president', 'chief', 'team lead', 'manager', 'c-level', 'cto', 'cfo'],
+}
+
+function classifyLevel(title: string): 'entry' | 'mid' | 'senior' | 'lead' {
+  const t = title.toLowerCase()
+  for (const level of ['lead', 'senior', 'entry'] as const) {
+    if (LEVEL_PATTERNS[level].some(p => t.includes(p))) return level
+  }
+  return 'mid'
+}
+
 // ── Expanded skill keywords (extracted from actual JDs) ──
 const ALL_SKILL_KEYWORDS: Record<string, string[]> = {
   // Programming Languages
@@ -154,6 +169,12 @@ export interface SkillEntry {
   jobCount: number
 }
 
+export interface SkillLevelEntry {
+  skill: string
+  levels: { entry: number; mid: number; senior: number; lead: number }
+  total: number
+}
+
 export interface RisingSkill {
   skill: string
   change: number
@@ -173,6 +194,8 @@ export interface RoleInsight {
   avgSalaryMax: number
   remotePercent: number
   hotSkills: SkillEntry[]
+  skillLevelMatrix: SkillLevelEntry[]
+  levelInsight: string
   risingSkills: RisingSkill[]
   crossSkills: CrossSkillInsight[]
   pixelbaraComment: string
@@ -353,6 +376,53 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
 
     const hotSkills = sorted.filter(s => s.percentage >= 5).slice(0, 12)
 
+    // ── Skill × Level heatmap matrix ──
+    const jobsByLevel: Record<string, typeof jobs> = { entry: [], mid: [], senior: [], lead: [] }
+    for (const job of jobs) {
+      const level = classifyLevel(job.title || '')
+      jobsByLevel[level].push(job)
+    }
+
+    const skillByLevel: Record<string, Record<string, number>> = {}
+    for (const [level, levelJobs] of Object.entries(jobsByLevel)) {
+      const counts: Record<string, number> = {}
+      for (const job of levelJobs) {
+        const text = [job.title || '', job.tags || '', job.description || ''].join(' ')
+        const skills = extractSkillsFromText(text)
+        for (const skill of skills) {
+          counts[skill] = (counts[skill] || 0) + 1
+        }
+      }
+      skillByLevel[level] = {}
+      for (const [skill, count] of Object.entries(counts)) {
+        skillByLevel[level][skill] = levelJobs.length > 0 ? Math.round((count / levelJobs.length) * 100) : 0
+      }
+    }
+
+    const skillLevelMatrix: SkillLevelEntry[] = hotSkills.map(s => ({
+      skill: s.skill,
+      levels: {
+        entry: skillByLevel.entry?.[s.skill] || 0,
+        mid: skillByLevel.mid?.[s.skill] || 0,
+        senior: skillByLevel.senior?.[s.skill] || 0,
+        lead: skillByLevel.lead?.[s.skill] || 0,
+      },
+      total: s.jobCount,
+    }))
+
+    // Auto-generate level insight (biggest jump Entry→Lead)
+    let maxJump = 0
+    let maxJumpSkill = ''
+    for (const s of skillLevelMatrix) {
+      const jump = s.levels.lead - s.levels.entry
+      if (jump > maxJump) { maxJump = jump; maxJumpSkill = s.skill }
+    }
+    const levelInsight = maxJumpSkill && maxJump > 0
+      ? `${maxJumpSkill} demand jumps +${maxJump}pp from Entry → Lead level`
+      : hotSkills[0]
+        ? `${hotSkills[0].skill} is the most in-demand skill across all levels`
+        : ''
+
     // Rising skills (comparing normalized rates)
     const risingSkills: RisingSkill[] = []
     for (const [skill, count] of Object.entries(skillCounts)) {
@@ -410,6 +480,8 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
       avgSalaryMax: avgMax,
       remotePercent,
       hotSkills,
+      skillLevelMatrix,
+      levelInsight,
       risingSkills: risingSkills.slice(0, 5),
       crossSkills: crossSkills.slice(0, 3),
       pixelbaraComment: PIXELBARA_COMMENTS[roleKey],
