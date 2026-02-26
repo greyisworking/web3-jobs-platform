@@ -40,17 +40,47 @@ function classifyRole(title: string): string {
 }
 
 // ── Level classification (by title keywords) ──
+// "manager" is intentionally excluded from lead patterns because
+// "Community Manager", "Social Media Manager" etc. are mid-level roles.
+// Only compound lead-manager titles are matched explicitly.
 const LEVEL_PATTERNS: Record<string, string[]> = {
-  entry: ['junior', 'jr.', 'jr ', 'entry level', 'entry-level', 'intern', 'associate', 'graduate', 'trainee'],
+  entry: ['junior', 'jr.', 'jr ', 'entry level', 'entry-level', 'associate', 'graduate', 'trainee'],
   senior: ['senior', 'sr.', 'sr ', 'staff', 'principal', 'distinguished'],
-  lead: ['lead', 'head of', 'director', 'vp ', 'vice president', 'chief', 'team lead', 'manager', 'c-level', 'cto', 'cfo'],
+  lead: [
+    'head of', 'director', 'vp ', 'vice president', 'chief',
+    'team lead', 'tech lead', 'c-level', 'cto', 'cfo', 'coo ', ' coo,', 'cmo',
+    'engineering manager', 'general manager',
+  ],
 }
+
+// Titles containing "lead" but NOT meaning leadership level
+const LEAD_FALSE_POSITIVES = ['lead generat', 'leading']
+
+// Titles containing "manager" that ARE leadership level
+const MANAGER_LEAD_PATTERNS = [
+  'engineering manager', 'general manager', 'managing director',
+  'country manager', 'regional manager', 'finance manager',
+]
 
 function classifyLevel(title: string): 'entry' | 'mid' | 'senior' | 'lead' {
   const t = title.toLowerCase()
-  for (const level of ['lead', 'senior', 'entry'] as const) {
-    if (LEVEL_PATTERNS[level].some(p => t.includes(p))) return level
-  }
+
+  // Check lead first (most specific compound patterns)
+  if (LEVEL_PATTERNS.lead.some(p => t.includes(p))) return 'lead'
+
+  // "lead" keyword: only if not a false positive
+  if (t.includes('lead') && !LEAD_FALSE_POSITIVES.some(fp => t.includes(fp))) return 'lead'
+
+  // "manager" keyword: only specific leadership patterns
+  if (t.includes('manager') && MANAGER_LEAD_PATTERNS.some(p => t.includes(p))) return 'lead'
+
+  // Check senior
+  if (LEVEL_PATTERNS.senior.some(p => t.includes(p))) return 'senior'
+
+  // Check entry (includes word-boundary check for "intern" to avoid matching "international")
+  if (LEVEL_PATTERNS.entry.some(p => t.includes(p))) return 'entry'
+  if (/\bintern\b/.test(t)) return 'entry'
+
   return 'mid'
 }
 
@@ -394,8 +424,12 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
         }
       }
       skillByLevel[level] = {}
+      // Require minimum 5 jobs at a level for reliable percentages
+      const MIN_LEVEL_SAMPLE = 5
       for (const [skill, count] of Object.entries(counts)) {
-        skillByLevel[level][skill] = levelJobs.length > 0 ? Math.round((count / levelJobs.length) * 100) : 0
+        skillByLevel[level][skill] = levelJobs.length >= MIN_LEVEL_SAMPLE
+          ? Math.round((count / levelJobs.length) * 100)
+          : 0 // Show 0 (rendered as "—") instead of misleading % from tiny samples
       }
     }
 
