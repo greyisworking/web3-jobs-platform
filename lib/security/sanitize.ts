@@ -26,7 +26,7 @@ const EVAL_PATTERN = /eval\s*\(/gi
 /**
  * Escape HTML entities to prevent XSS
  */
-export function escapeHtml(text: string): string {
+function escapeHtml(text: string): string {
   if (!text || typeof text !== 'string') return ''
   return text.replace(/[&<>"'`=/]/g, (char) => HTML_ENTITIES[char] || char)
 }
@@ -34,7 +34,7 @@ export function escapeHtml(text: string): string {
 /**
  * Remove all HTML tags
  */
-export function stripHtml(text: string): string {
+function stripHtml(text: string): string {
   if (!text || typeof text !== 'string') return ''
   return text.replace(/<[^>]*>/g, '')
 }
@@ -167,36 +167,10 @@ const CONTROL_CHARS_PATTERN = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g
 // Zero-width characters (often used for obfuscation)
 const ZERO_WIDTH_PATTERN = /[\u200B-\u200D\uFEFF\u2060]/g
 
-// Unicode homoglyphs that could be used for phishing
-const HOMOGLYPH_MAP: Record<string, string> = {
-  'а': 'a', // Cyrillic
-  'е': 'e',
-  'о': 'o',
-  'р': 'p',
-  'с': 'c',
-  'х': 'x',
-  'ѕ': 's',
-  'і': 'i',
-  'ј': 'j',
-  'ү': 'y',
-  'А': 'A',
-  'В': 'B',
-  'С': 'C',
-  'Е': 'E',
-  'Н': 'H',
-  'І': 'I',
-  'К': 'K',
-  'М': 'M',
-  'О': 'O',
-  'Р': 'P',
-  'Т': 'T',
-  'Х': 'X',
-}
-
 /**
  * Remove control characters
  */
-export function removeControlChars(text: string): string {
+function removeControlChars(text: string): string {
   if (!text || typeof text !== 'string') return ''
   return text.replace(CONTROL_CHARS_PATTERN, '')
 }
@@ -204,17 +178,9 @@ export function removeControlChars(text: string): string {
 /**
  * Remove zero-width characters
  */
-export function removeZeroWidth(text: string): string {
+function removeZeroWidth(text: string): string {
   if (!text || typeof text !== 'string') return ''
   return text.replace(ZERO_WIDTH_PATTERN, '')
-}
-
-/**
- * Replace common homoglyphs with ASCII equivalents
- */
-export function normalizeHomoglyphs(text: string): string {
-  if (!text || typeof text !== 'string') return ''
-  return text.split('').map(char => HOMOGLYPH_MAP[char] || char).join('')
 }
 
 /**
@@ -237,9 +203,6 @@ export function sanitizeInput(
 
   // Remove zero-width characters
   result = removeZeroWidth(result)
-
-  // Normalize homoglyphs for security-critical fields
-  // result = normalizeHomoglyphs(result)  // Enable if needed
 
   // Sanitize HTML or strip it
   if (options.allowHtml) {
@@ -299,12 +262,3 @@ export function sanitizeUrl(url: string): string | null {
   }
 }
 
-/**
- * Validate email format
- */
-export function isValidEmail(email: string): boolean {
-  if (!email || typeof email !== 'string') return false
-  // RFC 5322 compliant email regex
-  const emailPattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
-  return emailPattern.test(email) && email.length <= 254
-}

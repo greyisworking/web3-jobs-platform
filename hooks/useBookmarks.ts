@@ -60,7 +60,7 @@ async function fetchBookmarks() {
       return
     }
     const data = await res.json()
-    const items: BookmarkItem[] = (data.bookmarks ?? []).map((b: any) => ({
+    const items: BookmarkItem[] = (data.bookmarks ?? []).map((b: Record<string, unknown>) => ({
       jobId: b.id,
       savedAt: b.savedAt,
       title: b.title,

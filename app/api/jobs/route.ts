@@ -19,7 +19,7 @@ const CACHE_TTL = 60 * 1000
 const CACHE_STALE = 5 * 60 * 1000
 
 interface JobsData {
-  jobs: any[]
+  jobs: unknown[]
   stats: {
     total: number
     global: number
