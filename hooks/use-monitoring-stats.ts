@@ -1,7 +1,6 @@
 import useSWR from 'swr'
 import type { MonitoringStats } from '@/types/monitoring'
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+import { fetcher } from '@/lib/fetcher'
 
 const defaultStats: MonitoringStats = {
   todayErrors: 0,

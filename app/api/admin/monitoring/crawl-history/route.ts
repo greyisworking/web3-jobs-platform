@@ -1,16 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getAdminUser } from '@/lib/admin-auth'
+import { NextResponse } from 'next/server'
+import { withAdminAuth } from '@/lib/admin-auth'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest) {
-  try {
-    await getAdminUser()
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const GET = withAdminAuth(async (request, _admin) => {
   const { searchParams } = new URL(request.url)
   const page = parseInt(searchParams.get('page') || '1', 10)
   const pageSize = parseInt(searchParams.get('pageSize') || '20', 10)
@@ -34,4 +28,4 @@ export async function GET(request: NextRequest) {
     page,
     pageSize,
   })
-}
+})

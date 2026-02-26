@@ -1,7 +1,6 @@
 import useSWR from 'swr'
 import type { CrawlHistoryResponse } from '@/types/monitoring'
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+import { fetcher } from '@/lib/fetcher'
 
 export function useCrawlHistory(page = 1, pageSize = 20) {
   const params = new URLSearchParams({

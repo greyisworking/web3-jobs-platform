@@ -1,16 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getAdminUser } from '@/lib/admin-auth'
+import { NextResponse } from 'next/server'
+import { withAdminAuth } from '@/lib/admin-auth'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import type { BulkActionRequest } from '@/types/admin'
 
-export async function POST(request: NextRequest) {
-  let adminUser
-  try {
-    adminUser = await getAdminUser()
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const POST = withAdminAuth(async (request, admin) => {
   const body: BulkActionRequest = await request.json()
   const { ids } = body
 
@@ -24,7 +17,7 @@ export async function POST(request: NextRequest) {
     .from('Job')
     .update({
       isActive: true,
-      reviewed_by: adminUser.user.id,
+      reviewed_by: admin.user.id,
       reviewed_at: new Date().toISOString(),
     })
     .in('id', ids)
@@ -34,4 +27,4 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ success: true, count: ids.length })
-}
+})

@@ -1,14 +1,8 @@
 import { NextResponse } from 'next/server'
-import { getAdminUser } from '@/lib/admin-auth'
+import { withAdminAuth } from '@/lib/admin-auth'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
-export async function POST(request: Request) {
-  try {
-    await getAdminUser()
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const POST = withAdminAuth(async (request, _admin) => {
   try {
     const { jobId, hide } = await request.json()
 
@@ -49,4 +43,4 @@ export async function POST(request: Request) {
       { status: 500 }
     )
   }
-}
+})

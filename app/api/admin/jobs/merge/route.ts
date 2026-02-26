@@ -1,15 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getAdminUser } from '@/lib/admin-auth'
+import { NextResponse } from 'next/server'
+import { withAdminAuth } from '@/lib/admin-auth'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import type { MergeRequest } from '@/types/admin'
 
-export async function POST(request: NextRequest) {
-  try {
-    await getAdminUser()
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const POST = withAdminAuth(async (request, _admin) => {
   const body: MergeRequest = await request.json()
   const { keepId, deleteIds } = body
 
@@ -78,4 +72,4 @@ export async function POST(request: NextRequest) {
     kept: keepId,
     deleted: deleteIds.length,
   })
-}
+})

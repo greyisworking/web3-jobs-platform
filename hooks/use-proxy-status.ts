@@ -1,7 +1,6 @@
 import useSWR from 'swr'
 import type { ProxyStatusResponse } from '@/types/monitoring'
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+import { fetcher } from '@/lib/fetcher'
 
 export function useProxyStatus() {
   const { data, error, isLoading, mutate } = useSWR<ProxyStatusResponse>(

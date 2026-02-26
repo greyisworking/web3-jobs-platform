@@ -1,7 +1,6 @@
 import useSWR from 'swr'
 import type { SearchAnalyticsResponse } from '@/types/analytics'
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+import { fetcher } from '@/lib/fetcher'
 
 const defaultData: SearchAnalyticsResponse = {
   topQueries: [],

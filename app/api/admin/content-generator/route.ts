@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import Anthropic from '@anthropic-ai/sdk'
+import { ADMIN_EMAIL_WHITELIST } from '@/lib/admin-auth'
 
 export const maxDuration = 120
 
@@ -183,7 +184,6 @@ export async function POST(request: Request) {
   }
 
   // Check if user is admin
-  const ADMIN_EMAIL_WHITELIST = ['admin@neun.wtf', 'dahye@neun.wtf']
   const { data: admin } = await supabase
     .from('admins')
     .select('id')

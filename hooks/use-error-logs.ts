@@ -1,7 +1,6 @@
 import useSWR from 'swr'
 import type { ErrorLogsFilters, ErrorLogsResponse } from '@/types/monitoring'
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+import { fetcher } from '@/lib/fetcher'
 
 export function useErrorLogs(filters: ErrorLogsFilters = {}) {
   const params = new URLSearchParams()

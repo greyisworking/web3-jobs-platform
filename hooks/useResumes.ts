@@ -2,18 +2,13 @@
 
 import useSWR from 'swr'
 import { toast } from 'sonner'
+import { fetcher } from '@/lib/fetcher'
 
 interface Resume {
   name: string
   size: number
   created_at: string
   url: string | null
-}
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error('Failed to fetch')
-  return res.json()
 }
 
 export function useResumes() {

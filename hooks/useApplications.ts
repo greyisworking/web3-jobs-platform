@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import { ensureCSRFToken } from '@/lib/csrf-client'
 
 export type ApplicationStatus =
   | 'interested'
@@ -78,13 +79,11 @@ export function useApplications() {
     if (!user) return null
 
     try {
-      const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content
-
       const res = await fetch('/api/applications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+          'x-csrf-token': ensureCSRFToken(),
         },
         body: JSON.stringify({
           jobId,
@@ -113,11 +112,9 @@ export function useApplications() {
     if (!user) return false
 
     try {
-      const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content
-
       const res = await fetch(`/api/applications?jobId=${jobId}`, {
         method: 'DELETE',
-        headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
+        headers: { 'x-csrf-token': ensureCSRFToken() },
       })
 
       const data = await res.json()

@@ -1,6 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
+import { fetcher } from '@/lib/fetcher'
 
 interface Article {
   id: string
@@ -25,8 +26,6 @@ interface ArticlesResponse {
   articles: Article[]
   total: number
 }
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 const swrOptions = {
   revalidateOnFocus: true,

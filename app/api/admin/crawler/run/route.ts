@@ -1,20 +1,13 @@
 import { NextResponse } from 'next/server'
 import { spawn } from 'child_process'
 import path from 'path'
-import { getAdminUser } from '@/lib/admin-auth'
+import { withAdminAuth } from '@/lib/admin-auth'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 let lastRunTime = 0
 const RATE_LIMIT_MS = 5 * 60 * 1000 // 5 minutes
 
-export async function POST() {
-  let adminUser
-  try {
-    adminUser = await getAdminUser()
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const POST = withAdminAuth(async (_request, admin) => {
   // Rate limit: max 1 run per 5 minutes
   const now = Date.now()
   if (now - lastRunTime < RATE_LIMIT_MS) {
@@ -33,7 +26,7 @@ export async function POST() {
   // Audit log
   const supabase = await createSupabaseServerClient()
   await supabase.from('admin_audit_log').insert({
-    admin_id: adminUser.user.id,
+    admin_id: admin.user.id,
     action: 'crawler_run',
     details: { triggered_at: new Date().toISOString() },
   })
@@ -97,4 +90,4 @@ export async function POST() {
       )
     })
   })
-}
+})

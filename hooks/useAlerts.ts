@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import { ensureCSRFToken } from '@/lib/csrf-client'
 
 export type AlertFrequency = 'daily' | 'weekly' | 'instant'
 
@@ -71,13 +72,11 @@ export function useAlerts() {
     if (!currentUser) return null
 
     try {
-      const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content
-
       const res = await fetch('/api/alerts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+          'x-csrf-token': ensureCSRFToken(),
         },
         body: JSON.stringify(options),
       })
@@ -107,13 +106,11 @@ export function useAlerts() {
     if (!currentUser) return null
 
     try {
-      const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content
-
       const res = await fetch('/api/alerts', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+          'x-csrf-token': ensureCSRFToken(),
         },
         body: JSON.stringify({ id, ...updates }),
       })
@@ -136,11 +133,9 @@ export function useAlerts() {
     if (!currentUser) return false
 
     try {
-      const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content
-
       const res = await fetch(`/api/alerts?id=${id}`, {
         method: 'DELETE',
-        headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
+        headers: { 'x-csrf-token': ensureCSRFToken() },
       })
 
       const data = await res.json()

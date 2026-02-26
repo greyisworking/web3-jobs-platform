@@ -1,16 +1,10 @@
 import { NextResponse } from 'next/server'
-import { getAdminUser } from '@/lib/admin-auth'
+import { withAdminAuth } from '@/lib/admin-auth'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
-  try {
-    await getAdminUser()
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const GET = withAdminAuth(async (_request, _admin) => {
   const supabase = await createSupabaseServerClient()
 
   // Fetch bookmarks
@@ -58,4 +52,4 @@ export async function GET() {
       uniqueJobs,
     },
   })
-}
+})
