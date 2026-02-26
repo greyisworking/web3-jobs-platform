@@ -213,7 +213,7 @@ export default function BountiesPage() {
                   onClick={() => setCategory(c.id)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
                     category === c.id
-                      ? 'bg-purple-600 text-a24-text'
+                      ? 'bg-neun-success text-a24-text'
                       : 'bg-gray-800 text-a24-muted hover:text-a24-text'
                   }`}
                 >
@@ -257,7 +257,7 @@ export default function BountiesPage() {
                       {/* Category & Status */}
                       <div className="flex items-center gap-2 mb-2">
                         {bounty.category && (
-                          <span className="px-2 py-0.5 bg-purple-600/20 text-purple-400 text-[10px] uppercase tracking-wider">
+                          <span className="px-2 py-0.5 bg-neun-success/20 text-neun-success text-[10px] uppercase tracking-wider">
                             {bounty.category}
                           </span>
                         )}

@@ -86,7 +86,7 @@ function CompanyCard({ company, index, jobCount }: CompanyCardProps) {
       )}
 
       {company.hasToken && (
-        <span className="inline-block px-2 py-0.5 text-[10px] bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 tracking-wider">
+        <span className="inline-block px-2 py-0.5 text-[10px] bg-neun-success/10 dark:bg-neun-success/10 text-neun-success dark:text-neun-success/80 tracking-wider">
           HAS TOKEN
         </span>
       )}

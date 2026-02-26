@@ -162,7 +162,7 @@ export default function TransparencyPage() {
             transition={{ delay: 0.4 }}
             className="bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border rounded-lg p-4 md:p-6 text-center card-hover-lift"
           >
-            <Clock className="w-6 h-6 md:w-8 md:h-8 text-purple-500 mx-auto mb-2" />
+            <Clock className="w-6 h-6 md:w-8 md:h-8 text-neun-success mx-auto mb-2" />
             <p className="text-2xl md:text-3xl font-bold text-a24-text dark:text-a24-dark-text">
               {logs.length}
             </p>

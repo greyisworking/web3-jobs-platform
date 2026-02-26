@@ -101,7 +101,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-purple-400 underline',
+          class: 'text-neun-success underline',
         },
       }),
       Image.configure({
@@ -374,7 +374,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                     {option.label}
                   </span>
                   {getCurrentHeading() === option.shortLabel && (
-                    <Check className="w-4 h-4 text-purple-500" />
+                    <Check className="w-4 h-4 text-neun-success" />
                   )}
                 </button>
               ))}
@@ -448,7 +448,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 <button
                   type="button"
                   onClick={() => handleColor(customColor)}
-                  className="flex-1 px-2 py-1 text-xs bg-purple-600 text-white hover:bg-purple-700 transition-colors rounded"
+                  className="flex-1 px-2 py-1 text-xs bg-neun-success text-white hover:bg-neun-success/90 transition-colors rounded"
                 >
                   Apply
                 </button>
@@ -487,7 +487,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 <button
                   type="button"
                   onClick={handleLink}
-                  className="px-3 py-1.5 text-xs bg-purple-600 text-white hover:bg-purple-700 rounded"
+                  className="px-3 py-1.5 text-xs bg-neun-success text-white hover:bg-neun-success/90 rounded"
                 >
                   Add
                 </button>
@@ -524,7 +524,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 <button
                   type="button"
                   onClick={handleImage}
-                  className="px-3 py-1.5 text-xs bg-purple-600 text-white hover:bg-purple-700 rounded"
+                  className="px-3 py-1.5 text-xs bg-neun-success text-white hover:bg-neun-success/90 rounded"
                 >
                   Add
                 </button>
@@ -538,7 +538,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 border border-dashed border-a24-border hover:border-purple-500 text-sm text-a24-muted hover:text-a24-text transition-colors rounded"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 border border-dashed border-a24-border hover:border-neun-success text-sm text-a24-muted hover:text-a24-text transition-colors rounded"
               >
                 {uploading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -586,7 +586,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 <button
                   type="button"
                   onClick={handleVideo}
-                  className="px-3 py-1.5 text-xs bg-purple-600 text-white hover:bg-purple-700 rounded"
+                  className="px-3 py-1.5 text-xs bg-neun-success text-white hover:bg-neun-success/90 rounded"
                 >
                   Add
                 </button>
@@ -598,14 +598,14 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
       {/* Image Resize Controls */}
       {selectedImage && (
-        <div className="flex items-center gap-2 px-3 py-2 bg-purple-600/10 border-b border-purple-500/30">
-          <span className="text-xs text-purple-400 uppercase tracking-wider mr-2">Image Size:</span>
+        <div className="flex items-center gap-2 px-3 py-2 bg-neun-success/10 border-b border-neun-success/30">
+          <span className="text-xs text-neun-success uppercase tracking-wider mr-2">Image Size:</span>
           {IMAGE_SIZES.map((size) => (
             <button
               key={size.label}
               type="button"
               onClick={() => handleImageResize(size.width)}
-              className="px-3 py-1 text-xs bg-purple-600/20 text-purple-300 hover:bg-purple-600/40 transition-colors rounded"
+              className="px-3 py-1 text-xs bg-neun-success/20 text-neun-success/80 hover:bg-neun-success/40 transition-colors rounded"
             >
               {size.label}
             </button>
@@ -613,7 +613,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           <button
             type="button"
             onClick={() => setSelectedImage(null)}
-            className="ml-auto p-1 text-purple-400 hover:text-purple-300"
+            className="ml-auto p-1 text-neun-success hover:text-neun-success/80"
           >
             <X className="w-4 h-4" />
           </button>

@@ -78,7 +78,7 @@ const careerMeta: Record<string, {
     name: 'Frontend Developer',
     description: 'Build web3 interfaces, dApps, and wallet integrations.',
     icon: Palette,
-    color: 'bg-purple-500/20 text-purple-400',
+    color: 'bg-neun-success/20 text-neun-success',
     titlePatterns: ['frontend', 'react', 'ui engineer', 'web developer'],
     learningPath: [
       {

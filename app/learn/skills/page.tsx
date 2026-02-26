@@ -21,7 +21,7 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
 
 const categoryColors: Record<string, string> = {
   language: 'bg-blue-500/20 text-blue-400',
-  framework: 'bg-purple-500/20 text-purple-400',
+  framework: 'bg-neun-success/20 text-neun-success',
   blockchain: 'bg-cyan-500/20 text-cyan-400',
   concept: 'bg-amber-500/20 text-amber-400',
   tool: 'bg-emerald-500/20 text-emerald-400',

@@ -516,7 +516,7 @@ export function TrustProfile({
           <p className="text-xs text-gray-500 dark:text-gray-400">Reports Against</p>
         </div>
         <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-          <p className="text-2xl font-bold text-purple-500">{trustScore.score}</p>
+          <p className="text-2xl font-bold text-neun-success">{trustScore.score}</p>
           <p className="text-xs text-gray-500 dark:text-gray-400">Trust Score</p>
         </div>
       </div>

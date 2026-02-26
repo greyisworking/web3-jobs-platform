@@ -691,7 +691,7 @@ export const domains: Domain[] = [
     name: 'NFT & Digital Assets',
     description: "digital ownership, creator economy, and yes — beyond the jpegs.",
     icon: 'Image',
-    color: 'bg-purple-500/20 text-purple-400',
+    color: 'bg-neun-success/20 text-neun-success',
     jobFilterTag: 'nft',
     steps: [
       {

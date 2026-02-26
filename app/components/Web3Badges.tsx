@@ -183,7 +183,7 @@ export default function Web3Badges({ address: propAddress, showSync = false, com
             <p className="text-[10px] text-gray-500">DAO Votes</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-purple-400">{profile.reputation_score}</p>
+            <p className="text-lg font-bold text-neun-success">{profile.reputation_score}</p>
             <p className="text-[10px] text-gray-500">Rep Score</p>
           </div>
         </div>
@@ -247,7 +247,7 @@ export function MutualConnections({
 
   return (
     <div className="flex items-center gap-2 text-xs text-gray-400">
-      <span className="text-purple-400">Your mutuals work here:</span>
+      <span className="text-neun-success">Your mutuals work here:</span>
       <div className="flex -space-x-2">
         {mutuals.slice(0, 3).map(m => (
           <Blockies key={m.address} address={m.address} size={20} className="border border-gray-900" />

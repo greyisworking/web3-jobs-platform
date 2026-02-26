@@ -197,7 +197,7 @@ export default function CreateBountyPage() {
                   onClick={() => setForm(f => ({ ...f, category: cat.id }))}
                   className={`px-4 py-2 text-sm transition-colors ${
                     form.category === cat.id
-                      ? 'bg-purple-600 text-a24-text'
+                      ? 'bg-neun-success text-a24-text'
                       : 'bg-gray-800 text-a24-muted hover:text-a24-text'
                   }`}
                 >
@@ -307,7 +307,7 @@ export default function CreateBountyPage() {
                 {form.skills.map(skill => (
                   <span
                     key={skill}
-                    className="inline-flex items-center gap-1 px-2 py-1 bg-purple-600/20 text-purple-400 text-xs"
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-neun-success/20 text-neun-success text-xs"
                   >
                     {skill}
                     <button

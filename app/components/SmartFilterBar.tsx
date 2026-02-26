@@ -195,12 +195,12 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
         </div>
 
         {/* DAO Jobs Toggle */}
-        <div className="flex items-center justify-between py-3 px-4 border border-purple-500/30 bg-purple-500/5">
+        <div className="flex items-center justify-between py-3 px-4 border border-neun-success/30 bg-neun-success/5">
           <div>
-            <span className="text-xs font-medium uppercase tracking-[0.2em] text-purple-400">
+            <span className="text-xs font-medium uppercase tracking-[0.2em] text-neun-success">
               DAO Jobs
             </span>
-            <span className="ml-2 text-[10px] text-purple-400/60">
+            <span className="ml-2 text-[10px] text-neun-success/60">
               governance roles
             </span>
           </div>
@@ -214,7 +214,7 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
             }}
             className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
               filters.daoJobsOnly
-                ? 'bg-purple-500'
+                ? 'bg-neun-success'
                 : 'bg-a24-border dark:bg-a24-dark-border'
             }`}
             aria-label="Toggle DAO Jobs filter"
@@ -409,12 +409,12 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs text-purple-400 border border-purple-500/30"
+                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs text-neun-success border border-neun-success/30"
               >
                 DAO Jobs
                 <button
                   onClick={() => clearFilter('daoJobsOnly')}
-                  className="hover:text-purple-300 transition-colors"
+                  className="hover:text-neun-success/80 transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>

@@ -222,7 +222,7 @@ export default async function TrendsPage() {
                       {role.count} ({role.percentage}%)
                     </span>
                   </div>
-                  <ProgressBar percentage={role.percentage} color="bg-purple-500" />
+                  <ProgressBar percentage={role.percentage} color="bg-neun-success" />
                 </div>
               ))}
             </div>

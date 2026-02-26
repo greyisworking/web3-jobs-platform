@@ -351,13 +351,13 @@ export default function ArticleWritePage() {
     <div className="min-h-screen bg-a24-bg">
       {/* Draft Recovery Banner */}
       {showDraftBanner && drafts.length > 0 && !editingDraft && (
-        <div className="bg-purple-600/10 border-b border-purple-500/20">
+        <div className="bg-neun-success/10 border-b border-neun-success/20">
           <div className="max-w-6xl mx-auto px-6 py-3">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <FileEdit className="w-5 h-5 text-purple-400" />
+                <FileEdit className="w-5 h-5 text-neun-success" />
                 <p className="text-sm text-a24-text">
-                  <span className="text-purple-400 font-medium">
+                  <span className="text-neun-success font-medium">
                     {drafts.length} draft{drafts.length > 1 ? 's' : ''} saved
                   </span>
                   {' '}&mdash; Continue where you left off?
@@ -367,14 +367,14 @@ export default function ArticleWritePage() {
                 {drafts.length === 1 ? (
                   <button
                     onClick={() => continueDraft(drafts[0])}
-                    className="px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-700 text-white transition-colors"
+                    className="px-3 py-1.5 text-sm bg-neun-success hover:bg-neun-success/90 text-white transition-colors"
                   >
                     Continue &ldquo;{drafts[0].title || 'Untitled'}&rdquo;
                   </button>
                 ) : (
                   <Link
                     href="/articles/drafts"
-                    className="px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-700 text-white transition-colors"
+                    className="px-3 py-1.5 text-sm bg-neun-success hover:bg-neun-success/90 text-white transition-colors"
                   >
                     View Drafts
                   </Link>
@@ -427,7 +427,7 @@ export default function ArticleWritePage() {
               <button
                 onClick={() => handleSubmit(true)}
                 disabled={loading}
-                className="inline-flex items-center gap-2 text-sm bg-purple-600 hover:bg-purple-700 text-a24-text px-4 py-2 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 text-sm bg-neun-success hover:bg-neun-success/90 text-a24-text px-4 py-2 transition-colors disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Publish
@@ -464,7 +464,7 @@ export default function ArticleWritePage() {
                 onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))}
                 placeholder="Brief description (optional)"
                 rows={2}
-                className="w-full text-sm bg-transparent border border-a24-border p-3 outline-none text-a24-text placeholder:text-gray-600 resize-none focus:border-purple-500 transition-colors"
+                className="w-full text-sm bg-transparent border border-a24-border p-3 outline-none text-a24-text placeholder:text-gray-600 resize-none focus:border-neun-success transition-colors"
               />
             </div>
 
@@ -490,7 +490,7 @@ export default function ArticleWritePage() {
                   {form.tags.map(tag => (
                     <span
                       key={tag}
-                      className="inline-flex items-center gap-1 px-2 py-1 bg-purple-600/20 text-purple-400 text-xs"
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-neun-success/20 text-neun-success text-xs"
                     >
                       {tag}
                       <button onClick={() => removeTag(tag)} className="hover:text-a24-text">
@@ -514,7 +514,7 @@ export default function ArticleWritePage() {
                       }
                     }}
                     placeholder="Add a tag..."
-                    className="flex-1 text-sm bg-transparent border border-a24-border px-3 py-2 outline-none text-a24-text placeholder:text-gray-600 focus:border-purple-500 transition-colors"
+                    className="flex-1 text-sm bg-transparent border border-a24-border px-3 py-2 outline-none text-a24-text placeholder:text-gray-600 focus:border-neun-success transition-colors"
                   />
                   <button
                     onClick={() => addTag(tagInput)}
@@ -568,14 +568,14 @@ export default function ArticleWritePage() {
               {drafts.length > 0 && !editingDraft && (
                 <Link
                   href="/articles/drafts"
-                  className="block border border-purple-500/30 bg-purple-500/5 p-4 hover:border-purple-500/50 transition-colors"
+                  className="block border border-neun-success/30 bg-neun-success/5 p-4 hover:border-neun-success/50 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <FileEdit className="w-4 h-4 text-purple-400" />
+                      <FileEdit className="w-4 h-4 text-neun-success" />
                       <span className="text-sm text-a24-text">My Drafts</span>
                     </div>
-                    <span className="px-2 py-0.5 bg-purple-600/20 text-purple-400 text-xs">
+                    <span className="px-2 py-0.5 bg-neun-success/20 text-neun-success text-xs">
                       {drafts.length}
                     </span>
                   </div>
@@ -584,9 +584,9 @@ export default function ArticleWritePage() {
 
               {/* Wallet Connection - Clearly Optional */}
               {!isConnected && (
-                <div className="border border-dashed border-purple-500/20 bg-purple-500/5 p-5">
+                <div className="border border-dashed border-neun-success/20 bg-neun-success/5 p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xs uppercase tracking-wider text-purple-400 font-medium flex items-center gap-2">
+                    <h3 className="text-xs uppercase tracking-wider text-neun-success font-medium flex items-center gap-2">
                       <Wallet className="w-3.5 h-3.5" />
                       Wallet
                     </h3>
@@ -602,15 +602,15 @@ export default function ArticleWritePage() {
                   </p>
                   <ul className="space-y-2 text-xs text-a24-muted/70 mb-4">
                     <li className="flex items-center gap-2">
-                      <Shield className="w-3 h-3 text-purple-400/60" />
+                      <Shield className="w-3 h-3 text-neun-success/60" />
                       On-chain reputation badges
                     </li>
                     <li className="flex items-center gap-2">
-                      <Shield className="w-3 h-3 text-purple-400/60" />
+                      <Shield className="w-3 h-3 text-neun-success/60" />
                       POAP for published articles
                     </li>
                     <li className="flex items-center gap-2">
-                      <Shield className="w-3 h-3 text-purple-400/60" />
+                      <Shield className="w-3 h-3 text-neun-success/60" />
                       ENS name display
                     </li>
                   </ul>
@@ -630,23 +630,23 @@ export default function ArticleWritePage() {
                 </h3>
                 <ul className="space-y-3 text-xs text-a24-muted">
                   <li className="flex items-start gap-2">
-                    <span className="text-purple-400">01</span>
+                    <span className="text-neun-success">01</span>
                     <span>Short & punchy titles. WAGMI vibes only 🔥</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-purple-400">02</span>
+                    <span className="text-neun-success">02</span>
                     <span>Add a cover image. First impressions matter 👀</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-purple-400">03</span>
+                    <span className="text-neun-success">03</span>
                     <span>Tag it right. Help frens discover your alpha 🏷️</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-purple-400">04</span>
+                    <span className="text-neun-success">04</span>
                     <span>Structure with headings. Few understand 🧠</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-purple-400">05</span>
+                    <span className="text-neun-success">05</span>
                     <span>Double-check before mint! No rugs ✅</span>
                   </li>
                 </ul>

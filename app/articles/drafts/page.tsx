@@ -129,7 +129,7 @@ export default function DraftsPage() {
           </p>
           <Link
             href="/login?next=/articles/drafts"
-            className="inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors"
+            className="inline-block px-6 py-3 bg-neun-success hover:bg-neun-success/90 text-white font-medium transition-colors"
           >
             Log In
           </Link>
@@ -165,7 +165,7 @@ export default function DraftsPage() {
           </div>
           <Link
             href="/articles/write"
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
+            className="px-4 py-2 bg-neun-success hover:bg-neun-success/90 text-white text-sm font-medium transition-colors"
           >
             New Article
           </Link>
@@ -185,7 +185,7 @@ export default function DraftsPage() {
             </p>
             <Link
               href="/articles/write"
-              className="inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors"
+              className="inline-block px-6 py-3 bg-neun-success hover:bg-neun-success/90 text-white font-medium transition-colors"
             >
               Start Writing
             </Link>
@@ -195,7 +195,7 @@ export default function DraftsPage() {
             {drafts.map(draft => (
               <div
                 key={draft.id}
-                className="border border-a24-border bg-a24-surface p-5 hover:border-purple-500/50 transition-colors"
+                className="border border-a24-border bg-a24-surface p-5 hover:border-neun-success/50 transition-colors"
               >
                 <div className="flex items-start gap-4">
                   {/* Cover Image */}
@@ -228,7 +228,7 @@ export default function DraftsPage() {
                       {draft.tags && draft.tags.length > 0 && (
                         <div className="flex items-center gap-1">
                           {draft.tags.slice(0, 2).map(tag => (
-                            <span key={tag} className="px-1.5 py-0.5 bg-purple-600/20 text-purple-400 text-[10px]">
+                            <span key={tag} className="px-1.5 py-0.5 bg-neun-success/20 text-neun-success text-[10px]">
                               {tag}
                             </span>
                           ))}
@@ -244,7 +244,7 @@ export default function DraftsPage() {
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Link
                       href={`/articles/write?edit=${draft.slug}`}
-                      className="p-2 text-a24-muted hover:text-purple-400 hover:bg-purple-500/10 transition-colors"
+                      className="p-2 text-a24-muted hover:text-neun-success hover:bg-neun-success/10 transition-colors"
                       title="Edit"
                     >
                       <FileEdit className="w-5 h-5" />

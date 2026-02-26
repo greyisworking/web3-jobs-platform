@@ -190,7 +190,7 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
             </span>
           )}
           {job.is_dao_job && (
-            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-purple-500/20 border border-purple-500/50 text-purple-400 text-[9px] uppercase tracking-wider">
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-neun-success/20 border border-neun-success/50 text-neun-success text-[9px] uppercase tracking-wider">
               <Vote className="w-2.5 h-2.5" />
               DAO
             </span>

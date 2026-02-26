@@ -28,7 +28,7 @@ export function MiniToken({ symbol, price, priceChange24h, className }: MiniToke
       'text-a24-muted dark:text-a24-dark-muted',
       className
     )}>
-      <PixelToken size={10} className="text-purple-500 dark:text-purple-400" />
+      <PixelToken size={10} className="text-neun-success dark:text-neun-success" />
       <span className="font-medium">${symbol}</span>
       {price !== undefined && (
         <span>{formatPrice(price)}</span>
@@ -110,7 +110,7 @@ export function TokenInfoSection({ tokenInfo, tvlInfo, className }: TokenInfoSec
         {tokenInfo && (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <PixelToken size={14} className="text-purple-500 dark:text-purple-400" />
+              <PixelToken size={14} className="text-neun-success dark:text-neun-success" />
               <span className="text-sm font-medium text-a24-text dark:text-a24-dark-text">
                 ${tokenInfo.symbol}
               </span>

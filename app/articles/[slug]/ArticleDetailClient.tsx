@@ -74,7 +74,7 @@ function ShareModal({
             rel="noopener noreferrer"
             className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-gray-700 text-a24-text transition-colors"
           >
-            <div className="w-5 h-5 bg-purple-500 flex items-center justify-center text-xs font-bold">F</div>
+            <div className="w-5 h-5 bg-neun-success flex items-center justify-center text-xs font-bold">F</div>
             <span>Share on Farcaster</span>
             <ExternalLink className="w-4 h-4 ml-auto text-a24-muted" />
           </a>
@@ -157,7 +157,7 @@ function TipModal({
               onClick={() => setAmount(preset)}
               className={`py-2 text-sm font-medium transition-colors ${
                 amount === preset
-                  ? 'bg-purple-600 text-a24-text'
+                  ? 'bg-neun-success text-a24-text'
                   : 'bg-gray-800 text-a24-muted hover:text-a24-text'
               }`}
             >
@@ -174,7 +174,7 @@ function TipModal({
             onChange={(e) => setAmount(e.target.value)}
             min="0.001"
             step="0.001"
-            className="flex-1 bg-gray-800 border border-gray-700 px-3 py-2 text-a24-text outline-none focus:border-purple-500"
+            className="flex-1 bg-gray-800 border border-gray-700 px-3 py-2 text-a24-text outline-none focus:border-neun-success"
           />
           <span className="text-a24-muted">ETH</span>
         </div>
@@ -182,7 +182,7 @@ function TipModal({
         <button
           onClick={handleTip}
           disabled={sending || !amount || parseFloat(amount) <= 0}
-          className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-a24-text font-medium transition-colors disabled:opacity-50"
+          className="w-full py-3 bg-neun-success hover:bg-neun-success/90 text-a24-text font-medium transition-colors disabled:opacity-50"
         >
           {sending ? 'Sending...' : `Send ${amount} ETH`}
         </button>
@@ -274,7 +274,7 @@ export default function ArticleDetailClient({ article: initialArticle }: Article
             {article.tags.map(tag => (
               <span
                 key={tag}
-                className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs uppercase tracking-wider"
+                className="px-2 py-1 bg-neun-success/20 text-neun-success text-xs uppercase tracking-wider"
               >
                 {tag}
               </span>
@@ -353,9 +353,9 @@ export default function ArticleDetailClient({ article: initialArticle }: Article
           className="prose prose-lg prose-invert max-w-none
             prose-headings:font-bold prose-headings:text-a24-text
             prose-p:text-a24-text prose-p:leading-relaxed
-            prose-a:text-purple-400 prose-a:underline prose-a:underline-offset-4
+            prose-a:text-neun-success prose-a:underline prose-a:underline-offset-4
             prose-blockquote:border-gray-700 prose-blockquote:text-a24-muted
-            prose-code:text-purple-400 prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5
+            prose-code:text-neun-success prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5
             prose-pre:bg-a24-surface prose-pre:border prose-pre:border-a24-border
             prose-img:mx-auto
           "
@@ -374,9 +374,9 @@ export default function ArticleDetailClient({ article: initialArticle }: Article
                 disabled={!isConnected || collected || collecting}
                 className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors ${
                   collected
-                    ? 'bg-purple-600/20 text-purple-400 cursor-default'
+                    ? 'bg-neun-success/20 text-neun-success cursor-default'
                     : isConnected
-                      ? 'bg-purple-600 hover:bg-purple-700 text-a24-text'
+                      ? 'bg-neun-success hover:bg-neun-success/90 text-a24-text'
                       : 'bg-gray-800 text-a24-muted cursor-not-allowed'
                 }`}
               >
@@ -450,7 +450,7 @@ export default function ArticleDetailClient({ article: initialArticle }: Article
                   href={`https://etherscan.io/address/${article.author_address}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-purple-400 hover:text-purple-300 inline-flex items-center gap-1"
+                  className="text-xs text-neun-success hover:text-neun-success/80 inline-flex items-center gap-1"
                 >
                   View on Etherscan
                   <ExternalLink className="w-3 h-3" />

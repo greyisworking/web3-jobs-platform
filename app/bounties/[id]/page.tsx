@@ -180,7 +180,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
             <div className="bg-a24-surface border border-a24-border p-6">
               <div className="flex items-center gap-2 mb-3">
                 {bounty.category && (
-                  <span className="px-2 py-0.5 bg-purple-600/20 text-purple-400 text-xs uppercase tracking-wider">
+                  <span className="px-2 py-0.5 bg-neun-success/20 text-neun-success text-xs uppercase tracking-wider">
                     {bounty.category}
                   </span>
                 )}
@@ -296,7 +296,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
                           href={sub.submission_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300"
+                          className="inline-flex items-center gap-1 text-sm text-neun-success hover:text-neun-success/80"
                         >
                           <LinkIcon className="w-3 h-3" />
                           View Submission

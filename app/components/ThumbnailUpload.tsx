@@ -126,7 +126,7 @@ export default function ThumbnailUpload({ value, onChange }: ThumbnailUploadProp
         disabled={uploading}
         className={`w-full aspect-video flex flex-col items-center justify-center gap-3 border-2 border-dashed transition-colors cursor-pointer ${
           dragOver
-            ? 'border-purple-500 bg-purple-500/10'
+            ? 'border-neun-success bg-neun-success/10'
             : 'border-a24-border hover:border-gray-500 bg-a24-surface/50'
         } ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
       >

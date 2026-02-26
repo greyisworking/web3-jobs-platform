@@ -56,7 +56,7 @@ export default function ArticlesPage() {
         <div className="py-12 border-b border-a24-border mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-purple-400 mb-2">
+              <p className="text-xs uppercase tracking-[0.3em] text-neun-success mb-2">
                 Web3 Insights
               </p>
               <h2 className="text-2xl font-bold text-a24-text mb-2">
@@ -79,7 +79,7 @@ export default function ArticlesPage() {
             {(isConnected || user) ? (
               <Link
                 href="/articles/write"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-a24-text text-sm font-medium transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-neun-success hover:bg-neun-success/90 text-a24-text text-sm font-medium transition-colors"
               >
                 <PenLine className="w-4 h-4" />
                 Write Article
@@ -102,7 +102,7 @@ export default function ArticlesPage() {
               onClick={() => setSelectedTag(null)}
               className={`px-3 py-1 text-xs font-medium transition-colors ${
                 !selectedTag
-                  ? 'bg-purple-600 text-a24-text'
+                  ? 'bg-neun-success text-a24-text'
                   : 'bg-a24-surface text-a24-muted hover:text-a24-text'
               }`}
             >
@@ -114,7 +114,7 @@ export default function ArticlesPage() {
                 onClick={() => setSelectedTag(tag)}
                 className={`px-3 py-1 text-xs font-medium transition-colors ${
                   selectedTag === tag
-                    ? 'bg-purple-600 text-a24-text'
+                    ? 'bg-neun-success text-a24-text'
                     : 'bg-a24-surface text-a24-muted hover:text-a24-text'
                 }`}
               >
@@ -139,7 +139,7 @@ export default function ArticlesPage() {
             </p>
             <Link
               href="/articles/write"
-              className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-a24-text text-sm font-medium transition-colors"
+              className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 bg-neun-success hover:bg-neun-success/90 text-a24-text text-sm font-medium transition-colors"
             >
               <PenLine className="w-4 h-4" />
               Write Article
@@ -167,7 +167,7 @@ export default function ArticlesPage() {
                           {article.tags.slice(0, 3).map(tag => (
                             <span
                               key={tag}
-                              className="px-2 py-0.5 bg-purple-600/20 text-purple-400 text-[10px] uppercase tracking-wider"
+                              className="px-2 py-0.5 bg-neun-success/20 text-neun-success text-[10px] uppercase tracking-wider"
                             >
                               {tag}
                             </span>
@@ -175,7 +175,7 @@ export default function ArticlesPage() {
                         </div>
                       )}
 
-                      <h2 className="text-lg font-medium text-a24-text mb-2 group-hover:text-purple-400 transition-colors">
+                      <h2 className="text-lg font-medium text-a24-text mb-2 group-hover:text-neun-success transition-colors">
                         {article.title}
                       </h2>
 
@@ -212,7 +212,7 @@ export default function ArticlesPage() {
                         </span>
 
                         {article.collect_count > 0 && (
-                          <span className="flex items-center gap-1 text-purple-400">
+                          <span className="flex items-center gap-1 text-neun-success">
                             <Heart className="w-3 h-3" />
                             {article.collect_count}
                           </span>

@@ -45,7 +45,7 @@ const resourceColorMap: Record<string, string> = {
   article: 'text-blue-400',
   video: 'text-red-400',
   tool: 'text-amber-400',
-  course: 'text-purple-400',
+  course: 'text-neun-success',
   book: 'text-emerald-400',
 }
 
