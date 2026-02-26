@@ -1,4 +1,3 @@
-import puppeteer, { Page } from 'puppeteer'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { delay } from '../utils'
@@ -8,219 +7,188 @@ interface CrawlerReturn {
   new: number
 }
 
-interface JobListing {
-  title: string
-  company: string
-  location: string
-  type: string
-  url: string
-  salary?: string
-  tags?: string[]
+interface WantedJob {
+  id: number
+  position: string
+  status: string
+  company: {
+    id: number
+    name: string
+    industry_name: string
+  }
+  address: {
+    location: string
+    full_location: string
+    country: string
+  }
+  annual_from: number | null
+  annual_to: number | null
+  category_tags: { parent_id: number; id: number }[]
 }
 
+interface WantedJobDetail extends WantedJob {
+  detail: {
+    main_tasks: string
+    requirements: string
+    preferred_points: string
+    benefits: string
+    intro: string
+  }
+  skill_tags: { id: number; title: string }[]
+}
+
+const WANTED_API = 'https://www.wanted.co.kr/api/v4/jobs'
+const WANTED_URL = 'https://www.wanted.co.kr/wd'
+const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+
+const SEARCH_KEYWORDS = [
+  '블록체인', 'web3', 'DeFi', '크립토', 'blockchain',
+  'NFT', 'DAO', 'solidity', '가상자산', '디파이', '토큰',
+]
+
 /**
- * Fetch job description from Wanted detail page
+ * Fetch job listings from Wanted search API
  */
-async function fetchJobDescription(page: Page, url: string): Promise<{
-  description: string | null
-  requirements: string | null
-  benefits: string | null
-}> {
-  try {
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 20000 })
+async function fetchJobsByKeyword(keyword: string): Promise<WantedJob[]> {
+  const jobs: WantedJob[] = []
 
-    // Wait for job content to load
-    await page.waitForSelector('[class*="JobDescription"], [class*="job-description"], .job-content', { timeout: 5000 }).catch(() => {})
+  for (let offset = 0; offset < 100; offset += 20) {
+    const url = `${WANTED_API}?query=${encodeURIComponent(keyword)}&country=kr&job_sort=job.latest_order&years=-1&limit=20&offset=${offset}`
 
-    const content = await page.evaluate(() => {
-      let description = ''
-      let requirements = ''
-      let benefits = ''
-
-      // Wanted uses sections with headers
-      const sections = document.querySelectorAll('[class*="JobDescription"] section, .job-section, [class*="section"]')
-
-      sections.forEach(section => {
-        const header = section.querySelector('h2, h3, h6, [class*="header"], [class*="title"]')?.textContent?.trim().toLowerCase() || ''
-        const content = section.querySelector('[class*="content"], p, div:not([class*="header"])')?.textContent?.trim() || ''
-
-        if (header.includes('주요업무') || header.includes('담당업무') || header.includes('업무') || header.includes('role')) {
-          description = content
-        } else if (header.includes('자격요건') || header.includes('우대') || header.includes('requirement') || header.includes('qualification')) {
-          requirements = content
-        } else if (header.includes('혜택') || header.includes('복지') || header.includes('benefit')) {
-          benefits = content
-        }
+    try {
+      const res = await fetch(url, {
+        headers: { 'User-Agent': UA },
       })
 
-      // Fallback: get all text from description area
-      if (!description) {
-        const descEl = document.querySelector('[class*="JobDescription"], .job-content, [class*="description"]')
-        if (descEl) {
-          description = descEl.textContent?.trim().slice(0, 5000) || ''
-        }
+      if (!res.ok) {
+        console.log(`    ⚠️ API returned ${res.status} for "${keyword}" offset=${offset}`)
+        break
       }
 
-      return { description, requirements, benefits }
+      const data = await res.json()
+      if (!data.data || data.data.length === 0) break
+
+      jobs.push(...data.data)
+    } catch (error) {
+      console.log(`    ❌ API error for "${keyword}": ${error}`)
+      break
+    }
+
+    await delay(300)
+  }
+
+  return jobs
+}
+
+/**
+ * Fetch job detail from Wanted API
+ */
+async function fetchJobDetail(jobId: number): Promise<WantedJobDetail | null> {
+  try {
+    const res = await fetch(`${WANTED_API}/${jobId}`, {
+      headers: { 'User-Agent': UA },
     })
 
-    return content
-  } catch (error) {
-    return { description: null, requirements: null, benefits: null }
+    if (!res.ok) return null
+
+    const data = await res.json()
+    return data.job || data
+  } catch {
+    return null
   }
 }
 
 /**
- * Extract tags from Wanted job listing
+ * Build location string from Wanted address
  */
-async function extractTags(page: Page): Promise<string[]> {
-  try {
-    return await page.evaluate(() => {
-      const tags: string[] = []
-
-      // Wanted shows tags/skills as badges
-      const tagEls = document.querySelectorAll('[class*="Tag"], [class*="tag"], [class*="skill"], .skill-tag, .tech-stack span')
-      tagEls.forEach(el => {
-        const tag = el.textContent?.trim()
-        if (tag && tag.length < 30) {
-          tags.push(tag)
-        }
-      })
-
-      return tags.slice(0, 10)
-    })
-  } catch {
-    return []
+function buildLocation(address: WantedJob['address']): string {
+  if (!address) return '서울'
+  const parts = [address.location, address.full_location].filter(Boolean)
+  if (parts.length > 0) {
+    // Use full_location if available, otherwise location
+    return address.full_location || address.location || '서울'
   }
+  return '서울'
+}
+
+/**
+ * Build salary string from annual range (unit: 만원)
+ */
+function buildSalary(annualFrom: number | null, annualTo: number | null): string | undefined {
+  if (!annualFrom && !annualTo) return undefined
+  if (annualFrom && annualTo) {
+    return `${annualFrom * 10000}-${annualTo * 10000}`
+  }
+  return undefined
 }
 
 export async function crawlWanted(): Promise<CrawlerReturn> {
-  console.log('🔵 Starting 원티드(Wanted) crawler...')
+  console.log('🔵 Starting 원티드(Wanted) API crawler...')
 
-  let browser
   try {
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    })
+    // 1. Collect all jobs across keywords
+    const jobMap = new Map<number, WantedJob>()
 
-    const page = await browser.newPage()
-    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+    for (const keyword of SEARCH_KEYWORDS) {
+      console.log(`  🔍 Searching: "${keyword}"`)
+      const jobs = await fetchJobsByKeyword(keyword)
+      console.log(`    📦 Found ${jobs.length} jobs`)
 
-    // Search for blockchain/web3 jobs on Wanted
-    // Wanted uses category IDs and search params
-    const searchUrls = [
-      'https://www.wanted.co.kr/search?query=블록체인&tab=position',
-      'https://www.wanted.co.kr/search?query=web3&tab=position',
-      'https://www.wanted.co.kr/search?query=스마트컨트랙트&tab=position',
-      'https://www.wanted.co.kr/search?query=DeFi&tab=position',
-    ]
-
-    const allJobs: JobListing[] = []
-
-    for (const searchUrl of searchUrls) {
-      console.log(`  🔍 Searching: ${searchUrl.split('query=')[1]?.split('&')[0]}`)
-
-      try {
-        await page.goto(searchUrl, {
-          waitUntil: 'networkidle2',
-          timeout: 30000,
-        })
-
-        // Wait for job cards to render
-        await page.waitForSelector('[class*="JobCard"], [class*="job-card"], .position-card', { timeout: 10000 }).catch(() => {
-          console.log('    ⚠️  Selector timeout')
-        })
-
-        // Scroll to load more jobs
-        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-        await delay(1000)
-
-        // Extract jobs from this search
-        const jobs = await page.evaluate(() => {
-          const results: JobListing[] = []
-
-          // Wanted job card structure
-          const jobCards = document.querySelectorAll('[class*="JobCard"], [class*="job-card"], .position-card, [data-position-id]')
-
-          jobCards.forEach((card) => {
-            const linkEl = card.querySelector('a')
-            const titleEl = card.querySelector('[class*="job-title"], [class*="JobCard_title"], h2, strong')
-            const companyEl = card.querySelector('[class*="company"], [class*="JobCard_company"], .company-name')
-            const locationEl = card.querySelector('[class*="location"], [class*="JobCard_location"]')
-            const rewardEl = card.querySelector('[class*="reward"], [class*="compensation"]')
-
-            const title = titleEl?.textContent?.trim() || ''
-            const company = companyEl?.textContent?.trim() || ''
-            const location = locationEl?.textContent?.trim() || '서울'
-            let url = (linkEl as HTMLAnchorElement)?.href || ''
-
-            // Make sure URL is absolute
-            if (url && !url.startsWith('http')) {
-              url = 'https://www.wanted.co.kr' + url
-            }
-
-            const salary = rewardEl?.textContent?.trim()
-
-            if (title && company && url) {
-              // Avoid duplicates
-              if (!results.some(r => r.url === url)) {
-                results.push({ title, company, location, type: '정규직', url, salary })
-              }
-            }
-          })
-
-          return results
-        })
-
-        allJobs.push(...jobs)
-        console.log(`    📦 Found ${jobs.length} jobs`)
-
-        await delay(1000) // Rate limit between searches
-      } catch (err) {
-        console.log(`    ❌ Search failed: ${err}`)
+      for (const job of jobs) {
+        if (job.status === 'active' && !jobMap.has(job.id)) {
+          jobMap.set(job.id, job)
+        }
       }
+
+      await delay(500)
     }
 
-    // Remove duplicates based on URL
-    const uniqueJobs = allJobs.filter((job, index, self) =>
-      index === self.findIndex(j => j.url === job.url)
-    )
+    console.log(`📦 Total unique jobs: ${jobMap.size}`)
 
-    console.log(`📦 Total unique jobs: ${uniqueJobs.length}`)
-
+    // 2. Fetch details and save each job
     let savedCount = 0
     let newCount = 0
 
-    for (const job of uniqueJobs) {
+    for (const [jobId, job] of Array.from(jobMap.entries())) {
       try {
-        console.log(`  📄 Fetching: ${job.title.slice(0, 40)}...`)
+        console.log(`  📄 Fetching: ${job.position.slice(0, 50)}...`)
 
-        const { description, requirements, benefits } = await fetchJobDescription(page, job.url)
-        const tags = await extractTags(page)
+        const detail = await fetchJobDetail(jobId)
 
-        // Combine description sections
+        // Build description from detail sections
         let fullDescription = ''
-        if (description) fullDescription += `## 주요업무\n${description}\n\n`
-        if (requirements) fullDescription += `## 자격요건\n${requirements}\n\n`
-        if (benefits) fullDescription += `## 혜택 및 복지\n${benefits}\n\n`
-
-        if (fullDescription) {
-          console.log(`    ✅ Got description (${fullDescription.length} chars)`)
+        if (detail?.detail) {
+          const { intro, main_tasks, requirements, preferred_points, benefits } = detail.detail
+          if (intro) fullDescription += `## 회사소개\n${intro}\n\n`
+          if (main_tasks) fullDescription += `## 주요업무\n${main_tasks}\n\n`
+          if (requirements) fullDescription += `## 자격요건\n${requirements}\n\n`
+          if (preferred_points) fullDescription += `## 우대사항\n${preferred_points}\n\n`
+          if (benefits) fullDescription += `## 혜택 및 복지\n${benefits}\n\n`
         }
 
-        await delay(800) // Rate limit for Wanted
+        // Extract tags from skill_tags
+        const tags = detail?.skill_tags?.map(t => t.title).filter(Boolean) || []
+        if (tags.length === 0) tags.push('블록체인', 'Web3', 'Korea')
+
+        const location = buildLocation(job.address)
+        const salary = buildSalary(job.annual_from, job.annual_to)
+        const jobUrl = `${WANTED_URL}/${jobId}`
+
+        await delay(300)
 
         const result = await validateAndSaveJob(
           {
-            title: job.title,
-            company: job.company,
-            url: job.url,
-            location: job.location,
-            type: job.type,
-            salary: job.salary,
+            title: job.position,
+            company: job.company.name,
+            url: jobUrl,
+            location,
+            type: '정규직',
+            salary,
+            salaryMin: job.annual_from ? job.annual_from * 10000 : undefined,
+            salaryMax: job.annual_to ? job.annual_to * 10000 : undefined,
+            salaryCurrency: 'KRW',
             category: 'Engineering',
-            tags: tags.length > 0 ? tags : ['블록체인', 'Web3', 'Korea'],
+            tags,
             source: 'wanted.co.kr',
             region: 'Korea',
             postedDate: new Date(),
@@ -228,36 +196,42 @@ export async function crawlWanted(): Promise<CrawlerReturn> {
           },
           'wanted.co.kr'
         )
+
         if (result.saved) savedCount++
         if (result.isNew) newCount++
       } catch (error) {
-        console.error('Error saving Wanted job:', error)
+        console.error(`  ❌ Error saving job ${jobId}:`, error)
       }
     }
 
-    await supabase.from('CrawlLog').insert({
-      source: 'wanted.co.kr',
-      status: 'success',
-      jobCount: savedCount,
-      createdAt: new Date().toISOString(),
-    })
+    // 3. Log results
+    try {
+      await supabase.from('CrawlLog').insert({
+        source: 'wanted.co.kr',
+        status: 'success',
+        jobCount: savedCount,
+        createdAt: new Date().toISOString(),
+      })
+    } catch {
+      // CrawlLog table may not exist
+    }
 
     console.log(`✅ Saved ${savedCount} jobs from 원티드 (${newCount} new)`)
     return { total: savedCount, new: newCount }
   } catch (error) {
     console.error('❌ Wanted crawler error:', error)
 
-    await supabase.from('CrawlLog').insert({
-      source: 'wanted.co.kr',
-      status: 'failed',
-      jobCount: 0,
-      createdAt: new Date().toISOString(),
-    })
+    try {
+      await supabase.from('CrawlLog').insert({
+        source: 'wanted.co.kr',
+        status: 'failed',
+        jobCount: 0,
+        createdAt: new Date().toISOString(),
+      })
+    } catch {
+      // CrawlLog table may not exist
+    }
 
     return { total: 0, new: 0 }
-  } finally {
-    if (browser) {
-      await browser.close()
-    }
   }
 }

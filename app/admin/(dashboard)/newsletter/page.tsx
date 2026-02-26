@@ -194,8 +194,9 @@ export default function NewsletterPage() {
     setSaving(true)
     try {
       const today = new Date()
-      const month = today.toLocaleString('en-US', { month: 'short' })
-      const title = `NEUN Weekly | ${month} Week ${Math.ceil(today.getDate() / 7)}`
+      const month = today.getMonth() + 1
+      const weekNum = Math.ceil(today.getDate() / 7)
+      const title = `NEUN 위클리 | ${month}월 ${weekNum}주차`
 
       const res = await fetch('/api/admin/newsletter', {
         method: 'POST',

@@ -20,6 +20,7 @@ interface JobData {
   salaryCurrency: string | null
   is_featured: boolean | null
   backers?: string[] | null
+  source?: string | null
 }
 
 interface VerifiedJob extends JobData {
@@ -39,6 +40,16 @@ interface GenerateRequest {
   customIntro?: string
   weekLabel?: string
   skipVerification?: boolean
+}
+
+function isKoreanJob(job: { location?: string; company?: string; source?: string | null }): boolean {
+  const loc = (job.location || '').toLowerCase()
+  const koreaLocations = ['korea', 'south korea', 'seoul', '한국', '서울', '부산', '대전', '인천', '대구', '광주', '판교', '강남']
+  if (koreaLocations.some(k => loc.includes(k))) return true
+  if (/[\uAC00-\uD7AF]/.test(job.company || '')) return true
+  const src = (job.source || '').toLowerCase()
+  if (['rocketpunch', 'wanted'].some(s => src.includes(s))) return true
+  return false
 }
 
 // POST: Generate newsletter content (markdown + HTML)
@@ -154,9 +165,9 @@ async function verifyJob(job: JobData): Promise<VerifiedJob> {
 }
 
 function getWeekLabel(date: Date): string {
-  const month = date.toLocaleString('en-US', { month: 'short' })
+  const month = date.getMonth() + 1
   const weekOfMonth = Math.ceil(date.getDate() / 7)
-  return `${month} Week ${weekOfMonth}`
+  return `${month}월 ${weekOfMonth}주차`
 }
 
 function formatSalary(job: JobData): string {
@@ -175,32 +186,32 @@ function formatSalary(job: JobData): string {
 const JOB_CATEGORIES: Record<string, { emoji: string; label: string; roles: string[] }> = {
   engineering: {
     emoji: '💻',
-    label: 'Engineering',
+    label: '개발',
     roles: ['Engineering', 'Developer', 'Backend', 'Frontend', 'Full Stack', 'DevOps', 'SRE', 'Infrastructure', 'Blockchain Developer', 'Smart Contract', 'Protocol Engineer'],
   },
   security: {
     emoji: '🔐',
-    label: 'Security',
+    label: '보안',
     roles: ['Security', 'Security Engineer', 'Security Researcher', 'Auditor', 'Penetration Tester', 'CISO'],
   },
   product_design: {
     emoji: '🎨',
-    label: 'Product & Design',
+    label: '프로덕트 & 디자인',
     roles: ['Product', 'Design', 'UI/UX', 'UX', 'Product Manager', 'Product Designer', 'Graphic Designer', 'Creative'],
   },
   business_ops: {
     emoji: '📊',
-    label: 'Business & Operations',
+    label: '비즈니스 & 운영',
     roles: ['Operations', 'Business', 'Finance', 'Legal', 'HR', 'People', 'Admin', 'Strategy', 'BD', 'Business Development', 'Partnerships', 'Sales', 'Account'],
   },
   marketing_community: {
     emoji: '📢',
-    label: 'Marketing & Community',
+    label: '마케팅 & 커뮤니티',
     roles: ['Marketing', 'Community', 'Growth', 'Social Media', 'Content', 'PR', 'Communications', 'Brand', 'Copywriter'],
   },
   other: {
     emoji: '🌟',
-    label: 'Other',
+    label: '기타',
     roles: [],
   },
 }
@@ -361,49 +372,22 @@ function selectAndCategorizeJobs(jobs: VerifiedJob[], maxPerCategory = 7, totalM
   return categorized
 }
 
-function generateMarkdown(
-  jobs: VerifiedJob[],
-  stats: GenerateRequest['stats'],
-  week: string,
-  customIntro?: string,
+function generateCategorySectionsMd(
+  categorizedJobs: CategorizedJobs,
   utmParams?: string
 ): string {
-  const topRole = Object.entries(stats.roleBreakdown)
-    .sort((a, b) => b[1] - a[1])[0]
-  const topRolePercent = topRole
-    ? Math.round((topRole[1] / stats.totalJobs) * 100)
-    : 0
-
-  const intro = customIntro || "gm ser, this week's Web3 job market is heating up 🔥"
-
-  // Categorize and select jobs
-  const categorizedJobs = selectAndCategorizeJobs(jobs)
-  const totalSelectedJobs = Object.values(categorizedJobs).reduce((sum, jobs) => sum + jobs.length, 0)
-
-  let md = `# 🚀 NEUN Weekly | ${week}
-
-${intro}
-
-## 📊 This Week's Highlights
-- New listings: **${stats.totalJobs}**
-- Top role: **${topRole?.[0] || 'Engineering'}** (${topRolePercent}%)
-- Remote rate: **${stats.remoteRate}%**
-- Curated picks: **${totalSelectedJobs}** jobs across **${Object.keys(categorizedJobs).length}** categories
-
-`
-
-  // Generate category sections in preferred order
   const categoryOrder = ['engineering', 'security', 'product_design', 'business_ops', 'marketing_community', 'other']
+  let md = ''
 
   for (const categoryKey of categoryOrder) {
     const categoryJobs = categorizedJobs[categoryKey]
     if (!categoryJobs || categoryJobs.length === 0) continue
 
     const category = JOB_CATEGORIES[categoryKey]
-    md += `## ${category.emoji} ${category.label} (${categoryJobs.length} jobs)
+    md += `### ${category.emoji} ${category.label} (${categoryJobs.length}개)
 
-| Company | Role | Salary |
-|---------|------|--------|
+| 회사 | 포지션 | 연봉 |
+|------|--------|------|
 `
 
     for (const job of categoryJobs) {
@@ -417,42 +401,10 @@ ${intro}
     md += '\n'
   }
 
-  // Trends section
-  md += `## 📈 This Week's Trends
-`
-
-  // Top companies
-  if (stats.topCompanies.length > 0) {
-    md += `- **Hot hiring:** ${stats.topCompanies.slice(0, 5).map(c => c.name).join(', ')}\n`
-  }
-
-  // Role breakdown
-  const sortedRoles = Object.entries(stats.roleBreakdown).sort((a, b) => b[1] - a[1]).slice(0, 3)
-  if (sortedRoles.length > 0) {
-    md += `- **Top roles:** ${sortedRoles.map(([role, count]) => `${role} (${count})`).join(', ')}\n`
-  }
-
-  md += `
-## 🏢 Companies to Watch
-
-`
-
-  for (const company of stats.topCompanies.slice(0, 5)) {
-    md += `- **${company.name}** - ${company.count} open positions\n`
-  }
-
-  md += `
----
-
-[View all jobs →](${SITE_URL}/jobs?${utmParams})
-
-*Powered by NEUN | Built for Web3 natives*
-`
-
   return md
 }
 
-function generateHtml(
+function generateMarkdown(
   jobs: VerifiedJob[],
   stats: GenerateRequest['stats'],
   week: string,
@@ -465,15 +417,81 @@ function generateHtml(
     ? Math.round((topRole[1] / stats.totalJobs) * 100)
     : 0
 
-  const intro = customIntro || "gm ser, this week's Web3 job market is heating up 🔥"
+  const intro = customIntro || 'gm ser, 이번 주 Web3 채용 시장 소식을 전해드려요 🔥'
 
-  // Categorize and select jobs
-  const categorizedJobs = selectAndCategorizeJobs(jobs)
-  const totalSelectedJobs = Object.values(categorizedJobs).reduce((sum, jobs) => sum + jobs.length, 0)
+  // Split into Korean and Global jobs
+  const krJobs = jobs.filter(j => isKoreanJob(j))
+  const globalJobs = jobs.filter(j => !isKoreanJob(j))
 
-  // Generate category sections HTML
-  let categorySectionsHtml = ''
+  const krCategorized = selectAndCategorizeJobs(krJobs, 5, 15)
+  const globalCategorized = selectAndCategorizeJobs(globalJobs, 5, 20)
+
+  const krTotal = Object.values(krCategorized).reduce((sum, arr) => sum + arr.length, 0)
+  const globalTotal = Object.values(globalCategorized).reduce((sum, arr) => sum + arr.length, 0)
+  const totalSelectedJobs = krTotal + globalTotal
+
+  let md = `# 🚀 NEUN 위클리 | ${week}
+
+${intro}
+
+## 📊 이번 주 하이라이트
+- 신규 공고: **${stats.totalJobs}**개
+- 인기 직무: **${topRole?.[0] || 'Engineering'}** (${topRolePercent}%)
+- 리모트 비율: **${stats.remoteRate}%**
+- 엄선된 공고: **${totalSelectedJobs}**개
+
+`
+
+  // Korean Jobs Section
+  if (krTotal > 0) {
+    md += `## 🇰🇷 국내 공고\n\n`
+    md += generateCategorySectionsMd(krCategorized, utmParams)
+  }
+
+  // Global Jobs Section
+  if (globalTotal > 0) {
+    md += `## 🌍 해외 공고 (리모트 포함)\n\n`
+    md += generateCategorySectionsMd(globalCategorized, utmParams)
+  }
+
+  // Trends section
+  md += `## 📈 이번 주 트렌드\n`
+
+  if (stats.topCompanies.length > 0) {
+    md += `- **채용 활발:** ${stats.topCompanies.slice(0, 5).map(c => c.name).join(', ')}\n`
+  }
+
+  const sortedRoles = Object.entries(stats.roleBreakdown).sort((a, b) => b[1] - a[1]).slice(0, 3)
+  if (sortedRoles.length > 0) {
+    md += `- **인기 직무:** ${sortedRoles.map(([role, count]) => `${role} (${count})`).join(', ')}\n`
+  }
+
+  md += `
+## 🏢 주목할 회사
+
+`
+
+  for (const company of stats.topCompanies.slice(0, 5)) {
+    md += `- **${company.name}** - ${company.count}개 채용 중\n`
+  }
+
+  md += `
+---
+
+[전체 공고 보기 →](${SITE_URL}/jobs?${utmParams})
+
+*Powered by NEUN | Web3 채용 플랫폼*
+`
+
+  return md
+}
+
+function generateCategorySectionsHtml(
+  categorizedJobs: CategorizedJobs,
+  utmParams?: string
+): string {
   const categoryOrder = ['engineering', 'security', 'product_design', 'business_ops', 'marketing_community', 'other']
+  let html = ''
 
   for (const categoryKey of categoryOrder) {
     const categoryJobs = categorizedJobs[categoryKey]
@@ -500,16 +518,15 @@ function generateHtml(
         </tr>`
     }
 
-    categorySectionsHtml += `
-    <!-- ${category.label} Section -->
-    <div style="margin-bottom: 32px;">
-      <h3 style="color: #ffffff; font-size: 18px; margin-bottom: 12px;">${category.emoji} ${category.label} <span style="color: #94a3b8; font-size: 14px; font-weight: normal;">(${categoryJobs.length} jobs)</span></h3>
+    html += `
+    <div style="margin-bottom: 24px;">
+      <h4 style="color: #ffffff; font-size: 16px; margin-bottom: 8px;">${category.emoji} ${category.label} <span style="color: #94a3b8; font-size: 13px; font-weight: normal;">(${categoryJobs.length}개)</span></h4>
       <table style="width: 100%; border-collapse: collapse;">
         <thead>
           <tr style="background-color: #1e293b;">
-            <th style="padding: 10px 12px; text-align: left; color: #94a3b8; font-size: 11px; text-transform: uppercase;">Company</th>
-            <th style="padding: 10px 12px; text-align: left; color: #94a3b8; font-size: 11px; text-transform: uppercase;">Role</th>
-            <th style="padding: 10px 12px; text-align: left; color: #94a3b8; font-size: 11px; text-transform: uppercase;">Salary</th>
+            <th style="padding: 10px 12px; text-align: left; color: #94a3b8; font-size: 11px; text-transform: uppercase;">회사</th>
+            <th style="padding: 10px 12px; text-align: left; color: #94a3b8; font-size: 11px; text-transform: uppercase;">포지션</th>
+            <th style="padding: 10px 12px; text-align: left; color: #94a3b8; font-size: 11px; text-transform: uppercase;">연봉</th>
           </tr>
         </thead>
         <tbody style="color: #e2e8f0; font-size: 14px;">
@@ -519,9 +536,57 @@ function generateHtml(
     </div>`
   }
 
+  return html
+}
+
+function generateHtml(
+  jobs: VerifiedJob[],
+  stats: GenerateRequest['stats'],
+  week: string,
+  customIntro?: string,
+  utmParams?: string
+): string {
+  const topRole = Object.entries(stats.roleBreakdown)
+    .sort((a, b) => b[1] - a[1])[0]
+  const topRolePercent = topRole
+    ? Math.round((topRole[1] / stats.totalJobs) * 100)
+    : 0
+
+  const intro = customIntro || 'gm ser, 이번 주 Web3 채용 시장 소식을 전해드려요 🔥'
+
+  // Split into Korean and Global jobs
+  const krJobs = jobs.filter(j => isKoreanJob(j))
+  const globalJobs = jobs.filter(j => !isKoreanJob(j))
+
+  const krCategorized = selectAndCategorizeJobs(krJobs, 5, 15)
+  const globalCategorized = selectAndCategorizeJobs(globalJobs, 5, 20)
+
+  const krTotal = Object.values(krCategorized).reduce((sum, arr) => sum + arr.length, 0)
+  const globalTotal = Object.values(globalCategorized).reduce((sum, arr) => sum + arr.length, 0)
+  const totalSelectedJobs = krTotal + globalTotal
+
+  // Build KR/Global sections
+  let jobSectionsHtml = ''
+
+  if (krTotal > 0) {
+    jobSectionsHtml += `
+    <div style="margin-bottom: 32px;">
+      <h3 style="color: #ffffff; font-size: 20px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #22c55e;">🇰🇷 국내 공고</h3>
+      ${generateCategorySectionsHtml(krCategorized, utmParams)}
+    </div>`
+  }
+
+  if (globalTotal > 0) {
+    jobSectionsHtml += `
+    <div style="margin-bottom: 32px;">
+      <h3 style="color: #ffffff; font-size: 20px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #3b82f6;">🌍 해외 공고 (리모트 포함)</h3>
+      ${generateCategorySectionsHtml(globalCategorized, utmParams)}
+    </div>`
+  }
+
   let topCompaniesHtml = ''
   for (const company of stats.topCompanies.slice(0, 5)) {
-    topCompaniesHtml += `<li style="margin-bottom: 8px;"><strong>${company.name}</strong> - ${company.count} open positions</li>`
+    topCompaniesHtml += `<li style="margin-bottom: 8px;"><strong>${company.name}</strong> - ${company.count}개 채용 중</li>`
   }
 
   return `<!DOCTYPE html>
@@ -529,19 +594,19 @@ function generateHtml(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEUN Weekly | ${week}</title>
+  <title>NEUN 위클리 | ${week}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
   <div style="max-width: 640px; margin: 0 auto; padding: 40px 20px;">
     <!-- Header -->
     <div style="text-align: center; margin-bottom: 40px;">
       <h1 style="color: #22c55e; font-size: 32px; margin: 0; letter-spacing: 4px;">NEUN</h1>
-      <p style="color: #94a3b8; font-size: 14px; margin-top: 8px;">Web3 Jobs Platform</p>
+      <p style="color: #94a3b8; font-size: 14px; margin-top: 8px;">Web3 채용 플랫폼</p>
     </div>
 
     <!-- Title -->
     <h2 style="color: #ffffff; font-size: 24px; margin-bottom: 16px;">
-      🚀 NEUN Weekly | ${week}
+      🚀 NEUN 위클리 | ${week}
     </h2>
     <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6; margin-bottom: 32px;">
       ${intro}
@@ -549,20 +614,20 @@ function generateHtml(
 
     <!-- Highlights -->
     <div style="background-color: #1e293b; border-radius: 8px; padding: 24px; margin-bottom: 32px;">
-      <h3 style="color: #22c55e; font-size: 18px; margin: 0 0 16px 0;">📊 This Week's Highlights</h3>
+      <h3 style="color: #22c55e; font-size: 18px; margin: 0 0 16px 0;">📊 이번 주 하이라이트</h3>
       <ul style="color: #e2e8f0; margin: 0; padding-left: 20px; line-height: 1.8;">
-        <li>New listings: <strong>${stats.totalJobs}</strong></li>
-        <li>Top role: <strong>${topRole?.[0] || 'Engineering'}</strong> (${topRolePercent}%)</li>
-        <li>Remote rate: <strong>${stats.remoteRate}%</strong></li>
-        <li>Curated picks: <strong>${totalSelectedJobs}</strong> jobs across <strong>${Object.keys(categorizedJobs).length}</strong> categories</li>
+        <li>신규 공고: <strong>${stats.totalJobs}</strong>개</li>
+        <li>인기 직무: <strong>${topRole?.[0] || 'Engineering'}</strong> (${topRolePercent}%)</li>
+        <li>리모트 비율: <strong>${stats.remoteRate}%</strong></li>
+        <li>엄선된 공고: <strong>${totalSelectedJobs}</strong>개</li>
       </ul>
     </div>
 
-    <!-- Job Categories -->
-    ${categorySectionsHtml}
+    <!-- Job Sections (KR / Global) -->
+    ${jobSectionsHtml}
 
     <!-- Top Companies -->
-    <h3 style="color: #ffffff; font-size: 18px; margin-bottom: 16px;">🏢 Companies to Watch</h3>
+    <h3 style="color: #ffffff; font-size: 18px; margin-bottom: 16px;">🏢 주목할 회사</h3>
     <ul style="color: #e2e8f0; margin: 0 0 32px 0; padding-left: 20px; line-height: 1.8;">
       ${topCompaniesHtml}
     </ul>
@@ -571,14 +636,14 @@ function generateHtml(
     <div style="text-align: center; margin: 40px 0;">
       <a href="${SITE_URL}/jobs?${utmParams}"
          style="display: inline-block; background-color: #22c55e; color: #0f172a; padding: 16px 32px; text-decoration: none; font-weight: bold; border-radius: 4px;">
-        View All Jobs →
+        전체 공고 보기 →
       </a>
     </div>
 
     <!-- Footer -->
     <div style="border-top: 1px solid #1e293b; padding-top: 24px; text-align: center;">
       <p style="color: #64748b; font-size: 12px; margin: 0;">
-        Powered by <a href="${SITE_URL}" style="color: #22c55e; text-decoration: none;">NEUN</a> | Built for Web3 natives
+        Powered by <a href="${SITE_URL}" style="color: #22c55e; text-decoration: none;">NEUN</a> | Web3 채용 플랫폼
       </p>
     </div>
   </div>

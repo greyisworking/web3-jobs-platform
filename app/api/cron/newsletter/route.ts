@@ -26,6 +26,17 @@ interface Job {
   salaryMax: number | null
   salaryCurrency: string | null
   is_featured: boolean | null
+  source?: string | null
+}
+
+function isKoreanJob(job: { location?: string; company?: string; source?: string | null }): boolean {
+  const loc = (job.location || '').toLowerCase()
+  const koreaLocations = ['korea', 'south korea', 'seoul', '한국', '서울', '부산', '대전', '인천', '대구', '광주', '판교', '강남']
+  if (koreaLocations.some(k => loc.includes(k))) return true
+  if (/[\uAC00-\uD7AF]/.test(job.company || '')) return true
+  const src = (job.source || '').toLowerCase()
+  if (['rocketpunch', 'wanted'].some(s => src.includes(s))) return true
+  return false
 }
 
 export async function GET(request: Request) {
@@ -47,7 +58,7 @@ export async function GET(request: Request) {
     // Fetch recent jobs
     const { data: jobs, error } = await supabase
       .from('Job')
-      .select('id, title, company, location, url, role, salary, salaryMin, salaryMax, salaryCurrency, is_featured')
+      .select('id, title, company, location, url, role, salary, salaryMin, salaryMax, salaryCurrency, is_featured, source')
       .eq('isActive', true)
       .gte('crawledAt', startDate.toISOString())
       .order('crawledAt', { ascending: false })
@@ -73,7 +84,7 @@ export async function GET(request: Request) {
     const html = generateHtml(jobs.slice(0, 50), stats, week, utmParams)
 
     // Save to newsletter_history
-    const title = `NEUN Weekly | ${week}`
+    const title = `NEUN 위클리 | ${week}`
     try {
       await supabase.from('newsletter_history').insert({
         title,
@@ -103,9 +114,9 @@ export async function GET(request: Request) {
 }
 
 function getWeekLabel(date: Date): string {
-  const month = date.toLocaleString('en-US', { month: 'short' })
+  const month = date.getMonth() + 1
   const weekOfMonth = Math.ceil(date.getDate() / 7)
-  return `${month} Week ${weekOfMonth}`
+  return `${month}월 ${weekOfMonth}주차`
 }
 
 function calculateStats(jobs: Job[]) {
@@ -150,61 +161,78 @@ function generateMarkdown(jobs: Job[], stats: ReturnType<typeof calculateStats>,
   const topRole = Object.entries(stats.roleBreakdown).sort((a, b) => b[1] - a[1])[0]
   const topRolePercent = topRole ? Math.round((topRole[1] / stats.totalJobs) * 100) : 0
 
-  const featuredJobs = jobs.filter(j => j.is_featured).slice(0, 10)
-  const displayJobs = featuredJobs.length >= 5 ? featuredJobs : jobs.slice(0, 10)
+  // Split into Korean and Global jobs
+  const krJobs = jobs.filter(j => isKoreanJob(j))
+  const globalJobs = jobs.filter(j => !isKoreanJob(j))
 
-  let md = `# 🚀 NEUN Weekly | ${week}
+  const krDisplay = krJobs.slice(0, 10)
+  const globalDisplay = globalJobs.slice(0, 15)
+  const totalDisplay = krDisplay.length + globalDisplay.length
 
-gm ser, this week's Web3 job market is heating up 🔥
+  let md = `# 🚀 NEUN 위클리 | ${week}
 
-## 📊 This Week's Highlights
-- New positions: **${stats.totalJobs}**
-- Top role: **${topRole?.[0] || 'Engineering'}** (${topRolePercent}%)
-- Remote ratio: **${stats.remoteRate}%**
+gm ser, 이번 주 Web3 채용 시장 소식을 전해드려요 🔥
 
-## 🔥 Featured Positions
+## 📊 이번 주 하이라이트
+- 신규 공고: **${stats.totalJobs}**개
+- 인기 직무: **${topRole?.[0] || 'Engineering'}** (${topRolePercent}%)
+- 리모트 비율: **${stats.remoteRate}%**
+- 엄선된 공고: **${totalDisplay}**개
 
-| Company | Role | Location | Salary |
-|---------|------|----------|--------|
 `
 
-  for (const job of displayJobs) {
-    const jobUrl = `${SITE_URL}/jobs/${job.id}?${utmParams}`
-    const salary = formatSalary(job)
-    md += `| [${job.company}](${jobUrl}) | [${job.title}](${jobUrl}) | ${job.location || 'Remote'} | ${salary} |\n`
+  if (krDisplay.length > 0) {
+    md += `## 🇰🇷 국내 공고
+
+| 회사 | 포지션 | 위치 | 연봉 |
+|------|--------|------|------|
+`
+    for (const job of krDisplay) {
+      const jobUrl = `${SITE_URL}/jobs/${job.id}?${utmParams}`
+      const salary = formatSalary(job)
+      md += `| [${job.company}](${jobUrl}) | [${job.title}](${jobUrl}) | ${job.location || 'Remote'} | ${salary} |\n`
+    }
+    md += '\n'
   }
 
-  md += `
-## 🏢 Companies to Watch
+  if (globalDisplay.length > 0) {
+    md += `## 🌍 해외 공고 (리모트 포함)
+
+| 회사 | 포지션 | 위치 | 연봉 |
+|------|--------|------|------|
+`
+    for (const job of globalDisplay) {
+      const jobUrl = `${SITE_URL}/jobs/${job.id}?${utmParams}`
+      const salary = formatSalary(job)
+      md += `| [${job.company}](${jobUrl}) | [${job.title}](${jobUrl}) | ${job.location || 'Remote'} | ${salary} |\n`
+    }
+    md += '\n'
+  }
+
+  md += `## 🏢 주목할 회사
 
 `
   for (const company of stats.topCompanies.slice(0, 5)) {
-    md += `- **${company.name}** - ${company.count} open positions\n`
+    md += `- **${company.name}** - ${company.count}개 채용 중\n`
   }
 
   md += `
 ---
 
-[View all positions →](${SITE_URL}/jobs?${utmParams})
+[전체 공고 보기 →](${SITE_URL}/jobs?${utmParams})
 
-📊 Job data powered by [NEUN](${SITE_URL}) | Web3 Job Board
+📊 Powered by [NEUN](${SITE_URL}) | Web3 채용 플랫폼
 `
 
   return md
 }
 
-function generateHtml(jobs: Job[], stats: ReturnType<typeof calculateStats>, week: string, utmParams: string): string {
-  const topRole = Object.entries(stats.roleBreakdown).sort((a, b) => b[1] - a[1])[0]
-  const topRolePercent = topRole ? Math.round((topRole[1] / stats.totalJobs) * 100) : 0
-
-  const featuredJobs = jobs.filter(j => j.is_featured).slice(0, 10)
-  const displayJobs = featuredJobs.length >= 5 ? featuredJobs : jobs.slice(0, 10)
-
-  let jobRows = ''
-  for (const job of displayJobs) {
+function generateJobTableHtml(jobs: Job[], utmParams: string): string {
+  let rows = ''
+  for (const job of jobs) {
     const jobUrl = `${SITE_URL}/jobs/${job.id}?${utmParams}`
     const salary = formatSalary(job)
-    jobRows += `
+    rows += `
       <tr>
         <td style="padding: 12px; border-bottom: 1px solid #1e293b;">
           <a href="${jobUrl}" style="color: #22c55e; text-decoration: none;">${job.company}</a>
@@ -217,56 +245,87 @@ function generateHtml(jobs: Job[], stats: ReturnType<typeof calculateStats>, wee
       </tr>`
   }
 
+  return `<table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+      <thead>
+        <tr style="background-color: #1e293b;">
+          <th style="padding: 12px; text-align: left; color: #94a3b8; font-size: 12px;">회사</th>
+          <th style="padding: 12px; text-align: left; color: #94a3b8; font-size: 12px;">포지션</th>
+          <th style="padding: 12px; text-align: left; color: #94a3b8; font-size: 12px;">위치</th>
+          <th style="padding: 12px; text-align: left; color: #94a3b8; font-size: 12px;">연봉</th>
+        </tr>
+      </thead>
+      <tbody style="color: #e2e8f0; font-size: 14px;">${rows}</tbody>
+    </table>`
+}
+
+function generateHtml(jobs: Job[], stats: ReturnType<typeof calculateStats>, week: string, utmParams: string): string {
+  const topRole = Object.entries(stats.roleBreakdown).sort((a, b) => b[1] - a[1])[0]
+  const topRolePercent = topRole ? Math.round((topRole[1] / stats.totalJobs) * 100) : 0
+
+  // Split into Korean and Global jobs
+  const krJobs = jobs.filter(j => isKoreanJob(j))
+  const globalJobs = jobs.filter(j => !isKoreanJob(j))
+
+  const krDisplay = krJobs.slice(0, 10)
+  const globalDisplay = globalJobs.slice(0, 15)
+
+  let jobSectionsHtml = ''
+
+  if (krDisplay.length > 0) {
+    jobSectionsHtml += `
+    <div style="margin-bottom: 32px;">
+      <h3 style="color: #ffffff; font-size: 18px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #22c55e;">🇰🇷 국내 공고</h3>
+      ${generateJobTableHtml(krDisplay, utmParams)}
+    </div>`
+  }
+
+  if (globalDisplay.length > 0) {
+    jobSectionsHtml += `
+    <div style="margin-bottom: 32px;">
+      <h3 style="color: #ffffff; font-size: 18px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #3b82f6;">🌍 해외 공고 (리모트 포함)</h3>
+      ${generateJobTableHtml(globalDisplay, utmParams)}
+    </div>`
+  }
+
   return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEUN Weekly | ${week}</title>
+  <title>NEUN 위클리 | ${week}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
   <div style="max-width: 640px; margin: 0 auto; padding: 40px 20px;">
     <div style="text-align: center; margin-bottom: 40px;">
       <h1 style="color: #22c55e; font-size: 32px; margin: 0; letter-spacing: 4px;">NEUN</h1>
-      <p style="color: #94a3b8; font-size: 14px; margin-top: 8px;">Web3 Jobs Platform</p>
+      <p style="color: #94a3b8; font-size: 14px; margin-top: 8px;">Web3 채용 플랫폼</p>
     </div>
 
-    <h2 style="color: #ffffff; font-size: 24px; margin-bottom: 16px;">🚀 NEUN Weekly | ${week}</h2>
+    <h2 style="color: #ffffff; font-size: 24px; margin-bottom: 16px;">🚀 NEUN 위클리 | ${week}</h2>
     <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6; margin-bottom: 32px;">
-      gm ser, this week's Web3 job market is heating up 🔥
+      gm ser, 이번 주 Web3 채용 시장 소식을 전해드려요 🔥
     </p>
 
     <div style="background-color: #1e293b; border-radius: 8px; padding: 24px; margin-bottom: 32px;">
-      <h3 style="color: #22c55e; font-size: 18px; margin: 0 0 16px 0;">📊 This Week's Highlights</h3>
+      <h3 style="color: #22c55e; font-size: 18px; margin: 0 0 16px 0;">📊 이번 주 하이라이트</h3>
       <ul style="color: #e2e8f0; margin: 0; padding-left: 20px; line-height: 1.8;">
-        <li>New positions: <strong>${stats.totalJobs}</strong></li>
-        <li>Top role: <strong>${topRole?.[0] || 'Engineering'}</strong> (${topRolePercent}%)</li>
-        <li>Remote ratio: <strong>${stats.remoteRate}%</strong></li>
+        <li>신규 공고: <strong>${stats.totalJobs}</strong>개</li>
+        <li>인기 직무: <strong>${topRole?.[0] || 'Engineering'}</strong> (${topRolePercent}%)</li>
+        <li>리모트 비율: <strong>${stats.remoteRate}%</strong></li>
       </ul>
     </div>
 
-    <h3 style="color: #ffffff; font-size: 18px; margin-bottom: 16px;">🔥 Featured Positions</h3>
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 32px;">
-      <thead>
-        <tr style="background-color: #1e293b;">
-          <th style="padding: 12px; text-align: left; color: #94a3b8; font-size: 12px;">COMPANY</th>
-          <th style="padding: 12px; text-align: left; color: #94a3b8; font-size: 12px;">ROLE</th>
-          <th style="padding: 12px; text-align: left; color: #94a3b8; font-size: 12px;">LOCATION</th>
-          <th style="padding: 12px; text-align: left; color: #94a3b8; font-size: 12px;">SALARY</th>
-        </tr>
-      </thead>
-      <tbody style="color: #e2e8f0; font-size: 14px;">${jobRows}</tbody>
-    </table>
+    ${jobSectionsHtml}
 
     <div style="text-align: center; margin: 40px 0;">
       <a href="${SITE_URL}/jobs?${utmParams}" style="display: inline-block; background-color: #22c55e; color: #0f172a; padding: 16px 32px; text-decoration: none; font-weight: bold; border-radius: 4px;">
-        View All Positions →
+        전체 공고 보기 →
       </a>
     </div>
 
     <div style="border-top: 1px solid #1e293b; padding-top: 24px; text-align: center;">
       <p style="color: #64748b; font-size: 12px; margin: 0;">
-        📊 Job data powered by <a href="${SITE_URL}" style="color: #22c55e; text-decoration: none;">NEUN</a> | Web3 Job Board
+        📊 Powered by <a href="${SITE_URL}" style="color: #22c55e; text-decoration: none;">NEUN</a> | Web3 채용 플랫폼
       </p>
     </div>
   </div>
