@@ -1,30 +1,49 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { motion, useInView } from 'framer-motion'
-import { TrendingUp, Zap, Shuffle, ArrowUpRight, ChevronRight, Briefcase, MapPin, DollarSign } from 'lucide-react'
-import type { IntelligenceData, RoleInsight, SkillLevelEntry } from '@/lib/intelligence-data'
-import Pixelbara from '@/app/components/Pixelbara'
+import { Zap, Briefcase, MapPin, DollarSign } from 'lucide-react'
+import type { IntelligenceData, RoleInsight, SkillLevelEntry, RegionSalaryData, RegionRolesData } from '@/lib/intelligence-data'
 
 const ROLE_TABS = [
-  { key: 'all', label: 'All', emoji: '' },
-  { key: 'engineering', label: 'Engineering', emoji: '' },
-  { key: 'marketing', label: 'Marketing', emoji: '' },
-  { key: 'bd', label: 'BD', emoji: '' },
-  { key: 'ops', label: 'Ops', emoji: '' },
+  { key: 'all', label: 'All' },
+  { key: 'engineering', label: 'Engineering' },
+  { key: 'marketing', label: 'Marketing' },
+  { key: 'bd', label: 'BD' },
+  { key: 'ops', label: 'Ops' },
 ] as const
 
 const LEVELS = ['entry', 'mid', 'senior', 'lead'] as const
 const LEVEL_LABELS: Record<string, string> = { entry: 'Entry', mid: 'Mid', senior: 'Senior', lead: 'Lead' }
 
+// ── Meme text pools ──
+const HEATMAP_MEMES = [
+  'ser, the numbers don\'t lie',
+  'few understand this data',
+  'wagmi if you learn these',
+]
+const SALARY_MEMES = [
+  'location matters ser',
+  'remote = freedom + money',
+]
+const ROLES_MEMES = [
+  'follow the hiring trends',
+  'alpha in plain sight',
+]
+
+function pickMeme(pool: string[]): string {
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
+// ── Heatmap Cell (count-up + micro-variations) ──
 function HeatmapCell({ value, delay }: { value: number; delay: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true })
   const [displayed, setDisplayed] = useState(0)
   const [micro, setMicro] = useState(0)
+  const [hovered, setHovered] = useState(false)
 
-  // Count-up animation: 0 → target in ~1.5s
   useEffect(() => {
     if (!inView || value === 0) return
     const duration = 1500
@@ -34,7 +53,7 @@ function HeatmapCell({ value, delay }: { value: number; delay: number }) {
       const elapsed = now - start - delay
       if (elapsed < 0) { raf = requestAnimationFrame(tick); return }
       const t = Math.min(elapsed / duration, 1)
-      const eased = 1 - Math.pow(1 - t, 3) // ease-out cubic
+      const eased = 1 - Math.pow(1 - t, 3)
       setDisplayed(Math.round(value * eased * 10) / 10)
       if (t < 1) raf = requestAnimationFrame(tick)
     }
@@ -42,37 +61,31 @@ function HeatmapCell({ value, delay }: { value: number; delay: number }) {
     return () => cancelAnimationFrame(raf)
   }, [inView, value, delay])
 
-  // Micro-variations: ±0.3% every 2-3s (coin-chart style)
   useEffect(() => {
-    if (!inView || value === 0) return
+    if (!inView || value === 0 || hovered) return
     const id = setInterval(() => {
       setMicro((Math.random() - 0.5) * 0.6)
     }, 2000 + Math.random() * 1000)
     return () => clearInterval(id)
-  }, [inView, value])
+  }, [inView, value, hovered])
 
-  const final = value === 0 ? 0 : Math.max(0, displayed + micro)
+  const final = value === 0 ? 0 : Math.max(0, hovered ? value : displayed + micro)
   const intensity = value === 0 ? 0 : Math.min(value / 55, 1)
   const isHot = value >= 40
 
   return (
     <div
       ref={ref}
-      className="relative flex items-center justify-center py-2.5 px-1 rounded-sm transition-colors duration-300"
-      style={value > 0 ? {
-        backgroundColor: `rgba(34, 197, 94, ${0.04 + intensity * 0.22})`,
-      } : undefined}
+      className="relative flex items-center justify-center py-2 px-0.5 rounded-sm transition-colors duration-300"
+      style={value > 0 ? { backgroundColor: `rgba(34, 197, 94, ${0.04 + intensity * 0.22})` } : undefined}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      title={value > 0 ? `${value}%` : undefined}
     >
       {isHot && (
         <motion.div
           className="absolute inset-0.5 rounded-sm"
-          animate={{
-            boxShadow: [
-              '0 0 0px rgba(34,197,94,0)',
-              '0 0 6px rgba(34,197,94,0.25)',
-              '0 0 0px rgba(34,197,94,0)',
-            ],
-          }}
+          animate={{ boxShadow: ['0 0 0px rgba(34,197,94,0)', '0 0 6px rgba(34,197,94,0.25)', '0 0 0px rgba(34,197,94,0)'] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
         />
       )}
@@ -85,12 +98,36 @@ function HeatmapCell({ value, delay }: { value: number; delay: number }) {
         }`}
         style={{ fontFamily: 'var(--font-space), monospace' }}
       >
-        {value === 0 ? '—' : <>{final.toFixed(1)}<span className="hidden sm:inline">%</span></>}
+        {value === 0 ? '\u2014' : <>{final.toFixed(1)}<span className="hidden sm:inline">%</span></>}
       </span>
     </div>
   )
 }
 
+// ── Animated count-up for salary bars ──
+function CountUp({ target, prefix = '', suffix = '', duration = 1200 }: { target: number; prefix?: string; suffix?: string; duration?: number }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const inView = useInView(ref as React.RefObject<HTMLElement>, { once: true })
+  const [val, setVal] = useState(0)
+
+  useEffect(() => {
+    if (!inView || target === 0) return
+    const start = performance.now()
+    let raf: number
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / duration, 1)
+      const eased = 1 - Math.pow(1 - t, 3)
+      setVal(Math.round(target * eased))
+      if (t < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [inView, target, duration])
+
+  return <span ref={ref} style={{ fontFamily: 'var(--font-space), monospace' }}>{prefix}{target === 0 ? 'N/A' : `${val.toLocaleString()}${suffix}`}</span>
+}
+
+// ── Live Clock ──
 function LiveClock() {
   const [time, setTime] = useState('')
   useEffect(() => {
@@ -99,14 +136,97 @@ function LiveClock() {
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
   }, [])
+  return <span style={{ fontFamily: 'var(--font-space), monospace' }}>{time}</span>
+}
+
+// ── Salary Bar ──
+function SalaryBar({ item, maxSalary, delay }: { item: RegionSalaryData; maxSalary: number; delay: number }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref as React.RefObject<HTMLElement>, { once: true })
+  const barWidth = maxSalary > 0 && item.avgSalary > 0 ? (item.avgSalary / maxSalary) * 100 : 0
+
   return (
-    <span style={{ fontFamily: 'var(--font-space), monospace' }}>{time}</span>
+    <Link
+      href={`/jobs?location=${encodeURIComponent(item.label)}`}
+      className="group block px-3 py-2.5 hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors cursor-pointer"
+    >
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-xs text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors">
+          {item.flag} {item.label}
+          <span className="ml-1.5 text-[10px] text-a24-muted/40 dark:text-a24-dark-muted/40 tabular-nums" style={{ fontFamily: 'var(--font-space), monospace' }}>
+            ({item.jobCount})
+          </span>
+        </span>
+        <span className="text-xs tabular-nums text-a24-text dark:text-a24-dark-text font-medium">
+          <CountUp target={item.avgSalary > 0 ? Math.round(item.avgSalary / 1000) : 0} prefix="$" suffix="K" />
+        </span>
+      </div>
+      <div ref={ref} className="h-2 rounded-full bg-a24-border/20 dark:bg-a24-dark-border/20 overflow-hidden">
+        <motion.div
+          className="h-full rounded-full bg-neun-success"
+          initial={{ width: 0 }}
+          animate={inView ? { width: `${barWidth}%` } : { width: 0 }}
+          transition={{ duration: 0.8, delay: delay * 0.1, ease: [0.16, 1, 0.3, 1] }}
+        />
+      </div>
+    </Link>
   )
 }
 
+// ── Roles by Region Row ──
+function RegionRolesRow({ item, delay }: { item: RegionRolesData; delay: number }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref as React.RefObject<HTMLElement>, { once: true })
+  const opacities = ['', '/60', '/30']
+
+  return (
+    <Link
+      href={`/jobs?location=${encodeURIComponent(item.label)}`}
+      className="group block px-3 py-2.5 hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors cursor-pointer"
+    >
+      <div className="flex items-center gap-2 mb-1.5">
+        <span className="text-xs text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors shrink-0 w-20">
+          {item.flag} {item.label}
+        </span>
+        <div ref={ref} className="flex-1 flex items-center gap-1 min-w-0">
+          {item.roles.map((role, i) => (
+            <motion.div
+              key={role.name}
+              className={`relative h-5 rounded-sm bg-neun-success${opacities[i] || '/30'} group/bar`}
+              initial={{ width: 0 }}
+              animate={inView ? { width: `${role.percentage}%` } : { width: 0 }}
+              transition={{ duration: 0.6, delay: delay * 0.1 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              style={{ minWidth: role.percentage > 5 ? '28px' : '0' }}
+              title={`${role.name} ${role.percentage}%`}
+            >
+              {role.percentage >= 15 && (
+                <span className="absolute inset-0 flex items-center justify-center text-[8px] text-a24-dark-bg font-medium truncate px-1">
+                  {role.name}
+                </span>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      </div>
+      {/* Legend on hover */}
+      <div className="hidden group-hover:flex items-center gap-3 ml-[88px] text-[9px] text-a24-muted dark:text-a24-dark-muted">
+        {item.roles.map((role) => (
+          <span key={role.name}>{role.name} {role.percentage}%</span>
+        ))}
+      </div>
+    </Link>
+  )
+}
+
+// ── Main Component ──
 export default function IntelligenceReport({ data }: { data: IntelligenceData }) {
   const [activeRole, setActiveRole] = useState<string>('all')
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [rightTab, setRightTab] = useState<'salary' | 'roles'>('salary')
+
+  const heatmapMeme = useMemo(() => pickMeme(HEATMAP_MEMES), [])
+  const salaryMeme = useMemo(() => pickMeme(SALARY_MEMES), [])
+  const rolesMeme = useMemo(() => pickMeme(ROLES_MEMES), [])
 
   const role: RoleInsight | undefined = data.roles[activeRole]
 
@@ -124,6 +244,8 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
   const salaryStr = role.avgSalaryMin > 0 && role.avgSalaryMax > 0
     ? `$${Math.round(role.avgSalaryMin / 1000)}K - $${Math.round(role.avgSalaryMax / 1000)}K`
     : 'N/A'
+
+  const maxSalary = Math.max(...role.regionSalaries.map(r => r.avgSalary), 1)
 
   return (
     <div className={`transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
@@ -158,7 +280,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
         })}
       </nav>
 
-      {/* Role Summary Stats */}
+      {/* Summary Stats */}
       <section className="mb-6 grid grid-cols-3 gap-3">
         <div className="px-3 py-2.5 border border-a24-border dark:border-a24-dark-border rounded">
           <div className="flex items-center gap-1.5 mb-1">
@@ -189,11 +311,11 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
         </div>
       </section>
 
-      {/* Main grid: Hot Skills + Side */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      {/* Main 60/40 Grid */}
+      <section className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
-        {/* Skill × Level Heatmap */}
-        <div className="lg:col-span-8">
+        {/* LEFT: Skill × Level Heatmap (60%) */}
+        <div className="lg:col-span-3">
           <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden">
             {/* Header */}
             <div className="px-4 py-3 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border-b border-a24-border dark:border-a24-dark-border">
@@ -208,15 +330,14 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                 <span style={{ fontFamily: 'var(--font-space), monospace' }}>
                   Live from {data.totalJobs.toLocaleString()} jobs
                 </span>
-                <span>·</span>
+                <span>&middot;</span>
                 <LiveClock />
               </div>
             </div>
 
-            {/* Heatmap grid */}
+            {/* Heatmap grid — compact */}
             <div className="overflow-x-auto">
-              {/* Column headers */}
-              <div className="grid grid-cols-[minmax(72px,1.2fr)_repeat(4,minmax(44px,1fr))] sm:grid-cols-[minmax(140px,1fr)_repeat(4,80px)] px-3 py-2 border-b border-a24-border/30 dark:border-a24-dark-border/30">
+              <div className="grid grid-cols-[minmax(72px,1.2fr)_repeat(4,minmax(44px,1fr))] sm:grid-cols-[minmax(100px,1fr)_repeat(4,60px)] px-3 py-2 border-b border-a24-border/30 dark:border-a24-dark-border/30">
                 <span />
                 {LEVELS.map(level => (
                   <span
@@ -229,7 +350,6 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                 ))}
               </div>
 
-              {/* Skill rows */}
               <div className="divide-y divide-a24-border/10 dark:divide-a24-dark-border/10">
                 {role.skillLevelMatrix.length > 0 ? (
                   role.skillLevelMatrix.map((entry, i) => (
@@ -238,32 +358,17 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.04, duration: 0.3 }}
-                      className="grid grid-cols-[minmax(72px,1.2fr)_repeat(4,minmax(44px,1fr))] sm:grid-cols-[minmax(140px,1fr)_repeat(4,80px)] px-3 group hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors"
+                      className="grid grid-cols-[minmax(72px,1.2fr)_repeat(4,minmax(44px,1fr))] sm:grid-cols-[minmax(100px,1fr)_repeat(4,60px)] px-3 group hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors"
                     >
-                      {/* Skill name */}
-                      <div className="flex items-center gap-1 sm:gap-2 py-2 min-w-0">
-                        <span
-                          className="hidden sm:inline text-[10px] tabular-nums text-a24-muted/30 dark:text-a24-dark-muted/30 w-4 text-right shrink-0"
-                          style={{ fontFamily: 'var(--font-space), monospace' }}
-                        >
-                          {i + 1}
-                        </span>
+                      {/* Skill name — right-aligned to be close to numbers */}
+                      <div className="flex items-center justify-end py-1.5 pr-2 min-w-0">
                         <Link
                           href={`/learn/skills/${encodeURIComponent(entry.skill.toLowerCase())}`}
-                          className="text-xs sm:text-sm text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors truncate"
+                          className="text-xs text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors truncate text-right"
                         >
                           {entry.skill}
                         </Link>
-                        <div className="hidden sm:flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <Link
-                            href={`/jobs?search=${encodeURIComponent(entry.skill)}`}
-                            className="text-[8px] uppercase tracking-[0.1em] text-a24-muted/40 dark:text-a24-dark-muted/40 hover:text-neun-success transition-colors"
-                          >
-                            Jobs
-                          </Link>
-                        </div>
                       </div>
-                      {/* Level cells */}
                       {LEVELS.map((level, j) => (
                         <HeatmapCell
                           key={level}
@@ -281,149 +386,100 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
               </div>
             </div>
 
-            {/* Insight + CTA footer */}
-            {(role.levelInsight || role.hotSkills.length > 0) && (
-              <div className="px-4 py-3 border-t border-a24-border/30 dark:border-a24-dark-border/30 flex items-center justify-between gap-3">
-                {role.levelInsight && (
-                  <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted truncate">
-                    <span className="text-neun-success mr-1">↗</span>
-                    {role.levelInsight}
-                  </p>
-                )}
-                <Link
-                  href={`/jobs?role=${activeRole === 'all' ? '' : activeRole}`}
-                  className="flex items-center gap-1 text-[10px] uppercase tracking-[0.15em] text-neun-success hover:text-neun-success/80 transition-colors cursor-pointer shrink-0 ml-auto"
-                >
-                  {activeRole === 'all' ? 'See all jobs' : `See ${role.label} jobs`}
-                  <ArrowUpRight className="w-3 h-3" />
-                </Link>
-              </div>
-            )}
+            {/* Meme text footer */}
+            <div className="px-4 py-2.5 border-t border-a24-border/30 dark:border-a24-dark-border/30 flex items-center justify-between">
+              <p className="text-xs italic text-a24-muted/40 dark:text-a24-dark-muted/40">
+                {heatmapMeme}
+              </p>
+              <Link
+                href={`/jobs?role=${activeRole === 'all' ? '' : activeRole}`}
+                className="text-[10px] uppercase tracking-[0.15em] text-neun-success hover:text-neun-success/80 transition-colors cursor-pointer shrink-0"
+              >
+                {activeRole === 'all' ? 'See all jobs' : `See ${role.label} jobs`} &nearr;
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* Side Panel */}
-        <div className="lg:col-span-4 space-y-4">
-
-          {/* Rising Skills */}
-          {role.risingSkills.length > 0 && (
-            <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden">
-              <div className="px-4 py-3 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border-b border-a24-border dark:border-a24-dark-border flex items-center gap-2">
-                <TrendingUp className="w-3.5 h-3.5 text-neun-success" />
-                <h2 className="text-[10px] uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted font-light">
-                  Rising (90d)
-                </h2>
-              </div>
-              <div className="divide-y divide-a24-border/20 dark:divide-a24-dark-border/20">
-                {role.risingSkills.map(rs => (
-                  <Link
-                    key={rs.skill}
-                    href={`/learn/skills/${encodeURIComponent(rs.skill.toLowerCase())}`}
-                    className="flex items-center justify-between px-4 py-2.5 hover:bg-a24-surface/50 dark:hover:bg-a24-dark-surface/50 transition-colors cursor-pointer group"
-                  >
-                    <span className="text-sm text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors truncate">
-                      {rs.skill}
-                    </span>
-                    <span
-                      className="text-xs tabular-nums font-medium text-neun-success shrink-0 ml-2"
-                      style={{ fontFamily: 'var(--font-space), monospace' }}
-                    >
-                      +{rs.change}%
-                    </span>
-                  </Link>
-                ))}
-              </div>
+        {/* RIGHT: Salary / Roles by Region (40%) */}
+        <div className="lg:col-span-2">
+          <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden">
+            {/* Tab bar */}
+            <div className="flex border-b border-a24-border dark:border-a24-dark-border">
+              <button
+                onClick={() => setRightTab('salary')}
+                className={`flex-1 px-3 py-2.5 text-[10px] uppercase tracking-[0.2em] font-light transition-colors cursor-pointer ${
+                  rightTab === 'salary'
+                    ? 'text-neun-success bg-neun-success/5 border-b-2 border-neun-success'
+                    : 'text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text'
+                }`}
+              >
+                Salary
+              </button>
+              <button
+                onClick={() => setRightTab('roles')}
+                className={`flex-1 px-3 py-2.5 text-[10px] uppercase tracking-[0.2em] font-light transition-colors cursor-pointer ${
+                  rightTab === 'roles'
+                    ? 'text-neun-success bg-neun-success/5 border-b-2 border-neun-success'
+                    : 'text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text'
+                }`}
+              >
+                Roles by Region
+              </button>
             </div>
-          )}
 
-          {/* Cross-Skill Insights */}
-          {role.crossSkills.length > 0 && (
-            <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden">
-              <div className="px-4 py-3 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border-b border-a24-border dark:border-a24-dark-border flex items-center gap-2">
-                <Shuffle className="w-3.5 h-3.5 text-yellow-400" />
-                <h2 className="text-[10px] uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted font-light">
-                  Cross-Skill
-                </h2>
-              </div>
-              <div className="divide-y divide-a24-border/20 dark:divide-a24-dark-border/20">
-                {role.crossSkills.map(cs => (
-                  <div key={cs.skill} className="px-4 py-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-a24-text dark:text-a24-dark-text">{cs.skill}</span>
-                      <span
-                        className="text-[10px] tabular-nums text-yellow-400"
-                        style={{ fontFamily: 'var(--font-space), monospace' }}
-                      >
-                        {cs.percentage}%
-                      </span>
+            {/* Tab content */}
+            {rightTab === 'salary' ? (
+              <div>
+                <div className="px-3 py-2 bg-a24-surface/30 dark:bg-a24-dark-surface/30">
+                  <p className="text-[9px] uppercase tracking-[0.2em] text-a24-muted/50 dark:text-a24-dark-muted/50">
+                    Salary by Region
+                  </p>
+                </div>
+                <div className="divide-y divide-a24-border/10 dark:divide-a24-dark-border/10">
+                  {role.regionSalaries.filter(r => r.avgSalary > 0).length > 0 ? (
+                    role.regionSalaries
+                      .filter(r => r.avgSalary > 0)
+                      .map((item, i) => (
+                        <SalaryBar key={item.key} item={item} maxSalary={maxSalary} delay={i} />
+                      ))
+                  ) : (
+                    <div className="py-8 text-center text-sm text-a24-muted/40 dark:text-a24-dark-muted/40">
+                      Not enough salary data
                     </div>
-                    <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted leading-relaxed">
-                      {cs.insight}
-                    </p>
-                  </div>
-                ))}
+                  )}
+                </div>
+                <div className="px-3 py-2.5 border-t border-a24-border/30 dark:border-a24-dark-border/30">
+                  <p className="text-xs italic text-a24-muted/40 dark:text-a24-dark-muted/40">
+                    {salaryMeme}
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* Top Companies for role */}
-          {role.topCompanies.length > 0 && (
-            <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden">
-              <div className="px-4 py-3 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border-b border-a24-border dark:border-a24-dark-border">
-                <h2 className="text-[10px] uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted font-light">
-                  Top Hiring
-                </h2>
+            ) : (
+              <div>
+                <div className="px-3 py-2 bg-a24-surface/30 dark:bg-a24-dark-surface/30">
+                  <p className="text-[9px] uppercase tracking-[0.2em] text-a24-muted/50 dark:text-a24-dark-muted/50">
+                    Roles by Region
+                  </p>
+                </div>
+                <div className="divide-y divide-a24-border/10 dark:divide-a24-dark-border/10">
+                  {data.regionRoles.length > 0 ? (
+                    data.regionRoles.map((item, i) => (
+                      <RegionRolesRow key={item.key} item={item} delay={i} />
+                    ))
+                  ) : (
+                    <div className="py-8 text-center text-sm text-a24-muted/40 dark:text-a24-dark-muted/40">
+                      No region data available
+                    </div>
+                  )}
+                </div>
+                <div className="px-3 py-2.5 border-t border-a24-border/30 dark:border-a24-dark-border/30">
+                  <p className="text-xs italic text-a24-muted/40 dark:text-a24-dark-muted/40">
+                    {rolesMeme}
+                  </p>
+                </div>
               </div>
-              <div className="divide-y divide-a24-border/20 dark:divide-a24-dark-border/20">
-                {role.topCompanies.map((c, i) => (
-                  <Link
-                    key={c.name}
-                    href={`/jobs?search=${encodeURIComponent(c.name)}`}
-                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-a24-surface/50 dark:hover:bg-a24-dark-surface/50 transition-colors cursor-pointer group"
-                  >
-                    <span className="text-[10px] tabular-nums text-a24-muted/30 w-4 text-right shrink-0" style={{ fontFamily: 'var(--font-space), monospace' }}>
-                      {i + 1}
-                    </span>
-                    <span className="text-sm text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors truncate flex-1">
-                      {c.name}
-                    </span>
-                    <span className="text-[10px] tabular-nums text-a24-muted dark:text-a24-dark-muted shrink-0" style={{ fontFamily: 'var(--font-space), monospace' }}>
-                      {c.count}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Pixelbara Comment */}
-          <div className="border border-a24-border dark:border-a24-dark-border rounded p-4 text-center">
-            <div className="flex justify-center mb-3">
-              <Pixelbara pose="coding" size={56} clickable />
-            </div>
-            <p className="text-[10px] text-a24-muted dark:text-a24-dark-muted italic mb-3">
-              {role.pixelbaraComment}
-            </p>
-            <div className="flex flex-col gap-2">
-              <Link
-                href="/learn/career"
-                className="flex items-center justify-center gap-1.5 px-4 py-2 border border-a24-border dark:border-a24-dark-border rounded hover:border-neun-success/30 hover:bg-neun-success/5 transition-all duration-200 cursor-pointer group"
-              >
-                <ChevronRight className="w-3 h-3 text-a24-muted dark:text-a24-dark-muted group-hover:text-neun-success transition-colors" />
-                <span className="text-[10px] uppercase tracking-[0.2em] text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors font-light">
-                  Explore by Role
-                </span>
-              </Link>
-              <Link
-                href="/learn/skills"
-                className="flex items-center justify-center gap-1.5 px-4 py-2 border border-a24-border dark:border-a24-dark-border rounded hover:border-neun-success/30 hover:bg-neun-success/5 transition-all duration-200 cursor-pointer group"
-              >
-                <ChevronRight className="w-3 h-3 text-a24-muted dark:text-a24-dark-muted group-hover:text-neun-success transition-colors" />
-                <span className="text-[10px] uppercase tracking-[0.2em] text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors font-light">
-                  Explore by Skill
-                </span>
-              </Link>
-            </div>
+            )}
           </div>
         </div>
       </section>

@@ -8,7 +8,6 @@ const ROLE_PATTERNS: Record<string, string[]> = {
     'backend', 'frontend', 'front-end', 'full stack', 'fullstack', 'smart contract',
     'protocol', 'blockchain dev', 'security engineer', 'auditor', 'researcher',
     'data engineer', 'machine learning', 'data scientist',
-    // Korean
     '개발자', '개발', '엔지니어', '리서처',
   ],
   marketing: [
@@ -32,7 +31,6 @@ const ROLE_PATTERNS: Record<string, string[]> = {
 
 function classifyRole(title: string): string {
   const t = title.toLowerCase()
-  // Check in order of specificity
   for (const role of ['ops', 'bd', 'marketing', 'engineering']) {
     if (ROLE_PATTERNS[role].some(p => t.includes(p))) return role
   }
@@ -53,10 +51,8 @@ const LEVEL_PATTERNS: Record<string, string[]> = {
   ],
 }
 
-// Titles containing "lead" but NOT meaning leadership level
 const LEAD_FALSE_POSITIVES = ['lead generat', 'leading']
 
-// Titles containing "manager" that ARE leadership level
 const MANAGER_LEAD_PATTERNS = [
   'engineering manager', 'general manager', 'managing director',
   'country manager', 'regional manager', 'finance manager',
@@ -64,29 +60,60 @@ const MANAGER_LEAD_PATTERNS = [
 
 function classifyLevel(title: string): 'entry' | 'mid' | 'senior' | 'lead' {
   const t = title.toLowerCase()
-
-  // Check lead first (most specific compound patterns)
   if (LEVEL_PATTERNS.lead.some(p => t.includes(p))) return 'lead'
-
-  // "lead" keyword: only if not a false positive
   if (t.includes('lead') && !LEAD_FALSE_POSITIVES.some(fp => t.includes(fp))) return 'lead'
-
-  // "manager" keyword: only specific leadership patterns
   if (t.includes('manager') && MANAGER_LEAD_PATTERNS.some(p => t.includes(p))) return 'lead'
-
-  // Check senior
   if (LEVEL_PATTERNS.senior.some(p => t.includes(p))) return 'senior'
-
-  // Check entry (includes word-boundary check for "intern" to avoid matching "international")
   if (LEVEL_PATTERNS.entry.some(p => t.includes(p))) return 'entry'
   if (/\bintern\b/.test(t)) return 'entry'
-
   return 'mid'
+}
+
+// ── Region classification (by location) ──
+const REGION_INFO: Record<string, { label: string; flag: string }> = {
+  us:     { label: 'US',     flag: '\u{1F1FA}\u{1F1F8}' },
+  remote: { label: 'Remote', flag: '\u{1F310}' },
+  europe: { label: 'Europe', flag: '\u{1F1EA}\u{1F1FA}' },
+  asia:   { label: 'Asia',   flag: '\u{1F1F8}\u{1F1EC}' },
+  korea:  { label: 'Korea',  flag: '\u{1F1F0}\u{1F1F7}' },
+  latam:  { label: 'LATAM',  flag: '\u{1F30D}' },
+}
+
+function classifyJobRegion(location: string): string {
+  const l = location.toLowerCase()
+  if (/\bremote\b/.test(l) || l.includes('worldwide') || l.includes('anywhere')) return 'remote'
+  if (l.includes('korea') || l.includes('seoul') || l.includes('서울') || l.includes('한국')) return 'korea'
+  if (l.includes('united states') || /\busa\b/.test(l) || /\bu\.s\./.test(l) ||
+      l.includes('new york') || l.includes('san francisco') || l.includes('los angeles') ||
+      l.includes('chicago') || l.includes('austin') || l.includes('miami') || l.includes('seattle') ||
+      l.includes('denver') || l.includes('boston') || l.includes('washington') ||
+      l.includes('california') || l.includes('texas') || l.includes(', ny') ||
+      l.includes(', ca') || l.includes(', tx')) return 'us'
+  if (/\buk\b/.test(l) || l.includes('united kingdom') || l.includes('london') ||
+      l.includes('germany') || l.includes('berlin') || l.includes('france') || l.includes('paris') ||
+      l.includes('netherlands') || l.includes('amsterdam') || l.includes('ireland') || l.includes('dublin') ||
+      l.includes('switzerland') || l.includes('zurich') || l.includes('spain') ||
+      l.includes('portugal') || l.includes('lisbon') || /\beurope\b/.test(l)) return 'europe'
+  if (l.includes('singapore') || l.includes('hong kong') || l.includes('japan') || l.includes('tokyo') ||
+      l.includes('india') || l.includes('bangalore') || l.includes('mumbai') ||
+      l.includes('vietnam') || l.includes('thailand') || l.includes('indonesia') ||
+      l.includes('dubai') || l.includes('uae') || l.includes('taiwan') || /\basia\b/.test(l)) return 'asia'
+  if (l.includes('brazil') || l.includes('mexico') || l.includes('argentina') ||
+      l.includes('colombia') || l.includes('chile') || l.includes('latin america') || l.includes('latam')) return 'latam'
+  return 'other'
+}
+
+// Map classifyRole output to display label for Roles by Region
+const ROLE_DISPLAY_SHORT: Record<string, string> = {
+  engineering: 'Eng',
+  marketing: 'Mkt/Growth',
+  bd: 'BD',
+  ops: 'Ops/HR',
+  other: 'Other',
 }
 
 // ── Expanded skill keywords (extracted from actual JDs) ──
 const ALL_SKILL_KEYWORDS: Record<string, string[]> = {
-  // Programming Languages
   'Solidity': ['solidity'],
   'Rust': ['rust'],
   'TypeScript': ['typescript', 'ts '],
@@ -97,8 +124,6 @@ const ALL_SKILL_KEYWORDS: Record<string, string[]> = {
   'Cairo': ['cairo'],
   'C++': ['c++', 'cpp'],
   'Java': [' java ', 'java,'],
-
-  // Frameworks & Tools
   'React': ['react', 'reactjs'],
   'Next.js': ['next.js', 'nextjs'],
   'Node.js': ['node.js', 'nodejs'],
@@ -109,8 +134,6 @@ const ALL_SKILL_KEYWORDS: Record<string, string[]> = {
   'Viem': ['viem'],
   'TheGraph': ['the graph', 'thegraph', 'subgraph'],
   'GraphQL': ['graphql'],
-
-  // Blockchain Platforms
   'Ethereum': ['ethereum', 'evm'],
   'Solana': ['solana'],
   'Polygon': ['polygon', 'matic'],
@@ -118,8 +141,6 @@ const ALL_SKILL_KEYWORDS: Record<string, string[]> = {
   'Optimism': ['optimism', 'op stack'],
   'Base': [' base chain', 'base l2'],
   'Cosmos': ['cosmos', 'cosmwasm'],
-
-  // DeFi Concepts
   'DeFi': ['defi', 'decentralized finance'],
   'AMM': ['amm', 'automated market maker'],
   'Lending': ['lending', 'borrowing'],
@@ -127,8 +148,6 @@ const ALL_SKILL_KEYWORDS: Record<string, string[]> = {
   'MEV': ['mev', 'maximal extractable'],
   'Oracles': ['oracle', 'chainlink'],
   'Smart Contract Audit': ['audit', 'vulnerability', 'pen test'],
-
-  // Infrastructure
   'AWS': ['aws', 'amazon web services'],
   'Docker': ['docker', 'container'],
   'Kubernetes': ['kubernetes', 'k8s'],
@@ -137,8 +156,6 @@ const ALL_SKILL_KEYWORDS: Record<string, string[]> = {
   'MongoDB': ['mongodb', 'mongo'],
   'Redis': ['redis'],
   'ZK Proofs': ['zero knowledge', 'zk-', 'zkp', 'zk proof'],
-
-  // Marketing & Community
   'Twitter/X': ['twitter', 'x.com', ' x account', 'tweets'],
   'KOL Management': ['kol', 'key opinion leader'],
   'Content Strategy': ['content strategy', 'content marketing', 'editorial'],
@@ -151,8 +168,6 @@ const ALL_SKILL_KEYWORDS: Record<string, string[]> = {
   'Email Marketing': ['email marketing', 'newsletter', 'mailchimp'],
   'Brand Strategy': ['brand strategy', 'brand identity', 'branding'],
   'Social Media': ['social media', 'sns '],
-
-  // BD & Sales
   'Partnerships': ['partnership', 'partner relation'],
   'Sales': ['sales', 'selling', 'revenue generation'],
   'CRM': ['crm', 'salesforce', 'hubspot'],
@@ -161,8 +176,6 @@ const ALL_SKILL_KEYWORDS: Record<string, string[]> = {
   'Ecosystem Development': ['ecosystem development', 'ecosystem growth'],
   'Client Relations': ['client relation', 'account manage'],
   'Deal Sourcing': ['deal flow', 'deal sourcing', 'pipeline management'],
-
-  // Ops & Legal
   'Compliance': ['compliance', 'regulatory', 'aml', 'kyc'],
   'Legal': ['legal', 'contract law', 'corporate law', 'ip law'],
   'HR': ['human resources', 'hr ', 'people ops', 'people operations'],
@@ -171,8 +184,6 @@ const ALL_SKILL_KEYWORDS: Record<string, string[]> = {
   'Recruiting': ['recruiting', 'talent acquisition', 'sourcing candidate'],
   'Risk Management': ['risk management', 'risk assessment'],
   'Project Management': ['project management', 'scrum', 'agile', 'kanban'],
-
-  // Cross-domain
   'SQL': ['sql', 'mysql', 'postgresql query'],
   'Data Analysis': ['data analysis', 'data analytics', 'tableau', 'looker'],
   'Excel': ['excel', 'spreadsheet', 'google sheets'],
@@ -216,6 +227,23 @@ export interface CrossSkillInsight {
   insight: string
 }
 
+export interface RegionSalaryData {
+  key: string
+  label: string
+  flag: string
+  avgSalary: number
+  jobCount: number
+  remotePercent: number
+}
+
+export interface RegionRolesData {
+  key: string
+  label: string
+  flag: string
+  roles: { name: string; count: number; percentage: number }[]
+  totalJobs: number
+}
+
 export interface RoleInsight {
   key: string
   label: string
@@ -228,8 +256,8 @@ export interface RoleInsight {
   levelInsight: string
   risingSkills: RisingSkill[]
   crossSkills: CrossSkillInsight[]
-  pixelbaraComment: string
   topCompanies: { name: string; count: number }[]
+  regionSalaries: RegionSalaryData[]
 }
 
 export interface IntelligenceData {
@@ -237,6 +265,7 @@ export interface IntelligenceData {
   totalCompanies: number
   vcJobPercent: number
   roles: Record<string, RoleInsight>
+  regionRoles: RegionRolesData[]
 }
 
 // "Expected" skills for each role — used to detect cross-skills
@@ -263,14 +292,6 @@ const EXPECTED_SKILLS: Record<string, Set<string>> = {
   ]),
 }
 
-const PIXELBARA_COMMENTS: Record<string, string> = {
-  all: '"learn the meta, ser"',
-  engineering: '"gm ser, keep building"',
-  marketing: '"CT native? ur gonna make it"',
-  bd: '"close deals, touch grass"',
-  ops: '"someone\'s gotta do compliance"',
-}
-
 const ROLE_LABELS: Record<string, string> = {
   all: 'All Roles',
   engineering: 'Engineering',
@@ -292,7 +313,7 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
   const [recentRes, prevRes] = await Promise.all([
     supabase
       .from('Job')
-      .select('id, title, tags, description, company, location, salaryMin, salaryMax, salaryCurrency')
+      .select('id, title, tags, description, company, location, salaryMin, salaryMax, salaryCurrency, role')
       .eq('isActive', true)
       .gte('crawledAt', threeMonthsAgo.toISOString()),
     supabase
@@ -307,7 +328,6 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
   const prevJobs = prevRes.data || []
   const totalCompanies = new Set(recentJobs.map(j => j.company).filter(Boolean)).size
 
-  // Count VC-backed jobs
   let vcCount = 0
   for (const job of recentJobs) {
     if (findPriorityCompany(job.company)) vcCount++
@@ -424,12 +444,11 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
         }
       }
       skillByLevel[level] = {}
-      // Require minimum 5 jobs at a level for reliable percentages
       const MIN_LEVEL_SAMPLE = 5
       for (const [skill, count] of Object.entries(counts)) {
         skillByLevel[level][skill] = levelJobs.length >= MIN_LEVEL_SAMPLE
           ? Math.round((count / levelJobs.length) * 100)
-          : 0 // Show 0 (rendered as "—") instead of misleading % from tiny samples
+          : 0
       }
     }
 
@@ -444,7 +463,7 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
       total: s.jobCount,
     }))
 
-    // Auto-generate level insight (biggest jump Entry→Lead)
+    // Auto-generate level insight
     let maxJump = 0
     let maxJumpSkill = ''
     for (const s of skillLevelMatrix) {
@@ -457,7 +476,7 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
         ? `${hotSkills[0].skill} is the most in-demand skill across all levels`
         : ''
 
-    // Rising skills (comparing normalized rates)
+    // Rising skills
     const risingSkills: RisingSkill[] = []
     for (const [skill, count] of Object.entries(skillCounts)) {
       const prevCount = prevSkillCounts[skill] || 0
@@ -477,7 +496,7 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
     }
     risingSkills.sort((a, b) => b.change - a.change)
 
-    // Cross-skills: skills that appear in this role but are "unexpected"
+    // Cross-skills
     const crossSkills: CrossSkillInsight[] = []
     const expected = EXPECTED_SKILLS[roleKey]
     if (expected && roleKey !== 'all') {
@@ -506,6 +525,37 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
       .slice(0, 6)
       .map(([name, count]) => ({ name, count }))
 
+    // ── Region salary data (per role) ──
+    const regionJobsMap: Record<string, typeof jobs> = {}
+    for (const job of jobs) {
+      const region = classifyJobRegion(job.location || '')
+      if (region === 'other') continue
+      if (!regionJobsMap[region]) regionJobsMap[region] = []
+      regionJobsMap[region].push(job)
+    }
+
+    const regionSalaries: RegionSalaryData[] = []
+    for (const [regionKey, regionJobs] of Object.entries(regionJobsMap)) {
+      const info = REGION_INFO[regionKey]
+      if (!info) continue
+      const withSalary = regionJobs.filter(j =>
+        j.salaryMin && j.salaryMax && (j.salaryCurrency === 'USD' || !j.salaryCurrency) && j.salaryMax < 1000000
+      )
+      const avgSalary = withSalary.length >= 3
+        ? Math.round(withSalary.reduce((s, j) => s + (j.salaryMin! + j.salaryMax!) / 2, 0) / withSalary.length / 1000) * 1000
+        : 0
+      const rCount = regionJobs.filter(j => (j.location || '').toLowerCase().includes('remote')).length
+      regionSalaries.push({
+        key: regionKey,
+        label: info.label,
+        flag: info.flag,
+        avgSalary,
+        jobCount: regionJobs.length,
+        remotePercent: regionJobs.length > 0 ? Math.round((rCount / regionJobs.length) * 100) : 0,
+      })
+    }
+    regionSalaries.sort((a, b) => b.avgSalary - a.avgSalary)
+
     roles[roleKey] = {
       key: roleKey,
       label: ROLE_LABELS[roleKey],
@@ -518,15 +568,54 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
       levelInsight,
       risingSkills: risingSkills.slice(0, 5),
       crossSkills: crossSkills.slice(0, 3),
-      pixelbaraComment: PIXELBARA_COMMENTS[roleKey],
       topCompanies,
+      regionSalaries,
     }
   }
+
+  // ── Global region roles data ──
+  const globalRegionJobs: Record<string, typeof recentJobs> = {}
+  for (const job of recentJobs) {
+    const region = classifyJobRegion(job.location || '')
+    if (region === 'other') continue
+    if (!globalRegionJobs[region]) globalRegionJobs[region] = []
+    globalRegionJobs[region].push(job)
+  }
+
+  const regionRoles: RegionRolesData[] = []
+  for (const [regionKey, regionJobs] of Object.entries(globalRegionJobs)) {
+    const info = REGION_INFO[regionKey]
+    if (!info) continue
+    const roleCounts: Record<string, number> = {}
+    for (const job of regionJobs) {
+      const roleLabel = ROLE_DISPLAY_SHORT[classifyRole(job.title || '')] || 'Other'
+      roleCounts[roleLabel] = (roleCounts[roleLabel] || 0) + 1
+    }
+    const total = regionJobs.length
+    const rolesList = Object.entries(roleCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([name, count]) => ({
+        name,
+        count,
+        percentage: total > 0 ? Math.round((count / total) * 100) : 0,
+      }))
+
+    regionRoles.push({
+      key: regionKey,
+      label: info.label,
+      flag: info.flag,
+      roles: rolesList,
+      totalJobs: total,
+    })
+  }
+  regionRoles.sort((a, b) => b.totalJobs - a.totalJobs)
 
   return {
     totalJobs: recentJobs.length,
     totalCompanies,
     vcJobPercent: recentJobs.length > 0 ? Math.round((vcCount / recentJobs.length) * 100) : 0,
     roles,
+    regionRoles,
   }
 }

@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronDown, ChevronUp } from 'lucide-react'
 import { trackEvent } from '@/lib/analytics'
+import NSelect from './NSelect'
 
 export interface SmartFilters {
   region: string
@@ -341,41 +342,25 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
           >
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
               {FILTER_CONFIGS.map(({ key, label, options }) => (
-                <div key={key}>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted mb-1">
-                    {label}
-                  </label>
-                  <select
-                    value={filters[key]}
-                    onChange={(e) => handleChange(key, e.target.value)}
-                    className="w-full px-2 py-1.5 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface text-a24-text dark:text-a24-dark-text text-sm focus:ring-1 focus:ring-a24-text dark:focus:ring-a24-dark-text outline-none"
-                  >
-                    <option value="">All</option>
-                    {options.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <NSelect
+                  key={key}
+                  label={label}
+                  value={filters[key]}
+                  onChange={(v) => handleChange(key, v)}
+                  placeholder="All"
+                  options={[
+                    { value: '', label: 'All' },
+                    ...options.map(opt => ({ value: opt, label: opt })),
+                  ]}
+                />
               ))}
-              {/* Salary Range Dropdown */}
-              <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted mb-1">
-                  Salary
-                </label>
-                <select
-                  value={filters.salaryRange}
-                  onChange={(e) => handleChange('salaryRange', e.target.value)}
-                  className="w-full px-2 py-1.5 border border-a24-border dark:border-a24-dark-border bg-a24-surface dark:bg-a24-dark-surface text-a24-text dark:text-a24-dark-text text-sm focus:ring-1 focus:ring-a24-text dark:focus:ring-a24-dark-text outline-none"
-                >
-                  {SALARY_RANGES.map(({ value, label }) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <NSelect
+                label="Salary"
+                value={filters.salaryRange}
+                onChange={(v) => handleChange('salaryRange', v)}
+                placeholder="Any Salary"
+                options={SALARY_RANGES.map(({ value, label }) => ({ value, label }))}
+              />
             </div>
           </motion.div>
         )}

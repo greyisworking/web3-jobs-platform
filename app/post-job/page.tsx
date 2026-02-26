@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import Pixelbara from '../components/Pixelbara'
 import { PRIORITY_COMPANIES } from '@/lib/priority-companies'
 import { truncateAddress } from '../components/WalletConnect'
+import NSelect from '../components/NSelect'
 
 const SECTORS = [
   'DeFi',
@@ -367,20 +368,16 @@ export default function PostJobPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-a24-text dark:text-a24-dark-text mb-2">
-                    Sector *
-                  </label>
-                  <select
-                    required
+                  <NSelect
                     value={form.sector}
-                    onChange={(e) => setForm({ ...form, sector: e.target.value })}
-                    className="w-full px-4 py-3 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border focus:border-a24-text dark:focus:border-a24-dark-text outline-none transition-colors text-a24-text dark:text-a24-dark-text"
-                  >
-                    <option value="">Select sector</option>
-                    {SECTORS.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
+                    onChange={(v) => setForm({ ...form, sector: v })}
+                    label="Sector *"
+                    placeholder="Select sector"
+                    options={[
+                      { value: '', label: 'Select sector' },
+                      ...SECTORS.map((s) => ({ value: s, label: s })),
+                    ]}
+                  />
                 </div>
               </div>
               <div>
@@ -420,36 +417,24 @@ export default function PostJobPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-a24-text dark:text-a24-dark-text mb-2">
-                    Job Type *
-                  </label>
-                  <select
-                    required
+                  <NSelect
                     value={form.jobType}
-                    onChange={(e) => setForm({ ...form, jobType: e.target.value })}
-                    className="w-full px-4 py-3 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border focus:border-a24-text dark:focus:border-a24-dark-text outline-none transition-colors text-a24-text dark:text-a24-dark-text"
-                  >
-                    {JOB_TYPES.map((t) => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
+                    onChange={(v) => setForm({ ...form, jobType: v })}
+                    label="Job Type *"
+                    options={JOB_TYPES.map((t) => ({ value: t, label: t }))}
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm text-a24-text dark:text-a24-dark-text mb-2 flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    Location *
-                  </label>
-                  <select
-                    required
+                  <NSelect
                     value={form.location}
-                    onChange={(e) => setForm({ ...form, location: e.target.value })}
-                    className="w-full px-4 py-3 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border focus:border-a24-text dark:focus:border-a24-dark-text outline-none transition-colors text-a24-text dark:text-a24-dark-text"
-                  >
-                    <option value="">Select location</option>
-                    {REGIONS.map((r) => (
-                      <option key={r} value={r}>{r}</option>
-                    ))}
-                  </select>
+                    onChange={(v) => setForm({ ...form, location: v })}
+                    label="Location *"
+                    placeholder="Select location"
+                    options={[
+                      { value: '', label: 'Select location' },
+                      ...REGIONS.map((r) => ({ value: r, label: r })),
+                    ]}
+                  />
                 </div>
               </div>
               <div>

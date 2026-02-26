@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Users, Flag, Vote } from 'lucide-react'
+import NSelect from './NSelect'
 import { PixelShield, PixelThumbsUp, PixelCheck, PixelX } from './PixelIcons'
 import type { TrustLevel, TrustScore, Vouch, CommunityVote } from '@/lib/trust'
 import { getTrustLabel } from '@/lib/trust'
@@ -216,22 +217,16 @@ export function ReportModal({ isOpen, onClose, targetWallet, onSubmit }: ReportM
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Category
-              </label>
-              <select
+              <NSelect
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              >
-                <option value="">Select a category...</option>
-                {categories.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
+                onChange={setCategory}
+                label="Category"
+                placeholder="Select a category..."
+                options={[
+                  { value: '', label: 'Select a category...' },
+                  ...categories.map((cat) => ({ value: cat.value, label: cat.label })),
+                ]}
+              />
             </div>
 
             <div>

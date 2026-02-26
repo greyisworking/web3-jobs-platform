@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import NSelect from './NSelect'
 
 const BADGE_OPTIONS = ['Verified', 'Web3 Perks', 'Pre-IPO', 'Remote', 'Active', 'English'] as const
 const BACKER_OPTIONS = ['Hashed', 'a16z', 'Paradigm', 'Kakao', 'Kakao Ventures', 'Dunamu', 'Animoca Brands', 'SoftBank', 'Binance', 'LINE Corporation', 'Mirae Asset', 'KB Investment', 'Wemade'] as const
@@ -81,120 +82,102 @@ export default function JobFilters({ onFilterChange }: FilterProps) {
 
         {/* Region */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Region
-          </label>
-          <select
+          <NSelect
             value={filters.region}
-            onChange={(e) => handleChange('region', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-neun-primary dark:bg-white/10 dark:text-white"
-          >
-            <option value="">All</option>
-            <option value="Global">Global</option>
-            <option value="Korea">Korea</option>
-          </select>
+            onChange={(v) => handleChange('region', v)}
+            label="Region"
+            options={[
+              { value: '', label: 'All' },
+              { value: 'Global', label: 'Global' },
+              { value: 'Korea', label: 'Korea' },
+            ]}
+          />
         </div>
 
         {/* Job Type */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Job Type
-          </label>
-          <select
+          <NSelect
             value={filters.type}
-            onChange={(e) => handleChange('type', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-neun-primary dark:bg-white/10 dark:text-white"
-          >
-            <option value="">All</option>
-            <option value="Full-time">Full-time</option>
-            <option value="Part-time">Part-time</option>
-            <option value="Contract">Contract</option>
-            <option value="Internship">Internship</option>
-          </select>
+            onChange={(v) => handleChange('type', v)}
+            label="Job Type"
+            options={[
+              { value: '', label: 'All' },
+              { value: 'Full-time', label: 'Full-time' },
+              { value: 'Part-time', label: 'Part-time' },
+              { value: 'Contract', label: 'Contract' },
+              { value: 'Internship', label: 'Internship' },
+            ]}
+          />
         </div>
 
         {/* Location */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Location
-          </label>
-          <select
+          <NSelect
             value={filters.location}
-            onChange={(e) => handleChange('location', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-neun-primary dark:bg-white/10 dark:text-white"
-          >
-            <option value="">All</option>
-            <option value="Remote">Remote</option>
-            <option value="Seoul">Seoul</option>
-            <option value="Hybrid">Hybrid</option>
-            <option value="On-site">On-site</option>
-          </select>
+            onChange={(v) => handleChange('location', v)}
+            label="Location"
+            options={[
+              { value: '', label: 'All' },
+              { value: 'Remote', label: 'Remote' },
+              { value: 'Seoul', label: 'Seoul' },
+              { value: 'Hybrid', label: 'Hybrid' },
+              { value: 'On-site', label: 'On-site' },
+            ]}
+          />
         </div>
 
         {/* Source */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Source
-          </label>
-          <select
+          <NSelect
             value={filters.source}
-            onChange={(e) => handleChange('source', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-neun-primary dark:bg-white/10 dark:text-white"
-          >
-            <option value="">All</option>
-            <option value="web3.career">web3.career</option>
-            <option value="web3jobs.cc">web3jobs.cc</option>
-            <option value="web3kr.jobs">web3kr.jobs</option>
-            <option value="cryptojobslist.com">cryptojobslist.com</option>
-            <option value="wanted.co.kr">wanted.co.kr</option>
-            <option value="remote3.co">remote3.co</option>
-            <option value="remoteok.com">remoteok.com</option>
-            <option value="rocketpunch.com">rocketpunch.com</option>
-            <option value="jobs.sui.io">sui jobs</option>
-            <option value="jobs.solana.com">solana jobs</option>
-            <option value="ethereum.foundation">ethereum foundation</option>
-            <option value="priority:wanted">priority:wanted</option>
-            <option value="priority:lever">priority:lever</option>
-            <option value="priority:greenhouse">priority:greenhouse</option>
-          </select>
+            onChange={(v) => handleChange('source', v)}
+            label="Source"
+            options={[
+              { value: '', label: 'All' },
+              { value: 'web3.career', label: 'web3.career' },
+              { value: 'web3jobs.cc', label: 'web3jobs.cc' },
+              { value: 'web3kr.jobs', label: 'web3kr.jobs' },
+              { value: 'cryptojobslist.com', label: 'cryptojobslist.com' },
+              { value: 'wanted.co.kr', label: 'wanted.co.kr' },
+              { value: 'remote3.co', label: 'remote3.co' },
+              { value: 'remoteok.com', label: 'remoteok.com' },
+              { value: 'rocketpunch.com', label: 'rocketpunch.com' },
+              { value: 'jobs.sui.io', label: 'sui jobs' },
+              { value: 'jobs.solana.com', label: 'solana jobs' },
+              { value: 'ethereum.foundation', label: 'ethereum foundation' },
+              { value: 'priority:wanted', label: 'priority:wanted' },
+              { value: 'priority:lever', label: 'priority:lever' },
+              { value: 'priority:greenhouse', label: 'priority:greenhouse' },
+            ]}
+          />
         </div>
 
         {/* Badge */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Badge
-          </label>
-          <select
+          <NSelect
             value={filters.badge}
-            onChange={(e) => handleChange('badge', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-neun-primary dark:bg-white/10 dark:text-white"
-          >
-            <option value="">All Badges</option>
-            {BADGE_OPTIONS.map((badge) => (
-              <option key={badge} value={badge}>
-                {badge}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => handleChange('badge', v)}
+            label="Badge"
+            placeholder="All Badges"
+            options={[
+              { value: '', label: 'All Badges' },
+              ...BADGE_OPTIONS.map((b) => ({ value: b, label: b })),
+            ]}
+          />
         </div>
 
         {/* Backer */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Backer
-          </label>
-          <select
+          <NSelect
             value={filters.backer}
-            onChange={(e) => handleChange('backer', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-neun-primary dark:bg-white/10 dark:text-white"
-          >
-            <option value="">All Backers</option>
-            {BACKER_OPTIONS.map((backer) => (
-              <option key={backer} value={backer}>
-                {backer}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => handleChange('backer', v)}
+            label="Backer"
+            placeholder="All Backers"
+            options={[
+              { value: '', label: 'All Backers' },
+              ...BACKER_OPTIONS.map((b) => ({ value: b, label: b })),
+            ]}
+          />
         </div>
       </div>
 

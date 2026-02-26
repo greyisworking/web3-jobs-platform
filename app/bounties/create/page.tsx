@@ -11,6 +11,7 @@ import Footer from '../../components/Footer'
 import Pixelbara from '../../components/Pixelbara'
 import { WalletConnect } from '../../components/WalletConnect'
 import { toast } from 'sonner'
+import NSelect from '../../components/NSelect'
 
 const CATEGORIES = [
   { id: 'development', label: 'Development', emoji: '💻' },
@@ -226,21 +227,19 @@ export default function CreateBountyPage() {
               />
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-a24-muted mb-2">
-                Token
-              </label>
-              <select
+              <NSelect
                 value={form.reward_token}
-                onChange={e => setForm(f => ({ ...f, reward_token: e.target.value }))}
-                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-green-500 focus:outline-none"
-              >
-                <option value="ETH">ETH</option>
-                <option value="USDC">USDC</option>
-                <option value="USDT">USDT</option>
-                <option value="DAI">DAI</option>
-                <option value="ARB">ARB</option>
-                <option value="OP">OP</option>
-              </select>
+                onChange={(v) => setForm(f => ({ ...f, reward_token: v }))}
+                label="Token"
+                options={[
+                  { value: 'ETH', label: 'ETH' },
+                  { value: 'USDC', label: 'USDC' },
+                  { value: 'USDT', label: 'USDT' },
+                  { value: 'DAI', label: 'DAI' },
+                  { value: 'ARB', label: 'ARB' },
+                  { value: 'OP', label: 'OP' },
+                ]}
+              />
             </div>
           </div>
 

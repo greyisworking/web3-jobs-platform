@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import { ArrowLeft, Save } from 'lucide-react'
 import { toast } from 'sonner'
+import NSelect from '@/app/components/NSelect'
 
 const JOB_TYPES = ['Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship']
 const CATEGORIES = [
@@ -129,49 +130,31 @@ export default function NewJobPage() {
               />
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
-                Region *
-              </label>
-              <select
+              <NSelect
                 value={form.region}
-                onChange={(e) => setForm({ ...form, region: e.target.value })}
-                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-neun-success outline-none"
-              >
-                {REGIONS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
+                onChange={(v) => setForm({ ...form, region: v })}
+                label="Region *"
+                options={REGIONS.map((r) => ({ value: r, label: r }))}
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
-                Job Type *
-              </label>
-              <select
+              <NSelect
                 value={form.type}
-                onChange={(e) => setForm({ ...form, type: e.target.value })}
-                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-neun-success outline-none"
-              >
-                {JOB_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
+                onChange={(v) => setForm({ ...form, type: v })}
+                label="Job Type *"
+                options={JOB_TYPES.map((t) => ({ value: t, label: t }))}
+              />
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
-                Category *
-              </label>
-              <select
+              <NSelect
                 value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-neun-success outline-none"
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+                onChange={(v) => setForm({ ...form, category: v })}
+                label="Category *"
+                options={CATEGORIES.map((c) => ({ value: c, label: c }))}
+              />
             </div>
           </div>
 

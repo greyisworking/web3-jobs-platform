@@ -9,6 +9,7 @@ import type { Job } from '@/types/job'
 import { trackEvent } from '@/lib/analytics'
 import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import { ensureCSRFToken } from '@/lib/csrf-client'
+import NSelect from '@/app/components/NSelect'
 import { cleanJobDisplay, cleanJobDisplayWithSections } from '@/lib/clean-job-display'
 import MarkdownRenderer from '@/app/components/MarkdownRenderer'
 import JobDescription from '@/app/components/JobDescription'
@@ -758,22 +759,21 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
             </p>
 
             <div className="mb-4">
-              <label className="block text-[11px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted mb-2">
-                Reason for report *
-              </label>
-              <select
+              <NSelect
                 value={reportReason}
-                onChange={(e) => setReportReason(e.target.value)}
-                className="w-full px-3 py-2 text-sm bg-transparent border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text focus:outline-none focus:border-a24-text dark:focus:border-a24-dark-text"
-              >
-                <option value="">Select a reason</option>
-                <option value="spam">Spam or fake job</option>
-                <option value="scam">Suspected scam</option>
-                <option value="expired">Job no longer available</option>
-                <option value="inappropriate">Inappropriate content</option>
-                <option value="misleading">Misleading information</option>
-                <option value="other">Other</option>
-              </select>
+                onChange={setReportReason}
+                label="Reason for report *"
+                placeholder="Select a reason"
+                options={[
+                  { value: '', label: 'Select a reason' },
+                  { value: 'spam', label: 'Spam or fake job' },
+                  { value: 'scam', label: 'Suspected scam' },
+                  { value: 'expired', label: 'Job no longer available' },
+                  { value: 'inappropriate', label: 'Inappropriate content' },
+                  { value: 'misleading', label: 'Misleading information' },
+                  { value: 'other', label: 'Other' },
+                ]}
+              />
             </div>
 
             <div className="flex gap-3">

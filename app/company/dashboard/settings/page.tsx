@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import { Save, Building2 } from 'lucide-react'
 import { toast } from 'sonner'
+import NSelect from '@/app/components/NSelect'
 
 const COMPANY_SIZES = ['1-10', '11-50', '51-200', '201-500', '500+']
 const INDUSTRIES = [
@@ -177,34 +178,28 @@ export default function CompanySettingsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
-                Industry
-              </label>
-              <select
+              <NSelect
                 value={form.industry}
-                onChange={(e) => setForm({ ...form, industry: e.target.value })}
-                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-neun-success outline-none"
-              >
-                <option value="">Select industry</option>
-                {INDUSTRIES.map((i) => (
-                  <option key={i} value={i}>{i}</option>
-                ))}
-              </select>
+                onChange={(v) => setForm({ ...form, industry: v })}
+                label="Industry"
+                placeholder="Select industry"
+                options={[
+                  { value: '', label: 'Select industry' },
+                  ...INDUSTRIES.map((i) => ({ value: i, label: i })),
+                ]}
+              />
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
-                Company Size
-              </label>
-              <select
+              <NSelect
                 value={form.size}
-                onChange={(e) => setForm({ ...form, size: e.target.value })}
-                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-neun-success outline-none"
-              >
-                <option value="">Select size</option>
-                {COMPANY_SIZES.map((s) => (
-                  <option key={s} value={s}>{s} employees</option>
-                ))}
-              </select>
+                onChange={(v) => setForm({ ...form, size: v })}
+                label="Company Size"
+                placeholder="Select size"
+                options={[
+                  { value: '', label: 'Select size' },
+                  ...COMPANY_SIZES.map((s) => ({ value: s, label: `${s} employees` })),
+                ]}
+              />
             </div>
           </div>
 
