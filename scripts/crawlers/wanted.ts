@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { delay } from '../utils'
+import { translateLocation, translateTags } from '../../lib/translation'
 
 interface CrawlerReturn {
   total: number
@@ -99,16 +100,12 @@ async function fetchJobDetail(jobId: number): Promise<WantedJobDetail | null> {
 }
 
 /**
- * Build location string from Wanted address
+ * Build location string from Wanted address (always returns English)
  */
 function buildLocation(address: WantedJob['address']): string {
-  if (!address) return '서울'
-  const parts = [address.location, address.full_location].filter(Boolean)
-  if (parts.length > 0) {
-    // Use full_location if available, otherwise location
-    return address.full_location || address.location || '서울'
-  }
-  return '서울'
+  if (!address) return 'Seoul'
+  const raw = address.full_location || address.location || 'Seoul'
+  return translateLocation(raw)
 }
 
 /**
@@ -155,20 +152,21 @@ export async function crawlWanted(): Promise<CrawlerReturn> {
 
         const detail = await fetchJobDetail(jobId)
 
-        // Build description from detail sections
+        // Build description from detail sections (English headers)
         let fullDescription = ''
         if (detail?.detail) {
           const { intro, main_tasks, requirements, preferred_points, benefits } = detail.detail
-          if (intro) fullDescription += `## 회사소개\n${intro}\n\n`
-          if (main_tasks) fullDescription += `## 주요업무\n${main_tasks}\n\n`
-          if (requirements) fullDescription += `## 자격요건\n${requirements}\n\n`
-          if (preferred_points) fullDescription += `## 우대사항\n${preferred_points}\n\n`
-          if (benefits) fullDescription += `## 혜택 및 복지\n${benefits}\n\n`
+          if (intro) fullDescription += `## About Company\n${intro}\n\n`
+          if (main_tasks) fullDescription += `## Key Responsibilities\n${main_tasks}\n\n`
+          if (requirements) fullDescription += `## Requirements\n${requirements}\n\n`
+          if (preferred_points) fullDescription += `## Preferred Qualifications\n${preferred_points}\n\n`
+          if (benefits) fullDescription += `## Benefits & Perks\n${benefits}\n\n`
         }
 
-        // Extract tags from skill_tags
-        const tags = detail?.skill_tags?.map(t => t.title).filter(Boolean) || []
-        if (tags.length === 0) tags.push('블록체인', 'Web3', 'Korea')
+        // Extract tags from skill_tags (translate any Korean tags)
+        let tags = detail?.skill_tags?.map(t => t.title).filter(Boolean) || []
+        if (tags.length === 0) tags.push('Blockchain', 'Web3', 'Korea')
+        tags = translateTags(tags)
 
         const location = buildLocation(job.address)
         const salary = buildSalary(job.annual_from, job.annual_to)
@@ -182,7 +180,7 @@ export async function crawlWanted(): Promise<CrawlerReturn> {
             company: job.company.name,
             url: jobUrl,
             location,
-            type: '정규직',
+            type: 'Full-time',
             salary,
             salaryMin: job.annual_from ? job.annual_from * 10000 : undefined,
             salaryMax: job.annual_to ? job.annual_to * 10000 : undefined,

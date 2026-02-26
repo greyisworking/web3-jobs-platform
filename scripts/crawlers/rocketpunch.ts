@@ -2,6 +2,7 @@ import puppeteer, { Page } from 'puppeteer'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { delay } from '../utils'
+import { translateLocation, translateTags } from '../../lib/translation'
 
 interface CrawlerReturn {
   total: number
@@ -120,8 +121,8 @@ export async function crawlRocketPunch(): Promise<CrawlerReturn> {
 
         const title = titleEl?.textContent?.trim() || ''
         const company = companyEl?.textContent?.trim() || ''
-        const location = locationEl?.textContent?.trim() || '서울'
-        const type = typeEl?.textContent?.trim() || '정규직'
+        const location = locationEl?.textContent?.trim() || 'Seoul'
+        const type = typeEl?.textContent?.trim() || 'Full-time'
 
         let url = (titleEl as HTMLAnchorElement)?.href || (card.querySelector('a') as HTMLAnchorElement)?.href || ''
 
@@ -140,7 +141,7 @@ export async function crawlRocketPunch(): Promise<CrawlerReturn> {
           const url = (link as HTMLAnchorElement)?.href || ''
 
           if (title && url) {
-            results.push({ title, company: company || 'Unknown', location: '서울', type: '정규직', url })
+            results.push({ title, company: company || 'Unknown', location: 'Seoul', type: 'Full-time', url })
           }
         })
       }
@@ -172,10 +173,10 @@ export async function crawlRocketPunch(): Promise<CrawlerReturn> {
             title: job.title,
             company: job.company,
             url: job.url,
-            location: job.location,
+            location: translateLocation(job.location),
             type: job.type,
             category: 'Engineering',
-            tags: ['블록체인', 'Web3', 'Korea'],
+            tags: translateTags(['Blockchain', 'Web3', 'Korea']),
             source: 'rocketpunch.com',
             region: 'Korea',
             postedDate: new Date(),

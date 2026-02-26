@@ -1,16 +1,25 @@
 /**
- * Migrate Korean job titles to English
+ * Migrate ALL Korean content to English (term-based, fast)
  *
- * This script finds all jobs with Korean characters in the title
- * and translates them to English using the term-based translation system.
+ * Translates: title, company, location, salary, tags, description,
+ * requirements, responsibilities, benefits
  *
  * Usage:
  *   npx tsx scripts/translate-korean-jobs.ts          # Dry run (preview changes)
  *   npx tsx scripts/translate-korean-jobs.ts --apply  # Apply changes
+ *   npx tsx scripts/translate-korean-jobs.ts --stats  # Show stats only
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { containsKorean, translateJobTitle, quickTranslateTerms } from '../lib/translation'
+import {
+  containsKorean,
+  translateJobTitle,
+  translateCompanyName,
+  translateLocation,
+  translateSalary,
+  translateTags,
+  translateFullField,
+} from '../lib/translation'
 import 'dotenv/config'
 
 // Initialize Supabase client
@@ -22,6 +31,9 @@ interface KoreanJob {
   id: string
   title: string
   company: string
+  location: string
+  salary: string | null
+  tags: string | null
   description: string | null
   requirements: string | null
   responsibilities: string | null
@@ -29,12 +41,12 @@ interface KoreanJob {
 }
 
 async function findKoreanJobs(): Promise<KoreanJob[]> {
-  console.log('Scanning for Korean job content...\n')
+  console.log('Scanning ALL fields for Korean content...\n')
 
   // Fetch all active jobs
   const { data: jobs, error } = await supabase
     .from('Job')
-    .select('id, title, company, description, requirements, responsibilities, benefits')
+    .select('id, title, company, location, salary, tags, description, requirements, responsibilities, benefits')
     .eq('isActive', true)
     .order('crawledAt', { ascending: false })
 
@@ -46,6 +58,10 @@ async function findKoreanJobs(): Promise<KoreanJob[]> {
   // Filter for jobs with Korean in any field
   const koreanJobs = (jobs || []).filter(job =>
     containsKorean(job.title) ||
+    containsKorean(job.company) ||
+    containsKorean(job.location) ||
+    containsKorean(job.salary) ||
+    containsKorean(job.tags) ||
     containsKorean(job.description) ||
     containsKorean(job.requirements) ||
     containsKorean(job.responsibilities) ||
@@ -61,11 +77,11 @@ async function translateJobs(dryRun: boolean): Promise<void> {
   const koreanJobs = await findKoreanJobs()
 
   if (koreanJobs.length === 0) {
-    console.log('No Korean job titles found. All done!')
+    console.log('No Korean job content found. All done!')
     return
   }
 
-  console.log(`${dryRun ? '[DRY RUN]' : '[APPLYING]'} Translating ${koreanJobs.length} job titles...\n`)
+  console.log(`${dryRun ? '[DRY RUN]' : '[APPLYING]'} Translating ${koreanJobs.length} jobs...\n`)
   console.log('─'.repeat(80))
 
   let successCount = 0
@@ -73,52 +89,96 @@ async function translateJobs(dryRun: boolean): Promise<void> {
   let errorCount = 0
 
   for (const job of koreanJobs) {
-    const updates: Record<string, string> = {}
+    const updates: Record<string, string | null> = {}
     let hasChanges = false
 
     // Translate title
     if (containsKorean(job.title)) {
-      const translatedTitle = translateJobTitle(job.title)
-      if (translatedTitle !== job.title && translatedTitle.length > 0) {
-        updates.title = translatedTitle
+      const translated = translateJobTitle(job.title)
+      if (translated !== job.title && translated.length > 0) {
+        updates.title = translated
         hasChanges = true
+      }
+    }
+
+    // Translate company name
+    if (containsKorean(job.company)) {
+      const translated = translateCompanyName(job.company)
+      if (translated !== job.company && translated.length > 0) {
+        updates.company = translated
+        hasChanges = true
+      }
+    }
+
+    // Translate location
+    if (containsKorean(job.location)) {
+      const translated = translateLocation(job.location)
+      if (translated !== job.location && translated.length > 0) {
+        updates.location = translated
+        hasChanges = true
+      }
+    }
+
+    // Translate salary
+    if (containsKorean(job.salary)) {
+      const translated = translateSalary(job.salary)
+      if (translated && translated !== job.salary) {
+        updates.salary = translated
+        hasChanges = true
+      }
+    }
+
+    // Translate tags
+    if (containsKorean(job.tags)) {
+      try {
+        const parsedTags = JSON.parse(job.tags!)
+        if (Array.isArray(parsedTags)) {
+          const translated = translateTags(parsedTags)
+          const translatedStr = JSON.stringify(translated)
+          if (translatedStr !== job.tags) {
+            updates.tags = translatedStr
+            hasChanges = true
+          }
+        }
+      } catch {
+        // tags might not be valid JSON
       }
     }
 
     // Translate description
     if (job.description && containsKorean(job.description)) {
-      const translated = quickTranslateTerms(job.description)
-        .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
-        .replace(/\s{2,}/g, ' ')
-      updates.description = translated
-      hasChanges = true
+      const translated = translateFullField(job.description)
+      if (translated && translated !== job.description) {
+        updates.description = translated
+        hasChanges = true
+      }
     }
 
     // Translate requirements
     if (job.requirements && containsKorean(job.requirements)) {
-      const translated = quickTranslateTerms(job.requirements)
-        .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
-        .replace(/\s{2,}/g, ' ')
-      updates.requirements = translated
-      hasChanges = true
+      const translated = translateFullField(job.requirements)
+      if (translated && translated !== job.requirements) {
+        updates.requirements = translated
+        hasChanges = true
+      }
     }
 
     // Translate responsibilities
     if (job.responsibilities && containsKorean(job.responsibilities)) {
-      const translated = quickTranslateTerms(job.responsibilities)
-        .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
-        .replace(/\s{2,}/g, ' ')
-      updates.responsibilities = translated
-      hasChanges = true
+      const translated = translateFullField(job.responsibilities)
+      if (translated && translated !== job.responsibilities) {
+        updates.responsibilities = translated
+        hasChanges = true
+      }
     }
 
     // Translate benefits
     if (job.benefits && containsKorean(job.benefits)) {
-      const translated = quickTranslateTerms(job.benefits)
-        .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
-        .replace(/\s{2,}/g, ' ')
-      updates.benefits = translated
-      hasChanges = true
+      const translated = translateFullField(job.benefits)
+      if (translated && translated !== job.benefits) {
+        updates.benefits = translated
+        hasChanges = true
+      }
     }
 
     if (!hasChanges) {
@@ -127,11 +187,13 @@ async function translateJobs(dryRun: boolean): Promise<void> {
     }
 
     console.log(`[${job.company}]`)
-    if (updates.title) {
-      console.log(`  Title: ${job.title} → ${updates.title}`)
-    }
-    if (updates.description) {
-      console.log(`  Description: translated`)
+    for (const [field, value] of Object.entries(updates)) {
+      if (field === 'description' || field === 'requirements' || field === 'responsibilities' || field === 'benefits') {
+        console.log(`  ${field}: translated`)
+      } else {
+        const original = (job as any)[field]
+        console.log(`  ${field}: ${original} -> ${value}`)
+      }
     }
     console.log('')
 
@@ -164,22 +226,31 @@ async function translateJobs(dryRun: boolean): Promise<void> {
 }
 
 async function showStats(): Promise<void> {
-  const { count: totalCount } = await supabase
-    .from('Job')
-    .select('*', { count: 'exact', head: true })
-    .eq('isActive', true)
-
   const { data: jobs } = await supabase
     .from('Job')
-    .select('title')
+    .select('title, company, location, salary, tags, description, requirements, responsibilities, benefits')
     .eq('isActive', true)
 
-  const koreanCount = (jobs || []).filter(j => containsKorean(j.title)).length
+  const total = jobs?.length || 0
+  const fields = ['title', 'company', 'location', 'salary', 'tags', 'description', 'requirements', 'responsibilities', 'benefits'] as const
 
-  console.log('\nJob Language Statistics:')
-  console.log(`  Total active jobs: ${totalCount}`)
-  console.log(`  Korean titles: ${koreanCount} (${((koreanCount / (totalCount || 1)) * 100).toFixed(1)}%)`)
-  console.log(`  English/Other: ${(totalCount || 0) - koreanCount}`)
+  console.log('\nKorean Content Statistics:')
+  console.log(`  Total active jobs: ${total}`)
+  console.log('')
+
+  for (const field of fields) {
+    const count = (jobs || []).filter(j => containsKorean(j[field])).length
+    const pct = ((count / (total || 1)) * 100).toFixed(1)
+    if (count > 0) {
+      console.log(`  ${field.padEnd(20)} ${count} (${pct}%)`)
+    }
+  }
+
+  const anyKorean = (jobs || []).filter(j =>
+    fields.some(f => containsKorean(j[f]))
+  ).length
+  console.log(`\n  ANY Korean content: ${anyKorean} (${((anyKorean / (total || 1)) * 100).toFixed(1)}%)`)
+  console.log(`  100% English:       ${total - anyKorean} (${(((total - anyKorean) / (total || 1)) * 100).toFixed(1)}%)`)
 }
 
 async function main() {

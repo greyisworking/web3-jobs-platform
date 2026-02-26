@@ -4,7 +4,7 @@ import { jobSchema } from './job'
 import { findPriorityCompany } from '../priority-companies'
 import { computeBadges } from '../badges'
 import { detectRole, normalizeEmploymentType, detectRegion } from '../../scripts/utils'
-import { containsKorean, translateJobTitle, quickTranslateTerms } from '../translation'
+import { containsKorean, translateJobTitle, translateCompanyName, translateLocation, translateSalary, translateTags, translateFullField } from '../translation'
 import { cleanJobTitle, cleanCompanyName } from '../clean-job-title'
 import { createSafeLikePattern } from '../sanitize'
 // NOTE: Formatting removed - raw descriptions saved, sanitized on frontend
@@ -93,18 +93,24 @@ export async function validateAndSaveJob(
   // Clean up job title (remove location, experience, abbreviations, etc.)
   const cleanedTitle = cleanJobTitle(translatedTitle, job.company)
 
-  // Clean up company name (remove legal suffixes)
-  const cleanedCompany = cleanCompanyName(job.company)
+  // Translate company name (Korean → English), then clean legal suffixes
+  const translatedCompany = containsKorean(job.company)
+    ? translateCompanyName(job.company)
+    : job.company
+  const cleanedCompany = cleanCompanyName(translatedCompany)
 
-  // Also translate description if it contains Korean
-  const translateField = (text: string | null | undefined): string | null => {
-    if (!text) return null
-    if (!containsKorean(text)) return text
-    return quickTranslateTerms(text)
-      .replace(/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]+/g, ' ')
-      .replace(/\s{2,}/g, ' ')
-      .trim()
-  }
+  // Translate location (Korean → English)
+  const translatedLocation = containsKorean(job.location)
+    ? translateLocation(job.location)
+    : job.location
+
+  // Translate salary string (Korean → English)
+  const translatedSalary = job.salary
+    ? (translateSalary(job.salary ?? undefined) || job.salary)
+    : job.salary
+
+  // Translate tags (Korean → English)
+  const translatedTags = translateTags(job.tags)
 
   // Store raw description - no formatting, frontend sanitizes
   // Truncate extremely long descriptions (50,000 char limit)
@@ -115,12 +121,12 @@ export async function validateAndSaveJob(
       ? job.description.slice(0, MAX_DESCRIPTION_LENGTH)
       : job.description
     // Translate Korean terms if present
-    rawDescription = translateField(rawDescription)
+    rawDescription = translateFullField(rawDescription) || rawDescription
   }
 
-  const translatedRequirements = translateField(job.requirements)
-  const translatedResponsibilities = translateField(job.responsibilities)
-  const translatedBenefits = translateField(job.benefits)
+  const translatedRequirements = translateFullField(job.requirements as string | undefined)
+  const translatedResponsibilities = translateFullField(job.responsibilities as string | undefined)
+  const translatedBenefits = translateFullField(job.benefits as string | undefined)
 
   // Auto-detect role from title if not provided
   const detectedRole = job.role || detectRole(cleanedTitle)
@@ -198,12 +204,12 @@ export async function validateAndSaveJob(
         title: cleanedTitle,
         company: cleanedCompany,
         url: job.url,
-        location: job.location,
+        location: translatedLocation,
         type: normalizedType,
         category: job.category,
         role: detectedRole,
-        salary: job.salary || null,
-        tags: JSON.stringify(job.tags),
+        salary: translatedSalary || null,
+        tags: JSON.stringify(translatedTags),
         source: job.source,
         region: detectedRegion,
         isActive: true,
@@ -260,12 +266,12 @@ export async function validateAndSaveJob(
         update: {
           title: cleanedTitle,
           company: cleanedCompany,
-          location: job.location,
+          location: translatedLocation,
           type: normalizedType,
           category: job.category,
           role: detectedRole,
-          salary: job.salary || null,
-          tags: JSON.stringify(job.tags),
+          salary: translatedSalary || null,
+          tags: JSON.stringify(translatedTags),
           source: job.source,
           region: detectedRegion,
           isActive: true,
@@ -289,12 +295,12 @@ export async function validateAndSaveJob(
           title: cleanedTitle,
           company: cleanedCompany,
           url: job.url,
-          location: job.location,
+          location: translatedLocation,
           type: normalizedType,
           category: job.category,
           role: detectedRole,
-          salary: job.salary || null,
-          tags: JSON.stringify(job.tags),
+          salary: translatedSalary || null,
+          tags: JSON.stringify(translatedTags),
           source: job.source,
           region: detectedRegion,
           isActive: true,
