@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchHTML, delay, cleanText, parseSalary, detectExperienceLevel, detectRemoteType } from '../utils'
+import { fetchHTML, delay, cleanText, detectExperienceLevel, detectRemoteType } from '../utils'
 import { cleanDescriptionHtml } from '../../lib/clean-description'
 import { parseStringPromise } from 'xml2js'
 import axios from 'axios'

@@ -164,7 +164,7 @@ export function sanitizeJobDescription(raw: string | null | undefined): string {
     allowedAttributes: ALLOWED_ATTRIBUTES,
     // Transform all links to open in new tab
     transformTags: {
-      'a': (tagName, attribs) => {
+      'a': (_tagName, attribs) => {
         return {
           tagName: 'a',
           attribs: {

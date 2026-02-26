@@ -164,7 +164,7 @@ async function translateJobs(dryRun: boolean): Promise<void> {
 }
 
 async function showStats(): Promise<void> {
-  const { data: total, count: totalCount } = await supabase
+  const { count: totalCount } = await supabase
     .from('Job')
     .select('*', { count: 'exact', head: true })
     .eq('isActive', true)

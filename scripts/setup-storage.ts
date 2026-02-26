@@ -51,7 +51,7 @@ async function main() {
   } else {
     console.log('\n📦 Creating "images" bucket...')
 
-    const { data, error: createError } = await supabase.storage.createBucket('images', {
+    const { data: _data, error: createError } = await supabase.storage.createBucket('images', {
       public: true,
       allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'],
       fileSizeLimit: 5 * 1024 * 1024, // 5MB

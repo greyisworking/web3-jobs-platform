@@ -178,7 +178,7 @@ async function main() {
   console.log('🔄 Backfilling JD for jobs.solana.com...\n')
 
   // Get jobs without description
-  const { data: jobs, error } = await supabase
+  const { data: _jobs, error } = await supabase
     .from('Job')
     .select('id, url, title, company')
     .eq('source', 'jobs.solana.com')

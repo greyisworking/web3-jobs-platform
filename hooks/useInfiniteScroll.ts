@@ -24,7 +24,7 @@ interface UseInfiniteScrollReturn<T> {
 export function useInfiniteScroll<T>({
   items,
   pageSize = 12,
-  threshold = 200,
+  threshold: _threshold = 200,
   rootMargin = '0px 0px 200px 0px',
 }: UseInfiniteScrollOptions<T>): UseInfiniteScrollReturn<T> {
   const [visibleCount, setVisibleCount] = useState(pageSize)

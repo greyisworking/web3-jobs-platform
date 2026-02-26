@@ -193,7 +193,7 @@ export function extractDomain(url: string): string {
  * Extract clean HTML content preserving structure.
  * Removes noise elements (ads, related jobs, sidebars, etc.) before extraction.
  */
-export function extractHTML($element: cheerio.Cheerio<any>, $: cheerio.CheerioAPI): string {
+export function extractHTML($element: cheerio.Cheerio<any>, _$: cheerio.CheerioAPI): string {
   if (!$element.length) return ''
 
   // Clone to avoid mutating original

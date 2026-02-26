@@ -16,14 +16,14 @@ export async function GET(request: NextRequest) {
 
   try {
     // Get trust score
-    const { data: trustScore, error: trustError } = await supabase
+    const { data: trustScore } = await supabase
       .from('trust_scores')
       .select('*')
       .eq('wallet', wallet.toLowerCase())
       .single()
 
     // Get vouches received
-    const { data: vouches, error: vouchError } = await supabase
+    const { data: vouches } = await supabase
       .from('vouches')
       .select('*')
       .eq('vouchee_wallet', wallet.toLowerCase())

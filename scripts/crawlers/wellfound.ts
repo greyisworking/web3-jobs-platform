@@ -1,6 +1,5 @@
 import { supabase } from '../../lib/supabase-script'
-import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchWithRetry, delay, cleanText, parseSalary, detectExperienceLevel } from '../utils'
+import { fetchWithRetry } from '../utils'
 
 interface CrawlerReturn {
   total: number
@@ -18,45 +17,9 @@ export async function crawlWellfound(): Promise<CrawlerReturn> {
   // Wellfound uses GraphQL API
   const graphqlUrl = 'https://wellfound.com/graphql'
 
-  // GraphQL query for crypto/web3 jobs
-  const query = `
-    query JobListingsSearchQuery($filters: JobListingsSearchFiltersInput!) {
-      talent {
-        jobListingsSearch(filters: $filters) {
-          results {
-            id
-            title
-            slug
-            remotePolicy
-            locationNames
-            compensation
-            startup {
-              id
-              name
-              slug
-              logoUrl
-              oneLiner
-            }
-            postedAt
-          }
-          totalCount
-        }
-      }
-    }
-  `
-
-  const variables = {
-    filters: {
-      keyword: 'web3 OR blockchain OR crypto OR defi',
-      remote: true,
-      page: 1,
-      perPage: 100,
-    },
-  }
-
   try {
     // Try to fetch from GraphQL API
-    const response = await fetchWithRetry(graphqlUrl, {
+    const _response = await fetchWithRetry(graphqlUrl, {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -106,7 +69,7 @@ export async function crawlWellfoundSitemap(): Promise<CrawlerReturn> {
   const sitemapUrl = 'https://wellfound.com/sitemap-jobs.xml'
 
   try {
-    const response = await fetchWithRetry(sitemapUrl, {
+    const _response = await fetchWithRetry(sitemapUrl, {
       headers: {
         'Accept': 'application/xml',
       },

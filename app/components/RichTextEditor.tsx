@@ -126,7 +126,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       attributes: {
         class: 'min-h-[400px] p-4 bg-a24-bg dark:bg-a24-dark-bg text-a24-text dark:text-a24-dark-text focus:outline-none prose prose-sm dark:prose-invert max-w-none',
       },
-      handleClick: (view, pos, event) => {
+      handleClick: (_view, _pos, event) => {
         const target = event.target as HTMLElement
         if (target.tagName === 'IMG') {
           setSelectedImage(target as HTMLImageElement)

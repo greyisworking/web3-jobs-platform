@@ -168,7 +168,7 @@ function formatPlainTextDescription(text: string): string {
 
   // 0) Preserve existing markdown bold patterns by temporarily replacing them
   const boldPatterns: string[] = []
-  result = result.replace(/\*\*([^*\n]+)\*\*/g, (match, content) => {
+  result = result.replace(/\*\*([^*\n]+)\*\*/g, (match, _content) => {
     boldPatterns.push(match)
     return `__BOLD_${boldPatterns.length - 1}__`
   })

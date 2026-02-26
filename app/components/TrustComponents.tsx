@@ -69,7 +69,6 @@ interface VouchButtonProps {
 }
 
 export function VouchButton({
-  targetWallet,
   hasVouched,
   vouchCount,
   onVouch,

@@ -1,6 +1,6 @@
 import { supabase, isSupabaseConfigured } from '../supabase-script'
 import { PrismaClient } from '@prisma/client'
-import { jobSchema, type JobInput } from './job'
+import { jobSchema } from './job'
 import { findPriorityCompany } from '../priority-companies'
 import { computeBadges } from '../badges'
 import { detectRole, normalizeEmploymentType, detectRegion } from '../../scripts/utils'

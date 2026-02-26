@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { syncOnChainProfile, calculateBadges } from '@/lib/onchain'
-import type { BadgeType } from '@/types/web3'
-
 // GET /api/profile/[address] - Get user profile with badges
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ address: string }> }
 ) {
   try {

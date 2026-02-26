@@ -2,7 +2,6 @@ import 'dotenv/config'
 import { supabase } from '../lib/supabase-script'
 import axios from 'axios'
 
-const BATCH_SIZE = 20
 const DELAY_MS = parseInt(process.env.CRAWL_DELAY_MS || '2000')
 
 // Patterns that indicate a job posting is expired/closed/deleted

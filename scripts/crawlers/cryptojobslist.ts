@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchHTML, delay, cleanText } from '../utils'
+import { fetchHTML, delay } from '../utils'
 
 interface CrawlerReturn {
   total: number

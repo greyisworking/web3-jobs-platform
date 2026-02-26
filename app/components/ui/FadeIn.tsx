@@ -89,8 +89,6 @@ interface StaggerProps {
 export function Stagger({
   children,
   className,
-  staggerDelay = 100,
-  direction = 'up',
 }: StaggerProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)

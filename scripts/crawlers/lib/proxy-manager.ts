@@ -2,8 +2,6 @@
  * Proxy Manager - Handles proxy rotation and health tracking
  */
 
-import axios from 'axios'
-
 export interface ProxyConfig {
   host: string
   port: number

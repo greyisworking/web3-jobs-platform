@@ -3,7 +3,7 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 // GET /api/articles/[slug] - Get single article
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
@@ -108,7 +108,7 @@ export async function PUT(
 
 // DELETE /api/articles/[slug] - Delete article (author can delete own drafts, admin can delete any)
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {

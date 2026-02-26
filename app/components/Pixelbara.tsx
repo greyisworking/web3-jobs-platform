@@ -1185,8 +1185,8 @@ const TO_THE_MOON_ART = `
 ...................--RR------RR------RR--.....*......................
 `
 
-// 8. Rugged - Big empty wallet with moth flying out
-const RUGGED_ART = `
+// 8. Rugged - Big empty wallet with moth flying out (unused, using RUG_ART instead)
+const _RUGGED_ART = `
 ..............EeeE..........EeeE..............
 .............EeiiE..........EeiiE.............
 .............EEEE............EEEE.............
@@ -1728,13 +1728,13 @@ function HodlPose({ dark }: { dark: boolean }) {
   return <PixelSvg pixels={pixels} w={size.w} h={size.h} dark={dark} />
 }
 
-function RugPose({ dark }: { dark: boolean }) {
+function _RugPose({ dark }: { dark: boolean }) {
   const pixels = parseArt(RUG_ART)
   const size = artSize(RUG_ART)
   return <PixelSvg pixels={pixels} w={size.w} h={size.h} dark={dark} />
 }
 
-function GmPose({ dark }: { dark: boolean }) {
+function _GmPose({ dark }: { dark: boolean }) {
   const pixels = parseArt(GM_SER_ART)
   const size = artSize(GM_SER_ART)
   return <PixelSvg pixels={pixels} w={size.w} h={size.h} dark={dark} />
@@ -1746,7 +1746,7 @@ function TouchGrassPose({ dark }: { dark: boolean }) {
   return <PixelSvg pixels={pixels} w={size.w} h={size.h} dark={dark} />
 }
 
-function OnsenPose({ dark }: { dark: boolean }) {
+function _OnsenPose({ dark }: { dark: boolean }) {
   const pixels = parseArt(HOT_TUB_ART)
   const size = artSize(HOT_TUB_ART)
   return <PixelSvg pixels={pixels} w={size.w} h={size.h} dark={dark} />
@@ -1792,7 +1792,7 @@ function LowBatteryPose({ dark }: { dark: boolean }) {
 }
 
 // Legacy alias
-function PhoneCheckPose({ dark }: { dark: boolean }) {
+function _PhoneCheckPose({ dark }: { dark: boolean }) {
   return <LowBatteryPose dark={dark} />
 }
 
@@ -1851,7 +1851,7 @@ function EcosystemFriendsPose({ dark }: { dark: boolean }) {
 }
 
 // Legacy alias
-function RidingMarketPose({ dark }: { dark: boolean }) {
+function _RidingMarketPose({ dark }: { dark: boolean }) {
   return <EcosystemFriendsPose dark={dark} />
 }
 

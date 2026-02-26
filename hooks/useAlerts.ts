@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
-import type { User } from '@supabase/supabase-js'
 
 export type AlertFrequency = 'daily' | 'weekly' | 'instant'
 
@@ -21,7 +20,7 @@ export interface JobAlert {
 }
 
 export function useAlerts() {
-  const [user, setUser] = useState<User | null>(null)
+  const [, setUser] = useState<unknown>(null)
   const [alerts, setAlerts] = useState<JobAlert[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

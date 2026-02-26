@@ -175,7 +175,7 @@ async function main() {
 
     for (const [company, stat] of atsCompanies.slice(0, 30)) {
       const descStatus = stat.withDesc > 0 ? '✅' : '❌'
-      const sources = Array.from(stat.sources).join(', ')
+      const _sources = Array.from(stat.sources).join(', ')
 
       // Extract board token from URL
       let token = ''

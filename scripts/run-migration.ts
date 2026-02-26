@@ -66,7 +66,7 @@ async function runMigration(migrationFile: string) {
       }
     } catch (err) {
       // Direct SQL execution if rpc doesn't exist
-      const { error } = await supabase.from('_migrations').select().limit(0)
+      const { error: _error } = await supabase.from('_migrations').select().limit(0)
       console.error(`Error executing: ${statement.substring(0, 60)}...`)
       errorCount++
     }

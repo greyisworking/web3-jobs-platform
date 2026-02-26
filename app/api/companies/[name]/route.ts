@@ -321,7 +321,7 @@ async function enrichCompanyData(companyName: string): Promise<CompanyInfo | nul
 }
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ name: string }> }
 ) {
   const { name } = await params

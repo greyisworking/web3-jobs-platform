@@ -3,7 +3,6 @@ import { createClient } from '@supabase/supabase-js'
 import {
   isValidWalletAddress,
   checkRateLimit,
-  getRateLimitHeaders,
   rateLimitedResponse,
   checkSybilRisk,
   meetsMinimumRequirements,
@@ -26,7 +25,7 @@ export async function POST(request: NextRequest) {
   try {
     // Get client IP for rate limiting
     const forwardedFor = request.headers.get('x-forwarded-for')
-    const ip = forwardedFor?.split(',')[0]?.trim() || 'unknown'
+    const _ip = forwardedFor?.split(',')[0]?.trim() || 'unknown'
 
     const body = await request.json()
     const { voucherWallet, voucheeWallet, message } = body

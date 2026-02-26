@@ -206,10 +206,9 @@ export function fuzzyMatch(text: string, query: string, threshold = 0.3): boolea
   if (!text.trim()) return false
 
   const normalizedText = normalize(text)
-  const normalizedQuery = normalize(query)
 
   // Exact substring match
-  if (normalizedText.includes(normalizedQuery)) return true
+  if (normalizedText.includes(normalize(query))) return true
 
   // Token-based fuzzy match
   const queryTokens = tokenize(query)
@@ -239,7 +238,6 @@ export function fuzzyMatch(text: string, query: string, threshold = 0.3): boolea
 export function highlightMatches(text: string, query: string): string {
   if (!query.trim()) return text
 
-  const normalizedQuery = normalize(query)
   const queryTokens = tokenize(query)
 
   let result = text

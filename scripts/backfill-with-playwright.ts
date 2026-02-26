@@ -386,27 +386,6 @@ async function fetchDescription(job: Job): Promise<string | null> {
   return fetchGenericDescription(url)
 }
 
-// ============ Clean HTML to markdown ============
-
-function cleanHtmlToText(html: string): string {
-  const $ = cheerio.load(html)
-
-  // Remove unwanted elements
-  $('script, style, nav, footer, header, aside, iframe, form, noscript').remove()
-
-  // Convert to text
-  let text = $.text()
-
-  // Clean UI text
-  text = cleanUIText(text)
-
-  // Normalize whitespace
-  text = text.replace(/\n{3,}/g, '\n\n')
-  text = text.replace(/[ \t]{2,}/g, ' ')
-
-  return text.trim()
-}
-
 // ============ Main ============
 
 async function main() {

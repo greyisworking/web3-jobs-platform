@@ -933,7 +933,7 @@ function generateWhySlaps(metadata: JobMetadata): string {
 
 function buildMarkdownSummary(
   sections: SummarizeResult['sections'],
-  metadata: JobMetadata
+  _metadata: JobMetadata
 ): string {
   const parts: string[] = []
 
@@ -1197,7 +1197,7 @@ function splitIntoBullets(text: string): string[] {
   // Try to split on commas followed by "and" or action verbs
   const parts = text.split(/,\s*(?=and\s|[a-z]+\s+(?:to|with|for|on|in)\s)/i)
   if (parts.length > 2) {
-    return parts.map((p, i) => {
+    return parts.map((p) => {
       const cleaned = p.trim().replace(/^and\s+/i, '')
       return `- ${cleaned}`
     })

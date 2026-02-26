@@ -61,7 +61,7 @@ async function main() {
 
   let totalDuplicateJobs = 0
   for (const [key, dupeJobs] of duplicates.slice(0, 20)) {
-    const [company, title] = key.split('|')
+    const [_company, _title] = key.split('|')
     console.log(`  ${dupeJobs.length}x "${dupeJobs[0].title}" @ ${dupeJobs[0].company}`)
     for (const job of dupeJobs) {
       console.log(`      - [${job.source}] ${job.url.substring(0, 60)}...`)

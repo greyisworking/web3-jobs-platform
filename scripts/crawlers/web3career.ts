@@ -1,9 +1,8 @@
-import type { CheerioAPI } from 'cheerio'
 import * as cheerio from 'cheerio'
 import { chromium, Browser, Page } from 'playwright'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchHTML, delay, cleanText, parseSalary, detectExperienceLevel, detectRemoteType, getRandomUserAgent, delayWithJitter } from '../utils'
+import { fetchHTML, cleanText, parseSalary, detectExperienceLevel, detectRemoteType, getRandomUserAgent, delayWithJitter } from '../utils'
 import { cleanDescriptionHtml } from '../../lib/clean-description'
 
 interface JobData {

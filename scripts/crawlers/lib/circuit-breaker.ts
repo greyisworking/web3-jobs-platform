@@ -99,7 +99,7 @@ class CircuitBreaker {
   /**
    * Record a failed request
    */
-  recordFailure(name: string, error?: Error) {
+  recordFailure(name: string, _error?: Error) {
     const circuit = this.getCircuit(name)
     circuit.lastFailure = Date.now()
     circuit.failures++

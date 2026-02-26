@@ -7,13 +7,6 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-interface RateLimitEntry {
-  key: string
-  count: number
-  reset_at: string
-  created_at: string
-}
-
 interface RateLimitResult {
   allowed: boolean
   remaining: number
@@ -38,8 +31,6 @@ export async function checkRateLimit(
   identifier: string = 'default'
 ): Promise<RateLimitResult> {
   const fullKey = `${identifier}:${key}`
-  const now = Date.now()
-  const resetAt = new Date(now + windowMs)
 
   // Try database first
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {

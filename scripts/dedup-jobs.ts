@@ -97,7 +97,7 @@ async function main() {
 
   const idsToDeactivate: string[] = []
 
-  for (const [key, dupeJobs] of duplicates) {
+  for (const [_key, dupeJobs] of duplicates) {
     // Sort by priority (highest first), then by description length (prefer jobs with descriptions)
     const sorted = [...dupeJobs].sort((a, b) => {
       const priorityDiff = getSourcePriority(b.source) - getSourcePriority(a.source)

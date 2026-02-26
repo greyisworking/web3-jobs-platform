@@ -24,7 +24,7 @@ const STATUS_ORDER: ApplicationStatus[] = [
   'withdrawn',
 ]
 
-export default function ApplicationTracker({ jobId, jobTitle, company }: ApplicationTrackerProps) {
+export default function ApplicationTracker({ jobId }: ApplicationTrackerProps) {
   const { applications, trackApplication, removeApplication, loading } = useApplications()
   const [isOpen, setIsOpen] = useState(false)
   const [notes, setNotes] = useState('')

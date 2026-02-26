@@ -49,9 +49,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const {
       companyName,
-      companyWebsite,
+      companyWebsite: _companyWebsite,
       sector,
-      contactEmail,
+      contactEmail: _contactEmail,
       jobTitle,
       jobType,
       location,

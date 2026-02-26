@@ -233,7 +233,7 @@ function _MiniChart({ data }: { data: { date: string; clicks: number }[] }) {
 
   return (
     <div role="img" aria-label="Click trend chart (last 7 days)" className="flex items-end gap-1 h-16">
-      {last7Days.map((d, i) => (
+      {last7Days.map((d) => (
         <div
           key={d.date}
           className="flex-1 bg-neun-primary/20 hover:bg-neun-primary/40 transition-colors rounded-t cursor-pointer relative group"

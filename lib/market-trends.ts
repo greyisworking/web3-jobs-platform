@@ -125,7 +125,6 @@ export async function getMarketTrends(): Promise<MarketTrendsData | null> {
     const supabase = await createSupabaseServerClient()
 
     // Time periods
-    const now = new Date()
     const threeMonthsAgo = new Date()
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
     const sixMonthsAgo = new Date()

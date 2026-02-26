@@ -323,7 +323,7 @@ export async function humanize(
   aiScore: number
   wasModified: boolean
 }> {
-  const { useAI = false, threshold = 30 } = options
+  const { useAI: _useAI = false, threshold = 30 } = options
 
   const aiScore = calculateAIScore(text)
 

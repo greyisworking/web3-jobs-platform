@@ -31,7 +31,7 @@ const PRIORITY_COMPANIES_TIMEOUT_MS = 8 * 60 * 1000  // 8 minutes for priority-c
 async function withTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number,
-  sourceName: string
+  _sourceName: string
 ): Promise<T> {
   let timeoutId: NodeJS.Timeout
   const timeoutPromise = new Promise<never>((_, reject) => {
@@ -48,11 +48,6 @@ async function withTimeout<T>(
     clearTimeout(timeoutId!)
     throw error
   }
-}
-
-interface CrawlerReturn {
-  total: number  // Total jobs processed (saved or updated)
-  new: number    // Brand new jobs added
 }
 
 interface CrawlResult {

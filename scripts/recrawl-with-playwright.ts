@@ -3,7 +3,7 @@
  * Handles JavaScript-rendered content (Ashby, Lever, Greenhouse, etc.)
  */
 
-import { chromium, Browser, Page } from 'playwright'
+import { chromium, Page } from 'playwright'
 import { createClient } from '@supabase/supabase-js'
 import 'dotenv/config'
 

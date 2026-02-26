@@ -39,7 +39,7 @@ function cleanText(text: string): string {
 
 // cleanDescription removed — now using shared cleanDescriptionText() from lib/clean-description.ts
 
-function extractHTML($element: cheerio.Cheerio<any>, $: cheerio.CheerioAPI): string {
+function extractHTML($element: cheerio.Cheerio<any>, _$: cheerio.CheerioAPI): string {
   if (!$element.length) return ''
 
   // Clone to avoid modifying original
