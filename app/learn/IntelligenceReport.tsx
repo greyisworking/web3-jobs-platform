@@ -216,7 +216,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
             {/* Heatmap grid */}
             <div className="overflow-x-auto">
               {/* Column headers */}
-              <div className="grid grid-cols-[minmax(120px,1fr)_repeat(4,72px)] sm:grid-cols-[minmax(140px,1fr)_repeat(4,80px)] px-3 py-2 border-b border-a24-border/30 dark:border-a24-dark-border/30">
+              <div className="grid grid-cols-[minmax(80px,1fr)_repeat(4,56px)] sm:grid-cols-[minmax(140px,1fr)_repeat(4,80px)] px-3 py-2 border-b border-a24-border/30 dark:border-a24-dark-border/30">
                 <span />
                 {LEVELS.map(level => (
                   <span
@@ -238,7 +238,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.04, duration: 0.3 }}
-                      className="grid grid-cols-[minmax(120px,1fr)_repeat(4,72px)] sm:grid-cols-[minmax(140px,1fr)_repeat(4,80px)] px-3 group hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors"
+                      className="grid grid-cols-[minmax(80px,1fr)_repeat(4,56px)] sm:grid-cols-[minmax(140px,1fr)_repeat(4,80px)] px-3 group hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors"
                     >
                       {/* Skill name */}
                       <div className="flex items-center gap-2 py-2 min-w-0">
