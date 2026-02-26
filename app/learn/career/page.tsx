@@ -77,7 +77,7 @@ const careerPaths = [
 export default function CareerPathsPage() {
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <main id="main-content" className="max-w-6xl mx-auto px-6 py-20 md:py-32">
+      <main id="main-content" className="max-w-6xl mx-auto px-6 pt-24 pb-12">
         {/* Breadcrumb */}
         <Link
           href="/learn"

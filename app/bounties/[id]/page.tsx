@@ -120,7 +120,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
         <div className="max-w-6xl mx-auto px-6">
           <SubpageHeader title="B O U N T Y" />
         </div>
-        <main className="max-w-4xl mx-auto px-6 py-20">
+        <main className="max-w-4xl mx-auto px-6 pt-24 pb-12">
           <div className="text-center">
             <Pixelbara pose="loading" size={100} className="mx-auto mb-4" />
             <p className="text-a24-muted">Loading bounty...</p>
@@ -137,7 +137,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
         <div className="max-w-6xl mx-auto px-6">
           <SubpageHeader title="B O U N T Y" />
         </div>
-        <main className="max-w-4xl mx-auto px-6 py-20">
+        <main className="max-w-4xl mx-auto px-6 pt-24 pb-12">
           <div className="text-center">
             <Pixelbara pose="question" size={120} className="mx-auto mb-4" />
             <p className="text-lg text-a24-text mb-2">Bounty not found</p>
@@ -162,7 +162,7 @@ export default function BountyDetailPage({ params }: { params: Promise<{ id: str
         <SubpageHeader title="B O U N T Y" />
       </div>
 
-      <main className="max-w-4xl mx-auto px-6 pb-20">
+      <main className="max-w-4xl mx-auto px-6 pt-24 pb-12">
         {/* Back Link */}
         <Link
           href="/bounties"

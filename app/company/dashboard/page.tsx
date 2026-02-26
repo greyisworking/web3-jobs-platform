@@ -71,7 +71,7 @@ export default async function CompanyDashboardPage() {
         </div>
         <Link
           href="/company/dashboard/jobs/new"
-          className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-a24-text font-medium transition-colors"
+          className="flex items-center gap-2 px-6 py-3 bg-neun-success hover:bg-neun-success/90 text-a24-text font-medium transition-colors"
         >
           <Plus className="w-5 h-5" />
           Post New Job
@@ -114,7 +114,7 @@ export default async function CompanyDashboardPage() {
             <h2 className="text-lg font-bold text-a24-text">Recent Job Posts</h2>
             <Link
               href="/company/dashboard/jobs"
-              className="text-sm text-purple-400 hover:text-purple-300 flex items-center gap-1"
+              className="text-sm text-neun-success hover:text-neun-success/80 flex items-center gap-1"
             >
               View all <ArrowRight className="w-4 h-4" />
             </Link>
@@ -158,7 +158,7 @@ export default async function CompanyDashboardPage() {
               <p className="text-a24-muted mt-4">No jobs posted yet</p>
               <Link
                 href="/company/dashboard/jobs/new"
-                className="inline-block mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-a24-text text-sm font-medium transition-colors"
+                className="inline-block mt-4 px-4 py-2 bg-neun-success hover:bg-neun-success/90 text-a24-text text-sm font-medium transition-colors"
               >
                 Post Your First Job
               </Link>
@@ -172,9 +172,9 @@ export default async function CompanyDashboardPage() {
           <div className="space-y-3">
             <Link
               href="/company/dashboard/jobs/new"
-              className="block p-4 bg-purple-600/20 border border-purple-600/30 hover:bg-purple-600/30 transition-colors"
+              className="block p-4 bg-neun-success/20 border border-neun-success/30 hover:bg-neun-success/30 transition-colors"
             >
-              <h3 className="font-medium text-purple-400">Post New Job</h3>
+              <h3 className="font-medium text-neun-success">Post New Job</h3>
               <p className="text-sm text-a24-muted mt-1">
                 Create a new job listing
               </p>
@@ -218,7 +218,7 @@ function StatCard({
   return (
     <div className="bg-a24-surface border border-a24-border p-6">
       <div className="flex items-center gap-3 mb-3">
-        <div className="p-2 bg-purple-600/20 text-purple-400">
+        <div className="p-2 bg-neun-success/20 text-neun-success">
           <Icon className="w-5 h-5" />
         </div>
         <span className="text-sm text-a24-muted">{label}</span>

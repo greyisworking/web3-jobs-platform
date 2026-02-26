@@ -113,7 +113,7 @@ export default function CompanyJobsPage() {
         </div>
         <Link
           href="/company/dashboard/jobs/new"
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-a24-text font-medium transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-neun-success hover:bg-neun-success/90 text-a24-text font-medium transition-colors"
         >
           <Plus className="w-4 h-4" />
           Post New Job
@@ -129,7 +129,7 @@ export default function CompanyJobsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search jobs..."
-            className="w-full pl-10 pr-4 py-2 bg-a24-surface border border-a24-border text-a24-text placeholder-gray-500 focus:border-purple-500 outline-none"
+            className="w-full pl-10 pr-4 py-2 bg-a24-surface border border-a24-border text-a24-text placeholder-gray-500 focus:border-neun-success outline-none"
           />
         </div>
         <div className="flex gap-2">
@@ -139,7 +139,7 @@ export default function CompanyJobsPage() {
               onClick={() => setFilter(f)}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 filter === f
-                  ? 'bg-purple-600 text-a24-text'
+                  ? 'bg-neun-success text-a24-text'
                   : 'bg-a24-surface text-a24-muted hover:text-a24-text'
               }`}
             >
@@ -235,7 +235,7 @@ export default function CompanyJobsPage() {
           {!search && (
             <Link
               href="/company/dashboard/jobs/new"
-              className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-a24-text font-medium transition-colors"
+              className="mt-4 px-4 py-2 bg-neun-success hover:bg-neun-success/90 text-a24-text font-medium transition-colors"
             >
               Post New Job
             </Link>

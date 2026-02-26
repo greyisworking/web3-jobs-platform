@@ -41,8 +41,8 @@ const MODE_CONFIG = {
     label: '루디움 아티클',
     description: '교육용 아티클 (영문 + 한글)',
     icon: BookOpen,
-    color: 'text-purple-500',
-    bgColor: 'bg-purple-500/10',
+    color: 'text-neun-success',
+    bgColor: 'bg-neun-success/10',
     dualLanguage: true,
   },
 }
@@ -154,8 +154,8 @@ export default function ContentGeneratorPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20">
-          <Sparkles className="h-6 w-6 text-purple-400" />
+        <div className="p-2 rounded-lg bg-gradient-to-br from-neun-success/20 to-pink-500/20">
+          <Sparkles className="h-6 w-6 text-neun-success" />
         </div>
         <div>
           <h1 className="text-2xl font-bold">콘텐츠 생성기</h1>

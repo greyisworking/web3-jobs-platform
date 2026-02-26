@@ -85,7 +85,7 @@ export default function BountiesPage() {
         <SubpageHeader title="B O U N T I E S" />
       </div>
 
-      <main className="max-w-6xl mx-auto px-6 pb-20">
+      <main className="max-w-6xl mx-auto px-6 pt-24 pb-12">
         {/* Hero */}
         <div className="py-12 border-b border-a24-border mb-8">
           <div className="flex items-center justify-between">

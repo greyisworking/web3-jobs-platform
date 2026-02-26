@@ -107,7 +107,7 @@ export default function CreateBountyPage() {
           <SubpageHeader title="P O S T  B O U N T Y" />
         </div>
 
-        <main className="max-w-2xl mx-auto px-6 py-20">
+        <main className="max-w-2xl mx-auto px-6 pt-24 pb-12">
           <div className="text-center">
             <Pixelbara pose="question" size={150} className="mx-auto mb-6" />
             <h2 className="text-2xl font-bold text-a24-text mb-4">Connect Wallet to Post</h2>
@@ -129,7 +129,7 @@ export default function CreateBountyPage() {
         <SubpageHeader title="P O S T  B O U N T Y" />
       </div>
 
-      <main className="max-w-2xl mx-auto px-6 pb-20">
+      <main className="max-w-2xl mx-auto px-6 pt-24 pb-12">
         {/* Back Link */}
         <Link
           href="/bounties"

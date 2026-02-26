@@ -93,7 +93,7 @@ export default function CompanyLoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="company@example.com"
                 required
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-a24-text placeholder-gray-500 focus:border-purple-500 outline-none transition-colors"
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-a24-text placeholder-gray-500 focus:border-neun-success outline-none transition-colors"
               />
             </div>
 
@@ -108,7 +108,7 @@ export default function CompanyLoginPage() {
                 placeholder="********"
                 required
                 minLength={6}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-a24-text placeholder-gray-500 focus:border-purple-500 outline-none transition-colors"
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-a24-text placeholder-gray-500 focus:border-neun-success outline-none transition-colors"
               />
             </div>
 

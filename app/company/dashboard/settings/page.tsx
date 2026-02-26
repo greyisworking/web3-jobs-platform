@@ -117,7 +117,7 @@ export default function CompanySettingsPage() {
         {/* Basic Info */}
         <div className="bg-a24-surface border border-a24-border p-6 space-y-4">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-purple-600/20 text-purple-400">
+            <div className="p-2 bg-neun-success/20 text-neun-success">
               <Building2 className="w-5 h-5" />
             </div>
             <h2 className="text-lg font-medium text-a24-text">Company Profile</h2>
@@ -132,7 +132,7 @@ export default function CompanySettingsPage() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
-              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-neun-success outline-none"
             />
           </div>
 
@@ -145,7 +145,7 @@ export default function CompanySettingsPage() {
               value={form.website}
               onChange={(e) => setForm({ ...form, website: e.target.value })}
               placeholder="https://your-company.com"
-              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-neun-success outline-none"
             />
           </div>
 
@@ -158,7 +158,7 @@ export default function CompanySettingsPage() {
               value={form.logo_url}
               onChange={(e) => setForm({ ...form, logo_url: e.target.value })}
               placeholder="https://your-company.com/logo.png"
-              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-neun-success outline-none"
             />
           </div>
 
@@ -171,7 +171,7 @@ export default function CompanySettingsPage() {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Tell candidates about your company..."
               rows={4}
-              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none resize-none"
+              className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-neun-success outline-none resize-none"
             />
           </div>
 
@@ -183,7 +183,7 @@ export default function CompanySettingsPage() {
               <select
                 value={form.industry}
                 onChange={(e) => setForm({ ...form, industry: e.target.value })}
-                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-neun-success outline-none"
               >
                 <option value="">Select industry</option>
                 {INDUSTRIES.map((i) => (
@@ -198,7 +198,7 @@ export default function CompanySettingsPage() {
               <select
                 value={form.size}
                 onChange={(e) => setForm({ ...form, size: e.target.value })}
-                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text focus:border-neun-success outline-none"
               >
                 <option value="">Select size</option>
                 {COMPANY_SIZES.map((s) => (
@@ -218,7 +218,7 @@ export default function CompanySettingsPage() {
                 value={form.location}
                 onChange={(e) => setForm({ ...form, location: e.target.value })}
                 placeholder="e.g., San Francisco, Remote"
-                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-neun-success outline-none"
               />
             </div>
             <div>
@@ -232,7 +232,7 @@ export default function CompanySettingsPage() {
                 placeholder="2020"
                 min="1900"
                 max={new Date().getFullYear()}
-                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-a24-surface border border-a24-border text-a24-text placeholder-a24-muted focus:border-neun-success outline-none"
               />
             </div>
           </div>
@@ -243,7 +243,7 @@ export default function CompanySettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-a24-text font-medium transition-colors"
+            className="flex items-center gap-2 px-6 py-3 bg-neun-success hover:bg-neun-success/90 disabled:opacity-50 text-a24-text font-medium transition-colors"
           >
             <Save className="w-4 h-4" />
             {saving ? 'Saving...' : 'Save Changes'}

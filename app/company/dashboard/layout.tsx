@@ -84,7 +84,7 @@ export default async function CompanyDashboardLayout({
           {/* Post Job CTA */}
           <Link
             href="/company/dashboard/jobs/new"
-            className="flex items-center gap-3 px-4 py-3 mt-4 bg-purple-600 hover:bg-purple-700 text-a24-text transition-colors"
+            className="flex items-center gap-3 px-4 py-3 mt-4 bg-neun-success hover:bg-neun-success/90 text-a24-text transition-colors"
           >
             <Plus className="w-5 h-5" />
             <span className="text-sm font-medium">Post New Job</span>
@@ -94,7 +94,7 @@ export default async function CompanyDashboardLayout({
         {/* User section */}
         <div className="p-4 border-t border-a24-border">
           <div className="flex items-center gap-3 px-2 mb-3">
-            <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-a24-text text-sm font-bold">
+            <div className="w-8 h-8 bg-neun-success rounded-full flex items-center justify-center text-a24-text text-sm font-bold">
               {company?.name?.[0]?.toUpperCase() || 'C'}
             </div>
             <div className="flex-1 min-w-0">

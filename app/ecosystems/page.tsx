@@ -39,13 +39,13 @@ function EcosystemCard({ eco, index }: { eco: EcosystemWithCount; index: number 
         </div>
 
         {/* Name - BOLDER */}
-        <h3 className="text-xl font-bold text-a24-text dark:text-a24-dark-text mb-2 group-hover:underline decoration-2 underline-offset-4">
+        <h3 className="text-xl font-light uppercase tracking-[0.2em] text-a24-text dark:text-a24-dark-text mb-2 group-hover:underline decoration-2 underline-offset-4">
           {eco.name}
         </h3>
 
         {/* Job count - BIGGER */}
         <p className="text-base text-a24-muted dark:text-a24-dark-muted mb-4">
-          <span className="font-bold text-2xl text-a24-text dark:text-a24-dark-text">{eco.jobCount}</span> jobs
+          <span className="font-medium text-2xl text-a24-text dark:text-a24-dark-text">{eco.jobCount}</span> jobs
         </p>
 
         {/* View jobs link - BOLDER */}
@@ -145,7 +145,7 @@ export default function EcosystemsPage() {
           </p>
           <Link
             href="/jobs"
-            className="inline-flex items-center gap-3 px-10 py-5 text-base font-bold uppercase tracking-wider bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg hover:scale-105 transition-transform"
+            className="inline-flex items-center gap-3 px-10 py-5 text-base font-medium uppercase tracking-wider bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg hover:scale-105 transition-transform"
           >
             Browse all jobs
             <ArrowRight className="w-5 h-5" />

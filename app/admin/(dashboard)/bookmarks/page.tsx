@@ -99,7 +99,7 @@ export default function AdminBookmarksPage() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-3xl font-bold text-purple-600">{stats.uniqueJobs}</p>
+            <p className="text-3xl font-bold text-neun-success">{stats.uniqueJobs}</p>
             <p className="text-sm text-muted-foreground">북마크된 공고</p>
           </CardContent>
         </Card>

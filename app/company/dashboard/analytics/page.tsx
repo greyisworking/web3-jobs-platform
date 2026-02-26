@@ -117,7 +117,7 @@ export default function CompanyAnalyticsPage() {
               onClick={() => setTimeRange(range)}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 timeRange === range
-                  ? 'bg-purple-600 text-a24-text'
+                  ? 'bg-neun-success text-a24-text'
                   : 'bg-a24-surface text-a24-muted hover:text-a24-text'
               }`}
             >
@@ -147,7 +147,7 @@ export default function CompanyAnalyticsPage() {
 
         <div className="bg-a24-surface border border-a24-border p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-2 bg-purple-500/20 text-purple-400">
+            <div className="p-2 bg-neun-success/20 text-neun-success">
               <Users className="w-5 h-5" />
             </div>
             {overall.appliesTrend > 0 && (
@@ -254,8 +254,8 @@ export default function CompanyAnalyticsPage() {
       </div>
 
       {/* Tips */}
-      <div className="bg-purple-600/10 border border-purple-600/20 p-6">
-        <h3 className="text-lg font-medium text-purple-400 mb-3">
+      <div className="bg-neun-success/10 border border-neun-success/20 p-6">
+        <h3 className="text-lg font-medium text-neun-success mb-3">
           Tips to improve performance
         </h3>
         <ul className="space-y-2 text-sm text-gray-300">

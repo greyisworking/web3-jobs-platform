@@ -51,7 +51,7 @@ export default function ArticlesPage() {
         <SubpageHeader title="A R T I C L E S" />
       </div>
 
-      <main className="max-w-3xl mx-auto px-6 pb-20">
+      <main className="max-w-3xl mx-auto px-6 pt-24 pb-12">
         {/* Hero with Pixelbara */}
         <div className="py-12 border-b border-a24-border mb-8">
           <div className="flex items-center justify-between">
