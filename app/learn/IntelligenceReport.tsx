@@ -104,13 +104,16 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
   return (
     <div className={`transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
       {/* Role Tabs */}
-      <nav className="mb-6 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+      <nav role="tablist" className="mb-6 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
         {ROLE_TABS.map(tab => {
           const isActive = activeRole === tab.key
           const tabRole = data.roles[tab.key]
           return (
             <button
               key={tab.key}
+              role="tab"
+              aria-selected={isActive}
+              tabIndex={isActive ? 0 : -1}
               onClick={() => switchRole(tab.key)}
               className={`
                 shrink-0 px-3.5 py-2 rounded text-xs font-medium tracking-wide transition-all duration-200 cursor-pointer
@@ -192,7 +195,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                   href={`/jobs?role=${activeRole === 'all' ? '' : activeRole}`}
                   className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-[0.15em] text-neun-success hover:text-neun-success/80 transition-colors cursor-pointer"
                 >
-                  See all {role.label} jobs <ArrowUpRight className="w-3 h-3" />
+                  {activeRole === 'all' ? 'See all jobs' : `See all ${role.label} jobs`} <ArrowUpRight className="w-3 h-3" />
                 </Link>
               </div>
             )}

@@ -74,7 +74,7 @@ export default function Footer() {
 
           {/* Copyright */}
           <p className="text-[10px] font-light text-a24-muted/60 dark:text-a24-dark-muted/60 tracking-[0.15em]">
-            &copy; 2026 NEUN
+            &copy; {new Date().getFullYear()} NEUN
           </p>
         </div>
       </div>

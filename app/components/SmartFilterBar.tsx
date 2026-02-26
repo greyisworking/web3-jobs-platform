@@ -179,6 +179,7 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
           </div>
           <button
             onClick={handleTier1Toggle}
+            aria-pressed={filters.tier1VCOnly}
             className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
               filters.tier1VCOnly
                 ? 'bg-amber-500'
@@ -212,6 +213,7 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
               onFilterChange(next)
               trackEvent('filter_use', { filter_key: 'daoJobsOnly', filter_value: String(next.daoJobsOnly) })
             }}
+            aria-pressed={filters.daoJobsOnly}
             className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
               filters.daoJobsOnly
                 ? 'bg-neun-success'
@@ -245,6 +247,7 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
               onFilterChange(next)
               trackEvent('filter_use', { filter_key: 'tokenGatedOnly', filter_value: String(next.tokenGatedOnly) })
             }}
+            aria-pressed={filters.tokenGatedOnly}
             className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
               filters.tokenGatedOnly
                 ? 'bg-yellow-500'
@@ -279,6 +282,7 @@ export default function SmartFilterBar({ onFilterChange }: SmartFilterBarProps) 
               onFilterChange(next)
               trackEvent('filter_use', { filter_key: 'remoteOnly', filter_value: String(next.remoteOnly) })
             }}
+            aria-pressed={filters.remoteOnly}
             className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
               filters.remoteOnly
                 ? 'bg-cyan-500'

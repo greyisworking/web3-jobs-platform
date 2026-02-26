@@ -156,7 +156,7 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
         variants={cardHoverVariants}
         transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="relative block p-3 sm:p-4 min-h-[140px] sm:h-[160px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border transition-all duration-300 ease-out group flex flex-col overflow-hidden touch-target rounded-sm hover:shadow-card-hover dark:hover:shadow-card-hover-dark hover:border-neun-success/40 dark:hover:border-neun-success/30">
+        <article className="relative block p-3 sm:p-4 min-h-[140px] sm:h-[160px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border transition-all duration-300 ease-out group flex flex-col overflow-hidden touch-target rounded-sm hover:shadow-card-hover dark:hover:shadow-card-hover-dark hover:border-neun-success/40 dark:hover:border-neun-success/30">
           {/* Stretched link covers full card area; sits behind interactive children */}
           <Link
             href={`/jobs/${job.id}`}
@@ -249,7 +249,7 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
             </span>
           )}
         </div>
-      </div>
+      </article>
       </motion.div>
     </motion.div>
   )

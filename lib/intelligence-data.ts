@@ -358,7 +358,8 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
     for (const [skill, count] of Object.entries(skillCounts)) {
       const prevCount = prevSkillCounts[skill] || 0
       if (prevCount === 0 && count >= 3) {
-        risingSkills.push({ skill, change: 100 })
+        const recentRate = Math.round((count / jobs.length) * 100)
+        risingSkills.push({ skill, change: recentRate })
         continue
       }
       if (prevCount > 0 && prev.length > 0 && jobs.length > 0) {

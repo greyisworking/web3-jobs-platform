@@ -219,6 +219,9 @@ export default function SearchWithSuggestions({
       <AnimatePresence>
         {showDropdown && (
           <motion.div
+            role="listbox"
+            aria-live="polite"
+            aria-label="Search suggestions"
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
@@ -231,6 +234,8 @@ export default function SearchWithSuggestions({
 
               return (
                 <button
+                  role="option"
+                  aria-selected={isActive}
                   key={`${item.type}-${item.text}`}
                   onClick={() => {
                     setQuery(item.text)

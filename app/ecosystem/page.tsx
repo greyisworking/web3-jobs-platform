@@ -47,7 +47,7 @@ function CompanyCard({ company, index, jobCount }: CompanyCardProps) {
           ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
           : company.tier === 'P1'
             ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
-            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
       }`}>
         {company.tier}
       </span>
@@ -162,7 +162,7 @@ function InvestorCard({ vc, index }: { vc: VCData; index: number }) {
             ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
             : vc.tier === 'major'
               ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
         }`}>
           {vc.tier === 'top' ? 'TOP TIER' : vc.tier === 'major' ? 'MAJOR' : 'NOTABLE'}
         </span>
@@ -352,8 +352,11 @@ function EcosystemContent() {
         </div>
 
         {/* Tab Toggle */}
-        <div className="flex gap-0 mb-8 border-b border-a24-border dark:border-a24-dark-border">
+        <div role="tablist" className="flex gap-0 mb-8 border-b border-a24-border dark:border-a24-dark-border">
           <button
+            role="tab"
+            aria-selected={activeTab === 'companies'}
+            tabIndex={activeTab === 'companies' ? 0 : -1}
             onClick={() => handleTabChange('companies')}
             className={`relative px-6 py-3 text-[11px] uppercase tracking-wider font-medium transition-colors ${
               activeTab === 'companies'
@@ -367,6 +370,9 @@ function EcosystemContent() {
             )}
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'investors'}
+            tabIndex={activeTab === 'investors' ? 0 : -1}
             onClick={() => handleTabChange('investors')}
             className={`relative px-6 py-3 text-[11px] uppercase tracking-wider font-medium transition-colors ${
               activeTab === 'investors'
