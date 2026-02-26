@@ -127,7 +127,7 @@ export default function AccountPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-        <main className="max-w-4xl mx-auto px-6 py-20 md:py-32">
+        <main className="max-w-4xl mx-auto px-6 pt-24 pb-12">
           <div className="text-center">
             <div className="w-6 h-6 border border-a24-muted dark:border-a24-dark-muted border-t-a24-text dark:border-t-a24-dark-text rounded-full animate-spin mx-auto" />
           </div>
@@ -138,7 +138,7 @@ export default function AccountPage() {
 
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <main className="max-w-4xl mx-auto px-6 py-20 md:py-32">
+      <main className="max-w-4xl mx-auto px-6 pt-24 pb-12">
         <div className="flex flex-col md:flex-row gap-8 md:gap-12">
           {/* Sidebar */}
           <nav className="md:w-52 flex-shrink-0">

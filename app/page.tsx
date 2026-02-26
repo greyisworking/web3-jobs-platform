@@ -136,12 +136,12 @@ export default function Home() {
       <ScrollReveal>
         <section className="max-w-6xl mx-auto px-4 sm:px-6 section-spacing">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline gap-2 mb-2">
-            <h2 className="text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-[0.15em] text-a24-text dark:text-a24-dark-text">
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-light uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">
               Featured Positions
             </h2>
             <Link
               href="/jobs"
-              className="group inline-flex items-center gap-2 text-[11px] sm:text-[12px] uppercase tracking-[0.2em] font-bold text-neun-success hover:text-neun-success/80 transition-colors touch-target"
+              className="group inline-flex items-center gap-2 text-[11px] sm:text-[12px] uppercase tracking-[0.2em] font-medium text-neun-success hover:text-neun-success/80 transition-colors touch-target"
             >
               View All
               <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1" />
@@ -159,7 +159,7 @@ export default function Home() {
               </p>
               <button
                 onClick={fetchFeaturedJobs}
-                className="text-[11px] uppercase tracking-[0.2em] font-bold text-neun-success hover:text-neun-success/80 border border-neun-success/50 px-4 py-2 transition-colors"
+                className="text-[11px] uppercase tracking-[0.2em] font-medium text-neun-success hover:text-neun-success/80 border border-neun-success/50 px-4 py-2 transition-colors"
               >
                 Retry
               </button>

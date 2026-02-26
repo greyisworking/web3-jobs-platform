@@ -62,7 +62,7 @@ export default function CompareJobsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-        <main className="max-w-6xl mx-auto px-6 py-20 md:py-32">
+        <main className="max-w-6xl mx-auto px-6 pt-24 pb-12">
           <div className="text-center">
             <div className="w-6 h-6 border border-a24-muted dark:border-a24-dark-muted border-t-a24-text dark:border-t-a24-dark-text rounded-full animate-spin mx-auto" />
           </div>
@@ -73,7 +73,7 @@ export default function CompareJobsPage() {
 
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <main className="max-w-6xl mx-auto px-6 py-20 md:py-32">
+      <main className="max-w-6xl mx-auto px-6 pt-24 pb-12">
         <div className="text-center mb-12">
           <h1 className="text-2xl font-light uppercase tracking-[0.4em] text-a24-text dark:text-a24-dark-text mb-3">
             Compare Jobs
