@@ -148,20 +148,20 @@ function SalaryBar({ item, maxSalary, delay }: { item: RegionSalaryData; maxSala
   return (
     <Link
       href={`/jobs?location=${encodeURIComponent(item.label)}`}
-      className="group block px-4 py-3 hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors cursor-pointer"
+      className="group block px-5 py-4 hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors cursor-pointer"
     >
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-sm font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm sm:text-base font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors">
           {item.flag} {item.label}
-          <span className="ml-1.5 text-[10px] text-a24-muted/40 dark:text-a24-dark-muted/40 tabular-nums" style={{ fontFamily: 'var(--font-space), monospace' }}>
+          <span className="ml-2 text-xs text-a24-muted/40 dark:text-a24-dark-muted/40 tabular-nums" style={{ fontFamily: 'var(--font-space), monospace' }}>
             ({item.jobCount})
           </span>
         </span>
-        <span className="text-xs tabular-nums text-a24-text dark:text-a24-dark-text font-medium">
+        <span className="text-sm tabular-nums text-a24-text dark:text-a24-dark-text font-semibold">
           <CountUp target={item.avgSalary > 0 ? Math.round(item.avgSalary / 1000) : 0} prefix="$" suffix="K" />
         </span>
       </div>
-      <div ref={ref} className="h-2 rounded-full bg-a24-border/20 dark:bg-a24-dark-border/20 overflow-hidden">
+      <div ref={ref} className="h-2.5 rounded-full bg-a24-border/20 dark:bg-a24-dark-border/20 overflow-hidden">
         <motion.div
           className="h-full rounded-full bg-neun-success"
           initial={{ width: 0 }}
@@ -183,17 +183,17 @@ function RegionRolesRow({ item, delay }: { item: RegionRolesData; delay: number 
   return (
     <Link
       href={`/jobs?location=${encodeURIComponent(item.label)}`}
-      className="group block px-4 py-3 hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors cursor-pointer"
+      className="group block px-5 py-4 hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors cursor-pointer"
     >
-      <div className="flex items-center gap-2 mb-1.5">
-        <span className="text-sm font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors shrink-0 w-24">
+      <div className="flex items-center gap-2.5 mb-2">
+        <span className="text-sm sm:text-base font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors shrink-0 w-24 sm:w-28">
           {item.flag} {item.label}
         </span>
         <div ref={ref} className="flex-1 flex items-center gap-1 min-w-0">
           {item.roles.map((role, i) => (
             <motion.div
               key={role.name}
-              className="relative h-7 rounded-sm group/bar"
+              className="relative h-8 rounded-sm group/bar"
               initial={{ width: 0 }}
               animate={inView ? { width: `${role.percentage}%` } : { width: 0 }}
               transition={{ duration: 0.6, delay: delay * 0.1 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
@@ -204,7 +204,7 @@ function RegionRolesRow({ item, delay }: { item: RegionRolesData; delay: number 
               title={`${role.name} ${role.percentage}%`}
             >
               {role.percentage >= 15 && (
-                <span className="absolute inset-0 flex items-center justify-center text-[8px] text-a24-dark-bg font-medium truncate px-1">
+                <span className="absolute inset-0 flex items-center justify-center text-[9px] sm:text-[10px] text-a24-dark-bg font-semibold truncate px-1">
                   {role.name}
                 </span>
               )}
@@ -377,7 +377,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
             <div className="flex border-b border-a24-border dark:border-a24-dark-border">
               <button
                 onClick={() => setRightTab('salary')}
-                className={`flex-1 px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] transition-colors cursor-pointer ${
+                className={`flex-1 px-5 py-4 text-sm font-bold uppercase tracking-[0.2em] transition-colors cursor-pointer ${
                   rightTab === 'salary'
                     ? 'text-neun-success bg-neun-success/5 border-b-2 border-neun-success'
                     : 'text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text'
@@ -387,7 +387,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
               </button>
               <button
                 onClick={() => setRightTab('roles')}
-                className={`flex-1 px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] transition-colors cursor-pointer ${
+                className={`flex-1 px-5 py-4 text-sm font-bold uppercase tracking-[0.2em] transition-colors cursor-pointer ${
                   rightTab === 'roles'
                     ? 'text-neun-success bg-neun-success/5 border-b-2 border-neun-success'
                     : 'text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text'
@@ -400,8 +400,8 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
             {/* Tab content */}
             {rightTab === 'salary' ? (
               <div>
-                <div className="px-3 py-2 bg-a24-surface/30 dark:bg-a24-dark-surface/30">
-                  <p className="text-[9px] uppercase tracking-[0.2em] text-a24-muted/50 dark:text-a24-dark-muted/50">
+                <div className="px-5 py-3 bg-a24-surface/30 dark:bg-a24-dark-surface/30">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-a24-muted/50 dark:text-a24-dark-muted/50 font-semibold">
                     Salary by Region
                   </p>
                 </div>
@@ -418,7 +418,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                     </div>
                   )}
                 </div>
-                <div className="px-3 py-2.5 border-t border-a24-border/30 dark:border-a24-dark-border/30">
+                <div className="px-5 py-3 border-t border-a24-border/30 dark:border-a24-dark-border/30">
                   <p className="text-xs italic text-a24-muted/40 dark:text-a24-dark-muted/40">
                     {salaryMeme}
                   </p>
@@ -426,8 +426,8 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
               </div>
             ) : (
               <div>
-                <div className="px-3 py-2 bg-a24-surface/30 dark:bg-a24-dark-surface/30">
-                  <p className="text-[9px] uppercase tracking-[0.2em] text-a24-muted/50 dark:text-a24-dark-muted/50">
+                <div className="px-5 py-3 bg-a24-surface/30 dark:bg-a24-dark-surface/30">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-a24-muted/50 dark:text-a24-dark-muted/50 font-semibold">
                     Roles by Region
                   </p>
                 </div>
@@ -442,7 +442,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                     </div>
                   )}
                 </div>
-                <div className="px-3 py-2.5 border-t border-a24-border/30 dark:border-a24-dark-border/30">
+                <div className="px-5 py-3 border-t border-a24-border/30 dark:border-a24-dark-border/30">
                   <p className="text-xs italic text-a24-muted/40 dark:text-a24-dark-muted/40">
                     {rolesMeme}
                   </p>
