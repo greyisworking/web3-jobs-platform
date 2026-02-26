@@ -11,7 +11,6 @@ import {
   ExternalLink,
   ArrowRight,
   Building2,
-  TrendingUp,
 } from 'lucide-react'
 import { PRIORITY_COMPANIES, type PriorityCompany } from '@/lib/priority-companies'
 import GlowBadge from '../components/GlowBadge'

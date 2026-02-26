@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi'
 import { RefreshCw, Shield, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
 import Blockies, { truncateAddress } from './Blockies'
-import type { Badge, UserProfile } from '@/types/web3'
+import type { UserProfile } from '@/types/web3'
 import { BADGE_INFO } from '@/types/web3'
 
 interface Web3BadgesProps {
@@ -236,7 +236,7 @@ export function MutualConnections({
   companyId: string
   userAddress: string
 }) {
-  const [mutuals, setMutuals] = useState<{ address: string; ens?: string; platform: string }[]>([])
+  const [mutuals] = useState<{ address: string; ens?: string; platform: string }[]>([])
 
   useEffect(() => {
     // In production, fetch from API

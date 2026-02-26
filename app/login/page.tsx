@@ -1,9 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import { useSearchParams } from 'next/navigation'
 import { WalletConnect } from '../components/WalletConnect'
 import Footer from '../components/Footer'
 
@@ -31,9 +29,7 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [inApp, setInApp] = useState(false)
-  const router = useRouter()
   const searchParams = useSearchParams()
-  const supabase = createSupabaseBrowserClient()
 
   const nextUrl = searchParams.get('next') || '/'
 

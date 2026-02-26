@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { type TrustLevel, type TrustScore, TRUST_COMMENTS, quickTrustCheck, SIMPLE_TRUST_CHECKS, simpleCompanyTrustCheck, type SimpleTrustResult, TIER1_VCS } from '@/lib/trust-check'
+import { type TrustLevel, type TrustScore, TRUST_COMMENTS, quickTrustCheck, SIMPLE_TRUST_CHECKS, type SimpleTrustResult, TIER1_VCS } from '@/lib/trust-check'
 import { PixelThumbsUp, PixelThinking, PixelSweating, PixelRunning, PixelCheck, PixelX } from './PixelIcons'
 
 // ══════════════════════════════════════════════════════════

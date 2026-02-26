@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import Link from 'next/link'
-import { Shield, Vote, Flag, Ban, Users, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react'
-import { PixelShield, PixelBallot } from '../components/PixelIcons'
+import { Shield, Vote, Flag, Ban, Users, Clock, CheckCircle, AlertTriangle } from 'lucide-react'
+import { PixelShield } from '../components/PixelIcons'
 import Pixelbara from '../components/Pixelbara'
 import Footer from '../components/Footer'
 import {

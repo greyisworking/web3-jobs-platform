@@ -362,9 +362,11 @@ export function needsHumanization(text: string, threshold: number = 30): boolean
 // Exports
 // ============================================================================
 
-export default {
+const humanizer = {
   calculateAIScore,
   humanizeRuleBased,
   humanize,
   needsHumanization,
 }
+
+export default humanizer

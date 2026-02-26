@@ -3,7 +3,7 @@
 import { type ReactNode, type HTMLAttributes, memo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, MapPin, Briefcase, Building2, Calendar, ExternalLink } from 'lucide-react'
+import { ArrowRight, MapPin, Briefcase, Building2, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Job } from '@/types/job'
 import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { ArrowLeft, FileEdit, Trash2, Clock, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
@@ -37,7 +36,6 @@ function formatTimeAgo(dateString: string): string {
 }
 
 export default function DraftsPage() {
-  const router = useRouter()
   const supabase = createSupabaseBrowserClient()
 
   const [user, setUser] = useState<User | null>(null)

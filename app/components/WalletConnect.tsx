@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAccount, useConnect, useDisconnect, useEnsName } from 'wagmi'
 import { Wallet, LogOut, Copy, Check, ChevronDown, X, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import { getErrorForToast } from '@/lib/error-messages'
 
 // Truncate address for display
@@ -114,7 +113,6 @@ export function WalletConnect() {
   const { connect, connectors, isPending, error: connectError } = useConnect()
   const { disconnect } = useDisconnect()
   const { data: ensName } = useEnsName({ address })
-  const supabase = createSupabaseBrowserClient()
 
   // Hydration fix
   useEffect(() => {

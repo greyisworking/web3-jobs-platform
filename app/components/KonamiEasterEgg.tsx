@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a']
 
 export default function KonamiEasterEgg() {
-  const [progress, setProgress] = useState(0)
+  const [, setProgress] = useState(0)
   const [rainbow, setRainbow] = useState(false)
 
   useEffect(() => {

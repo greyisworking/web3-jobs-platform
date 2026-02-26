@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback, use } from 'react'
-import { useRouter } from 'next/navigation'
 import { useAccount } from 'wagmi'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
@@ -29,7 +28,6 @@ interface Submission {
 
 export default function BountyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const router = useRouter()
   const { address, isConnected } = useAccount()
 
   const [bounty, setBounty] = useState<Bounty | null>(null)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Eye, Loader2, X, Plus, Wallet, Shield, FileEdit } from 'lucide-react'
@@ -78,21 +78,7 @@ export default function ArticleWritePage() {
     return () => subscription.unsubscribe()
   }, [supabase.auth])
 
-  // Fetch drafts when user is authenticated
-  useEffect(() => {
-    if (user && !editSlug) {
-      fetchDrafts()
-    }
-  }, [user, editSlug])
-
-  // Load specific draft if editing
-  useEffect(() => {
-    if (user && editSlug) {
-      loadDraftForEditing(editSlug)
-    }
-  }, [user, editSlug])
-
-  const fetchDrafts = async () => {
+  const fetchDrafts = useCallback(async () => {
     try {
       const res = await fetch('/api/articles/drafts')
       if (res.ok) {
@@ -105,9 +91,16 @@ export default function ArticleWritePage() {
     } catch (error) {
       console.error('Failed to fetch drafts:', error)
     }
-  }
+  }, [])
 
-  const loadDraftForEditing = async (slug: string) => {
+  // Fetch drafts when user is authenticated
+  useEffect(() => {
+    if (user && !editSlug) {
+      fetchDrafts()
+    }
+  }, [user, editSlug, fetchDrafts])
+
+  const loadDraftForEditing = useCallback(async (slug: string) => {
     setLoadingDraft(true)
     try {
       const res = await fetch(`/api/articles/${slug}`)
@@ -133,7 +126,14 @@ export default function ArticleWritePage() {
     } finally {
       setLoadingDraft(false)
     }
-  }
+  }, [router])
+
+  // Load specific draft if editing
+  useEffect(() => {
+    if (user && editSlug) {
+      loadDraftForEditing(editSlug)
+    }
+  }, [user, editSlug, loadDraftForEditing])
 
   const continueDraft = (draft: Draft) => {
     router.push(`/articles/write?edit=${draft.slug}`)

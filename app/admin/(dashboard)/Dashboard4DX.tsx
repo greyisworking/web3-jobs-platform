@@ -20,7 +20,6 @@ import {
   Minus,
   RefreshCw,
   Briefcase,
-  Users,
   Bookmark,
   AlertTriangle,
   CheckCircle,
@@ -174,7 +173,7 @@ function ScoreCard({
   value: number
   target?: number
   unit?: string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   description?: string
   trend?: number
   href?: string
@@ -228,7 +227,7 @@ function ScoreCard({
   )
 }
 
-function MiniChart({ data }: { data: { date: string; clicks: number }[] }) {
+function _MiniChart({ data }: { data: { date: string; clicks: number }[] }) {
   const maxClicks = Math.max(...data.map((d) => d.clicks), 1)
   const last7Days = data.slice(-7)
 
@@ -249,7 +248,7 @@ function MiniChart({ data }: { data: { date: string; clicks: number }[] }) {
   )
 }
 
-function FullChart({ data }: { data: { date: string; clicks: number }[] }) {
+function _FullChart({ data }: { data: { date: string; clicks: number }[] }) {
   const maxClicks = Math.max(...data.map((d) => d.clicks), 1)
   const last14Days = data.slice(-14)
 
@@ -336,12 +335,12 @@ export function Dashboard4DX() {
 
   if (!metrics) return null
 
-  const wigStatus = getScoreStatus(metrics.wig.current, metrics.wig.target)
-  const jobsStatus = getScoreStatus(metrics.leadMeasures.crawler.activeJobs, metrics.leadMeasures.crawler.targetJobs)
+  const _wigStatus = getScoreStatus(metrics.wig.current, metrics.wig.target)
+  const _jobsStatus = getScoreStatus(metrics.leadMeasures.crawler.activeJobs, metrics.leadMeasures.crawler.targetJobs)
   const daysRemaining = Math.ceil(
     (new Date(metrics.wig.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
   )
-  const dailyRequired = Math.ceil(
+  const _dailyRequired = Math.ceil(
     (metrics.wig.target - metrics.wig.current) / Math.max(daysRemaining, 1)
   )
 

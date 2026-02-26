@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import {
-  Eye, Users, TrendingUp, TrendingDown, BarChart3, Calendar
+  Eye, Users, TrendingUp, BarChart3
 } from 'lucide-react'
 import Pixelbara from '@/app/components/Pixelbara'
 

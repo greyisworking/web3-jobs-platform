@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Shield, ThumbsUp, ThumbsDown, AlertTriangle, Check, X, Users, Flag, Vote } from 'lucide-react'
+import { Users, Flag, Vote } from 'lucide-react'
 import { PixelShield, PixelThumbsUp, PixelCheck, PixelX } from './PixelIcons'
 import type { TrustLevel, TrustScore, Vouch, CommunityVote } from '@/lib/trust'
-import { getTrustLabel, getTrustColor } from '@/lib/trust'
+import { getTrustLabel } from '@/lib/trust'
 
 // ════════════════════════════════════════════════════════════════════════════
 // Trust Score Badge

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import type { User } from '@supabase/supabase-js'
@@ -146,9 +147,11 @@ export default function AccountPage() {
             <div className="mb-6 pb-6 border-b border-a24-border dark:border-a24-dark-border">
               <div className="flex items-center gap-3">
                 {avatarUrl ? (
-                  <img
+                  <Image
                     src={avatarUrl}
                     alt=""
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full object-cover border border-a24-border dark:border-a24-dark-border"
                   />
                 ) : (
@@ -213,9 +216,11 @@ export default function AccountPage() {
                 <div className="p-5 border border-a24-border dark:border-a24-dark-border rounded bg-a24-surface/50 dark:bg-a24-dark-surface/50">
                   <div className="flex items-start gap-4 mb-6">
                     {avatarUrl ? (
-                      <img
+                      <Image
                         src={avatarUrl}
                         alt=""
+                        width={56}
+                        height={56}
                         className="w-14 h-14 rounded-full object-cover border border-a24-border dark:border-a24-dark-border flex-shrink-0"
                       />
                     ) : (

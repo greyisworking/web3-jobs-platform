@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
@@ -8,14 +8,12 @@ import type { Job } from '@/types/job'
 import JobCard from './components/JobCard'
 import { JobCardSkeletonGrid } from './components/JobCardSkeleton'
 import Pixelbara from './components/Pixelbara'
-import { MiniPixelbara, TimeAwarePixelbara, useTimeOfDay, TIME_MSGS } from './components/Pixelbara'
+import { MiniPixelbara } from './components/Pixelbara'
 import SocialProof from './components/SocialProof'
 // ScrollPixelbara removed - unnecessary floating element
 import ScrollReveal from './components/ScrollReveal'
 import Footer from './components/Footer'
 import PWAInstallPrompt from './components/PWAInstallPrompt'
-
-const FEATURED_COUNT = 6
 
 // Custom hook to get viewport size for conditional rendering
 function useViewportSize() {

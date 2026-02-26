@@ -37,7 +37,7 @@ function AnimatedBar({ percentage, delay }: { percentage: number; delay: number 
   )
 }
 
-function SkillRow({ entry, rank, roleKey }: { entry: SkillEntry; rank: number; roleKey: string }) {
+function SkillRow({ entry, rank }: { entry: SkillEntry; rank: number }) {
   return (
     <div className="group flex items-center gap-3 py-2.5 px-1">
       <span
@@ -181,7 +181,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
             <div className="px-3 py-1 divide-y divide-a24-border/20 dark:divide-a24-dark-border/20">
               {role.hotSkills.length > 0 ? (
                 role.hotSkills.map((entry, i) => (
-                  <SkillRow key={entry.skill} entry={entry} rank={i + 1} roleKey={activeRole} />
+                  <SkillRow key={entry.skill} entry={entry} rank={i + 1} />
                 ))
               ) : (
                 <div className="py-12 text-center text-sm text-a24-muted/40 dark:text-a24-dark-muted/40">

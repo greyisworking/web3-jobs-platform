@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft,
   Search,
-  Filter,
   ExternalLink,
   AlertTriangle,
   FileText,
@@ -16,7 +15,7 @@ import {
   ChevronRight,
   Clock,
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -67,7 +66,7 @@ export default function AdminJobsPage() {
   const [page, setPage] = useState(initialPage)
   const pageSize = 50
 
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams({
@@ -90,11 +89,11 @@ export default function AdminJobsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filter, source, search, page, pageSize])
 
   useEffect(() => {
     fetchJobs()
-  }, [filter, source, page])
+  }, [fetchJobs])
 
   useEffect(() => {
     // Update URL params

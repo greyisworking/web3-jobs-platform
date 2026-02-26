@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, Clock, Eye, Heart, Share2, MessageSquare,
@@ -203,7 +202,6 @@ interface ArticleDetailClientProps {
 }
 
 export default function ArticleDetailClient({ article: initialArticle }: ArticleDetailClientProps) {
-  const router = useRouter()
   const { address, isConnected } = useAccount()
   const [article, setArticle] = useState<Article>(initialArticle)
   const [collected, setCollected] = useState(false)
