@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import {
   isValidWalletAddress,
   checkRateLimit,
@@ -9,11 +8,9 @@ import {
   sanitizeInput,
 } from '@/lib/security'
 import { requireCSRF } from '@/lib/csrf'
+import { createSupabaseServiceClient } from '@/lib/supabase-server'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+const supabase = createSupabaseServiceClient()
 
 // GET /api/trust/vote - Get active votes
 export async function GET(request: NextRequest) {

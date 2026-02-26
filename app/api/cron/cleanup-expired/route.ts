@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createSupabaseServiceClient } from '@/lib/supabase-server'
 
 // Vercel Cron: runs daily at midnight UTC
 // vercel.json: { "path": "/api/cron/cleanup-expired", "schedule": "0 0 * * *" }
@@ -8,9 +8,6 @@ export const maxDuration = 60 // 1 minute
 export const dynamic = 'force-dynamic'
 
 const MAX_JOB_AGE_DAYS = 90
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export async function GET(request: Request) {
   // Verify cron secret
@@ -21,7 +18,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey)
+  const supabase = createSupabaseServiceClient()
   const now = new Date()
   const maxAgeDate = new Date(now.getTime() - MAX_JOB_AGE_DAYS * 24 * 60 * 60 * 1000)
 

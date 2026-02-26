@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error('Bookmarks POST error:', error)
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -134,6 +134,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error('Bookmarks DELETE error:', error)
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

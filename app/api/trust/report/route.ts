@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import {
   isValidWalletAddress,
   checkRateLimit,
@@ -11,11 +10,9 @@ import {
   sanitizeUrl,
 } from '@/lib/security'
 import { requireCSRF } from '@/lib/csrf'
+import { createSupabaseServiceClient } from '@/lib/supabase-server'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+const supabase = createSupabaseServiceClient()
 
 // Allowed report categories
 const ALLOWED_CATEGORIES = ['scam', 'spam', 'harassment', 'impersonation', 'fraud', 'other']

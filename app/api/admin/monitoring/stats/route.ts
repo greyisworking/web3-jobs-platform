@@ -1,17 +1,11 @@
-import { NextResponse } from 'next/server'
-import { getAdminUser } from '@/lib/admin-auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { withAdminAuth } from '@/lib/admin-auth'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import type { MonitoringStats } from '@/types/monitoring'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
-  try {
-    await getAdminUser()
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const GET = withAdminAuth(async (_request, _admin) => {
   const supabase = await createSupabaseServerClient()
 
   const now = new Date()
@@ -80,4 +74,4 @@ export async function GET() {
   }
 
   return NextResponse.json(stats)
-}
+})

@@ -3,20 +3,14 @@
  * Admin-only: Recalculates featured scores and updates featured jobs.
  */
 
-import { NextResponse } from 'next/server';
-import { getAdminUser } from '@/lib/admin-auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { withAdminAuth } from '@/lib/admin-auth';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { refreshFeaturedJobs } from '@/lib/featured-refresh';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST() {
-  try {
-    await getAdminUser();
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export const POST = withAdminAuth(async (_request, _admin) => {
   try {
     const supabase = await createSupabaseServerClient();
     const result = await refreshFeaturedJobs(supabase);
@@ -26,4 +20,4 @@ export async function POST() {
     console.error('POST /api/admin/jobs/featured/refresh error:', err);
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 });
   }
-}
+});

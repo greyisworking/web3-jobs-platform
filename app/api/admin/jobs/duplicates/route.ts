@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
-import { getAdminUser } from '@/lib/admin-auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { withAdminAuth } from '@/lib/admin-auth'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import type { JobWithStatus, DuplicateGroup } from '@/types/admin'
 
@@ -27,13 +27,7 @@ function similarity(a: string, b: string): number {
   return intersection.size / union.size
 }
 
-export async function GET() {
-  try {
-    await getAdminUser()
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const GET = withAdminAuth(async (_request, _admin) => {
   const supabase = await createSupabaseServerClient()
 
   const { data: jobs, error } = await supabase
@@ -101,4 +95,4 @@ export async function GET() {
   duplicateGroups.sort((a, b) => b.similarity - a.similarity)
 
   return NextResponse.json({ groups: duplicateGroups })
-}
+})

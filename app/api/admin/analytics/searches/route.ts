@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminUser } from '@/lib/admin-auth'
+import { withAdminAuth } from '@/lib/admin-auth'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import type {
   TopSearchQuery,
@@ -16,13 +16,7 @@ const TECH_KEYWORDS = [
   'foundry', 'aws', 'docker', 'kubernetes', 'graphql', 'sql',
 ]
 
-export async function GET(request: NextRequest) {
-  try {
-    await getAdminUser()
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const GET = withAdminAuth(async (request, _admin) => {
   const { searchParams } = new URL(request.url)
   const dateFrom = searchParams.get('date_from') || undefined
   const dateTo = searchParams.get('date_to') || undefined
@@ -90,4 +84,4 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json(response)
-}
+})

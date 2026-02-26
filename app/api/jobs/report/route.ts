@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { requireCSRF } from '@/lib/csrf'
+import { createSupabaseServiceClient } from '@/lib/supabase-server'
 
 // Simple in-memory rate limit for report endpoint
 const reportRateLimit = new Map<string, { count: number; resetAt: number }>()
@@ -26,10 +26,7 @@ function checkReportRateLimit(ip: string): boolean {
 
 // Create client inside handler to avoid build-time initialization
 function getSupabaseClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  return createSupabaseServiceClient()
 }
 
 export async function POST(req: NextRequest) {

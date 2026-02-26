@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createSupabaseServiceClient } from '@/lib/supabase-server'
 
 // Vercel Cron: runs every 3 hours
 // vercel.json: { "path": "/api/cron/crawl", "schedule": "0 */3 * * *" }
 
 export const maxDuration = 300 // 5 minutes (Vercel Pro)
 export const dynamic = 'force-dynamic'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export async function GET(request: Request) {
   // Verify cron secret (Vercel sends this header)
@@ -20,7 +17,7 @@ export async function GET(request: Request) {
   }
 
   const startTime = Date.now()
-  const supabase = createClient(supabaseUrl, supabaseKey)
+  const supabase = createSupabaseServiceClient()
 
   try {
     console.log('🚀 Cron crawl started at', new Date().toISOString())

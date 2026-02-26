@@ -6,19 +6,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminUser } from '@/lib/admin-auth';
+import { withAdminAuth } from '@/lib/admin-auth';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { BADGE_VALUES } from '@/lib/badges';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: NextRequest) {
-  try {
-    await getAdminUser();
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export const POST = withAdminAuth(async (request, _admin) => {
   try {
     const body = await request.json();
     const { ids, badges } = body as { ids?: string[]; badges?: string[] };
@@ -61,4 +55,4 @@ export async function POST(request: NextRequest) {
     console.error('POST /api/admin/jobs/badges error:', err);
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 });
   }
-}
+});

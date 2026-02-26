@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminUser } from '@/lib/admin-auth'
+import { withAdminAuth } from '@/lib/admin-auth'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
@@ -18,13 +18,7 @@ function hasHtmlEntities(text: string | null): boolean {
   return HTML_ENTITY_PATTERNS.some(pattern => pattern.test(text))
 }
 
-export async function GET(request: NextRequest) {
-  try {
-    await getAdminUser()
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const GET = withAdminAuth(async (request, _admin) => {
   const { searchParams } = new URL(request.url)
   const status = searchParams.get('status') || undefined
   const badge = searchParams.get('badge') || undefined
@@ -155,4 +149,4 @@ export async function GET(request: NextRequest) {
     pageSize,
     sources: uniqueSources,
   })
-}
+})

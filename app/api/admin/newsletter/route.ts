@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
-import { getAdminUser } from '@/lib/admin-auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { withAdminAuth } from '@/lib/admin-auth'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
@@ -29,13 +29,7 @@ interface NewsletterStats {
 }
 
 // GET: Fetch jobs for newsletter generation
-export async function GET(request: Request) {
-  try {
-    await getAdminUser()
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const GET = withAdminAuth(async (request, _admin) => {
   const { searchParams } = new URL(request.url)
   const days = parseInt(searchParams.get('days') || '7')
   const limit = parseInt(searchParams.get('limit') || '100')
@@ -81,16 +75,10 @@ export async function GET(request: Request) {
     stats,
     period: { days, startDate: startDate.toISOString() },
   })
-}
+})
 
 // POST: Save newsletter to history
-export async function POST(request: Request) {
-  try {
-    await getAdminUser()
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const POST = withAdminAuth(async (request, _admin) => {
   const body = await request.json()
   const { title, contentMd, contentHtml, jobIds } = body
 
@@ -116,7 +104,7 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ success: true, newsletter: data })
-}
+})
 
 function calculateStats(jobs: JobForNewsletter[]): NewsletterStats {
   const roleBreakdown: Record<string, number> = {}

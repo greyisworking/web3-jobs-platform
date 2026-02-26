@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { PRIORITY_COMPANIES } from '@/lib/priority-companies'
 import { requireCSRF } from '@/lib/csrf'
+import { createSupabaseServiceClient } from '@/lib/supabase-server'
 
 // Basic XSS sanitization
 function sanitizeText(text: string): string {
@@ -13,9 +13,8 @@ function sanitizeText(text: string): string {
     .trim()
 }
 
-// Create Supabase client for API route
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+// Check if Supabase is configured
+const supabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL
 
 // Rate limiting: max 3 job posts per wallet per day
 const postRateLimit = new Map<string, { count: number; resetAt: number }>()
@@ -109,7 +108,7 @@ export async function POST(request: NextRequest) {
     // Generate unique URL for the job
     const jobUrl = `https://neun.wtf/jobs/${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
-    if (!supabaseUrl || !supabaseKey) {
+    if (!supabaseConfigured) {
       // Fallback: return success if no Supabase configured
       return NextResponse.json({
         success: true,
@@ -119,7 +118,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabase = createSupabaseServiceClient()
 
     // Check if wallet is blacklisted
     const { data: blacklistCheck } = await supabase

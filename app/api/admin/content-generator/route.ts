@@ -1,12 +1,9 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import Anthropic from '@anthropic-ai/sdk'
 import { ADMIN_EMAIL_WHITELIST } from '@/lib/admin-auth'
+import { createSupabaseServiceClient } from '@/lib/supabase-server'
 
 export const maxDuration = 120
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 type ContentMode = 'newsletter' | 'ludium-jobs' | 'ludium-article'
 
@@ -176,7 +173,7 @@ export async function POST(request: Request) {
   }
 
   const token = authHeader.substring(7)
-  const supabase = createClient(supabaseUrl, supabaseKey)
+  const supabase = createSupabaseServiceClient()
 
   const { data: { user }, error: authError } = await supabase.auth.getUser(token)
   if (authError || !user) {

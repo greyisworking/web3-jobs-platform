@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import axios from 'axios'
+import { createSupabaseServiceClient } from '@/lib/supabase-server'
 
 // Vercel Cron: runs every Thursday 8:30 AM KST (Wednesday 23:30 UTC)
 // vercel.json: { "path": "/api/cron/newsletter", "schedule": "30 23 * * 3" }
@@ -10,9 +10,6 @@ export const dynamic = 'force-dynamic'
 
 const SITE_URL = 'https://neun.wtf'
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || ''
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 interface Job {
   id: string
@@ -48,7 +45,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey)
+  const supabase = createSupabaseServiceClient()
   const startDate = new Date()
   startDate.setDate(startDate.getDate() - 7)
 

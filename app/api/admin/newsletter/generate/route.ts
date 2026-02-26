@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
-import { getAdminUser } from '@/lib/admin-auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { withAdminAuth } from '@/lib/admin-auth'
 import axios from 'axios'
 
 export const maxDuration = 60
@@ -53,13 +53,7 @@ function isKoreanJob(job: { location?: string; company?: string; source?: string
 }
 
 // POST: Generate newsletter content (markdown + HTML)
-export async function POST(request: Request) {
-  try {
-    await getAdminUser()
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const POST = withAdminAuth(async (request, _admin) => {
   const body: GenerateRequest = await request.json()
   const { jobs, stats, customIntro, weekLabel, skipVerification } = body
 
@@ -104,7 +98,7 @@ export async function POST(request: Request) {
       jobs: verifiedJobs,
     },
   })
-}
+})
 
 async function verifyJobs(jobs: JobData[]): Promise<VerifiedJob[]> {
   const results: VerifiedJob[] = []
