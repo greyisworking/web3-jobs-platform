@@ -306,7 +306,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
 
             {/* Heatmap grid — compact */}
             <div className="overflow-x-auto">
-              <div className="grid grid-cols-[minmax(72px,1.2fr)_repeat(4,minmax(52px,1fr))] sm:grid-cols-[minmax(100px,1fr)_repeat(4,72px)] px-3 py-2 border-b border-a24-border/30 dark:border-a24-dark-border/30">
+              <div className="grid grid-cols-[minmax(90px,1.5fr)_repeat(4,minmax(40px,1fr))] sm:grid-cols-[minmax(100px,1fr)_repeat(4,72px)] px-3 py-2 border-b border-a24-border/30 dark:border-a24-dark-border/30">
                 <span />
                 {LEVELS.map(level => (
                   <span
@@ -327,13 +327,13 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.04, duration: 0.3 }}
-                      className="grid grid-cols-[minmax(72px,1.2fr)_repeat(4,minmax(52px,1fr))] sm:grid-cols-[minmax(100px,1fr)_repeat(4,72px)] px-3 group hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors"
+                      className="grid grid-cols-[minmax(90px,1.5fr)_repeat(4,minmax(40px,1fr))] sm:grid-cols-[minmax(100px,1fr)_repeat(4,72px)] px-3 group hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors"
                     >
                       {/* Skill name — right-aligned to be close to numbers */}
                       <div className="flex items-center justify-end py-2.5 pr-2 min-w-0">
                         <Link
                           href={`/learn/skills/${encodeURIComponent(entry.skill.toLowerCase())}`}
-                          className="text-sm font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors truncate text-right"
+                          className="text-xs sm:text-sm font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors truncate text-right"
                         >
                           {entry.skill}
                         </Link>
