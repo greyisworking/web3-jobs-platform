@@ -280,21 +280,21 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
         })}
       </nav>
 
-      {/* Main 60/40 Grid */}
-      <section className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+      {/* Main 50/50 Grid */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-        {/* LEFT: Skill × Level Heatmap (60%) */}
-        <div className="lg:col-span-3">
+        {/* LEFT: Skill × Level Heatmap (50%) */}
+        <div>
           <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden">
             {/* Header */}
-            <div className="px-4 py-4 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border-b border-a24-border dark:border-a24-dark-border">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Zap className="w-4 h-4 text-neun-success" />
-                <h2 className="text-xs uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted font-semibold">
+            <div className="px-5 py-5 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border-b border-a24-border dark:border-a24-dark-border">
+              <div className="flex items-center gap-2.5 mb-2">
+                <Zap className="w-5 h-5 text-neun-success" />
+                <h2 className="text-sm sm:text-base uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted font-bold">
                   A Secret Weapon for Career Advancement
                 </h2>
               </div>
-              <div className="flex items-center gap-2 text-[9px] text-a24-muted/40 dark:text-a24-dark-muted/40">
+              <div className="flex items-center gap-2 text-[10px] text-a24-muted/40 dark:text-a24-dark-muted/40">
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-neun-success animate-pulse" />
                 <span style={{ fontFamily: 'var(--font-space), monospace' }}>
                   Live from {data.totalJobs.toLocaleString()} jobs
@@ -306,7 +306,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
 
             {/* Heatmap grid — compact */}
             <div className="overflow-x-auto">
-              <div className="grid grid-cols-[minmax(90px,1.5fr)_repeat(4,minmax(40px,1fr))] sm:grid-cols-[minmax(120px,1.2fr)_repeat(4,84px)] px-3 py-2 border-b border-a24-border/30 dark:border-a24-dark-border/30">
+              <div className="grid grid-cols-[minmax(90px,1.5fr)_repeat(4,minmax(40px,1fr))] sm:grid-cols-[minmax(140px,1.5fr)_repeat(4,1fr)] px-3 py-2 border-b border-a24-border/30 dark:border-a24-dark-border/30">
                 <span />
                 {LEVELS.map(level => (
                   <span
@@ -327,13 +327,13 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.04, duration: 0.3 }}
-                      className="grid grid-cols-[minmax(90px,1.5fr)_repeat(4,minmax(40px,1fr))] sm:grid-cols-[minmax(120px,1.2fr)_repeat(4,84px)] px-3 group hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors"
+                      className="grid grid-cols-[minmax(90px,1.5fr)_repeat(4,minmax(40px,1fr))] sm:grid-cols-[minmax(140px,1.5fr)_repeat(4,1fr)] px-3 group hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors"
                     >
-                      {/* Skill name — right-aligned to be close to numbers */}
-                      <div className="flex items-center justify-end py-2.5 sm:py-3.5 pr-2 min-w-0">
+                      {/* Skill name — left-aligned */}
+                      <div className="flex items-center justify-start py-2.5 sm:py-3.5 pl-1 min-w-0">
                         <Link
                           href={`/learn/skills/${encodeURIComponent(entry.skill.toLowerCase())}`}
-                          className="text-xs sm:text-sm font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors truncate text-right"
+                          className="text-xs sm:text-sm font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors truncate text-left"
                         >
                           {entry.skill}
                         </Link>
@@ -370,8 +370,8 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
           </div>
         </div>
 
-        {/* RIGHT: Salary / Roles by Region (40%) */}
-        <div className="lg:col-span-2">
+        {/* RIGHT: Salary / Roles by Region (50%) */}
+        <div>
           <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden">
             {/* Tab bar */}
             <div className="flex border-b border-a24-border dark:border-a24-dark-border">
