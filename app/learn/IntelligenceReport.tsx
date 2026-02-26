@@ -241,20 +241,20 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                       className="grid grid-cols-[minmax(72px,1.2fr)_repeat(4,minmax(44px,1fr))] sm:grid-cols-[minmax(140px,1fr)_repeat(4,80px)] px-3 group hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors"
                     >
                       {/* Skill name */}
-                      <div className="flex items-center gap-2 py-2 min-w-0">
+                      <div className="flex items-center gap-1 sm:gap-2 py-2 min-w-0">
                         <span
-                          className="text-[10px] tabular-nums text-a24-muted/30 dark:text-a24-dark-muted/30 w-4 text-right shrink-0"
+                          className="hidden sm:inline text-[10px] tabular-nums text-a24-muted/30 dark:text-a24-dark-muted/30 w-4 text-right shrink-0"
                           style={{ fontFamily: 'var(--font-space), monospace' }}
                         >
                           {i + 1}
                         </span>
                         <Link
                           href={`/learn/skills/${encodeURIComponent(entry.skill.toLowerCase())}`}
-                          className="text-sm text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors truncate"
+                          className="text-xs sm:text-sm text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors truncate"
                         >
                           {entry.skill}
                         </Link>
-                        <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div className="hidden sm:flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                           <Link
                             href={`/jobs?search=${encodeURIComponent(entry.skill)}`}
                             className="text-[8px] uppercase tracking-[0.1em] text-a24-muted/40 dark:text-a24-dark-muted/40 hover:text-neun-success transition-colors"
