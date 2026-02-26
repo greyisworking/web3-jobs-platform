@@ -39,7 +39,7 @@ function pickMeme(pool: string[]): string {
 // ── Heatmap Cell (count-up + micro-variations) ──
 function HeatmapCell({ value, delay }: { value: number; delay: number }) {
   const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true })
+  const inView = useInView(ref, { once: true, margin: '0px 0px 800px 0px' })
   const [displayed, setDisplayed] = useState(0)
   const [micro, setMicro] = useState(0)
   const [hovered, setHovered] = useState(false)
@@ -107,7 +107,7 @@ function HeatmapCell({ value, delay }: { value: number; delay: number }) {
 // ── Animated count-up for salary bars ──
 function CountUp({ target, prefix = '', suffix = '', duration = 1200 }: { target: number; prefix?: string; suffix?: string; duration?: number }) {
   const ref = useRef<HTMLSpanElement>(null)
-  const inView = useInView(ref as React.RefObject<HTMLElement>, { once: true })
+  const inView = useInView(ref as React.RefObject<HTMLElement>, { once: true, margin: '0px 0px 800px 0px' })
   const [val, setVal] = useState(0)
 
   useEffect(() => {
@@ -142,7 +142,7 @@ function LiveClock() {
 // ── Salary Bar ──
 function SalaryBar({ item, maxSalary, delay }: { item: RegionSalaryData; maxSalary: number; delay: number }) {
   const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref as React.RefObject<HTMLElement>, { once: true })
+  const inView = useInView(ref as React.RefObject<HTMLElement>, { once: true, margin: '0px 0px 800px 0px' })
   const barWidth = maxSalary > 0 && item.avgSalary > 0 ? (item.avgSalary / maxSalary) * 100 : 0
 
   return (
@@ -176,7 +176,7 @@ function SalaryBar({ item, maxSalary, delay }: { item: RegionSalaryData; maxSala
 // ── Roles by Region Row ──
 function RegionRolesRow({ item, delay }: { item: RegionRolesData; delay: number }) {
   const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref as React.RefObject<HTMLElement>, { once: true })
+  const inView = useInView(ref as React.RefObject<HTMLElement>, { once: true, margin: '0px 0px 800px 0px' })
   const opacities = ['', '/60', '/30']
 
   return (
