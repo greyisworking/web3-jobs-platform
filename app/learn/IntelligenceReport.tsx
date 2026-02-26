@@ -177,7 +177,8 @@ function SalaryBar({ item, maxSalary, delay }: { item: RegionSalaryData; maxSala
 function RegionRolesRow({ item, delay }: { item: RegionRolesData; delay: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref as React.RefObject<HTMLElement>, { once: true, margin: '0px 0px 800px 0px' })
-  const opacities = ['', '/60', '/30']
+  // Use inline rgba for opacity — Tailwind can't decompose CSS var() for /60 /30 modifiers
+  const barOpacities = [1, 0.6, 0.3]
 
   return (
     <Link
@@ -192,11 +193,14 @@ function RegionRolesRow({ item, delay }: { item: RegionRolesData; delay: number 
           {item.roles.map((role, i) => (
             <motion.div
               key={role.name}
-              className={`relative h-5 rounded-sm bg-neun-success${opacities[i] || '/30'} group/bar`}
+              className="relative h-5 rounded-sm group/bar"
               initial={{ width: 0 }}
               animate={inView ? { width: `${role.percentage}%` } : { width: 0 }}
               transition={{ duration: 0.6, delay: delay * 0.1 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-              style={{ minWidth: role.percentage > 5 ? '28px' : '0' }}
+              style={{
+                minWidth: role.percentage > 5 ? '28px' : '0',
+                backgroundColor: `rgba(34, 197, 94, ${barOpacities[i] ?? 0.3})`,
+              }}
               title={`${role.name} ${role.percentage}%`}
             >
               {role.percentage >= 15 && (
