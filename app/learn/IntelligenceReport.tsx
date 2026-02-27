@@ -87,23 +87,59 @@ function HeatmapCell({ value, delay, skill, level, topCompanies, avgSalaryRange,
   const approxJobs = Math.round(jobCount * value / 100)
   const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null)
 
-  const handleMouseEnter = useCallback(() => {
-    setHovered(true)
+  const updateTooltipPos = useCallback(() => {
     if (ref.current && value > 0) {
       const rect = ref.current.getBoundingClientRect()
-      const tooltipW = 224 // w-56 = 14rem = 224px
+      const tooltipW = Math.min(224, window.innerWidth - 16) // shrink on small screens
       let left = rect.left + rect.width / 2 - tooltipW / 2
-      // Clamp to viewport
       if (left < 8) left = 8
       if (left + tooltipW > window.innerWidth - 8) left = window.innerWidth - 8 - tooltipW
-      setTooltipPos({ top: rect.bottom + 8, left })
+      // Show below cell, but if it would go off-screen bottom, show above
+      let top = rect.bottom + 8
+      const tooltipH = 160 // approximate height
+      if (top + tooltipH > window.innerHeight - 8) {
+        top = rect.top - tooltipH - 8
+      }
+      setTooltipPos({ top, left })
     }
   }, [value])
+
+  const handleMouseEnter = useCallback(() => {
+    setHovered(true)
+    updateTooltipPos()
+  }, [updateTooltipPos])
 
   const handleMouseLeave = useCallback(() => {
     setHovered(false)
     setTooltipPos(null)
   }, [])
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (value === 0) return
+    e.preventDefault()
+    setHovered(prev => {
+      if (prev) {
+        // Already open → close
+        setTooltipPos(null)
+        return false
+      }
+      updateTooltipPos()
+      return true
+    })
+  }, [value, updateTooltipPos])
+
+  // Close tooltip when tapping outside
+  useEffect(() => {
+    if (!hovered) return
+    const handleTouchOutside = (e: TouchEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setHovered(false)
+        setTooltipPos(null)
+      }
+    }
+    document.addEventListener('touchstart', handleTouchOutside, { passive: true })
+    return () => document.removeEventListener('touchstart', handleTouchOutside)
+  }, [hovered])
 
   return (
     <div
@@ -112,6 +148,7 @@ function HeatmapCell({ value, delay, skill, level, topCompanies, avgSalaryRange,
       style={value > 0 ? { backgroundColor: `rgba(34, 197, 94, ${0.04 + intensity * 0.22})` } : undefined}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
     >
       {isHot && (
         <motion.div
@@ -135,19 +172,19 @@ function HeatmapCell({ value, delay, skill, level, topCompanies, avgSalaryRange,
       {/* Tooltip via portal — rendered on body to avoid overflow clipping */}
       {hovered && value > 0 && tooltipPos && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed z-[9999] w-56 pointer-events-none hidden sm:block"
+          className="fixed z-[9999] w-[calc(100vw-16px)] sm:w-56 pointer-events-none"
           style={{ top: tooltipPos.top, left: tooltipPos.left }}
         >
           <motion.div
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.15 }}
-            className="bg-a24-dark-bg border border-a24-dark-border rounded-lg shadow-xl p-3.5 pointer-events-auto"
+            className="bg-a24-dark-bg border border-a24-dark-border rounded-lg shadow-xl p-3 sm:p-3.5 pointer-events-auto"
           >
-            <p className="text-sm font-semibold text-a24-dark-text mb-2">
+            <p className="text-xs sm:text-sm font-semibold text-a24-dark-text mb-1.5 sm:mb-2">
               {skill} × {LEVEL_LABELS[level]}
             </p>
-            <div className="space-y-1.5 text-xs text-a24-dark-muted">
+            <div className="space-y-1 sm:space-y-1.5 text-[11px] sm:text-xs text-a24-dark-muted">
               <p>
                 <span className="text-neun-success font-medium">{value}%</span> of jobs require this
               </p>
@@ -160,7 +197,7 @@ function HeatmapCell({ value, delay, skill, level, topCompanies, avgSalaryRange,
             </div>
             <Link
               href={`/jobs?skill=${encodeURIComponent(skill.toLowerCase())}${activeRole !== 'all' ? `&role=${activeRole}` : ''}`}
-              className="mt-2.5 block text-[10px] uppercase tracking-wider text-neun-success hover:text-neun-success/80 transition-colors"
+              className="mt-2 sm:mt-2.5 block text-[10px] uppercase tracking-wider text-neun-success hover:text-neun-success/80 transition-colors"
             >
               See {approxJobs > 0 ? `~${approxJobs}` : ''} jobs &nearr;
             </Link>
