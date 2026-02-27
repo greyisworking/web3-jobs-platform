@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { Zap, BarChart3, Globe } from 'lucide-react'
-import type { IntelligenceData, RoleInsight, SkillLevelEntry, RegionSalaryData, RegionRolesData } from '@/lib/intelligence-data'
+import type { IntelligenceData, RoleInsight, SkillLevelEntry, RegionSalaryData, RegionRolesData, CountrySalaryData } from '@/lib/intelligence-data'
 
 const ROLE_TABS = [
   { key: 'all', label: 'All' },
@@ -244,37 +244,94 @@ function LiveClock() {
   return <span style={{ fontFamily: 'var(--font-space), monospace' }}>{time}</span>
 }
 
-// ── Salary Bar ──
+// ── Salary Bar with country hover expand ──
+const COUNTRY_BAR_OPACITIES = [1, 0.75, 0.55, 0.4, 0.28]
+
 function SalaryBar({ item, maxSalary, delay }: { item: RegionSalaryData; maxSalary: number; delay: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref as React.RefObject<HTMLElement>, { once: true, margin: '0px 0px 800px 0px' })
   const barWidth = maxSalary > 0 && item.avgSalary > 0 ? (item.avgSalary / maxSalary) * 100 : 0
+  const [expanded, setExpanded] = useState(false)
+  const hasCountries = item.countries && item.countries.length > 1
 
   return (
-    <Link
-      href={`/jobs?location=${encodeURIComponent(item.label)}`}
-      className="group block px-5 py-4 hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors cursor-pointer"
+    <div
+      className="group px-4 py-3 sm:px-5 sm:py-4 hover:bg-a24-surface/30 dark:hover:bg-a24-dark-surface/30 transition-colors cursor-pointer"
+      onMouseEnter={() => hasCountries && setExpanded(true)}
+      onMouseLeave={() => setExpanded(false)}
     >
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm sm:text-base font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors">
-          {item.flag} {item.label}
-          <span className="ml-2 text-xs text-a24-muted/40 dark:text-a24-dark-muted/40 tabular-nums" style={{ fontFamily: 'var(--font-space), monospace' }}>
-            ({item.jobCount})
+      <Link href={`/jobs?location=${encodeURIComponent(item.label)}`}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm sm:text-base font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors">
+            {item.flag} {item.label}
+            <span className="ml-2 text-xs text-a24-muted/40 dark:text-a24-dark-muted/40 tabular-nums" style={{ fontFamily: 'var(--font-space), monospace' }}>
+              ({item.jobCount})
+            </span>
           </span>
-        </span>
-        <span className="text-sm tabular-nums text-a24-text dark:text-a24-dark-text font-semibold">
-          <CountUp target={item.avgSalary > 0 ? Math.round(item.avgSalary / 1000) : 0} prefix="$" suffix="K" />
-        </span>
-      </div>
-      <div ref={ref} className="h-2.5 rounded-full bg-a24-border/20 dark:bg-a24-dark-border/20 overflow-hidden">
-        <motion.div
-          className="h-full rounded-full bg-neun-success"
-          initial={{ width: 0 }}
-          animate={inView ? { width: `${barWidth}%` } : { width: 0 }}
-          transition={{ duration: 0.8, delay: delay * 0.1, ease: [0.16, 1, 0.3, 1] }}
-        />
-      </div>
-    </Link>
+          <span className="text-sm tabular-nums text-a24-text dark:text-a24-dark-text font-semibold">
+            <CountUp target={item.avgSalary > 0 ? Math.round(item.avgSalary / 1000) : 0} prefix="$" suffix="K" />
+          </span>
+        </div>
+        <div ref={ref} className="h-2.5 rounded-full bg-a24-border/20 dark:bg-a24-dark-border/20 overflow-hidden">
+          <motion.div
+            className="h-full rounded-full bg-neun-success"
+            initial={{ width: 0 }}
+            animate={inView ? { width: `${barWidth}%` } : { width: 0 }}
+            transition={{ duration: 0.8, delay: delay * 0.1, ease: [0.16, 1, 0.3, 1] }}
+          />
+        </div>
+      </Link>
+
+      {/* Country breakdown on hover */}
+      <AnimatePresence>
+        {expanded && hasCountries && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pt-3 mt-2">
+              {/* Stacked horizontal bars */}
+              <div className="flex items-stretch gap-[2px] h-9 sm:h-10 rounded-sm overflow-hidden">
+                {item.countries.map((c, i) => (
+                  <Link
+                    key={c.name}
+                    href={`/jobs?location=${encodeURIComponent(c.name)}`}
+                    className="relative flex items-center justify-center overflow-hidden rounded-sm transition-opacity hover:opacity-90"
+                    style={{
+                      width: `${c.percentage}%`,
+                      minWidth: c.percentage > 3 ? '32px' : '8px',
+                      backgroundColor: `rgba(34, 197, 94, ${COUNTRY_BAR_OPACITIES[i] ?? 0.2})`,
+                    }}
+                    title={`${c.flag} ${c.name} — $${Math.round(c.avgSalary / 1000)}K avg`}
+                  >
+                    {c.percentage >= 12 && (
+                      <span className="text-[9px] sm:text-[10px] font-semibold text-a24-dark-bg truncate px-1 whitespace-nowrap">
+                        {c.name} {c.avgSalary > 0 ? `$${Math.round(c.avgSalary / 1000)}K` : ''}
+                      </span>
+                    )}
+                  </Link>
+                ))}
+              </div>
+              {/* Percentage labels below */}
+              <div className="flex gap-[2px] mt-1">
+                {item.countries.map(c => (
+                  <span
+                    key={c.name}
+                    className="text-[9px] sm:text-[10px] tabular-nums text-a24-muted/50 dark:text-a24-dark-muted/50 text-center truncate"
+                    style={{ width: `${c.percentage}%`, minWidth: c.percentage > 3 ? '32px' : '8px', fontFamily: 'var(--font-space), monospace' }}
+                  >
+                    {c.percentage >= 5 ? `${c.flag} ${c.percentage}%` : ''}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
 

@@ -103,6 +103,52 @@ function classifyJobRegion(location: string): string {
   return 'other'
 }
 
+// ── Country classification within regions ──
+const COUNTRY_MAP: { pattern: RegExp; name: string; flag: string; region: string }[] = [
+  // US sub-regions
+  { pattern: /new york|\bny\b/i, name: 'New York', flag: '\u{1F5FD}', region: 'us' },
+  { pattern: /san francisco|sf\b/i, name: 'San Francisco', flag: '\u{1F309}', region: 'us' },
+  { pattern: /los angeles|\bla\b.*ca/i, name: 'Los Angeles', flag: '\u{1F3AC}', region: 'us' },
+  { pattern: /miami/i, name: 'Miami', flag: '\u{1F334}', region: 'us' },
+  { pattern: /austin|texas|\btx\b/i, name: 'Texas', flag: '\u{2B50}', region: 'us' },
+  { pattern: /seattle|washington.*state/i, name: 'Seattle', flag: '\u{2614}', region: 'us' },
+  { pattern: /chicago/i, name: 'Chicago', flag: '\u{1F3D9}', region: 'us' },
+  { pattern: /boston/i, name: 'Boston', flag: '\u{1F393}', region: 'us' },
+  { pattern: /denver|colorado/i, name: 'Denver', flag: '\u{26F0}', region: 'us' },
+  { pattern: /california|\bca\b/i, name: 'California', flag: '\u{2600}', region: 'us' },
+  // Europe
+  { pattern: /\buk\b|united kingdom|london|england/i, name: 'UK', flag: '\u{1F1EC}\u{1F1E7}', region: 'europe' },
+  { pattern: /germany|berlin|munich/i, name: 'Germany', flag: '\u{1F1E9}\u{1F1EA}', region: 'europe' },
+  { pattern: /france|paris/i, name: 'France', flag: '\u{1F1EB}\u{1F1F7}', region: 'europe' },
+  { pattern: /netherlands|amsterdam/i, name: 'Netherlands', flag: '\u{1F1F3}\u{1F1F1}', region: 'europe' },
+  { pattern: /ireland|dublin/i, name: 'Ireland', flag: '\u{1F1EE}\u{1F1EA}', region: 'europe' },
+  { pattern: /switzerland|zurich/i, name: 'Switzerland', flag: '\u{1F1E8}\u{1F1ED}', region: 'europe' },
+  { pattern: /spain|madrid|barcelona/i, name: 'Spain', flag: '\u{1F1EA}\u{1F1F8}', region: 'europe' },
+  { pattern: /portugal|lisbon/i, name: 'Portugal', flag: '\u{1F1F5}\u{1F1F9}', region: 'europe' },
+  // Asia
+  { pattern: /singapore/i, name: 'Singapore', flag: '\u{1F1F8}\u{1F1EC}', region: 'asia' },
+  { pattern: /hong kong/i, name: 'Hong Kong', flag: '\u{1F1ED}\u{1F1F0}', region: 'asia' },
+  { pattern: /japan|tokyo/i, name: 'Japan', flag: '\u{1F1EF}\u{1F1F5}', region: 'asia' },
+  { pattern: /india|bangalore|mumbai/i, name: 'India', flag: '\u{1F1EE}\u{1F1F3}', region: 'asia' },
+  { pattern: /vietnam/i, name: 'Vietnam', flag: '\u{1F1FB}\u{1F1F3}', region: 'asia' },
+  { pattern: /thailand|bangkok/i, name: 'Thailand', flag: '\u{1F1F9}\u{1F1ED}', region: 'asia' },
+  { pattern: /dubai|uae/i, name: 'UAE', flag: '\u{1F1E6}\u{1F1EA}', region: 'asia' },
+  { pattern: /taiwan/i, name: 'Taiwan', flag: '\u{1F1F9}\u{1F1FC}', region: 'asia' },
+  // LATAM
+  { pattern: /brazil|são paulo/i, name: 'Brazil', flag: '\u{1F1E7}\u{1F1F7}', region: 'latam' },
+  { pattern: /mexico/i, name: 'Mexico', flag: '\u{1F1F2}\u{1F1FD}', region: 'latam' },
+  { pattern: /argentina|buenos aires/i, name: 'Argentina', flag: '\u{1F1E6}\u{1F1F7}', region: 'latam' },
+  { pattern: /colombia/i, name: 'Colombia', flag: '\u{1F1E8}\u{1F1F4}', region: 'latam' },
+]
+
+function classifyCountry(location: string, region: string): { name: string; flag: string } | null {
+  const l = location.toLowerCase()
+  for (const c of COUNTRY_MAP) {
+    if (c.region === region && c.pattern.test(l)) return { name: c.name, flag: c.flag }
+  }
+  return null
+}
+
 // Map classifyRole output to display label for Roles by Region
 const ROLE_DISPLAY_SHORT: Record<string, string> = {
   engineering: 'Eng',
@@ -227,6 +273,14 @@ export interface CrossSkillInsight {
   insight: string
 }
 
+export interface CountrySalaryData {
+  name: string
+  flag: string
+  avgSalary: number
+  jobCount: number
+  percentage: number
+}
+
 export interface RegionSalaryData {
   key: string
   label: string
@@ -234,6 +288,7 @@ export interface RegionSalaryData {
   avgSalary: number
   jobCount: number
   remotePercent: number
+  countries: CountrySalaryData[]
 }
 
 export interface RegionRolesData {
@@ -545,6 +600,34 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
         ? Math.round(withSalary.reduce((s, j) => s + (j.salaryMin! + j.salaryMax!) / 2, 0) / withSalary.length / 1000) * 1000
         : 0
       const rCount = regionJobs.filter(j => (j.location || '').toLowerCase().includes('remote')).length
+
+      // Country breakdown within region
+      const countryJobsMap: Record<string, { name: string; flag: string; jobs: typeof regionJobs }> = {}
+      for (const job of regionJobs) {
+        const country = classifyCountry(job.location || '', regionKey)
+        const key = country?.name ?? 'Other'
+        if (!countryJobsMap[key]) countryJobsMap[key] = { name: key, flag: country?.flag ?? info.flag, jobs: [] }
+        countryJobsMap[key].jobs.push(job)
+      }
+      const countries: CountrySalaryData[] = Object.values(countryJobsMap)
+        .map(c => {
+          const cWithSalary = c.jobs.filter(j =>
+            j.salaryMin && j.salaryMax && (j.salaryCurrency === 'USD' || !j.salaryCurrency) && j.salaryMax < 1000000
+          )
+          const cAvg = cWithSalary.length >= 2
+            ? Math.round(cWithSalary.reduce((s, j) => s + (j.salaryMin! + j.salaryMax!) / 2, 0) / cWithSalary.length / 1000) * 1000
+            : 0
+          return {
+            name: c.name,
+            flag: c.flag,
+            avgSalary: cAvg,
+            jobCount: c.jobs.length,
+            percentage: regionJobs.length > 0 ? Math.round((c.jobs.length / regionJobs.length) * 100) : 0,
+          }
+        })
+        .sort((a, b) => b.jobCount - a.jobCount)
+        .slice(0, 5)
+
       regionSalaries.push({
         key: regionKey,
         label: info.label,
@@ -552,6 +635,7 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
         avgSalary,
         jobCount: regionJobs.length,
         remotePercent: regionJobs.length > 0 ? Math.round((rCount / regionJobs.length) * 100) : 0,
+        countries,
       })
     }
     regionSalaries.sort((a, b) => b.avgSalary - a.avgSalary)
