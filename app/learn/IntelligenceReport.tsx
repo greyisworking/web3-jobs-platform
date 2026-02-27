@@ -423,7 +423,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
       </nav>
 
       {/* Main 50/50 Grid */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-5 items-stretch">
 
         {/* LEFT: Skill × Level Heatmap */}
         <div className="flex flex-col">
@@ -519,11 +519,11 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
         </div>
 
         {/* RIGHT: Salary (top) + Market Maturity (bottom) — stacked, no tabs */}
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-3 sm:gap-5">
 
           {/* SALARY — linked to active role tab */}
           <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden flex flex-col">
-            <div className="px-5 py-4 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border-b border-a24-border dark:border-a24-dark-border flex items-center gap-2.5">
+            <div className="px-4 py-3 sm:px-5 sm:py-4 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border-b border-a24-border dark:border-a24-dark-border flex items-center gap-2.5">
               <BarChart3 className="w-4 h-4 text-neun-success" />
               <h2 className="text-xs sm:text-sm uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted font-bold">
                 Salary
@@ -542,7 +542,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                 </div>
               )}
             </div>
-            <div className="px-5 py-3 border-t border-a24-border/30 dark:border-a24-dark-border/30">
+            <div className="px-4 py-2 sm:px-5 sm:py-3 border-t border-a24-border/30 dark:border-a24-dark-border/30">
               <p className="text-xs italic text-a24-muted/40 dark:text-a24-dark-muted/40">
                 {salaryMeme}
               </p>
@@ -551,7 +551,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
 
           {/* MARKET MATURITY — always "all" data, not linked to role tab */}
           <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden flex flex-col flex-1">
-            <div className="px-5 py-4 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border-b border-a24-border dark:border-a24-dark-border flex items-center gap-2.5">
+            <div className="px-4 py-3 sm:px-5 sm:py-4 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border-b border-a24-border dark:border-a24-dark-border flex items-center gap-2.5">
               <Globe className="w-4 h-4 text-neun-success" />
               <h2 className="text-xs sm:text-sm uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted font-bold">
                 Market Maturity
@@ -568,7 +568,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                 </div>
               )}
             </div>
-            <div className="px-5 py-3 border-t border-a24-border/30 dark:border-a24-dark-border/30 mt-auto">
+            <div className="px-4 py-2 sm:px-5 sm:py-3 border-t border-a24-border/30 dark:border-a24-dark-border/30 mt-auto">
               <p className="text-xs italic text-a24-muted/40 dark:text-a24-dark-muted/40">
                 {maturityMeme}
               </p>
