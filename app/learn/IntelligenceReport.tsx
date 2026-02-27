@@ -423,11 +423,11 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
       </nav>
 
       {/* Main 50/50 Grid */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
 
         {/* LEFT: Skill × Level Heatmap */}
-        <div>
-          <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden">
+        <div className="flex flex-col">
+          <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden flex flex-col flex-1">
             {/* Header */}
             <div className="px-5 py-5 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border-b border-a24-border dark:border-a24-dark-border">
               <div className="flex items-center gap-2.5 mb-2">
@@ -447,7 +447,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
             </div>
 
             {/* Heatmap grid */}
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto flex-1">
               <div className="grid grid-cols-[minmax(90px,1.5fr)_repeat(4,minmax(40px,1fr))] sm:grid-cols-[minmax(140px,1.5fr)_repeat(4,1fr)] px-3 py-2 border-b border-a24-border/30 dark:border-a24-dark-border/30">
                 <span />
                 {LEVELS.map(level => (
@@ -522,7 +522,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
         <div className="flex flex-col gap-5">
 
           {/* SALARY — linked to active role tab */}
-          <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden">
+          <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden flex flex-col">
             <div className="px-5 py-4 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border-b border-a24-border dark:border-a24-dark-border flex items-center gap-2.5">
               <BarChart3 className="w-4 h-4 text-neun-success" />
               <h2 className="text-xs sm:text-sm uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted font-bold">
@@ -550,14 +550,14 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
           </div>
 
           {/* MARKET MATURITY — always "all" data, not linked to role tab */}
-          <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden">
+          <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden flex flex-col flex-1">
             <div className="px-5 py-4 bg-a24-surface/50 dark:bg-a24-dark-surface/50 border-b border-a24-border dark:border-a24-dark-border flex items-center gap-2.5">
               <Globe className="w-4 h-4 text-neun-success" />
               <h2 className="text-xs sm:text-sm uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted font-bold">
                 Market Maturity
               </h2>
             </div>
-            <div className="divide-y divide-a24-border/10 dark:divide-a24-dark-border/10">
+            <div className="divide-y divide-a24-border/10 dark:divide-a24-dark-border/10 flex-1">
               {data.regionRoles.length > 0 ? (
                 data.regionRoles.map((item, i) => (
                   <MarketMaturityRow key={item.key} item={item} delay={i} />
@@ -568,7 +568,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                 </div>
               )}
             </div>
-            <div className="px-5 py-3 border-t border-a24-border/30 dark:border-a24-dark-border/30">
+            <div className="px-5 py-3 border-t border-a24-border/30 dark:border-a24-dark-border/30 mt-auto">
               <p className="text-xs italic text-a24-muted/40 dark:text-a24-dark-muted/40">
                 {maturityMeme}
               </p>
