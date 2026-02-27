@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { Zap, BarChart3, Globe } from 'lucide-react'
@@ -84,14 +85,33 @@ function HeatmapCell({ value, delay, skill, level, topCompanies, avgSalaryRange,
   const intensity = value === 0 ? 0 : Math.min(value / 55, 1)
   const isHot = value >= 40
   const approxJobs = Math.round(jobCount * value / 100)
+  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null)
+
+  const handleMouseEnter = useCallback(() => {
+    setHovered(true)
+    if (ref.current && value > 0) {
+      const rect = ref.current.getBoundingClientRect()
+      const tooltipW = 224 // w-56 = 14rem = 224px
+      let left = rect.left + rect.width / 2 - tooltipW / 2
+      // Clamp to viewport
+      if (left < 8) left = 8
+      if (left + tooltipW > window.innerWidth - 8) left = window.innerWidth - 8 - tooltipW
+      setTooltipPos({ top: rect.bottom + 8, left })
+    }
+  }, [value])
+
+  const handleMouseLeave = useCallback(() => {
+    setHovered(false)
+    setTooltipPos(null)
+  }, [])
 
   return (
     <div
       ref={ref}
       className="relative flex items-center justify-center py-3 px-1 sm:py-4 sm:px-2 rounded-sm transition-colors duration-300 cursor-pointer"
       style={value > 0 ? { backgroundColor: `rgba(34, 197, 94, ${0.04 + intensity * 0.22})` } : undefined}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {isHot && (
         <motion.div
@@ -112,41 +132,42 @@ function HeatmapCell({ value, delay, skill, level, topCompanies, avgSalaryRange,
         {value === 0 ? '\u2014' : <>{final.toFixed(1)}<span className="hidden sm:inline">%</span></>}
       </span>
 
-      {/* Tooltip */}
-      <AnimatePresence>
-        {hovered && value > 0 && (
+      {/* Tooltip via portal — rendered on body to avoid overflow clipping */}
+      {hovered && value > 0 && tooltipPos && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed z-[9999] w-56 pointer-events-none hidden sm:block"
+          style={{ top: tooltipPos.top, left: tooltipPos.left }}
+        >
           <motion.div
-            initial={{ opacity: 0, y: 4 }}
+            initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden sm:block"
+            className="bg-a24-dark-bg border border-a24-dark-border rounded-lg shadow-xl p-3.5 pointer-events-auto"
           >
-            <div className="bg-a24-dark-bg border border-a24-dark-border rounded-lg shadow-xl p-3.5">
-              <p className="text-sm font-semibold text-a24-dark-text mb-2">
-                {skill} × {LEVEL_LABELS[level]}
+            <p className="text-sm font-semibold text-a24-dark-text mb-2">
+              {skill} × {LEVEL_LABELS[level]}
+            </p>
+            <div className="space-y-1.5 text-xs text-a24-dark-muted">
+              <p>
+                <span className="text-neun-success font-medium">{value}%</span> of jobs require this
               </p>
-              <div className="space-y-1.5 text-xs text-a24-dark-muted">
+              {topCompanies.length > 0 && (
                 <p>
-                  <span className="text-neun-success font-medium">{value}%</span> of jobs require this
+                  Top hiring: {topCompanies.slice(0, 3).map(c => c.name).join(', ')}
                 </p>
-                {topCompanies.length > 0 && (
-                  <p>
-                    Top hiring: {topCompanies.slice(0, 3).map(c => c.name).join(', ')}
-                  </p>
-                )}
-                <p>{avgSalaryRange}</p>
-              </div>
-              <Link
-                href={`/jobs?skill=${encodeURIComponent(skill.toLowerCase())}${activeRole !== 'all' ? `&role=${activeRole}` : ''}`}
-                className="mt-2.5 block text-[10px] uppercase tracking-wider text-neun-success hover:text-neun-success/80 transition-colors"
-              >
-                See {approxJobs > 0 ? `~${approxJobs}` : ''} jobs &nearr;
-              </Link>
+              )}
+              <p>{avgSalaryRange}</p>
             </div>
+            <Link
+              href={`/jobs?skill=${encodeURIComponent(skill.toLowerCase())}${activeRole !== 'all' ? `&role=${activeRole}` : ''}`}
+              className="mt-2.5 block text-[10px] uppercase tracking-wider text-neun-success hover:text-neun-success/80 transition-colors"
+            >
+              See {approxJobs > 0 ? `~${approxJobs}` : ''} jobs &nearr;
+            </Link>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }
