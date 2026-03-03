@@ -1,6 +1,7 @@
 import Footer from '@/app/components/Footer'
 import { getIntelligenceData } from '@/lib/intelligence-data'
 import IntelligenceReport from './IntelligenceReport'
+import TrendsDashboard from './TrendsDashboard'
 
 export const revalidate = 3600
 
@@ -13,6 +14,11 @@ export default async function LearnPage() {
 
         {/* Intelligence Report (Client Component) */}
         <IntelligenceReport data={data} />
+
+        {/* Trends Dashboard (Client Component) */}
+        <div className="mt-5">
+          <TrendsDashboard />
+        </div>
 
         {/* Footer note */}
         <div className="text-center mt-6">
