@@ -40,16 +40,10 @@ export const metadata: Metadata = {
   publisher: 'NEUN',
   alternates: {
     canonical: 'https://neun.wtf',
-    languages: {
-      'en': 'https://neun.wtf',
-      'ko': 'https://neun.wtf',
-      'x-default': 'https://neun.wtf',
-    },
   },
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    alternateLocale: ['ko_KR'],
     url: 'https://neun.wtf',
     siteName: 'NEUN',
     title: 'NEUN | Web3 Jobs',
