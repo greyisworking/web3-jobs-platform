@@ -70,7 +70,7 @@ export default async function SkillPage({
       <main id="main-content" className="max-w-6xl mx-auto px-6 pt-24 pb-12">
         {/* Breadcrumb */}
         <Link
-          href="/learn/skills"
+          href="/market/skills"
           className="inline-flex items-center gap-2 text-sm text-a24-muted dark:text-a24-dark-muted hover:text-neun-success transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -216,7 +216,7 @@ export default async function SkillPage({
                 return (
                   <Link
                     key={relatedSlug}
-                    href={`/learn/skills/${relatedSlug}`}
+                    href={`/market/skills/${relatedSlug}`}
                     className="px-4 py-2 border border-a24-border dark:border-a24-dark-border hover:border-neun-success/50 text-sm text-a24-text dark:text-a24-dark-text hover:text-neun-success transition-colors"
                   >
                     {related.name}

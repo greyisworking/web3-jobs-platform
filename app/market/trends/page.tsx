@@ -74,11 +74,11 @@ export default async function TrendsPage() {
       <main id="main-content" className="max-w-6xl mx-auto px-6 pt-24 pb-12">
         {/* Breadcrumb */}
         <Link
-          href="/learn"
+          href="/market"
           className="inline-flex items-center gap-2 text-sm text-a24-muted dark:text-a24-dark-muted hover:text-neun-success transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          back to learn
+          back to market
         </Link>
 
         {/* Hero */}
@@ -158,7 +158,7 @@ export default async function TrendsPage() {
                       {String(idx + 1).padStart(2, '0')}
                     </span>
                     <Link
-                      href={`/learn/skills/${skill.skill.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+                      href={`/market/skills/${skill.skill.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
                       className="text-sm text-a24-text dark:text-a24-dark-text hover:text-neun-success transition-colors"
                     >
                       {skill.skill}
@@ -187,7 +187,7 @@ export default async function TrendsPage() {
                 <div key={skill.skill}>
                   <div className="flex items-center justify-between mb-1">
                     <Link
-                      href={`/learn/skills/${skill.skill.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+                      href={`/market/skills/${skill.skill.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
                       className="text-sm text-a24-text dark:text-a24-dark-text hover:text-neun-success transition-colors"
                     >
                       {skill.skill}
@@ -315,7 +315,7 @@ export default async function TrendsPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/learn/career"
+              href="/market/career"
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-neun-success text-white text-sm font-medium hover:bg-neun-success/90 transition-colors"
             >
               explore career paths

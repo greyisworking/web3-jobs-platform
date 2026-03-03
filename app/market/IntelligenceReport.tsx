@@ -490,7 +490,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
               <div className="flex items-center gap-2.5 mb-2">
                 <Zap className="w-5 h-5 text-neun-success" />
                 <h2 className="text-sm sm:text-base uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted font-bold">
-                  A Secret Weapon for Career Advancement
+                  Web3 Job Market Intelligence
                 </h2>
               </div>
               <div className="flex items-center gap-2 text-[10px] text-a24-muted/40 dark:text-a24-dark-muted/40">
@@ -531,7 +531,7 @@ export default function IntelligenceReport({ data }: { data: IntelligenceData })
                       {/* Skill name — left-aligned */}
                       <div className="flex items-center justify-start py-2.5 sm:py-3.5 pl-1 min-w-0">
                         <Link
-                          href={`/learn/skills/${encodeURIComponent(entry.skill.toLowerCase())}`}
+                          href={`/market/skills/${encodeURIComponent(entry.skill.toLowerCase())}`}
                           className="text-xs sm:text-sm font-medium text-a24-text dark:text-a24-dark-text group-hover:text-neun-success transition-colors truncate text-left"
                         >
                           {entry.skill}

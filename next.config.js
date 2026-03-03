@@ -75,25 +75,20 @@ const nextConfig = {
     return [
       // /careers -> /jobs (alias)
       { source: '/careers', destination: '/jobs', permanent: true },
-      { source: '/ko/careers', destination: '/ko/jobs', permanent: true },
       // /companies -> /ecosystem
       { source: '/companies', destination: '/ecosystem?tab=companies', permanent: true },
-      { source: '/ko/companies', destination: '/ko/ecosystem?tab=companies', permanent: true },
       // /investors -> /ecosystem?tab=investors
       { source: '/investors', destination: '/ecosystem?tab=investors', permanent: true },
-      { source: '/ko/investors', destination: '/ko/ecosystem?tab=investors', permanent: true },
+      // Legacy /ko/* URLs → strip locale prefix
+      { source: '/ko', destination: '/', permanent: true },
+      { source: '/ko/:path*', destination: '/:path*', permanent: true },
+      // Legacy /en/* URLs → strip locale prefix
+      { source: '/en', destination: '/', permanent: true },
+      { source: '/en/:path*', destination: '/:path*', permanent: true },
+      // /learn → /market (renamed 2026-03)
+      { source: '/learn', destination: '/market', permanent: true },
+      { source: '/learn/:path*', destination: '/market/:path*', permanent: true },
     ]
-  },
-  // i18n rewrites - map /ko/* to /* (same pages, different locale)
-  async rewrites() {
-    return {
-      beforeFiles: [
-        // Rewrite /ko to /
-        { source: '/ko', destination: '/' },
-        // Rewrite /ko/anything to /anything
-        { source: '/ko/:path*', destination: '/:path*' },
-      ],
-    }
   },
   // Security headers
   async headers() {

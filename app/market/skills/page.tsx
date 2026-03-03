@@ -53,11 +53,11 @@ export default function SkillsPage() {
       <main id="main-content" className="max-w-6xl mx-auto px-6 pt-24 pb-12">
         {/* Breadcrumb */}
         <Link
-          href="/learn"
+          href="/market"
           className="inline-flex items-center gap-2 text-sm text-a24-muted dark:text-a24-dark-muted hover:text-neun-success transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          back to learn
+          back to market
         </Link>
 
         {/* Hero */}
@@ -94,7 +94,7 @@ export default function SkillsPage() {
                 {categorySkills.map((skill) => (
                   <Link
                     key={skill.slug}
-                    href={`/learn/skills/${skill.slug}`}
+                    href={`/market/skills/${skill.slug}`}
                     className="group p-5 border border-a24-border dark:border-a24-dark-border hover:border-neun-success/50 transition-colors"
                   >
                     <h3 className="text-base font-medium text-a24-text dark:text-a24-dark-text mb-2 group-hover:text-neun-success transition-colors">
@@ -119,7 +119,7 @@ export default function SkillsPage() {
             don&apos;t see the skill you&apos;re looking for?
           </p>
           <Link
-            href="/learn/library"
+            href="/market/library"
             className="inline-flex items-center gap-2 text-sm text-neun-success hover:underline"
           >
             browse the full resource library

@@ -323,8 +323,8 @@
   animation-play-state: paused;
 }
 
-/* Learn page ticker animation */
-@keyframes learn-ticker {
+/* Market page ticker animation */
+@keyframes market-ticker {
   0% {
     transform: translateX(0);
   }
@@ -333,11 +333,11 @@
   }
 }
 
-.learn-ticker {
-  animation: learn-ticker 35s linear infinite;
+.market-ticker {
+  animation: market-ticker 35s linear infinite;
 }
 
-.learn-ticker:hover {
+.market-ticker:hover {
   animation-play-state: paused;
 }
 
@@ -1399,7 +1399,7 @@ input:-webkit-autofill:focus {
   .badge-recommended,
   .badge-new-emphasis,
   .vc-marquee,
-  .learn-ticker,
+  .market-ticker,
   .pixelbara-eyes,
   .pixelbara-rainbow svg,
   .skeleton,

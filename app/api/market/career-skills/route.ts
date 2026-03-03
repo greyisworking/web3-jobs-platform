@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCareerSkills, careerPaths } from '@/lib/career-skills'
 
-// GET /api/learn/career-skills?career=smart-contract-engineer
+// GET /api/market/career-skills?career=smart-contract-engineer
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const careerSlug = searchParams.get('career')

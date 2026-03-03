@@ -12,7 +12,7 @@ export default function LearnTicker({ items }: { items: TickerItem[] }) {
 
   return (
     <div className="overflow-hidden border-b border-a24-border dark:border-a24-dark-border bg-a24-surface/30 dark:bg-a24-dark-surface/30">
-      <div className="learn-ticker flex whitespace-nowrap py-2.5" role="marquee" aria-label="Skill demand ticker">
+      <div className="market-ticker flex whitespace-nowrap py-2.5" role="marquee" aria-label="Skill demand ticker">
         {duplicated.map((item, i) => (
           <div key={`${item.skill}-${i}`} className="flex items-center gap-2 px-5 shrink-0">
             <span
