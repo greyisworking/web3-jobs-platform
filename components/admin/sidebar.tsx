@@ -16,6 +16,7 @@ import {
   Star,
   Mail,
   Sparkles,
+  FileBarChart,
   HelpCircle,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
@@ -115,6 +116,12 @@ const navSections: NavSection[] = [
         label: '뉴스레터 생성',
         description: '매주 채용 뉴스레터 만들기',
         icon: <Mail className="h-4 w-4" />
+      },
+      {
+        href: '/admin/report',
+        label: '월간 리포트',
+        description: '월간 시장 동향 리포트 생성',
+        icon: <FileBarChart className="h-4 w-4" />
       },
       {
         href: '/admin/content-generator',
