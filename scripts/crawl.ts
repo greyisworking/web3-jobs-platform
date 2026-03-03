@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { crawlPriorityCompanies } from './crawlers/priority-companies'
 import { crawlWeb3Career } from './crawlers/web3career'
-import { crawlWeb3KRJobs } from './crawlers/web3krjobs'
+// import { crawlWeb3KRJobs } from './crawlers/web3krjobs'  // Disabled: ERR_SSL_VERSION_OR_CIPHER_MISMATCH 5회 연속 (2026-03-03)
 import { crawlCryptoJobsList } from './crawlers/cryptojobslist'
 import { crawlRemote3 } from './crawlers/remote3'
 import { crawlRemoteOK } from './crawlers/remoteok'
@@ -13,7 +13,7 @@ import { crawlEthereumJobs } from './crawlers/ethereum'
 import { crawlAvalancheJobs } from './crawlers/avalanchejobs'
 import { crawlArbitrumJobs } from './crawlers/arbitrumjobs'
 import { crawlCryptocurrencyJobs } from './crawlers/cryptocurrencyjobs'
-// Skipped imports (403 errors or 0 results):
+// Skipped imports (403 errors, 0 results, or SSL errors):
 // import { crawlCryptoJobs } from './crawlers/cryptojobs'
 // import { crawlWellfound } from './crawlers/wellfound'
 // import { crawlSuperteamEarn } from './crawlers/superteam'
@@ -88,7 +88,7 @@ async function main() {
   console.log('='.repeat(50))
   console.log(`⏱️  Overall timeout: ${OVERALL_TIMEOUT_MS / 60000} minutes`)
   console.log(`⏱️  Per-source timeout: ${PER_SOURCE_TIMEOUT_MS / 60000} minutes`)
-  console.log(`⏭️  Skipping: crypto.jobs, wellfound.com, superteam.fun, base.hirechain.io`)
+  console.log(`⏭️  Skipping: crypto.jobs, wellfound.com, superteam.fun, base.hirechain.io, web3kr.jobs (SSL)`)
 
   const startTime = Date.now()
   const results: CrawlResult[] = []
@@ -103,7 +103,7 @@ async function main() {
   // 시작 알림
   await sendDiscordNotification(
     '🚀 크롤링 시작!',
-    '14개 채용 사이트에서 공고를 수집하고 있어요.\n(4개 소스 스킵: 403 에러/0개 결과)\n완료되면 다시 알려드릴게요!',
+    '13개 채용 사이트에서 공고를 수집하고 있어요.\n(5개 소스 스킵: 403 에러/0개 결과/SSL 에러)\n완료되면 다시 알려드릴게요!',
     0x3498db
   )
 
@@ -113,7 +113,7 @@ async function main() {
   const crawlers = [
     { name: 'priority-companies', fn: crawlPriorityCompanies, timeout: PRIORITY_COMPANIES_TIMEOUT_MS },
     { name: 'web3.career', fn: crawlWeb3Career },
-    { name: 'web3kr.jobs', fn: crawlWeb3KRJobs },
+    // { name: 'web3kr.jobs', fn: crawlWeb3KRJobs },  // Disabled: SSL cert broken (2026-03-03)
     { name: 'cryptojobslist.com', fn: crawlCryptoJobsList },
     { name: 'remote3.co', fn: crawlRemote3 },
     { name: 'remoteok.com', fn: crawlRemoteOK },
@@ -125,11 +125,12 @@ async function main() {
     { name: 'jobs.avax.network', fn: crawlAvalancheJobs },
     { name: 'jobs.arbitrum.io', fn: crawlArbitrumJobs },
     { name: 'cryptocurrencyjobs.co', fn: crawlCryptocurrencyJobs },
-    // Skipped sources (403 or 0 results):
+    // Skipped sources (403, 0 results, or SSL):
     // - crypto.jobs (403 error)
     // - wellfound.com (403 error)
     // - talent.superteam.fun (0 results)
     // - base.hirechain.io (0 results)
+    // - web3kr.jobs (SSL cert broken since 2026-03)
   ]
 
   for (const crawler of crawlers) {

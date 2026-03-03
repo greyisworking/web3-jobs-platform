@@ -102,8 +102,14 @@ export async function crawlRocketPunch(): Promise<CrawlerReturn> {
     })
 
     // Wait for job cards to render
-    await page.waitForSelector('.company-name, .job-title, [class*="job-card"], .job-item', { timeout: 10000 }).catch(() => {
-      console.log('⚠️  Selector timeout, proceeding with available content')
+    await page.waitForSelector('.company-name, .job-title, [class*="job-card"], .job-item', { timeout: 10000 }).catch(async () => {
+      console.log('⚠️  Selector timeout, dumping page HTML for debugging...')
+      try {
+        const bodyHtml = await page.evaluate(() => document.querySelector('body')?.innerHTML?.substring(0, 3000) || 'empty body')
+        console.log('🔍 Page HTML (first 3000 chars):\n', bodyHtml)
+      } catch (e) {
+        console.log('⚠️  Could not capture page HTML')
+      }
     })
 
     // Extract job data from the rendered DOM
@@ -142,6 +148,21 @@ export async function crawlRocketPunch(): Promise<CrawlerReturn> {
 
           if (title && url) {
             results.push({ title, company: company || 'Unknown', location: 'Seoul', type: 'Full-time', url })
+          }
+        })
+      }
+
+      // Fallback 2: scan all links matching /jobs/ pattern
+      if (results.length === 0) {
+        const allLinks = document.querySelectorAll('a[href*="/jobs/"]')
+        allLinks.forEach((link) => {
+          const url = (link as HTMLAnchorElement)?.href || ''
+          const title = link.textContent?.trim() || ''
+          // Skip nav/header links (too short or generic)
+          if (title && title.length > 5 && url && !url.includes('/jobs?')) {
+            const parentCard = link.closest('div, li, article, section')
+            const company = parentCard?.querySelector('.company-name, .corp-name, [class*="company"]')?.textContent?.trim() || 'Unknown'
+            results.push({ title, company, location: 'Seoul', type: 'Full-time', url })
           }
         })
       }

@@ -48,14 +48,16 @@ export async function crawlCryptoJobsList(): Promise<CrawlerReturn> {
   let newCount = 0
   for (const job of jobsArray) {
     try {
-      const title = job.title || job.name
+      const title = job.jobTitle || job.title || job.name
       if (!title) continue
 
-      const companyName = job.company?.name || job.companyName || job.company || 'Unknown'
+      const companyName = job.companyName || job.company?.name || job.company || 'Unknown'
 
       let jobUrl: string
       if (job.url && job.url.startsWith('http')) {
         jobUrl = job.url
+      } else if (job.seoSlug) {
+        jobUrl = `${baseUrl}/jobs/${job.seoSlug}`
       } else if (job.slug) {
         jobUrl = `${baseUrl}/jobs/${job.slug}`
       } else if (job.id) {
@@ -64,7 +66,7 @@ export async function crawlCryptoJobsList(): Promise<CrawlerReturn> {
         continue
       }
 
-      const location = job.location || job.locationName || 'Remote'
+      const location = job.jobLocation || job.location || job.locationName || 'Remote'
       const tags: string[] = Array.isArray(job.tags)
         ? job.tags.map((t: any) => typeof t === 'string' ? t : t.name || t.label || '').filter(Boolean)
         : []
@@ -77,11 +79,12 @@ export async function crawlCryptoJobsList(): Promise<CrawlerReturn> {
           location: typeof location === 'string' ? location : 'Remote',
           type: job.type || job.employmentType || 'Full-time',
           category: job.category || 'Engineering',
-          salary: job.salary || undefined,
+          salary: job.salaryString || job.salary || undefined,
+          companyLogo: job.companyLogo || undefined,
           tags,
           source: 'cryptojobslist.com',
           region: 'Global',
-          postedDate: job.createdAt ? new Date(job.createdAt) : new Date(),
+          postedDate: job.publishedAt ? new Date(job.publishedAt) : job.createdAt ? new Date(job.createdAt) : new Date(),
         },
         'cryptojobslist.com'
       )
