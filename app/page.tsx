@@ -10,6 +10,7 @@ import { JobCardSkeletonGrid } from './components/JobCardSkeleton'
 import Pixelbara from './components/Pixelbara'
 import { MiniPixelbara } from './components/Pixelbara'
 import SocialProof from './components/SocialProof'
+import MarketHighlight from './components/MarketHighlight'
 // ScrollPixelbara removed - unnecessary floating element
 import ScrollReveal from './components/ScrollReveal'
 import Footer from './components/Footer'
@@ -129,6 +130,9 @@ export default function Home() {
       <section className="max-w-6xl mx-auto px-6">
         <SocialProof />
       </section>
+
+      {/* Market Highlight */}
+      <MarketHighlight />
 
       {/* Featured Jobs - BOLDER */}
       <ScrollReveal>
