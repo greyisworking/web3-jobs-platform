@@ -44,6 +44,7 @@ const SOURCE_PRIORITY: Record<string, number> = {
   'remoteok.com': 40,
   'remote3.co': 40,
   'base.hirechain.io': 35,
+  'jobstash.xyz': 35,
   'rocketpunch.com': 30,
   'wanted.co.kr': 30,
 }

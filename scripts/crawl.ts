@@ -14,6 +14,7 @@ import { crawlAvalancheJobs } from './crawlers/avalanchejobs'
 import { crawlArbitrumJobs } from './crawlers/arbitrumjobs'
 import { crawlCryptocurrencyJobs } from './crawlers/cryptocurrencyjobs'
 import { crawlCryptoJobs } from './crawlers/cryptojobs'
+import { crawlJobStash } from './crawlers/jobstash'
 // Skipped imports (403 errors, 0 results, or SSL errors):
 // import { crawlWellfound } from './crawlers/wellfound'
 // import { crawlSuperteamEarn } from './crawlers/superteam'
@@ -103,7 +104,7 @@ async function main() {
   // 시작 알림
   await sendDiscordNotification(
     '🚀 크롤링 시작!',
-    '14개 채용 사이트에서 공고를 수집하고 있어요.\n(4개 소스 스킵: 403 에러/0개 결과/SSL 에러)\n완료되면 다시 알려드릴게요!',
+    '15개 채용 사이트에서 공고를 수집하고 있어요.\n(4개 소스 스킵: 403 에러/0개 결과/SSL 에러)\n완료되면 다시 알려드릴게요!',
     0x3498db
   )
 
@@ -126,6 +127,7 @@ async function main() {
     { name: 'jobs.arbitrum.io', fn: crawlArbitrumJobs },
     { name: 'cryptocurrencyjobs.co', fn: crawlCryptocurrencyJobs },
     { name: 'crypto.jobs', fn: crawlCryptoJobs },  // Restored: RSS feed mode (was 403 on HTML)
+    { name: 'jobstash.xyz', fn: crawlJobStash, timeout: 8 * 60 * 1000 },  // 8 min (192 pages)
     // Skipped sources (403, 0 results, or SSL):
     // - wellfound.com (403 error)
     // - talent.superteam.fun (0 results)
