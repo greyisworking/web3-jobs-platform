@@ -642,6 +642,7 @@ export function translateJobTitle(title: string): string {
 /**
  * Fully translate a job description field to English.
  * Applies section headers, term translation, and strips remaining Korean.
+ * WARNING: This destroys Korean body text. Use translateDescriptionSafe() for descriptions.
  */
 export function translateFullField(text: string | null | undefined): string | null {
   if (!text) return null
@@ -651,6 +652,41 @@ export function translateFullField(text: string | null | undefined): string | nu
   translated = stripKorean(translated)
 
   return translated.length > 0 ? translated : null
+}
+
+/**
+ * Safely translate a job description: translates known section headers
+ * but preserves Korean body text. Also cleans zero-width spaces and
+ * other invisible Unicode characters.
+ */
+export function translateDescriptionSafe(text: string | null | undefined): string | null {
+  if (!text) return null
+
+  let cleaned = text
+
+  // 1. Remove zero-width spaces and other invisible Unicode characters
+  cleaned = cleaned
+    .replace(/[\u200B\u200C\u200D\uFEFF]/g, '')  // zero-width chars
+    .replace(/\u00A0/g, ' ')                       // non-breaking space → regular space
+
+  // 2. If no Korean, return cleaned text as-is
+  if (!containsKorean(cleaned)) return cleaned
+
+  // 3. Translate section headers only (longest match first)
+  const sortedHeaders = Object.entries(SECTION_HEADERS).sort(
+    (a, b) => b[0].length - a[0].length
+  )
+  for (const [korean, english] of sortedHeaders) {
+    cleaned = cleaned.replace(new RegExp(escapeRegExp(korean), 'g'), english)
+  }
+
+  // 4. Normalize excessive whitespace (but preserve newlines for markdown)
+  cleaned = cleaned
+    .replace(/[ \t]{3,}/g, '  ')
+    .replace(/\n{4,}/g, '\n\n\n')
+    .trim()
+
+  return cleaned.length > 0 ? cleaned : null
 }
 
 // Translate job description sections

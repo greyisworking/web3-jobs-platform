@@ -4,7 +4,7 @@ import { jobSchema } from './job'
 import { findPriorityCompany } from '../priority-companies'
 import { computeBadges } from '../badges'
 import { detectRole, normalizeEmploymentType, detectRegion } from '../../scripts/utils'
-import { containsKorean, translateJobTitle, translateCompanyName, translateLocation, translateSalary, translateTags, translateFullField } from '../translation'
+import { containsKorean, translateJobTitle, translateCompanyName, translateLocation, translateSalary, translateTags, translateDescriptionSafe } from '../translation'
 import { cleanJobTitle, cleanCompanyName } from '../clean-job-title'
 import { createSafeLikePattern } from '../sanitize'
 // NOTE: Formatting removed - raw descriptions saved, sanitized on frontend
@@ -120,13 +120,14 @@ export async function validateAndSaveJob(
     rawDescription = job.description.length > MAX_DESCRIPTION_LENGTH
       ? job.description.slice(0, MAX_DESCRIPTION_LENGTH)
       : job.description
-    // Translate Korean terms if present
-    rawDescription = translateFullField(rawDescription) || rawDescription
+    // Translate section headers only (preserve Korean body text for Korean sources)
+    // translateFullField() strips ALL Korean chars which destroys Korean descriptions
+    rawDescription = translateDescriptionSafe(rawDescription)
   }
 
-  const translatedRequirements = translateFullField(job.requirements as string | undefined)
-  const translatedResponsibilities = translateFullField(job.responsibilities as string | undefined)
-  const translatedBenefits = translateFullField(job.benefits as string | undefined)
+  const translatedRequirements = translateDescriptionSafe(job.requirements as string | undefined)
+  const translatedResponsibilities = translateDescriptionSafe(job.responsibilities as string | undefined)
+  const translatedBenefits = translateDescriptionSafe(job.benefits as string | undefined)
 
   // Auto-detect role from title if not provided
   const detectedRole = job.role || detectRole(cleanedTitle)
