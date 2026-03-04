@@ -13,8 +13,8 @@ import { crawlEthereumJobs } from './crawlers/ethereum'
 import { crawlAvalancheJobs } from './crawlers/avalanchejobs'
 import { crawlArbitrumJobs } from './crawlers/arbitrumjobs'
 import { crawlCryptocurrencyJobs } from './crawlers/cryptocurrencyjobs'
+import { crawlCryptoJobs } from './crawlers/cryptojobs'
 // Skipped imports (403 errors, 0 results, or SSL errors):
-// import { crawlCryptoJobs } from './crawlers/cryptojobs'
 // import { crawlWellfound } from './crawlers/wellfound'
 // import { crawlSuperteamEarn } from './crawlers/superteam'
 // import { crawlBaseHirechain } from './crawlers/basehirechain'
@@ -88,7 +88,7 @@ async function main() {
   console.log('='.repeat(50))
   console.log(`⏱️  Overall timeout: ${OVERALL_TIMEOUT_MS / 60000} minutes`)
   console.log(`⏱️  Per-source timeout: ${PER_SOURCE_TIMEOUT_MS / 60000} minutes`)
-  console.log(`⏭️  Skipping: crypto.jobs, wellfound.com, superteam.fun, base.hirechain.io, web3kr.jobs (SSL)`)
+  console.log(`⏭️  Skipping: wellfound.com, superteam.fun, base.hirechain.io, web3kr.jobs (SSL)`)
 
   const startTime = Date.now()
   const results: CrawlResult[] = []
@@ -103,7 +103,7 @@ async function main() {
   // 시작 알림
   await sendDiscordNotification(
     '🚀 크롤링 시작!',
-    '13개 채용 사이트에서 공고를 수집하고 있어요.\n(5개 소스 스킵: 403 에러/0개 결과/SSL 에러)\n완료되면 다시 알려드릴게요!',
+    '14개 채용 사이트에서 공고를 수집하고 있어요.\n(4개 소스 스킵: 403 에러/0개 결과/SSL 에러)\n완료되면 다시 알려드릴게요!',
     0x3498db
   )
 
@@ -125,8 +125,8 @@ async function main() {
     { name: 'jobs.avax.network', fn: crawlAvalancheJobs },
     { name: 'jobs.arbitrum.io', fn: crawlArbitrumJobs },
     { name: 'cryptocurrencyjobs.co', fn: crawlCryptocurrencyJobs },
+    { name: 'crypto.jobs', fn: crawlCryptoJobs },  // Restored: RSS feed mode (was 403 on HTML)
     // Skipped sources (403, 0 results, or SSL):
-    // - crypto.jobs (403 error)
     // - wellfound.com (403 error)
     // - talent.superteam.fun (0 results)
     // - base.hirechain.io (0 results)

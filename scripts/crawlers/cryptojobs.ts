@@ -1,7 +1,8 @@
+import axios from 'axios'
+import * as cheerio from 'cheerio'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { delay, cleanText, delayWithJitter } from '../utils'
-import { resilientFetchHTML } from './lib/resilient-fetch'
+import { cleanText, parseSalary, getRandomUserAgent } from '../utils'
 
 interface CrawlerReturn {
   total: number
@@ -9,200 +10,145 @@ interface CrawlerReturn {
 }
 
 /**
- * CryptoJobs (crypto.jobs) Crawler
- * Crawls the main jobs listing page and extracts job data from HTML
+ * CryptoJobs (crypto.jobs) Crawler — RSS feed mode
+ * The site blocks HTML scraping (Cloudflare 403), but the RSS feed is open.
+ * Feed: https://crypto.jobs/feed/rss — returns ~50 most recent jobs with rich data.
  */
 export async function crawlCryptoJobs(): Promise<CrawlerReturn> {
-  console.log('🚀 Starting CryptoJobs crawler...')
+  console.log('🚀 Starting CryptoJobs crawler (RSS mode)...')
 
-  const baseUrl = 'https://crypto.jobs'
-  const pages = [
-    `${baseUrl}/jobs`,
-    `${baseUrl}/jobs?categories=tech`,
-    `${baseUrl}/jobs?categories=marketing`,
-    `${baseUrl}/jobs?categories=sales`,
-    `${baseUrl}/jobs?type=remote`,
-  ]
+  const feedUrl = 'https://crypto.jobs/feed/rss'
 
-  const allJobs: Array<{
-    title: string
-    company: string
-    url: string
-    location: string
-    type: string
-    category: string
-    salary?: string
-    tags: string[]
-  }> = []
-
-  const seenUrls = new Set<string>()
-
-  for (const pageUrl of pages) {
-    console.log(`  📄 Fetching ${pageUrl}`)
-    const $ = await resilientFetchHTML(pageUrl, {
+  let xml: string
+  try {
+    const response = await axios.get(feedUrl, {
+      headers: { 'User-Agent': getRandomUserAgent() },
+      timeout: 15000,
+    })
+    xml = response.data
+  } catch (error: any) {
+    console.error(`  ❌ Failed to fetch RSS feed: ${error.message}`)
+    await supabase.from('CrawlLog').insert({
       source: 'crypto.jobs',
-      maxRetries: 3,
+      status: 'failed',
+      jobCount: 0,
+      createdAt: new Date().toISOString(),
     })
-
-    if (!$) {
-      console.error(`  ❌ Failed to fetch ${pageUrl}`)
-      continue
-    }
-
-    // Find job cards - look for links to /jobs/[slug]
-    $('a[href^="/jobs/"]').each((_, el) => {
-      try {
-        const $el = $(el)
-        const href = $el.attr('href') || ''
-
-        // Skip main jobs page link
-        if (href === '/jobs' || href === '/jobs/') return
-
-        // Skip non-job links
-        if (!href.match(/^\/jobs\/[\w-]+$/)) return
-
-        const fullUrl = `${baseUrl}${href}`
-
-        // Skip duplicates
-        if (seenUrls.has(fullUrl)) return
-        seenUrls.add(fullUrl)
-
-        // Get job card container
-        const $card = $el.closest('div, article, li').first()
-        const cardText = $card.text() || $el.text()
-
-        // Extract title
-        let title = cleanText($el.text())
-        // If link text is too short, look for heading
-        if (title.length < 5) {
-          const heading = $card.find('h2, h3, h4, strong').first()
-          title = cleanText(heading.text()) || title
-        }
-
-        // Skip if no valid title
-        if (title.length < 3 || title.length > 200) return
-
-        // Extract company name (usually appears after the job title or in a separate element)
-        let company = 'Unknown'
-        const companyPatterns = [
-          /at\s+([A-Z][a-zA-Z0-9\s&.]+)/i,
-          /([A-Z][a-zA-Z0-9\s&.]+)\s*(?:•|·|-|–)/,
-        ]
-        for (const pattern of companyPatterns) {
-          const match = cardText.match(pattern)
-          if (match) {
-            company = cleanText(match[1])
-            break
-          }
-        }
-
-        // If still no company, look for secondary link
-        const companyLink = $card.find('a:not([href^="/jobs/"])').first()
-        if (companyLink.length && company === 'Unknown') {
-          company = cleanText(companyLink.text())
-        }
-
-        // Extract location
-        let location = 'Remote'
-        if (cardText.toLowerCase().includes('remote')) {
-          location = 'Remote'
-        }
-        const locationPatterns = [
-          /🌍\s*([A-Za-z\s,]+)/,
-          /📍\s*([A-Za-z\s,]+)/,
-          /(Remote|Europe|USA|Asia|LATAM|Africa|Worldwide)/i,
-        ]
-        for (const pattern of locationPatterns) {
-          const match = cardText.match(pattern)
-          if (match) {
-            location = cleanText(match[1])
-            break
-          }
-        }
-
-        // Extract employment type
-        let type = 'Full-time'
-        if (cardText.toLowerCase().includes('part time') || cardText.toLowerCase().includes('part-time')) {
-          type = 'Part-time'
-        } else if (cardText.toLowerCase().includes('contract')) {
-          type = 'Contract'
-        }
-
-        // Extract category
-        let category = 'Engineering'
-        if (cardText.toLowerCase().includes('marketing')) {
-          category = 'Marketing'
-        } else if (cardText.toLowerCase().includes('sales')) {
-          category = 'Sales'
-        } else if (cardText.toLowerCase().includes('design')) {
-          category = 'Design'
-        } else if (cardText.toLowerCase().includes('operations')) {
-          category = 'Operations'
-        }
-
-        // Extract tags
-        const tags: string[] = []
-        const tagPatterns = ['Solidity', 'Rust', 'TypeScript', 'Python', 'React', 'Blockchain', 'DeFi', 'NFT', 'Web3', 'Smart Contract']
-        for (const tag of tagPatterns) {
-          if (cardText.toLowerCase().includes(tag.toLowerCase())) {
-            tags.push(tag)
-          }
-        }
-
-        allJobs.push({
-          title,
-          company,
-          url: fullUrl,
-          location,
-          type,
-          category,
-          tags,
-        })
-      } catch (error) {
-        // Skip invalid entries
-      }
-    })
-
-    // Rate limit with jitter between pages
-    await delayWithJitter(1500, 1000)
+    return { total: 0, new: 0 }
   }
 
-  // Remove duplicates
-  const uniqueJobs = Array.from(new Map(allJobs.map(j => [j.url, j])).values())
-
-  console.log(`📦 Found ${uniqueJobs.length} unique jobs from CryptoJobs`)
+  const $ = cheerio.load(xml, { xmlMode: true })
+  const items = $('item')
+  console.log(`  📡 RSS feed: ${items.length} items`)
 
   let savedCount = 0
   let newCount = 0
 
-  for (const job of uniqueJobs) {
+  items.each((_, item) => {
+    // Queued for processing below (cheerio .each is sync)
+  })
+
+  // Process items sequentially (for DB writes)
+  const itemElements = items.toArray()
+  for (const item of itemElements) {
     try {
+      const $item = $(item)
+
+      // Title: "Senior Blockchain Engineer at Unlimit Pro"
+      const rawTitle = cleanText($item.find('title').text())
+      const link = $item.find('link').text().trim().split('?')[0] // Strip UTM params
+      const category = cleanText($item.find('category').text()) || 'Engineering'
+      const pubDateStr = $item.find('pubDate').text().trim()
+      const descriptionHtml = $item.find('description').text()
+
+      if (!rawTitle || !link) continue
+
+      // Parse "Title at Company" pattern
+      let title = rawTitle
+      let company = 'Unknown'
+      const atMatch = rawTitle.match(/^(.+?)\s+at\s+(.+)$/i)
+      if (atMatch) {
+        title = cleanText(atMatch[1])
+        company = cleanText(atMatch[2])
+      }
+
+      // Parse description HTML for structured fields
+      const $desc = cheerio.load(descriptionHtml)
+      let location = 'Remote'
+      let salary: string | undefined
+      let type = 'Full-time'
+      let skills: string[] = []
+
+      $desc('p').each((_, p) => {
+        const text = $desc(p).text()
+        if (text.startsWith('Company:') && company === 'Unknown') {
+          company = cleanText(text.replace('Company:', ''))
+        }
+        if (text.startsWith('Location:')) {
+          location = cleanText(text.replace('Location:', ''))
+        }
+        if (text.startsWith('Salary:')) {
+          salary = cleanText(text.replace('Salary:', ''))
+        }
+        if (text.startsWith('Type:')) {
+          type = cleanText(text.replace('Type:', ''))
+        }
+        if (text.startsWith('Skills:')) {
+          skills = text.replace('Skills:', '').split(',').map(s => cleanText(s)).filter(Boolean)
+        }
+      })
+
+      // Extract remaining text as description (after structured fields)
+      $desc('p strong').parent().remove()
+      const description = cleanText($desc.text()).slice(0, 5000) || undefined
+
+      // Map category
+      const categoryMap: Record<string, string> = {
+        'Tech': 'Engineering',
+        'Marketing': 'Marketing',
+        'Sales': 'Sales',
+        'Design': 'Design',
+        'Other': 'Operations',
+      }
+      const mappedCategory = categoryMap[category] || 'Engineering'
+
+      // Parse salary
+      const salaryInfo = parseSalary(salary)
+
+      // Tags: combine RSS skills + detected from title
+      const tags = skills.length > 0 ? skills : ['Web3', 'Crypto']
+
+      // Parse date
+      const postedDate = pubDateStr ? new Date(pubDateStr) : new Date()
+
       const result = await validateAndSaveJob(
         {
-          title: job.title,
-          company: job.company,
-          url: job.url,
-          location: job.location,
-          type: job.type,
-          category: job.category,
-          tags: job.tags,
+          title,
+          company,
+          url: link,
+          location,
+          type,
+          category: mappedCategory,
+          salary: salary || undefined,
+          salaryMin: salaryInfo.min,
+          salaryMax: salaryInfo.max,
+          salaryCurrency: salaryInfo.currency,
+          tags,
           source: 'crypto.jobs',
           region: 'Global',
-          postedDate: new Date(),
+          postedDate,
+          description,
         },
         'crypto.jobs'
       )
 
       if (result.saved) savedCount++
       if (result.isNew) newCount++
-
-      await delay(100)
     } catch (error) {
-      console.error(`  Error saving job ${job.url}:`, error)
+      console.error('  Error processing RSS item:', error)
     }
   }
 
-  // Log crawl result
   await supabase.from('CrawlLog').insert({
     source: 'crypto.jobs',
     status: 'success',
