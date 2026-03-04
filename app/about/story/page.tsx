@@ -10,10 +10,11 @@ export default function OurStoryPage() {
       <div className="flex flex-col md:flex-row items-start gap-8 mb-8">
         <div className="flex-1">
           <p className="text-lg font-medium text-a24-text dark:text-a24-dark-text mb-4">
-            NEUN is Web3&apos;s most trusted job board.
+            NEUN is a Web3 job aggregator tracking 2,400+ open positions across the blockchain ecosystem.
           </p>
           <p className="text-base font-light text-a24-muted dark:text-a24-dark-muted">
-            Only VC-backed companies. Only legit jobs. No scams, no rugs, no bs.
+            We crawl 40+ data sources every 3 hours to bring you verified, VC-backed opportunities.
+            No scams, no rugs, no bs.
           </p>
         </div>
         <Pixelbara pose="bling" size={120} clickable />
@@ -52,16 +53,19 @@ export default function OurStoryPage() {
         </p>
         <ul className="space-y-2 text-a24-muted dark:text-a24-dark-muted">
           <li className="flex items-center gap-2">
-            <span className="text-neun-success">✓</span> Verified funding from Tier 1 VCs
+            <span className="text-neun-success">✓</span> 2,400+ active positions from VC-backed companies
           </li>
           <li className="flex items-center gap-2">
-            <span className="text-neun-success">✓</span> Real companies with real products
+            <span className="text-neun-success">✓</span> 40+ data sources crawled every 3 hours
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-neun-success">✓</span> Real companies with real products &mdash; verified by Tier 1 VCs
           </li>
           <li className="flex items-center gap-2">
             <span className="text-neun-success">✓</span> Direct links to official career pages
           </li>
           <li className="flex items-center gap-2">
-            <span className="text-neun-success">✓</span> Updated every 3 hours
+            <span className="text-neun-success">✓</span> Market intelligence dashboard with skill trends &amp; salary data
           </li>
         </ul>
       </div>

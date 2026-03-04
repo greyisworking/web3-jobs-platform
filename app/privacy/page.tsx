@@ -24,7 +24,7 @@ export default function PrivacyPage() {
               Privacy Policy
             </h1>
             <p className="text-a24-muted dark:text-a24-dark-muted text-sm">
-              Last updated: January 2026
+              Last updated: March 2026
             </p>
           </div>
           <Pixelbara pose="reading" size={80} />
@@ -99,7 +99,45 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">5. Data Security</h2>
+            <h2 className="text-xl font-semibold mb-4">5. Google Analytics</h2>
+            <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
+              We use Google Analytics to collect anonymized usage data such as page views,
+              session duration, and referral sources. Google Analytics uses cookies to
+              distinguish unique users and track interactions. The information generated
+              is transmitted to and stored by Google on servers in the United States.
+              Google may use this data as described in{' '}
+              <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-a24-text dark:hover:text-a24-dark-text">
+                Google&apos;s Privacy Policy
+              </a>.
+              You can opt out of Google Analytics by installing the{' '}
+              <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer" className="underline hover:text-a24-text dark:hover:text-a24-dark-text">
+                Google Analytics Opt-out Browser Add-on
+              </a>.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-4">6. Advertising</h2>
+            <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
+              We use Google AdSense to display advertisements on our site. Google AdSense
+              may use cookies and web beacons to serve ads based on your prior visits to
+              this site or other websites. Google&apos;s use of advertising cookies enables
+              it and its partners to serve ads based on your browsing patterns.
+            </p>
+            <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted mt-4">
+              You may opt out of personalized advertising by visiting{' '}
+              <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" className="underline hover:text-a24-text dark:hover:text-a24-dark-text">
+                Google Ads Settings
+              </a>.
+              For more information about how Google uses data, visit{' '}
+              <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer" className="underline hover:text-a24-text dark:hover:text-a24-dark-text">
+                How Google uses data when you use our partners&apos; sites or apps
+              </a>.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-4">7. Data Security</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
               We implement appropriate security measures to protect your information.
               However, no method of transmission over the Internet is 100% secure.
@@ -107,7 +145,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">6. Your Rights</h2>
+            <h2 className="text-xl font-semibold mb-4">8. Your Rights</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
               You have the right to:
             </p>
@@ -121,7 +159,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">7. Data Retention</h2>
+            <h2 className="text-xl font-semibold mb-4">9. Data Retention</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
               We retain your information for as long as your account is active or as needed
               to provide services. You can request deletion at any time.
@@ -129,7 +167,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">8. International Transfers</h2>
+            <h2 className="text-xl font-semibold mb-4">10. International Transfers</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
               Your information may be transferred to and processed in countries other than
               your own. We ensure appropriate safeguards are in place.
@@ -137,7 +175,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">9. Children&apos;s Privacy</h2>
+            <h2 className="text-xl font-semibold mb-4">11. Children&apos;s Privacy</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
               Our service is not intended for children under 16. We do not knowingly
               collect information from children.
@@ -145,7 +183,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">10. Changes to This Policy</h2>
+            <h2 className="text-xl font-semibold mb-4">12. Changes to This Policy</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
               We may update this policy from time to time. We will notify you of any
               material changes by posting the new policy on this page.
@@ -153,7 +191,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">11. Contact Us</h2>
+            <h2 className="text-xl font-semibold mb-4">13. Contact Us</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
               For privacy-related questions, please contact us at neun@neun.wtf
             </p>

@@ -24,7 +24,7 @@ export default function TermsPage() {
               Terms of Service
             </h1>
             <p className="text-a24-muted dark:text-a24-dark-muted text-sm">
-              Last updated: January 2026
+              Last updated: March 2026
             </p>
           </div>
           <Pixelbara pose="reading" size={80} />
@@ -73,14 +73,30 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-4">4. Job Listings</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
-              While we strive to ensure accuracy, we do not guarantee the accuracy, completeness,
-              or reliability of any job listing. Job listings are provided for informational purposes
-              only. We are not responsible for the hiring decisions of any company listed on our platform.
+              NEUN is a job aggregator that collects and displays publicly available job postings
+              from third-party sources. While we strive to ensure accuracy, we do not guarantee
+              the accuracy, completeness, timeliness, or reliability of any job listing. Job
+              listings are provided for informational purposes only. We are not responsible for
+              the content of external job postings, the hiring decisions of any company, or the
+              outcome of any application submitted through links on our platform. Always verify
+              job details directly with the hiring company before applying.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">5. Intellectual Property</h2>
+            <h2 className="text-xl font-semibold mb-4">5. Advertising</h2>
+            <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
+              NEUN displays third-party advertisements provided by Google AdSense and potentially
+              other advertising networks. These ads are clearly distinguishable from our editorial
+              content. We are not responsible for the content, accuracy, or practices of any
+              advertiser. Clicking on advertisements may redirect you to third-party websites
+              that are governed by their own terms and privacy policies. Your interaction with
+              advertisers is solely between you and the advertiser.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-4">6. Intellectual Property</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
               The NEUN name, logo, pixelbara mascot, and all related graphics are owned by NEUN.
               You may not use our intellectual property without prior written consent, except for
@@ -89,7 +105,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">6. Disclaimer of Warranties</h2>
+            <h2 className="text-xl font-semibold mb-4">7. Disclaimer of Warranties</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
               THE SERVICE IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTIES OF ANY KIND. WE DO NOT
               GUARANTEE THAT THE SERVICE WILL BE UNINTERRUPTED, SECURE, OR ERROR-FREE.
@@ -97,7 +113,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">7. Limitation of Liability</h2>
+            <h2 className="text-xl font-semibold mb-4">8. Limitation of Liability</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
               NEUN shall not be liable for any indirect, incidental, special, consequential, or
               punitive damages arising from your use of the service.
@@ -105,7 +121,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">8. Changes to Terms</h2>
+            <h2 className="text-xl font-semibold mb-4">9. Changes to Terms</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
               We reserve the right to modify these terms at any time. Continued use of the service
               after changes constitutes acceptance of the new terms.
@@ -113,7 +129,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">9. Contact</h2>
+            <h2 className="text-xl font-semibold mb-4">10. Contact</h2>
             <p className="text-[15px] leading-relaxed text-a24-muted dark:text-a24-dark-muted">
               For questions about these terms, please contact us at neun@neun.wtf
             </p>

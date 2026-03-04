@@ -18,7 +18,7 @@ export default function Footer() {
           {/* Links */}
           <div className="flex items-center gap-4 sm:gap-6">
             <Link
-              href="/about/story"
+              href="/about"
               className="text-[11px] uppercase tracking-[0.2em] font-light text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
             >
               About
