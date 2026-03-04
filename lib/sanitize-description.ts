@@ -246,3 +246,67 @@ export function extractPlainText(html: string | null | undefined): string {
   if (!html) return ''
   return sanitizeHtml(html, { allowedTags: [] }).trim()
 }
+
+// ══════════════════════════════════════════════════════════
+// Crawler-time sanitizer (used in validate-job.ts before DB save)
+// Strips HTML residue so DB stores clean text.
+// ══════════════════════════════════════════════════════════
+
+/** Common HTML entity map */
+const HTML_ENTITY_MAP: Record<string, string> = {
+  '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"',
+  '&#39;': "'", '&apos;': "'", '&nbsp;': ' ',
+  '&#x2F;': '/', '&#x27;': "'", '&#x60;': '`',
+  '&ndash;': '–', '&mdash;': '—', '&bull;': '•',
+  '&hellip;': '…', '&trade;': '™', '&copy;': '©', '&reg;': '®',
+}
+
+/**
+ * Sanitize description at crawl time (before DB save).
+ * Converts HTML to clean plain text:
+ * 1. Block-level tags → newlines
+ * 2. Strip remaining HTML tags
+ * 3. Decode HTML entities
+ * 4. Remove zero-width / invisible chars
+ * 5. Normalize whitespace
+ */
+export function sanitizeDescriptionForStorage(text: string): string {
+  let result = text
+
+  // 1. Convert block-level tags to newlines (preserve structure)
+  result = result
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/?(p|div|li|h[1-6]|tr|blockquote|section|article|header|footer)[\s>][^>]*>/gi, '\n')
+    .replace(/<\/?(?:ul|ol)[\s>][^>]*>/gi, '\n')
+
+  // 2. Strip all remaining HTML tags
+  result = result.replace(/<[^>]+>/g, '')
+
+  // 3. Decode HTML entities
+  for (const [entity, char] of Object.entries(HTML_ENTITY_MAP)) {
+    result = result.replaceAll(entity, char)
+  }
+  // Numeric entities (&#123; &#x1A;)
+  result = result.replace(/&#(\d+);/g, (_, code) => {
+    const n = parseInt(code, 10)
+    return n > 0 && n < 0x10ffff ? String.fromCodePoint(n) : ''
+  })
+  result = result.replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => {
+    const n = parseInt(hex, 16)
+    return n > 0 && n < 0x10ffff ? String.fromCodePoint(n) : ''
+  })
+
+  // 4. Remove zero-width and invisible characters
+  result = result.replace(/[\u200B\u200C\u200D\u200E\u200F\uFEFF\u00AD]/g, '')
+
+  // 5. Normalize whitespace
+  result = result.replace(/[^\S\n]+/g, ' ')
+  result = result
+    .split('\n')
+    .map(line => line.trim())
+    .join('\n')
+  result = result.replace(/\n{3,}/g, '\n\n')
+  result = result.trim()
+
+  return result
+}

@@ -7,6 +7,7 @@ import { detectRole, normalizeEmploymentType, detectRegion } from '../../scripts
 import { containsKorean, translateJobTitle, translateCompanyName, translateLocation, translateSalary, translateTags, translateDescriptionSafe } from '../translation'
 import { cleanJobTitle, cleanCompanyName } from '../clean-job-title'
 import { createSafeLikePattern } from '../sanitize'
+import { sanitizeDescriptionForStorage } from '../sanitize-description'
 // NOTE: Formatting removed - raw descriptions saved, sanitized on frontend
 // import { formatJobDescription, needsFormatting } from '../description-formatter'
 
@@ -113,22 +114,29 @@ export async function validateAndSaveJob(
   // Translate tags (Korean → English)
   const translatedTags = translateTags(job.tags)
 
-  // Store raw description - no formatting, frontend sanitizes
+  // Store raw description - sanitize HTML residue, then translate
   // Truncate extremely long descriptions (50,000 char limit)
   const MAX_DESCRIPTION_LENGTH = 50000
   let rawDescription: string | null = null
   if (job.description) {
-    rawDescription = job.description.length > MAX_DESCRIPTION_LENGTH
+    let desc = job.description.length > MAX_DESCRIPTION_LENGTH
       ? job.description.slice(0, MAX_DESCRIPTION_LENGTH)
       : job.description
+    // Sanitize HTML tags, entities, zero-width chars
+    desc = sanitizeDescriptionForStorage(desc)
     // Translate section headers only (preserve Korean body text for Korean sources)
-    // translateFullField() strips ALL Korean chars which destroys Korean descriptions
-    rawDescription = translateDescriptionSafe(rawDescription)
+    rawDescription = translateDescriptionSafe(desc)
   }
 
-  const translatedRequirements = translateDescriptionSafe(job.requirements as string | undefined)
-  const translatedResponsibilities = translateDescriptionSafe(job.responsibilities as string | undefined)
-  const translatedBenefits = translateDescriptionSafe(job.benefits as string | undefined)
+  const translatedRequirements = translateDescriptionSafe(
+    job.requirements ? sanitizeDescriptionForStorage(job.requirements as string) : undefined
+  )
+  const translatedResponsibilities = translateDescriptionSafe(
+    job.responsibilities ? sanitizeDescriptionForStorage(job.responsibilities as string) : undefined
+  )
+  const translatedBenefits = translateDescriptionSafe(
+    job.benefits ? sanitizeDescriptionForStorage(job.benefits as string) : undefined
+  )
 
   // Auto-detect role from title if not provided
   const detectedRole = job.role || detectRole(cleanedTitle)
@@ -141,14 +149,12 @@ export async function validateAndSaveJob(
 
   // Use Prisma for SQLite, Supabase for production
   if (isSupabaseConfigured) {
-    // ── Cross-source dedup check ──
-    // Look for existing job with same normalized title + company (regardless of URL)
-    // Use cleaned values for better dedup matching
+    // ── Dedup check (cross-source + same-source) ──
     const normTitle = normalizeText(cleanedTitle)
     const normCompany = normalizeText(cleanedCompany)
     const newPriority = getSourcePriority(job.source)
 
-    // Query jobs from same company (case-insensitive) to check for duplicates
+    // Query active jobs from same company (case-insensitive) with different URL
     const { data: sameCompanyJobs } = await supabase
       .from('Job')
       .select('id, url, source, title, company, postedDate, description')
@@ -157,7 +163,7 @@ export async function validateAndSaveJob(
       .neq('url', job.url)
       .limit(50)
 
-    // Find cross-source duplicate (same normalized title + company)
+    // Find duplicate: same normalized title + company (any source)
     const crossDupe = sameCompanyJobs?.find((existing) => {
       return (
         normalizeText(existing.title) === normTitle &&
@@ -166,6 +172,10 @@ export async function validateAndSaveJob(
     })
 
     if (crossDupe) {
+      if (crossDupe.source === job.source) {
+        // Same-source duplicate — skip (existing entry will be updated via URL upsert if same URL)
+        return { saved: true, isNew: false }
+      }
       const existingPriority = getSourcePriority(crossDupe.source)
       if (existingPriority >= newPriority) {
         // Existing job has equal or higher priority - skip this one
@@ -176,7 +186,7 @@ export async function validateAndSaveJob(
             .update({ description: job.description })
             .eq('id', crossDupe.id)
         }
-        return { saved: true, isNew: false } // Duplicate from different source - not a new job
+        return { saved: true, isNew: false }
       }
       // New source has higher priority - deactivate the old one and continue with insert
       await supabase

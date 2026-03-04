@@ -15,6 +15,7 @@ import { crawlArbitrumJobs } from './crawlers/arbitrumjobs'
 import { crawlCryptocurrencyJobs } from './crawlers/cryptocurrencyjobs'
 import { crawlCryptoJobs } from './crawlers/cryptojobs'
 import { crawlJobStash } from './crawlers/jobstash'
+import { cleanupExpiredJobs } from './cleanup/expire'
 // Skipped imports (403 errors, 0 results, or SSL errors):
 // import { crawlWellfound } from './crawlers/wellfound'
 // import { crawlSuperteamEarn } from './crawlers/superteam'
@@ -163,6 +164,19 @@ async function main() {
   const totalNewJobs = results.reduce((sum, r) => sum + r.newCount, 0)
   const successCount = results.filter(r => r.status === 'success').length
   const failedCount = results.filter(r => r.status === 'failed').length
+
+  // Post-crawl cleanup: deactivate expired jobs
+  console.log('\n🧹 Post-crawl cleanup...')
+  try {
+    const expiredCount = await cleanupExpiredJobs()
+    if (expiredCount > 0) {
+      console.log(`  🗑️ Deactivated ${expiredCount} expired jobs (>60 days)`)
+    } else {
+      console.log(`  ✅ No expired jobs to clean up`)
+    }
+  } catch (err: any) {
+    console.error(`  ⚠️ Cleanup failed: ${err.message}`)
+  }
 
   console.log('\n' + '='.repeat(50))
   console.log(`\n✨ Crawling Complete!`)
