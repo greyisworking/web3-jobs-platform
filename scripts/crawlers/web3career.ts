@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio'
 import { chromium, Browser, Page } from 'playwright'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchHTML, cleanText, parseSalary, detectExperienceLevel, detectRemoteType, getRandomUserAgent, delayWithJitter } from '../utils'
+import { fetchHTML, cleanText, parseSalary, detectExperienceLevel, detectRemoteType, getRandomUserAgent, delayWithJitter, delay } from '../utils'
 import { cleanDescriptionHtml } from '../../lib/clean-description'
 
 interface JobData {
@@ -52,123 +52,148 @@ async function closeBrowser(): Promise<void> {
 
 /**
  * Fetch detailed job information using Playwright (bypasses Cloudflare)
+ * Retries once on 403/timeout with 30s backoff.
  */
 async function fetchJobDetailsWithPlaywright(jobUrl: string): Promise<Partial<JobData>> {
-  let page: Page | null = null
-  const details: Partial<JobData> = {}
+  const maxAttempts = 2
 
-  try {
-    const b = await getBrowser()
-    page = await b.newPage({
-      userAgent: getRandomUserAgent(),
-    })
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    let page: Page | null = null
+    const details: Partial<JobData> = {}
 
-    // Set browser-like headers
-    await page.setExtraHTTPHeaders({
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    })
+    try {
+      const b = await getBrowser()
+      page = await b.newPage({
+        userAgent: getRandomUserAgent(),
+      })
 
-    // Navigate with longer timeout for Cloudflare challenge
-    await page.goto(jobUrl, {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000,
-    })
+      // Set browser-like headers
+      await page.setExtraHTTPHeaders({
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      })
 
-    // Wait for content to render (Cloudflare challenge + JS rendering)
-    await page.waitForTimeout(2000)
+      // Navigate with timeout
+      const response = await page.goto(jobUrl, {
+        waitUntil: 'domcontentloaded',
+        timeout: 20000,
+      })
 
-    // Get page content
-    const html = await page.content()
-    const $ = cheerio.load(html)
+      // Check for 403 (CloudFront block)
+      if (response && response.status() === 403) {
+        throw new Error('CloudFront 403')
+      }
 
-    // Remove UI noise elements before extraction
-    $('nav, header, footer, aside, .apply-button, .job-actions, .share-buttons').remove()
-    $('[class*="apply"], [class*="share"], [class*="action"], button').remove()
-    $('script, style, noscript, iframe').remove()
+      // Wait for content to render (Cloudflare challenge + JS rendering)
+      await page.waitForTimeout(2000)
 
-    // Job description - try multiple selectors
-    const descriptionSelectors = [
-      '.job-description-content',
-      '.job-detail-description',
-      '[class*="JobDescription"]',
-      '[class*="job-description"]',
-      '.description-section',
-      '.job-content',
-      'article .content',
-      'main .prose',
-    ]
+      // Get page content
+      const html = await page.content()
+      const $ = cheerio.load(html)
 
-    for (const selector of descriptionSelectors) {
-      const el = $(selector)
-      if (el.length) {
-        const html = el.first().html()
-        if (html && html.length > 100) {
-          details.description = cleanDescriptionHtml(html)
-          break
+      // Remove UI noise elements before extraction
+      $('nav, header, footer, aside, .apply-button, .job-actions, .share-buttons').remove()
+      $('[class*="apply"], [class*="share"], [class*="action"], button').remove()
+      $('script, style, noscript, iframe').remove()
+
+      // Job description - try multiple selectors
+      const descriptionSelectors = [
+        '.job-description-content',
+        '.job-detail-description',
+        '[class*="JobDescription"]',
+        '[class*="job-description"]',
+        '.description-section',
+        '.job-content',
+        'article .content',
+        'main .prose',
+      ]
+
+      for (const selector of descriptionSelectors) {
+        const el = $(selector)
+        if (el.length) {
+          const html = el.first().html()
+          if (html && html.length > 100) {
+            details.description = cleanDescriptionHtml(html)
+            break
+          }
         }
       }
-    }
 
-    // Fallback: get main content if no description found
-    if (!details.description) {
-      const mainContent = $('main').first()
-      if (mainContent.length) {
-        mainContent.find('nav, header, footer, [class*="sidebar"]').remove()
-        const html = mainContent.html()
-        if (html && html.length > 200) {
-          details.description = cleanDescriptionHtml(html)
+      // Fallback: get main content if no description found
+      if (!details.description) {
+        const mainContent = $('main').first()
+        if (mainContent.length) {
+          mainContent.find('nav, header, footer, [class*="sidebar"]').remove()
+          const html = mainContent.html()
+          if (html && html.length > 200) {
+            details.description = cleanDescriptionHtml(html)
+          }
         }
       }
+
+      // Extract sections from headers
+      $('h2, h3, h4, strong').each((_, el) => {
+        const header = cleanText($(el).text()).toLowerCase()
+        const content = $(el).nextUntil('h2, h3, h4').text()
+
+        if (header.includes('requirement') || header.includes('qualif') || header.includes('looking for') || header.includes('자격')) {
+          details.requirements = cleanText(content)
+        }
+        if (header.includes('responsib') || header.includes('what you') || header.includes('duties') || header.includes('담당')) {
+          details.responsibilities = cleanText(content)
+        }
+        if (header.includes('benefit') || header.includes('perk') || header.includes('offer') || header.includes('복리')) {
+          details.benefits = cleanText(content)
+        }
+      })
+
+      // Company logo
+      const logoImg = $('img[src*="logo"], .company-logo img, .job-company img').first()
+      if (logoImg.length) {
+        const logoSrc = logoImg.attr('src')
+        if (logoSrc && !logoSrc.includes('placeholder')) {
+          details.companyLogo = logoSrc.startsWith('http') ? logoSrc : `https://web3.career${logoSrc}`
+        }
+      }
+
+      // Company website
+      const websiteLink = $('a[href*="company"], a:contains("website"), a:contains("Visit")').first()
+      if (websiteLink.length) {
+        const href = websiteLink.attr('href')
+        if (href && href.startsWith('http') && !href.includes('web3.career')) {
+          details.companyWebsite = href
+        }
+      }
+
+      // Experience level and remote type detection
+      const fullText = $('body').text()
+      details.experienceLevel = detectExperienceLevel(fullText) || undefined
+      details.remoteType = detectRemoteType(fullText) || undefined
+
+      await page.close()
+
+      if (attempt > 1) {
+        console.log(`    ✅ Detail attempt ${attempt} succeeded`)
+      }
+      return details
+
+    } catch (error: any) {
+      if (page) await page.close().catch(() => {})
+      const msg = error.message || String(error)
+      const isRetryable = msg.includes('403') || msg.includes('Timeout') || msg.includes('timeout')
+
+      if (isRetryable && attempt < maxAttempts) {
+        console.log(`    ⚠️ Detail ${msg} on attempt ${attempt}, retrying in 30s...`)
+        await delay(30000)
+        continue
+      }
+
+      console.log(`    ⚠️ Detail skipped (${msg}) after ${attempt} attempt(s)`)
+      return details
     }
-
-    // Extract sections from headers
-    $('h2, h3, h4, strong').each((_, el) => {
-      const header = cleanText($(el).text()).toLowerCase()
-      const content = $(el).nextUntil('h2, h3, h4').text()
-
-      if (header.includes('requirement') || header.includes('qualif') || header.includes('looking for') || header.includes('자격')) {
-        details.requirements = cleanText(content)
-      }
-      if (header.includes('responsib') || header.includes('what you') || header.includes('duties') || header.includes('담당')) {
-        details.responsibilities = cleanText(content)
-      }
-      if (header.includes('benefit') || header.includes('perk') || header.includes('offer') || header.includes('복리')) {
-        details.benefits = cleanText(content)
-      }
-    })
-
-    // Company logo
-    const logoImg = $('img[src*="logo"], .company-logo img, .job-company img').first()
-    if (logoImg.length) {
-      const logoSrc = logoImg.attr('src')
-      if (logoSrc && !logoSrc.includes('placeholder')) {
-        details.companyLogo = logoSrc.startsWith('http') ? logoSrc : `https://web3.career${logoSrc}`
-      }
-    }
-
-    // Company website
-    const websiteLink = $('a[href*="company"], a:contains("website"), a:contains("Visit")').first()
-    if (websiteLink.length) {
-      const href = websiteLink.attr('href')
-      if (href && href.startsWith('http') && !href.includes('web3.career')) {
-        details.companyWebsite = href
-      }
-    }
-
-    // Experience level and remote type detection
-    const fullText = $('body').text()
-    details.experienceLevel = detectExperienceLevel(fullText) || undefined
-    details.remoteType = detectRemoteType(fullText) || undefined
-
-    await page.close()
-    return details
-
-  } catch (error: any) {
-    console.error(`  ⚠️ Playwright error for ${jobUrl}: ${error.message}`)
-    if (page) await page.close().catch(() => {})
-    return details
   }
+
+  return {}
 }
 
 interface CrawlerReturn {
@@ -182,13 +207,19 @@ export async function crawlWeb3Career(): Promise<CrawlerReturn> {
   const baseUrl = 'https://web3.career'
   let allJobs: JobData[] = []
 
-  // Crawl first 3 pages using browser headers
+  // Crawl first 3 pages using browser headers (with 1 retry on failure)
   for (let page = 1; page <= 3; page++) {
     const pageUrl = page === 1 ? `${baseUrl}/web3-jobs` : `${baseUrl}/web3-jobs?page=${page}`
-    const $ = await fetchHTML(pageUrl, { useBrowserHeaders: true })
+    let $ = await fetchHTML(pageUrl, { useBrowserHeaders: true })
 
     if (!$) {
-      console.error(`❌ Failed to fetch Web3.career page ${page}`)
+      console.log(`  ⚠️ web3.career: page ${page} failed on attempt 1, retrying in 30s...`)
+      await delay(30000)
+      $ = await fetchHTML(pageUrl, { useBrowserHeaders: true })
+    }
+
+    if (!$) {
+      console.log(`  ⚠️ web3.career: page ${page} CloudFront 403 - skipped after 2 attempts`)
       continue
     }
 

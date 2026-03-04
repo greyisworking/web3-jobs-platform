@@ -112,7 +112,7 @@ async function main() {
 
   const crawlers = [
     { name: 'priority-companies', fn: crawlPriorityCompanies, timeout: PRIORITY_COMPANIES_TIMEOUT_MS },
-    { name: 'web3.career', fn: crawlWeb3Career },
+    { name: 'web3.career', fn: crawlWeb3Career, timeout: 3 * 60 * 1000 },  // 3 min (has internal retry)
     // { name: 'web3kr.jobs', fn: crawlWeb3KRJobs },  // Disabled: SSL cert broken (2026-03-03)
     { name: 'cryptojobslist.com', fn: crawlCryptoJobsList },
     { name: 'remote3.co', fn: crawlRemote3 },
