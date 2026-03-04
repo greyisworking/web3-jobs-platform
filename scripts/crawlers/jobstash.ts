@@ -48,7 +48,7 @@ interface JSJob {
 const API_BASE = 'https://middleware.jobstash.xyz/jobs/list'
 const PAGE_SIZE = 10  // API max per page
 const MAX_PAGES = 200 // Safety limit (~2000 jobs)
-const DELAY_MS = 500  // Between API calls
+const DELAY_MS = 300  // Between API calls (500→300: rate limit 여유 확인됨)
 const API_TIMEOUT = 30000 // 30s per request
 const MAX_RETRIES = 2
 const CONSECUTIVE_ERROR_LIMIT = 3 // Stop after 3 consecutive errors

@@ -24,9 +24,10 @@ import type { CrawlResult } from './notify'
 // import { crawlBaseHirechain } from './crawlers/basehirechain'
 
 // Timeout settings
-const OVERALL_TIMEOUT_MS = 30 * 60 * 1000  // 30 minutes max
+const OVERALL_TIMEOUT_MS = 15 * 60 * 1000  // 15 minutes max (병렬 실행이므로 단축)
 const PER_SOURCE_TIMEOUT_MS = 5 * 60 * 1000  // 5 minutes per source
 const PRIORITY_COMPANIES_TIMEOUT_MS = 8 * 60 * 1000  // 8 minutes for priority-companies
+const CONCURRENCY = 5  // 동시 실행 크롤러 수
 
 // Wrap crawler with timeout
 async function withTimeout<T>(
@@ -51,22 +52,67 @@ async function withTimeout<T>(
   }
 }
 
+// Promise pool: concurrency개만큼 동시 실행, 하나 완료 시 큐에서 다음 시작
+interface TaskOutcome<T> {
+  result?: T
+  error?: Error
+  duration: number  // seconds
+}
+
+async function runConcurrent<T>(
+  tasks: { name: string; fn: () => Promise<T> }[],
+  concurrency: number
+): Promise<Map<string, TaskOutcome<T>>> {
+  const outcomes = new Map<string, TaskOutcome<T>>()
+  const queue = [...tasks]
+  const running = new Set<Promise<void>>()
+
+  async function runNext(): Promise<void> {
+    if (queue.length === 0) return
+    const task = queue.shift()!
+    const start = Date.now()
+    try {
+      const result = await task.fn()
+      outcomes.set(task.name, { result, duration: (Date.now() - start) / 1000 })
+    } catch (err: any) {
+      outcomes.set(task.name, { error: err, duration: (Date.now() - start) / 1000 })
+    }
+  }
+
+  // Initial batch
+  while (running.size < concurrency && queue.length > 0) {
+    const p = runNext().then(() => { running.delete(p) })
+    running.add(p)
+  }
+
+  // Process queue as tasks complete
+  while (running.size > 0) {
+    await Promise.race(running)
+    while (running.size < concurrency && queue.length > 0) {
+      const p = runNext().then(() => { running.delete(p) })
+      running.add(p)
+    }
+  }
+
+  return outcomes
+}
+
 async function main() {
   console.log('🌐 Starting Web3 Jobs Crawler...\n')
   console.log('='.repeat(50))
   console.log(`⏱️  Overall timeout: ${OVERALL_TIMEOUT_MS / 60000} minutes`)
   console.log(`⏱️  Per-source timeout: ${PER_SOURCE_TIMEOUT_MS / 60000} minutes`)
+  console.log(`🔀 Concurrency: ${CONCURRENCY} crawlers in parallel`)
   console.log(`⏭️  Skipping: wellfound.com, superteam.fun, base.hirechain.io, web3kr.jobs (SSL)`)
 
   const startTime = Date.now()
   const results: CrawlResult[] = []
 
-  // Overall timeout check
-  const checkOverallTimeout = () => {
-    if (Date.now() - startTime > OVERALL_TIMEOUT_MS) {
-      throw new Error(`Overall timeout exceeded (${OVERALL_TIMEOUT_MS / 60000} minutes)`)
-    }
-  }
+  // Overall timeout: 병렬 실행이므로 15분이면 충분
+  const overallTimer = setTimeout(() => {
+    console.error(`🛑 Overall timeout exceeded (${OVERALL_TIMEOUT_MS / 60000} minutes) — forcing exit`)
+    process.exit(1)
+  }, OVERALL_TIMEOUT_MS)
 
   // Active crawlers (excluding skipped sources)
   console.log('\n📌 Active Crawlers\n')
@@ -98,26 +144,41 @@ async function main() {
   // 시작 알림
   await sendCrawlStart(crawlers.length)
 
-  for (const crawler of crawlers) {
-    // Check overall timeout before each crawler
-    checkOverallTimeout()
+  // 각 크롤러를 task로 래핑 (개별 타임아웃 적용)
+  const tasks = crawlers.map(c => ({
+    name: c.name,
+    fn: async () => {
+      const timeout = c.timeout || PER_SOURCE_TIMEOUT_MS
+      return withTimeout(c.fn(), timeout, c.name)
+    }
+  }))
 
-    const crawlerStartTime = Date.now()
-    const timeout = crawler.timeout || PER_SOURCE_TIMEOUT_MS
-    try {
-      const result = await withTimeout(crawler.fn(), timeout, crawler.name)
-      // Handle both old (number) and new ({ total, new }) return types
+  // 병렬 실행 (concurrency=5)
+  console.log(`\n🔀 Running ${tasks.length} crawlers with concurrency=${CONCURRENCY}...\n`)
+  const outcomes = await runConcurrent(tasks, CONCURRENCY)
+
+  // 결과 수집 (정의 순서 유지)
+  for (const crawler of crawlers) {
+    const outcome = outcomes.get(crawler.name)
+    if (!outcome) {
+      results.push({ source: crawler.name, status: 'failed', jobCount: 0, newCount: 0, error: 'No result' })
+      console.error(`❌ ${crawler.name}: No result`)
+      continue
+    }
+
+    if (outcome.error) {
+      console.error(`❌ ${crawler.name}: ${outcome.error.message} [${outcome.duration.toFixed(1)}s]`)
+      results.push({ source: crawler.name, status: 'failed', jobCount: 0, newCount: 0, error: outcome.error.message })
+    } else {
+      const result = outcome.result!
       const total = typeof result === 'number' ? result : result.total
       const newCount = typeof result === 'number' ? 0 : result.new
-      const duration = ((Date.now() - crawlerStartTime) / 1000).toFixed(1)
+      console.log(`✅ ${crawler.name}: ${total} jobs (${newCount} new) [${outcome.duration.toFixed(1)}s]`)
       results.push({ source: crawler.name, status: 'success', jobCount: total, newCount })
-      console.log(`✅ ${crawler.name}: ${total} jobs (${newCount} new) [${duration}s]`)
-    } catch (error: any) {
-      const duration = ((Date.now() - crawlerStartTime) / 1000).toFixed(1)
-      console.error(`❌ ${crawler.name}: ${error.message} [${duration}s]`)
-      results.push({ source: crawler.name, status: 'failed', jobCount: 0, newCount: 0, error: error.message })
     }
   }
+
+  clearTimeout(overallTimer)
 
   const endTime = Date.now()
   const duration = (endTime - startTime) / 1000
