@@ -370,13 +370,15 @@ export async function getIntelligenceData(): Promise<IntelligenceData> {
       .from('Job')
       .select('id, title, tags, description, company, location, salaryMin, salaryMax, salaryCurrency, role')
       .eq('isActive', true)
-      .gte('crawledAt', threeMonthsAgo.toISOString()),
+      .gte('crawledAt', threeMonthsAgo.toISOString())
+      .limit(10000),
     supabase
       .from('Job')
       .select('id, title, tags, description')
       .eq('isActive', true)
       .gte('crawledAt', sixMonthsAgo.toISOString())
-      .lt('crawledAt', threeMonthsAgo.toISOString()),
+      .lt('crawledAt', threeMonthsAgo.toISOString())
+      .limit(10000),
   ])
 
   const recentJobs = recentRes.data || []
