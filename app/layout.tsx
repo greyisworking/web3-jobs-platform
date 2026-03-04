@@ -25,10 +25,10 @@ const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['400', '500', 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.wtf'),
   title: {
-    default: 'NEUN | Web3 Jobs',
+    default: 'NEUN | Web3 Jobs — 2,400+ Blockchain, DeFi, Crypto Jobs Updated Every 3 Hours',
     template: '%s | NEUN',
   },
-  description: 'a16z, Hashed, Paradigm backed companies. Only legit Web3 jobs.',
+  description: 'Web3 job aggregator tracking 2,400+ blockchain, DeFi, and crypto positions from 40+ sources. Updated every 3 hours. Only VC-backed companies — a16z, Hashed, Paradigm and more.',
   keywords: [
     'Web3 jobs', 'crypto jobs', 'blockchain careers', 'DeFi jobs',
     'a16z portfolio', 'Paradigm portfolio', 'Hashed portfolio',
@@ -46,8 +46,8 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://neun.wtf',
     siteName: 'NEUN',
-    title: 'NEUN | Web3 Jobs',
-    description: 'a16z, Hashed, Paradigm backed. Only legit jobs.',
+    title: 'NEUN | Web3 Jobs — 2,400+ Blockchain, DeFi, Crypto Jobs',
+    description: 'Web3 job aggregator tracking 2,400+ positions from 40+ sources. Only VC-backed companies.',
     images: [
       {
         url: 'https://neun.wtf/og-image.png',
@@ -59,8 +59,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'NEUN | Web3 Jobs',
-    description: 'a16z, Hashed, Paradigm backed. Only legit jobs.',
+    title: 'NEUN | Web3 Jobs — 2,400+ Blockchain, DeFi, Crypto Jobs',
+    description: 'Web3 job aggregator tracking 2,400+ positions from 40+ sources. Only VC-backed companies.',
     images: ['https://neun.wtf/og-image.png'],
     creator: '@neun_io',
   },
@@ -150,6 +150,52 @@ export default function RootLayout({
         <link rel="apple-touch-startup-image" href="/splash/splash-ipad-air.svg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" />
       </head>
       <body className={`${inter.variable} ${caveat.variable} ${pressStart.variable} ${spaceGrotesk.variable} ${inter.className}`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@graph': [
+                {
+                  '@type': 'Organization',
+                  '@id': 'https://neun.wtf/#organization',
+                  name: 'NEUN',
+                  url: 'https://neun.wtf',
+                  logo: {
+                    '@type': 'ImageObject',
+                    url: 'https://neun.wtf/icon-512x512.png',
+                  },
+                  sameAs: [
+                    'https://twitter.com/neunjobs',
+                    'https://t.me/neunjobs',
+                    'https://discord.gg/neunjobs',
+                  ],
+                  description: 'Web3 job aggregator tracking 2,400+ blockchain, DeFi, and crypto positions from 40+ sources.',
+                  contactPoint: {
+                    '@type': 'ContactPoint',
+                    email: 'neun@neun.wtf',
+                    contactType: 'customer service',
+                  },
+                },
+                {
+                  '@type': 'WebSite',
+                  '@id': 'https://neun.wtf/#website',
+                  url: 'https://neun.wtf',
+                  name: 'NEUN',
+                  publisher: { '@id': 'https://neun.wtf/#organization' },
+                  potentialAction: {
+                    '@type': 'SearchAction',
+                    target: {
+                      '@type': 'EntryPoint',
+                      urlTemplate: 'https://neun.wtf/jobs?q={search_term_string}',
+                    },
+                    'query-input': 'required name=search_term_string',
+                  },
+                },
+              ],
+            }),
+          }}
+        />
         <Web3Provider>
           <I18nProvider>
           <WebVitals />

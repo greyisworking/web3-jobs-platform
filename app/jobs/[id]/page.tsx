@@ -89,7 +89,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     : parts.join(' • ')
 
   const logoUrl = `https://logo.clearbit.com/${encodeURIComponent(job.company.toLowerCase().replace(/\s+/g, ''))}.com`
-  const ogImageUrl = `${baseUrl}/og-image.png` // Fallback to site OG image
+  // Let Next.js auto-discover the dynamic opengraph-image.tsx for per-job OG images
+  const ogImageUrl = `${baseUrl}/jobs/${id}/opengraph-image`
 
   return {
     title,

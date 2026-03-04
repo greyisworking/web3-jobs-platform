@@ -2,9 +2,21 @@ import type { Metadata } from 'next'
 import SubpageHeader from '../components/SubpageHeader'
 import Footer from '../components/Footer'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.wtf'
+
 export const metadata: Metadata = {
-  title: 'About — Neun',
-  description: 'About Neun — Web3 careers aggregated from 40+ global and Korean sources.',
+  title: 'About NEUN — Real-Time Web3 Job Market Intelligence',
+  description: 'NEUN is a Web3 job aggregator tracking 2,400+ positions from 40+ sources. Updated every 3 hours with market intelligence, skill trends, and salary data.',
+  alternates: {
+    canonical: `${baseUrl}/about`,
+  },
+  openGraph: {
+    title: 'About NEUN — Real-Time Web3 Job Market Intelligence',
+    description: 'NEUN is a Web3 job aggregator tracking 2,400+ positions from 40+ sources.',
+    url: `${baseUrl}/about`,
+    siteName: 'NEUN',
+    type: 'website',
+  },
 }
 
 const ABOUT_TABS = [
