@@ -66,14 +66,50 @@ function ChangeBadge({ value }: { value: number }) {
   )
 }
 
+const FALLBACK_DATA: HeroData = {
+  hotSkills: [
+    { name: 'Solidity', count: 0, changePercent: 0 },
+    { name: 'Rust', count: 0, changePercent: 0 },
+    { name: 'TypeScript', count: 0, changePercent: 0 },
+  ],
+  trendingUp: { name: 'Solidity', changePercent: 0 },
+  coolingDown: { name: '-', changePercent: 0 },
+  marketPulse: { totalJobs: 2400, newThisWeek: 0, remoteRate: 0, totalChange: 0, remoteChange: 0 },
+  weeklyTrend: [],
+}
+
 export default function HeroTrendDashboard() {
   const [data, setData] = useState<HeroData | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      // If still loading after 8s, show fallback
+      setLoading(false)
+    }, 8000)
+
     fetch('/api/market/hero')
-      .then(res => res.json())
-      .then(d => setData(d))
-      .catch(() => {})
+      .then(res => {
+        if (!res.ok) throw new Error(`${res.status}`)
+        return res.json()
+      })
+      .then(d => {
+        // Validate response has expected shape
+        if (d.hotSkills && Array.isArray(d.hotSkills)) {
+          setData(d)
+        } else {
+          setData(FALLBACK_DATA)
+        }
+      })
+      .catch(() => {
+        setData(FALLBACK_DATA)
+      })
+      .finally(() => {
+        clearTimeout(timeout)
+        setLoading(false)
+      })
+
+    return () => clearTimeout(timeout)
   }, [])
 
   return (
@@ -89,7 +125,7 @@ export default function HeroTrendDashboard() {
           Right now, Web3 is hiring for...
         </motion.p>
 
-        {data ? (
+        {!loading && data ? (
           <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
             {data.hotSkills.map((skill, i) => (
               <motion.div
@@ -106,18 +142,18 @@ export default function HeroTrendDashboard() {
               </motion.div>
             ))}
           </div>
-        ) : (
+        ) : loading ? (
           <div className="flex flex-wrap gap-4">
             {[1, 2, 3].map(i => (
               <div key={i} className="h-12 w-40 skeleton-shimmer rounded" />
             ))}
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Section 2: Trend Cards + Pixelbara */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pb-6">
-        {data ? (
+        {!loading && data ? (
           <>
             <TrendCard
               label="Trending Up"
@@ -138,7 +174,7 @@ export default function HeroTrendDashboard() {
               <Pixelbara pose="heroLaptop" size={120} clickable suppressHover />
             </div>
           </>
-        ) : (
+        ) : loading ? (
           <>
             <SkeletonCard />
             <SkeletonCard />
@@ -147,12 +183,12 @@ export default function HeroTrendDashboard() {
               <SkeletonCard />
             </div>
           </>
-        )}
+        ) : null}
       </div>
 
       {/* Section 3: Mini Trend Chart + CTA */}
       <div className="pb-10 sm:pb-14">
-        {data ? (
+        {!loading && data && data.weeklyTrend.length > 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -185,9 +221,9 @@ export default function HeroTrendDashboard() {
               </ResponsiveContainer>
             </div>
           </motion.div>
-        ) : (
+        ) : loading ? (
           <div className="h-24 sm:h-32 w-full skeleton-shimmer rounded" />
-        )}
+        ) : null}
 
         <div className="flex justify-center mt-6 sm:mt-8">
           <Link
