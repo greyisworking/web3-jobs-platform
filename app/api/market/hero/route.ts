@@ -67,7 +67,7 @@ export async function GET() {
     fiftySixDaysAgo.setDate(fiftySixDaysAgo.getDate() - 56)
 
     // Phase 1: Lightweight count queries + skill data (parallel)
-    const [thisWeekRes, lastWeekRes, totalCountRes, thisWeekCountRes, lastWeekCountRes, trendRes] = await Promise.all([
+    const [thisWeekRes, lastWeekRes, totalCountRes, thisWeekCountRes, lastWeekCountRes, remoteCountRes, trendRes] = await Promise.all([
       // Skills: this week (title + tags only, limited set)
       supabase
         .from('Job')
@@ -105,6 +105,13 @@ export async function GET() {
         .eq('isActive', true)
         .gte('crawledAt', fourteenDaysAgo.toISOString())
         .lt('crawledAt', sevenDaysAgo.toISOString()),
+
+      // Remote job count (location contains remote/worldwide/anywhere)
+      supabase
+        .from('Job')
+        .select('id', { count: 'exact', head: true })
+        .eq('isActive', true)
+        .or('location.ilike.%remote%,location.ilike.%worldwide%,location.ilike.%anywhere%'),
 
       // Weekly trend: just crawledAt
       supabase
@@ -164,10 +171,9 @@ export async function GET() {
       ? Math.round(((newThisWeek - newLastWeek) / newLastWeek) * 100)
       : (newThisWeek > 0 ? 100 : 0)
 
-    // Remote rate: estimate from this week's skill query data (already fetched)
-    // Not perfect but avoids an extra heavy query
-    const remoteRate = 0 // Simplified: skip remote calculation to stay within timeout
-    const remoteChange = 0
+    const remoteCount = remoteCountRes.count ?? 0
+    const remoteRate = totalJobs > 0 ? Math.round((remoteCount / totalJobs) * 100) : 0
+    const remoteChange = 0 // Skip week-over-week remote comparison to keep queries light
 
     // -- Weekly Trend (8 weeks) --
     const weeklyMap = new Map<string, number>()
