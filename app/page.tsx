@@ -59,12 +59,12 @@ export default function Home() {
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg pixelbara-cursor">
 
       {/* Hero Section - BOLD & IMPACTFUL */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 section-spacing-lg">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 md:pt-10 pb-10 md:pb-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12"
+          className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8"
         >
           {/* Left: Text - BIGGER */}
           <div className="flex-1 text-center md:text-left">
@@ -116,7 +116,7 @@ export default function Home() {
             {/* Render only one Pixelbara based on viewport size */}
             <Pixelbara
               pose="heroLaptop"
-              size={viewportSize === 'lg' ? 480 : viewportSize === 'md' ? 360 : 240}
+              size={viewportSize === 'lg' ? 720 : viewportSize === 'md' ? 540 : 320}
               clickable
               suppressHover
               className="animate-pixel-blink"
