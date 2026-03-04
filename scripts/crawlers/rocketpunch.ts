@@ -1,207 +1,200 @@
-import puppeteer, { Page } from 'puppeteer'
+import puppeteer, { Page, HTTPResponse } from 'puppeteer'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { delay } from '../utils'
-import { translateLocation, translateTags } from '../../lib/translation'
+import { delay, getRandomUserAgent } from '../utils'
 
 interface CrawlerReturn {
   total: number
   new: number
 }
 
-interface JobListing {
+/** Shape returned by RocketPunch internal API */
+interface RPApiResponse {
+  totalItems: number
+  itemSize: number
+  items: RPJob[]
+}
+
+interface RPJob {
+  jobId: number
+  companyLogoUrl: string
+  companyName: string
+  companyPermalink: string
   title: string
-  company: string
-  location: string
-  type: string
-  url: string
+  description: string          // Short one-liner
+  seniorities: string[]        // ["신입","주니어","미들","시니어","C레벨"]
+  workType: string             // "상시 출근" | "상시 재택" | "출근-재택 혼합"
+  advertised: boolean
+}
+
+// Search keywords for web3/blockchain jobs
+const SEARCH_KEYWORDS = ['블록체인', 'web3', '크립토', 'DeFi', 'NFT']
+
+/** Map Korean seniority to English experience level */
+function mapSeniority(seniorities: string[]): string | undefined {
+  const mapping: Record<string, string> = {
+    '신입': 'Entry',
+    '주니어': 'Junior',
+    '미들': 'Mid',
+    '시니어': 'Senior',
+    'C레벨': 'Executive',
+  }
+  const priority = ['Executive', 'Senior', 'Mid', 'Junior', 'Entry']
+  const mapped = seniorities.map(s => mapping[s]).filter(Boolean)
+  return priority.find(p => mapped.includes(p))
+}
+
+/** Map Korean workType to remote type */
+function mapWorkType(workType: string): string {
+  if (workType.includes('재택') && workType.includes('출근')) return 'Hybrid'
+  if (workType.includes('재택')) return 'Remote'
+  return 'On-site'
 }
 
 /**
- * Fetch job description from detail page
+ * Search for jobs by typing keyword into the SPA search box.
+ * Returns the parsed API response intercepted from the network.
  */
-async function fetchJobDescription(page: Page, url: string): Promise<string | null> {
-  try {
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 20000 })
+async function searchKeyword(page: Page, keyword: string): Promise<RPJob[]> {
+  // Set up response interception (collect /api/proxy/jobs responses with keyword)
+  let resolveResponse: (jobs: RPJob[]) => void
+  const responsePromise = new Promise<RPJob[]>(resolve => {
+    resolveResponse = resolve
+  })
 
-    // Wait for job description to load
-    await page.waitForSelector('.description, .job-description, [class*="description"], .content', { timeout: 5000 }).catch(() => {})
+  // Timeout fallback
+  const timeout = setTimeout(() => resolveResponse([]), 15000)
 
-    const description = await page.evaluate(() => {
-      // Try multiple selectors for job description
-      const selectors = [
-        '.job-description',
-        '.description-wrapper',
-        '.job-content',
-        '#job-description',
-        '[class*="job-description"]',
-        '.content-description',
-        // 로켓펀치 specific selectors
-        '.job-detail .description',
-        '.duty-description',
-        '.job-duty',
-        '.job-content-wrapper',
-        'section.description',
-        // Fallback: main content area
-        'article .content',
-        '.main-content .description',
-      ]
-
-      for (const selector of selectors) {
-        const el = document.querySelector(selector)
-        if (el) {
-          const text = el.textContent?.trim() || ''
-          if (text.length > 50) {
-            return text
-          }
-        }
+  const handler = async (response: HTTPResponse) => {
+    const url = response.url()
+    if (url.includes('/api/proxy/jobs') && url.includes('keyword=')) {
+      try {
+        const body = await response.text()
+        const data: RPApiResponse = JSON.parse(body)
+        clearTimeout(timeout)
+        resolveResponse(data.items || [])
+      } catch {
+        clearTimeout(timeout)
+        resolveResponse([])
       }
-
-      // Last fallback: look for any large text block in main area
-      const mainContent = document.querySelector('main, .main, article, .job-detail')
-      if (mainContent) {
-        const paragraphs = mainContent.querySelectorAll('p, li, div')
-        let combined = ''
-        paragraphs.forEach(p => {
-          const text = p.textContent?.trim() || ''
-          if (text.length > 20 && text.length < 2000) {
-            combined += text + '\n'
-          }
-        })
-        if (combined.length > 100) {
-          return combined.slice(0, 5000)
-        }
-      }
-
-      return null
-    })
-
-    return description
-  } catch (error) {
-    return null
+    }
   }
+  page.on('response', handler)
+
+  // Type keyword in search box
+  const input = await page.$('input#keyword-input')
+  if (!input) {
+    clearTimeout(timeout)
+    page.off('response', handler)
+    console.log(`    ⚠️ Search input not found`)
+    return []
+  }
+
+  await input.click({ clickCount: 3 }) // Select all existing text
+  await input.type(keyword, { delay: 50 })
+  await delay(300)
+  await page.keyboard.press('Enter')
+
+  const jobs = await responsePromise
+  page.off('response', handler)
+  return jobs
 }
 
 export async function crawlRocketPunch(): Promise<CrawlerReturn> {
-  console.log('🚀 Starting 로켓펀치 crawler...')
+  console.log('🚀 Starting 로켓펀치 crawler (API intercept mode)...')
 
+  const allJobs = new Map<number, RPJob>() // Deduplicate by jobId
   let browser
+
   try {
     browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled'],
     })
 
     const page = await browser.newPage()
-    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
 
-    // Search for blockchain/web3 jobs
-    await page.goto('https://www.rocketpunch.com/jobs?keywords=블록체인+web3', {
-      waitUntil: 'networkidle2',
+    // Anti-detection
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => false })
+    })
+    await page.setUserAgent(getRandomUserAgent())
+    await page.setExtraHTTPHeaders({
+      'Accept-Language': 'ko-KR,ko;q=0.9,en;q=0.8',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+    })
+    await page.setViewport({ width: 1440, height: 900 })
+
+    // Step 1: Navigate to pass AWS WAF challenge
+    console.log('  🔐 Passing AWS WAF challenge...')
+    await page.goto('https://www.rocketpunch.com/jobs', {
+      waitUntil: 'domcontentloaded',
       timeout: 30000,
     })
 
-    // Wait for job cards to render
-    await page.waitForSelector('.company-name, .job-title, [class*="job-card"], .job-item', { timeout: 10000 }).catch(async () => {
-      console.log('⚠️  Selector timeout, dumping page HTML for debugging...')
+    // Wait for WAF auto-reload
+    try {
+      await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 20000 })
+    } catch {}
+    await delay(3000)
+
+    // Verify search input exists (SPA loaded successfully)
+    const searchInput = await page.$('input#keyword-input')
+    if (!searchInput) {
+      throw new Error('SPA did not load - search input not found after WAF')
+    }
+    console.log('  ✅ WAF passed, SPA loaded')
+
+    // Step 2: Search each keyword and collect jobs
+    for (const keyword of SEARCH_KEYWORDS) {
+      console.log(`  🔍 Searching: ${keyword}`)
       try {
-        const bodyHtml = await page.evaluate(() => document.querySelector('body')?.innerHTML?.substring(0, 3000) || 'empty body')
-        console.log('🔍 Page HTML (first 3000 chars):\n', bodyHtml)
-      } catch (e) {
-        console.log('⚠️  Could not capture page HTML')
-      }
-    })
-
-    // Extract job data from the rendered DOM
-    const jobs = await page.evaluate(() => {
-      const results: JobListing[] = []
-
-      // RocketPunch job card structure
-      const jobCards = document.querySelectorAll('.job-card-container, .job-item, [class*="content-item"], .company-jobs-item')
-
-      jobCards.forEach((card) => {
-        const titleEl = card.querySelector('.job-title a, h4 a, .position a, a.job-title')
-        const companyEl = card.querySelector('.company-name a, .company a, .name a, a.company')
-        const locationEl = card.querySelector('.location, .job-stat-info .location, [class*="location"]')
-        const typeEl = card.querySelector('.job-stat-info .type, [class*="employment"], .job-type')
-
-        const title = titleEl?.textContent?.trim() || ''
-        const company = companyEl?.textContent?.trim() || ''
-        const location = locationEl?.textContent?.trim() || 'Seoul'
-        const type = typeEl?.textContent?.trim() || 'Full-time'
-
-        let url = (titleEl as HTMLAnchorElement)?.href || (card.querySelector('a') as HTMLAnchorElement)?.href || ''
-
-        if (title && company && url) {
-          results.push({ title, company, location, type, url })
+        const jobs = await searchKeyword(page, keyword)
+        let added = 0
+        for (const job of jobs) {
+          if (!allJobs.has(job.jobId)) {
+            allJobs.set(job.jobId, job)
+            added++
+          }
         }
-      })
-
-      // Fallback: try alternate selectors if above yields nothing
-      if (results.length === 0) {
-        const rows = document.querySelectorAll('.company-jobs-item, .job-list-item, [data-job-id], .job-card')
-        rows.forEach((row) => {
-          const title = row.querySelector('h4, .title, .job-title')?.textContent?.trim() || ''
-          const company = row.querySelector('.company-name, .corp-name')?.textContent?.trim() || ''
-          const link = row.querySelector('a')
-          const url = (link as HTMLAnchorElement)?.href || ''
-
-          if (title && url) {
-            results.push({ title, company: company || 'Unknown', location: 'Seoul', type: 'Full-time', url })
-          }
-        })
+        console.log(`    📦 ${jobs.length} results (${added} new unique)`)
+        await delay(1500) // Rate limit between searches
+      } catch (error: any) {
+        console.log(`    ⚠️ Failed: ${error.message}`)
       }
+    }
 
-      // Fallback 2: scan all links matching /jobs/ pattern
-      if (results.length === 0) {
-        const allLinks = document.querySelectorAll('a[href*="/jobs/"]')
-        allLinks.forEach((link) => {
-          const url = (link as HTMLAnchorElement)?.href || ''
-          const title = link.textContent?.trim() || ''
-          // Skip nav/header links (too short or generic)
-          if (title && title.length > 5 && url && !url.includes('/jobs?')) {
-            const parentCard = link.closest('div, li, article, section')
-            const company = parentCard?.querySelector('.company-name, .corp-name, [class*="company"]')?.textContent?.trim() || 'Unknown'
-            results.push({ title, company, location: 'Seoul', type: 'Full-time', url })
-          }
-        })
-      }
+    console.log(`📦 Found ${allJobs.size} unique jobs from 로켓펀치`)
 
-      return results
-    })
-
-    console.log(`📦 Found ${jobs.length} jobs from 로켓펀치`)
-
+    // Step 3: Save jobs
     let savedCount = 0
     let newCount = 0
 
-    for (const job of jobs) {
+    for (const [, job] of allJobs) {
       try {
-        // Fetch job description from detail page
-        console.log(`  📄 Fetching JD: ${job.title.slice(0, 40)}...`)
-        const description = await fetchJobDescription(page, job.url)
-
-        if (description) {
-          console.log(`    ✅ Got description (${description.length} chars)`)
-        } else {
-          console.log(`    ⚠️  No description found`)
-        }
-
-        await delay(500)  // Rate limit for Korean site
+        const jobUrl = `https://www.rocketpunch.com/jobs/${job.jobId}/${job.companyPermalink}`
+        const remoteType = mapWorkType(job.workType)
+        const experienceLevel = mapSeniority(job.seniorities)
 
         const result = await validateAndSaveJob(
           {
             title: job.title,
-            company: job.company,
-            url: job.url,
-            location: translateLocation(job.location),
-            type: job.type,
+            company: job.companyName,
+            url: jobUrl,
+            location: 'Seoul, South Korea',
+            type: 'Full-time',
             category: 'Engineering',
-            tags: translateTags(['Blockchain', 'Web3', 'Korea']),
+            tags: ['Blockchain', 'Web3', 'Korea'],
             source: 'rocketpunch.com',
             region: 'Korea',
             postedDate: new Date(),
-            description: description || undefined,
+            description: job.description || undefined,
+            companyLogo: job.companyLogoUrl || undefined,
+            remoteType,
+            experienceLevel,
           },
           'rocketpunch.com'
         )
