@@ -42,7 +42,9 @@ interface JSJob {
     logoUrl: string | null
     website: string | null
     investors: { name: string }[] | null
+    projects?: { name: string }[] | null
   } | null
+  project: { name: string } | null  // Specific project this job belongs to
 }
 
 const API_BASE = 'https://middleware.jobstash.xyz/jobs/list'
@@ -99,6 +101,104 @@ function formatSalary(min: number | null, max: number | null, currency: string |
 function arrayToString(arr: string[] | null): string | undefined {
   if (!arr || arr.length === 0) return undefined
   return arr.map(item => `• ${item}`).join('\n')
+}
+
+// ── Company resolution: detect when org.name is actually a project name ──
+
+/** Known ATS platforms — extract company slug from URL path/subdomain */
+const ATS_EXTRACTORS: { pattern: RegExp; getSlug: (url: URL) => string | null }[] = [
+  { pattern: /jobs\.ashbyhq\.com$/i, getSlug: (u) => u.pathname.split('/')[1] || null },
+  { pattern: /jobs\.lever\.co$/i, getSlug: (u) => u.pathname.split('/')[1] || null },
+  { pattern: /boards\.greenhouse\.io$/i, getSlug: (u) => u.pathname.split('/')[1] || null },
+  { pattern: /\.greenhouse\.io$/i, getSlug: (u) => u.hostname.split('.')[0] || null },
+  { pattern: /apply\.workable\.com$/i, getSlug: (u) => u.pathname.split('/')[1] || null },
+  { pattern: /\.bamboohr\.com$/i, getSlug: (u) => u.hostname.split('.')[0] || null },
+  { pattern: /\.myworkdayjobs\.com$/i, getSlug: (u) => u.hostname.split('.')[0] || null },
+]
+
+/** Job board domains to skip (not employer sites) */
+const JOB_BOARD_DOMAINS = [
+  'linkedin.com', 'indeed.com', 'glassdoor.com', 'wellfound.com',
+  'rocketpunch.com', 'wanted.co.kr', 'jobstash.xyz', 'web3.career',
+  'cryptojobslist.com', 'cryptocurrencyjobs.co', 'remote3.co', 'remoteok.com',
+  'angel.co', 'talent.io', 'notion.site',
+]
+
+/** Convert URL slug to readable name: "chainlink-labs" → "Chainlink Labs" */
+function slugToName(slug: string): string {
+  return slug
+    .replace(/[-_]/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+}
+
+/** Normalize for comparison: lowercase, strip non-alphanumeric */
+function normalizeForCompare(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
+/**
+ * Extract company hint from an apply URL.
+ * For ATS URLs, extracts company slug from the URL structure.
+ * For direct career pages, extracts domain name.
+ * Returns null for job board URLs or unparseable URLs.
+ */
+function extractCompanyHintFromUrl(applyUrl: string): string | null {
+  try {
+    const url = new URL(applyUrl)
+    const hostname = url.hostname.toLowerCase()
+
+    // Skip known job boards
+    if (JOB_BOARD_DOMAINS.some(d => hostname === d || hostname.endsWith('.' + d))) {
+      return null
+    }
+
+    // Try ATS extractors first
+    for (const { pattern, getSlug } of ATS_EXTRACTORS) {
+      if (pattern.test(hostname)) {
+        const slug = getSlug(url)
+        return slug ? slugToName(slug) : null
+      }
+    }
+
+    // Direct career page: use domain name (e.g., "ozys" from "ozys.io")
+    const cleanHost = hostname.replace(/^www\./, '')
+    const name = cleanHost.split('.')[0]
+    if (name && name.length > 2) {
+      return name.charAt(0).toUpperCase() + name.slice(1)
+    }
+
+    return null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Resolve the actual hiring company.
+ * JobStash sometimes uses project names as organization.name (e.g., "megaton.fi"
+ * when the real employer is "Ozys"). We cross-check against the apply URL domain
+ * and fall back to org.name when they match or can't be determined.
+ */
+function resolveCompany(orgName: string, applyUrl: string | null): string {
+  if (!applyUrl) return orgName
+
+  const urlHint = extractCompanyHintFromUrl(applyUrl)
+  if (!urlHint) return orgName
+
+  const normOrg = normalizeForCompare(orgName)
+  const normHint = normalizeForCompare(urlHint)
+
+  // If names overlap (substring match), org.name is likely correct
+  if (normOrg.includes(normHint) || normHint.includes(normOrg)) {
+    return orgName
+  }
+
+  // Names differ significantly → URL domain is likely the real employer
+  console.log(`  🔄 Company remap: "${orgName}" → "${urlHint}" (from apply URL)`)
+  return urlHint
 }
 
 export async function crawlJobStash(): Promise<CrawlerReturn> {
@@ -159,8 +259,15 @@ export async function crawlJobStash(): Promise<CrawlerReturn> {
 
         try {
           const org = job.organization
-          const company = org?.name || 'Unknown'
+          const orgName = org?.name || 'Unknown'
+          const company = resolveCompany(orgName, job.url)
           const tags = job.tags?.map(t => t.name).slice(0, 10) || []
+
+          // If company was remapped, preserve original project name in tags
+          if (company !== orgName && orgName !== 'Unknown') {
+            const projectTag = `project:${orgName}`
+            if (!tags.includes(projectTag)) tags.push(projectTag)
+          }
 
           const result = await validateAndSaveJob(
             {
