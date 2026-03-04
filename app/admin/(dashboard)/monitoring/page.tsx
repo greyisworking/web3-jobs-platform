@@ -9,10 +9,11 @@ import { MonitoringErrorsTab } from './errors-tab'
 import { MonitoringProxiesTab } from './proxies-tab'
 import { MonitoringCrawlHistoryTab } from './crawl-history-tab'
 import { MonitoringAnalyticsTab } from './analytics-tab'
+import { CrawlDashboardTab } from './crawl-dashboard-tab'
 
 export default function MonitoringPage() {
   const { stats, isLoading: statsLoading } = useMonitoringStats()
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState('crawl-dashboard')
 
   return (
     <div className="space-y-6">
@@ -22,12 +23,16 @@ export default function MonitoringPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
+          <TabsTrigger value="crawl-dashboard">크롤링 대시보드</TabsTrigger>
           <TabsTrigger value="overview">전체 현황</TabsTrigger>
           <TabsTrigger value="errors">오류</TabsTrigger>
           <TabsTrigger value="proxies">프록시</TabsTrigger>
           <TabsTrigger value="crawl-history">크롤링 기록</TabsTrigger>
           <TabsTrigger value="analytics">통계</TabsTrigger>
         </TabsList>
+        <TabsContent value="crawl-dashboard">
+          <CrawlDashboardTab />
+        </TabsContent>
         <TabsContent value="overview">
           <MonitoringOverview />
         </TabsContent>
