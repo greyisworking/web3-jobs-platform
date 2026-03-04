@@ -2,42 +2,20 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import type { Job } from '@/types/job'
 import JobCard from './components/JobCard'
 import { JobCardSkeletonGrid } from './components/JobCardSkeleton'
 import Pixelbara from './components/Pixelbara'
-import { MiniPixelbara } from './components/Pixelbara'
-import MarketHighlight from './components/MarketHighlight'
-// ScrollPixelbara removed - unnecessary floating element
+import HeroTrendDashboard from './components/HeroTrendDashboard'
 import ScrollReveal from './components/ScrollReveal'
 import Footer from './components/Footer'
 import PWAInstallPrompt from './components/PWAInstallPrompt'
-
-// Custom hook to get viewport size for conditional rendering
-function useViewportSize() {
-  const [size, setSize] = useState<'sm' | 'md' | 'lg'>('lg')
-
-  useEffect(() => {
-    const updateSize = () => {
-      if (window.innerWidth >= 1024) setSize('lg')
-      else if (window.innerWidth >= 768) setSize('md')
-      else setSize('sm')
-    }
-    updateSize()
-    window.addEventListener('resize', updateSize)
-    return () => window.removeEventListener('resize', updateSize)
-  }, [])
-
-  return size
-}
 
 export default function Home() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-  const viewportSize = useViewportSize()
 
   const fetchFeaturedJobs = () => {
     setLoading(true)
@@ -58,75 +36,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg pixelbara-cursor">
 
-      {/* Hero Section - BOLD & IMPACTFUL */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 md:pt-10 pb-10 md:pb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8"
-        >
-          {/* Left: Text - BIGGER */}
-          <div className="flex-1 text-center md:text-left">
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-tight tracking-tight text-a24-text dark:text-a24-dark-text mb-4 md:mb-6"
-            >
-              <span className="text-gradient-green">a16z</span>,{' '}
-              <span className="text-gradient-green">Hashed</span>,{' '}
-              <span className="text-gradient-green">Paradigm</span>{' '}
-              + top Web3 companies.
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-base md:text-lg lg:text-xl font-medium text-a24-muted dark:text-a24-dark-muted mb-8 md:mb-10 tracking-wide"
-            >
-              no cap. only legit jobs. fr fr.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="flex justify-center md:justify-start"
-            >
-              <Link
-                href="/jobs"
-                className="group inline-flex items-center justify-center gap-3 text-[12px] uppercase tracking-[0.2em] font-bold text-white bg-neun-success px-6 sm:px-8 py-4 hover:bg-neun-success/90 hover:shadow-green-glow active:scale-95 transition-all duration-200 touch-target"
-              >
-                <MiniPixelbara className="opacity-80 group-hover:opacity-100 transition-opacity" />
-                Explore Careers
-                <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
-              </Link>
-            </motion.div>
-          </div>
-
-          {/* Right: Pixelbara full body - BIGGER with animation */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="flex-shrink-0 animate-float"
-          >
-            {/* Render only one Pixelbara based on viewport size */}
-            <Pixelbara
-              pose="heroLaptop"
-              size={viewportSize === 'lg' ? 720 : viewportSize === 'md' ? 540 : 320}
-              clickable
-              suppressHover
-              className="animate-pixel-blink"
-            />
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* Market Highlight */}
-      <MarketHighlight />
+      {/* Hero Trend Dashboard */}
+      <HeroTrendDashboard />
 
       {/* Featured Jobs - BOLDER */}
       <ScrollReveal>
