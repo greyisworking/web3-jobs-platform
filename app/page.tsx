@@ -9,7 +9,6 @@ import JobCard from './components/JobCard'
 import { JobCardSkeletonGrid } from './components/JobCardSkeleton'
 import Pixelbara from './components/Pixelbara'
 import { MiniPixelbara } from './components/Pixelbara'
-import SocialProof from './components/SocialProof'
 import MarketHighlight from './components/MarketHighlight'
 // ScrollPixelbara removed - unnecessary floating element
 import ScrollReveal from './components/ScrollReveal'
@@ -124,11 +123,6 @@ export default function Home() {
             />
           </motion.div>
         </motion.div>
-      </section>
-
-      {/* Social Proof */}
-      <section className="max-w-6xl mx-auto px-6">
-        <SocialProof />
       </section>
 
       {/* Market Highlight */}
