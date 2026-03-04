@@ -15,6 +15,7 @@ import ServiceWorkerRegistration from './components/ServiceWorkerRegistration'
 import ErrorBoundary from './components/ErrorBoundary'
 import Onboarding from './components/Onboarding'
 import CompareBar from './components/CompareBar'
+import Script from 'next/script'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], weight: ['200', '300', '400', '500', '700'], display: 'swap', variable: '--font-body' })
@@ -220,6 +221,12 @@ export default function RootLayout({
           />
           </I18nProvider>
         </Web3Provider>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2088147929472328"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         <Analytics />
         <SpeedInsights />
       </body>
