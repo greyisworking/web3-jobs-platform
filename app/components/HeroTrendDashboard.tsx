@@ -183,7 +183,7 @@ export default function HeroTrendDashboard() {
       </div>
 
       {/* Section 3: Mini Trend Chart + CTA */}
-      <div className="pb-10 sm:pb-14">
+      <div className="pb-4 sm:pb-6">
         {data && data.weeklyTrend.length > 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -221,7 +221,7 @@ export default function HeroTrendDashboard() {
           <div className="h-24 sm:h-32 w-full skeleton-shimmer rounded" />
         ) : null}
 
-        <div className="flex justify-center mt-6 sm:mt-8">
+        <div className="flex justify-center mt-4">
           <Link
             href="/market"
             className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] font-medium border border-neun-success/50 text-neun-success hover:bg-neun-success/10 px-5 py-2.5 rounded transition-all duration-200"

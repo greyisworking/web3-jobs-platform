@@ -54,12 +54,12 @@ export default function Home() {
               <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
           </div>
-          <div className="w-12 h-px bg-neun-success mb-8 md:mb-10" />
+          <div className="w-12 h-px bg-neun-success mb-4 md:mb-6" />
 
           {loading ? (
             <JobCardSkeletonGrid count={6} />
           ) : error ? (
-            <div className="py-16 md:py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
+            <div className="py-8 md:py-10 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
               <Pixelbara pose="empty" size={160} className="mx-auto mb-4" clickable />
               <p className="text-a24-muted dark:text-a24-dark-muted text-base font-medium mb-4">
                 Failed to load jobs. Please try again.
@@ -72,7 +72,7 @@ export default function Home() {
               </button>
             </div>
           ) : jobs.length === 0 ? (
-            <div className="py-16 md:py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
+            <div className="py-8 md:py-10 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
               <Pixelbara pose="empty" size={160} className="mx-auto mb-4" clickable />
               <p className="text-a24-muted dark:text-a24-dark-muted text-base font-medium">
                 bruh... no jobs rn. touch grass.

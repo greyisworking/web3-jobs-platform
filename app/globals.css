@@ -453,11 +453,11 @@
 
 /* Section spacing */
 .section-spacing {
-  @apply py-16 md:py-20 lg:py-24;
+  @apply py-8 md:py-10 lg:py-12;
 }
 
 .section-spacing-lg {
-  @apply py-20 md:py-28 lg:py-32;
+  @apply py-12 md:py-16 lg:py-20;
 }
 
 /* Card gap responsive */
