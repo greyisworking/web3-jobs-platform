@@ -4,22 +4,14 @@ import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { ArrowRight, TrendingUp, TrendingDown, Activity } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { AreaChart, Area, XAxis, ResponsiveContainer } from 'recharts'
+import dynamic from 'next/dynamic'
+import type { HeroData } from '@/lib/hero-data'
 import Pixelbara from './Pixelbara'
 
-interface HeroData {
-  hotSkills: { name: string; count: number; changePercent: number }[]
-  trendingUp: { name: string; changePercent: number }
-  coolingDown: { name: string; changePercent: number }
-  marketPulse: {
-    totalJobs: number
-    newThisWeek: number
-    remoteRate: number
-    totalChange: number
-    remoteChange: number
-  }
-  weeklyTrend: { week: string; count: number }[]
-}
+const HeroTrendChart = dynamic(() => import('./HeroTrendChart'), {
+  ssr: false,
+  loading: () => <div className="h-24 sm:h-32 w-full skeleton-shimmer rounded" />,
+})
 
 function useCountUp(target: number, duration = 1200) {
   const [value, setValue] = useState(0)
@@ -66,48 +58,11 @@ function ChangeBadge({ value }: { value: number }) {
   )
 }
 
-const FALLBACK_DATA: HeroData = {
-  hotSkills: [
-    { name: 'Solidity', count: 0, changePercent: 0 },
-    { name: 'Rust', count: 0, changePercent: 0 },
-    { name: 'TypeScript', count: 0, changePercent: 0 },
-  ],
-  trendingUp: { name: 'Solidity', changePercent: 0 },
-  coolingDown: { name: '-', changePercent: 0 },
-  marketPulse: { totalJobs: 2400, newThisWeek: 0, remoteRate: 0, totalChange: 0, remoteChange: 0 },
-  weeklyTrend: [],
+interface HeroTrendDashboardProps {
+  data: HeroData
 }
 
-export default function HeroTrendDashboard() {
-  const [data, setData] = useState<HeroData | null>(null)
-
-  useEffect(() => {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 8000)
-
-    fetch('/api/market/hero', { signal: controller.signal })
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.json()
-      })
-      .then(d => {
-        if (d.hotSkills && Array.isArray(d.hotSkills)) {
-          setData(d)
-        } else {
-          setData(FALLBACK_DATA)
-        }
-      })
-      .catch(() => {
-        setData(FALLBACK_DATA)
-      })
-      .finally(() => clearTimeout(timeout))
-
-    return () => {
-      controller.abort()
-      clearTimeout(timeout)
-    }
-  }, [])
-
+export default function HeroTrendDashboard({ data }: HeroTrendDashboardProps) {
   return (
     <section className="max-w-6xl mx-auto px-4 sm:px-6">
       {/* Section 1: Hero Headline */}
@@ -121,105 +76,57 @@ export default function HeroTrendDashboard() {
           Right now, Web3 is hiring for...
         </motion.p>
 
-        {data ? (
-          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-            {data.hotSkills.map((skill, i) => (
-              <motion.div
-                key={skill.name}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 + i * 0.15 }}
-                className="flex items-baseline gap-2"
-              >
-                <span className="text-5xl sm:text-6xl md:text-7xl font-black text-a24-text dark:text-a24-dark-text">
-                  {skill.name}
-                </span>
-                <ChangeBadge value={skill.changePercent} />
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-12 w-40 skeleton-shimmer rounded" />
-            ))}
-          </div>
-        )}
+        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+          {data.hotSkills.map((skill, i) => (
+            <motion.div
+              key={skill.name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 + i * 0.15 }}
+              className="flex items-baseline gap-2"
+            >
+              <span className="text-5xl sm:text-6xl md:text-7xl font-black text-a24-text dark:text-a24-dark-text">
+                {skill.name}
+              </span>
+              <ChangeBadge value={skill.changePercent} />
+            </motion.div>
+          ))}
+        </div>
       </div>
 
       {/* Section 2: Trend Cards + Pixelbara */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pb-6">
-        {data ? (
-          <>
-            <TrendCard
-              label="Trending Up"
-              icon={<TrendingUp className="w-3 h-3" />}
-              value={data.trendingUp.name}
-              change={data.trendingUp.changePercent}
-              positive
-            />
-            <TrendCard
-              label="Cooling Down"
-              icon={<TrendingDown className="w-3 h-3" />}
-              value={data.coolingDown.name}
-              change={data.coolingDown.changePercent}
-              positive={false}
-            />
-            <MarketPulseCard pulse={data.marketPulse} />
-            <div className="hidden lg:flex items-center justify-center border border-a24-border dark:border-a24-dark-border rounded p-4">
-              <Pixelbara pose="heroLaptop" size={120} clickable suppressHover />
-            </div>
-          </>
-        ) : (
-          <>
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
-            <div className="hidden lg:block">
-              <SkeletonCard />
-            </div>
-          </>
-        )}
+        <TrendCard
+          label="Trending Up"
+          icon={<TrendingUp className="w-3 h-3" />}
+          value={data.trendingUp.name}
+          change={data.trendingUp.changePercent}
+          positive
+        />
+        <TrendCard
+          label="Cooling Down"
+          icon={<TrendingDown className="w-3 h-3" />}
+          value={data.coolingDown.name}
+          change={data.coolingDown.changePercent}
+          positive={false}
+        />
+        <MarketPulseCard pulse={data.marketPulse} />
+        <div className="hidden lg:flex items-center justify-center border border-a24-border dark:border-a24-dark-border rounded p-4">
+          <Pixelbara pose="heroLaptop" size={120} clickable suppressHover />
+        </div>
       </div>
 
       {/* Section 3: Mini Trend Chart + CTA */}
       <div className="pb-4 sm:pb-6">
-        {data && data.weeklyTrend.length > 0 ? (
+        {data.weeklyTrend.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <div className="h-24 sm:h-32 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data.weeklyTrend}>
-                  <defs>
-                    <linearGradient id="heroGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--neun-success)" stopOpacity={0.2} />
-                      <stop offset="100%" stopColor="var(--neun-success)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="week"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 10, fill: 'var(--a24-muted)' }}
-                    tickFormatter={(v: string) => v.split('-')[1] || v}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="count"
-                    stroke="var(--neun-success)"
-                    strokeWidth={2}
-                    fill="url(#heroGradient)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+            <HeroTrendChart data={data.weeklyTrend} />
           </motion.div>
-        ) : !data ? (
-          <div className="h-24 sm:h-32 w-full skeleton-shimmer rounded" />
-        ) : null}
+        )}
 
         <div className="flex justify-center mt-4">
           <Link
@@ -299,15 +206,6 @@ function MarketPulseCard({
           )}
         </span>
       </div>
-    </div>
-  )
-}
-
-function SkeletonCard() {
-  return (
-    <div className="border border-a24-border dark:border-a24-dark-border rounded p-4 sm:p-5">
-      <div className="h-3 w-20 skeleton-shimmer rounded mb-3" />
-      <div className="h-8 w-24 skeleton-shimmer rounded" />
     </div>
   )
 }
