@@ -3,24 +3,24 @@ import type { Metadata } from 'next'
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.wtf'
 
 export const metadata: Metadata = {
-  title: 'Web3 Career Guide — Skills, Salary & Learning Paths | NEUN',
-  description: 'Data-driven career guide for Web3. Explore skill demand by experience level, salary benchmarks by region, curated learning paths, and career roadmaps powered by real job data.',
-  keywords: ['web3 career guide', 'blockchain career path', 'web3 salary data', 'solidity skills', 'web3 learning resources', 'crypto job skills'],
+  title: 'Find Your Web3 Career Path — Interactive Quiz & Roadmap | NEUN',
+  description: 'Answer 3 questions and get a personalized Web3 career roadmap with real-time job data, salary benchmarks, skill requirements, and curated learning resources.',
+  keywords: ['web3 career quiz', 'blockchain career path', 'web3 roadmap', 'crypto job guide', 'web3 skills', 'solidity career'],
   alternates: {
     canonical: `${baseUrl}/learn`,
   },
   openGraph: {
-    title: 'Web3 Career Guide — Skills, Salary & Learning Paths | NEUN',
-    description: 'Data-driven career guide for Web3. Skills, salaries, and learning paths from real job data.',
+    title: 'Find Your Web3 Career Path | NEUN',
+    description: 'Answer 3 questions and get a personalized Web3 career roadmap powered by real job data.',
     url: `${baseUrl}/learn`,
     siteName: 'NEUN',
     type: 'website',
-    images: [{ url: `${baseUrl}/og-image.png`, width: 1200, height: 630, alt: 'NEUN - Web3 Career Guide' }],
+    images: [{ url: `${baseUrl}/og-image.png`, width: 1200, height: 630, alt: 'NEUN - Web3 Career Quiz' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Web3 Career Guide | NEUN',
-    description: 'Data-driven career guide for Web3. Skills, salaries, and learning paths from real job data.',
+    title: 'Find Your Web3 Career Path | NEUN',
+    description: 'Answer 3 questions and get a personalized Web3 career roadmap powered by real job data.',
     images: [`${baseUrl}/og-image.png`],
     creator: '@neun_io',
   },
