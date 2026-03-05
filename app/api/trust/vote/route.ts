@@ -122,17 +122,17 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!voteId || !voterWallet || !decision) {
-      return NextResponse.json({ error: '필수 항목이 누락되었습니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'Required fields are missing.' }, { status: 400 })
     }
 
     // Validate wallet address
     if (!isValidWalletAddress(voterWallet)) {
-      return NextResponse.json({ error: '올바른 지갑 주소 형식이 아닙니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid wallet address format.' }, { status: 400 })
     }
 
     // Validate decision
     if (!['guilty', 'not_guilty', 'abstain'].includes(decision)) {
-      return NextResponse.json({ error: '유효하지 않은 투표입니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid vote decision.' }, { status: 400 })
     }
 
     // Rate limiting
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
     if (sybilCheck.isSuspicious && sybilCheck.riskScore >= 60) {
       console.warn(`Sybil risk detected for voter ${voterWallet}: ${sybilCheck.reason}`)
       return NextResponse.json({
-        error: '의심스러운 활동이 감지되었습니다.',
+        error: 'Suspicious activity detected.',
       }, { status: 403 })
     }
 
@@ -164,15 +164,15 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (voteError || !vote) {
-      return NextResponse.json({ error: '투표를 찾을 수 없습니다.' }, { status: 404 })
+      return NextResponse.json({ error: 'Vote not found.' }, { status: 404 })
     }
 
     if (vote.result) {
-      return NextResponse.json({ error: '이미 종료된 투표입니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'This vote has already been finalized.' }, { status: 400 })
     }
 
     if (new Date(vote.voting_ends_at) < new Date()) {
-      return NextResponse.json({ error: '투표 기간이 만료되었습니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'The voting period has expired.' }, { status: 400 })
     }
 
     // Check if already voted (duplicate prevention)
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (existing) {
-      return NextResponse.json({ error: '이미 투표했습니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'You have already voted.' }, { status: 400 })
     }
 
     // Sanitize comment

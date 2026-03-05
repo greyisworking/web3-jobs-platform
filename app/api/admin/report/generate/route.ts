@@ -134,8 +134,6 @@ function buildMarkdown(data: {
   const year = start.getFullYear()
   const month = start.getMonth() + 1
   const totalChange = calcChange(data.curr.totalJobs, data.prev.totalJobs)
-  const newJobs = data.curr.totalJobs
-
   let md = `# NEUN Web3 Market Report — ${year}년 ${month}월\n\n`
 
   // Summary

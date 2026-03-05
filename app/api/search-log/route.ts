@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 /**
- * POST: 검색 쿼리 로깅
- * GET ?popular=true: 최근 7일간 인기 검색어 상위 10개
+ * POST: Log search queries
+ * GET ?popular=true: Top 10 popular searches in last 7 days
  */
 export async function POST(request: NextRequest) {
   try {
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createSupabaseServerClient()
 
-    // 최근 7일간 인기 검색어 상위 10개
+    // Top 10 popular searches in last 7 days
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch popular searches' }, { status: 500 })
     }
 
-    // 쿼리별 카운트 집계
+    // Aggregate counts per query
     const counts: Record<string, number> = {}
     for (const row of data ?? []) {
       const q = row.query

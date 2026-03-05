@@ -29,17 +29,17 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!reporterWallet || !targetWallet || !category || !reason) {
-      return NextResponse.json({ error: '필수 항목이 누락되었습니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'Required fields are missing.' }, { status: 400 })
     }
 
     // Validate wallet addresses
     if (!isValidWalletAddress(reporterWallet) || !isValidWalletAddress(targetWallet)) {
-      return NextResponse.json({ error: '올바른 지갑 주소 형식이 아닙니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid wallet address format.' }, { status: 400 })
     }
 
     // Self-report prevention
     if (isSelfAction(reporterWallet, targetWallet)) {
-      return NextResponse.json({ error: '자기 자신을 신고할 수 없습니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'You cannot report yourself.' }, { status: 400 })
     }
 
     // Rate limiting - stricter for reports
@@ -58,13 +58,13 @@ export async function POST(request: NextRequest) {
     const isDuplicate = await hasDuplicateAction(reporterWallet, targetWallet, 'report')
     if (isDuplicate) {
       return NextResponse.json({
-        error: '이미 이 사용자를 최근에 신고했습니다. 30일 후에 다시 신고할 수 있습니다.',
+        error: 'You have already reported this user recently. You can report again after 30 days.',
       }, { status: 400 })
     }
 
     // Validate category
     if (!ALLOWED_CATEGORIES.includes(category)) {
-      return NextResponse.json({ error: '유효하지 않은 신고 카테고리입니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid report category.' }, { status: 400 })
     }
 
     // Sanitize inputs

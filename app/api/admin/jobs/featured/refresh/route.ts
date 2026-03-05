@@ -3,7 +3,7 @@
  * Admin-only: Recalculates featured scores and updates featured jobs.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/admin-auth';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { refreshFeaturedJobs } from '@/lib/featured-refresh';

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 /**
- * POST: 북마크된 공고 ID 목록의 검증 상태 확인
+ * POST: Verify bookmark status for a list of job IDs
  * Body: { jobIds: string[] }
  * Response: { verified: string[] }
  */
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ verified: [] })
     }
 
-    // UUID 형식 필터링 (Supabase uuid 컬럼에 유효하지 않은 값 방지)
+    // Filter valid UUID format to prevent invalid values in Supabase uuid column
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     const validIds = jobIds.filter((id: string) => uuidRegex.test(id))
 
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createSupabaseServerClient()
 
-    // isActive이거나 badges에 'Verified'가 포함된 공고 조회
+    // Query jobs that are active or have 'Verified' badge
     const { data, error } = await supabase
       .from('Job')
       .select('id, isActive, badges')

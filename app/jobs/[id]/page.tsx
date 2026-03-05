@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: 'Job Not Found | NEUN' }
   }
 
-  // Unified title format: "{직무} at {회사} | NEUN"
+  // Unified title format: "{role} at {company} | NEUN"
   const title = `${job.title} at ${job.company} | NEUN`
 
   // Build rich description

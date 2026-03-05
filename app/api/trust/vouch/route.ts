@@ -20,26 +20,22 @@ export async function POST(request: NextRequest) {
   if (csrfError) return csrfError
 
   try {
-    // Get client IP for rate limiting
-    const forwardedFor = request.headers.get('x-forwarded-for')
-    const _ip = forwardedFor?.split(',')[0]?.trim() || 'unknown'
-
     const body = await request.json()
     const { voucherWallet, voucheeWallet, message } = body
 
     // Validate required fields
     if (!voucherWallet || !voucheeWallet) {
-      return NextResponse.json({ error: '지갑 주소가 필요합니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'Wallet address is required.' }, { status: 400 })
     }
 
     // Validate wallet address format
     if (!isValidWalletAddress(voucherWallet) || !isValidWalletAddress(voucheeWallet)) {
-      return NextResponse.json({ error: '올바른 지갑 주소 형식이 아닙니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid wallet address format.' }, { status: 400 })
     }
 
     // Self-action prevention
     if (isSelfAction(voucherWallet, voucheeWallet)) {
-      return NextResponse.json({ error: '자기 자신에게 보증할 수 없습니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'You cannot vouch for yourself.' }, { status: 400 })
     }
 
     // Rate limiting
@@ -59,7 +55,7 @@ export async function POST(request: NextRequest) {
     if (sybilCheck.isSuspicious && sybilCheck.riskScore >= 70) {
       console.warn(`High sybil risk detected for ${voucherWallet}: ${sybilCheck.reason}`)
       return NextResponse.json({
-        error: '의심스러운 활동이 감지되었습니다. 나중에 다시 시도해주세요.',
+        error: 'Suspicious activity detected. Please try again later.',
       }, { status: 403 })
     }
 
@@ -72,7 +68,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (existing) {
-      return NextResponse.json({ error: '이미 이 사용자에게 보증했습니다.' }, { status: 400 })
+      return NextResponse.json({ error: 'You have already vouched for this user.' }, { status: 400 })
     }
 
     // Sanitize message input

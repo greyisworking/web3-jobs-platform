@@ -8,6 +8,6 @@ interface JobDetailModalProps {
 }
 
 /** Modal removed — cards now link directly to job URLs */
-export default function JobDetailModal({ job, onClose }: JobDetailModalProps) {
+export default function JobDetailModal(_props: JobDetailModalProps) {
   return null
 }

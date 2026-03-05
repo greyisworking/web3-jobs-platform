@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Send, Building2, Briefcase, MapPin, DollarSign, Code, Wallet, CheckCircle } from 'lucide-react'
+import { ArrowLeft, Send, Building2, Briefcase, DollarSign, Code, Wallet, CheckCircle } from 'lucide-react'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { toast } from 'sonner'
 import Pixelbara from '../components/Pixelbara'

@@ -5,7 +5,7 @@
  * Body: { ids: string[], badges: string[] }
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/admin-auth';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { BADGE_VALUES } from '@/lib/badges';

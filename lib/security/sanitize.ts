@@ -32,14 +32,6 @@ function escapeHtml(text: string): string {
 }
 
 /**
- * Remove all HTML tags
- */
-function stripHtml(text: string): string {
-  if (!text || typeof text !== 'string') return ''
-  return text.replace(/<[^>]*>/g, '')
-}
-
-/**
  * Sanitize text by removing dangerous patterns
  */
 export function sanitizeText(text: string): string {

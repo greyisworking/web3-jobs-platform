@@ -1,10 +1,10 @@
-// 크롤링 대시보드 타입 정의
+// Crawl dashboard type definitions
 
 export interface CrawlSession {
   sessionId: string
   startedAt: string
   endedAt: string
-  duration: number // 초
+  duration: number // seconds
   successCount: number
   failedCount: number
   totalJobs: number
@@ -17,7 +17,7 @@ export interface SourceHealth {
   lastJobCount: number
   lastStatus: 'success' | 'failed'
   consecutiveFailures: number
-  avgJobCount: number // 최근 5회 평균
+  avgJobCount: number // average of last 5 runs
 }
 
 export interface DataQuality {
