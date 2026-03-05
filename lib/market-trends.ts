@@ -136,6 +136,7 @@ export async function getMarketTrends(): Promise<MarketTrendsData | null> {
       .select('id, title, tags, description, company, experienceLevel, location, type, crawledAt')
       .eq('isActive', true)
       .gte('crawledAt', threeMonthsAgo.toISOString())
+      .limit(10000)
 
     if (recentError || !recentJobs) {
       return null
@@ -148,6 +149,7 @@ export async function getMarketTrends(): Promise<MarketTrendsData | null> {
       .eq('isActive', true)
       .gte('crawledAt', sixMonthsAgo.toISOString())
       .lt('crawledAt', threeMonthsAgo.toISOString())
+      .limit(10000)
 
     const prevJobs = previousJobs || []
 

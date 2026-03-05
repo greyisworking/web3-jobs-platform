@@ -196,6 +196,7 @@ export async function getSkillDetail(skillSlug: string): Promise<SkillDetailData
       .select('id, title, tags, description, company, location')
       .eq('isActive', true)
       .gte('crawledAt', threeMonthsAgo.toISOString())
+      .limit(10000)
 
     if (error || !allJobs) {
       return null

@@ -100,6 +100,7 @@ export async function GET(request: NextRequest) {
     .select('id, title, description, experienceLevel')
     .eq('isActive', true)
     .gte('crawledAt', cutoff.toISOString())
+    .limit(10000)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

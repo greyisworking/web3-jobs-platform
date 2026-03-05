@@ -209,6 +209,7 @@ export async function getCareerSkills(careerSlug: string): Promise<CareerSkillsD
       .select('id, title, tags, description, company, experienceLevel, location, type')
       .eq('isActive', true)
       .gte('crawledAt', threeMonthsAgo.toISOString())
+      .limit(10000)
 
     if (error || !allJobs) {
       return null
