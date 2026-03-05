@@ -85,9 +85,10 @@ const nextConfig = {
       // Legacy /en/* URLs → strip locale prefix
       { source: '/en', destination: '/', permanent: true },
       { source: '/en/:path*', destination: '/:path*', permanent: true },
-      // /learn → /market (renamed 2026-03)
-      { source: '/learn', destination: '/market', permanent: true },
-      { source: '/learn/:path*', destination: '/market/:path*', permanent: true },
+      // /market/library → /learn/library (moved 2026-03)
+      { source: '/market/library', destination: '/learn/library', permanent: true },
+      { source: '/market/career', destination: '/learn/career', permanent: true },
+      { source: '/market/career/:path*', destination: '/learn/career/:path*', permanent: true },
     ]
   },
   // Security headers

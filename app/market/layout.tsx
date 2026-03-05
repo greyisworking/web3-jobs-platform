@@ -3,15 +3,15 @@ import type { Metadata } from 'next'
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.wtf'
 
 export const metadata: Metadata = {
-  title: 'Web3 Job Market Trends — Salary Data, Skill Analysis, Hiring Insights',
-  description: 'Real-time Web3 job market intelligence. Track in-demand skills like Solidity & Rust, salary benchmarks, hiring trends, and remote work rates across 2,400+ positions.',
-  keywords: ['web3 market trends', 'crypto salary data', 'blockchain hiring', 'defi job market', 'web3 skills demand', 'solidity developer salary'],
+  title: 'Web3 Job Market Trends — Hiring Data, Skill Demand, Tech Stacks',
+  description: 'Real-time Web3 job market trends. Track weekly hiring volume, top companies, skill demand by category, remote work rates, and tech stack rankings across thousands of positions.',
+  keywords: ['web3 market trends', 'crypto hiring data', 'blockchain job market', 'web3 skill demand', 'tech stack ranking'],
   alternates: {
     canonical: `${baseUrl}/market`,
   },
   openGraph: {
-    title: 'Web3 Job Market Trends — Salary Data, Skill Analysis, Hiring Insights | NEUN',
-    description: 'Real-time Web3 job market intelligence. Track in-demand skills, salary benchmarks, and hiring trends.',
+    title: 'Web3 Job Market Trends — Hiring Data, Skill Demand, Tech Stacks | NEUN',
+    description: 'Real-time Web3 job market trends. Track hiring volume, skill demand, and tech stack rankings.',
     url: `${baseUrl}/market`,
     siteName: 'NEUN',
     type: 'website',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Web3 Job Market Trends | NEUN',
-    description: 'Real-time Web3 job market intelligence. Track in-demand skills, salary benchmarks, and hiring trends.',
+    description: 'Real-time Web3 job market trends. Track hiring volume, skill demand, and tech stack rankings.',
     images: [`${baseUrl}/og-image.png`],
     creator: '@neun_io',
   },

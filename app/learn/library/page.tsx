@@ -26,6 +26,7 @@ async function getJobCounts(): Promise<Record<string, number>> {
     .select('tags, title, category')
     .eq('isActive', true)
     .gte('crawledAt', threeMonthsAgo.toISOString())
+    .limit(10000)
 
   if (error || !jobs) {
     // Return zeros if query fails

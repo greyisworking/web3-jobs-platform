@@ -315,7 +315,7 @@ export default async function TrendsPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/market/career"
+              href="/learn/career"
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-neun-success text-white text-sm font-medium hover:bg-neun-success/90 transition-colors"
             >
               explore career paths

@@ -119,7 +119,7 @@ export default function SkillsPage() {
             don&apos;t see the skill you&apos;re looking for?
           </p>
           <Link
-            href="/market/library"
+            href="/learn/library"
             className="inline-flex items-center gap-2 text-sm text-neun-success hover:underline"
           >
             browse the full resource library

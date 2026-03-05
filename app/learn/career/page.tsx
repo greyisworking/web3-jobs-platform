@@ -80,11 +80,11 @@ export default function CareerPathsPage() {
       <main id="main-content" className="max-w-6xl mx-auto px-6 pt-24 pb-12">
         {/* Breadcrumb */}
         <Link
-          href="/market"
+          href="/learn"
           className="inline-flex items-center gap-2 text-sm text-a24-muted dark:text-a24-dark-muted hover:text-neun-success transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          back to market
+          back to learn
         </Link>
 
         {/* Hero */}
@@ -106,7 +106,7 @@ export default function CareerPathsPage() {
               return (
                 <Link
                   key={path.slug}
-                  href={`/market/career/${path.slug}`}
+                  href={`/learn/career/${path.slug}`}
                   className={`group p-6 border transition-all duration-300 ${path.borderColor} hover:bg-a24-surface/50 dark:hover:bg-a24-dark-surface/50`}
                 >
                   <div className="flex items-start gap-6">

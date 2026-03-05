@@ -386,6 +386,7 @@ export default function Navigation() {
             />
             <Link href="/ecosystem" className={linkClass(isActive('/ecosystem'))}>Ecosystem</Link>
             <Link href="/market" className={linkClass(isActive('/market'))}>Market</Link>
+            <Link href="/learn" className={linkClass(isActive('/learn'))}>Learn</Link>
           </div>
 
           {/* Mobile: Logo */}
@@ -436,6 +437,13 @@ export default function Navigation() {
                 className={`block py-3 border-b border-a24-border ${linkClass(isActive('/market'))}`}
               >
                 Market
+              </Link>
+              <Link
+                href="/learn"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/learn'))}`}
+              >
+                Learn
               </Link>
               {(mobileUser || address) && (
                 <Link

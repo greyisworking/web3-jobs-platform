@@ -220,7 +220,7 @@ export default async function CareerPage({
       <main id="main-content" className="max-w-6xl mx-auto px-6 pt-24 pb-12">
         {/* Breadcrumb */}
         <Link
-          href="/market/career"
+          href="/learn/career"
           className="inline-flex items-center gap-2 text-sm text-a24-muted dark:text-a24-dark-muted hover:text-neun-success transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
