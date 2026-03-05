@@ -21,10 +21,26 @@ interface RPJob {
   companyName: string
   companyPermalink: string
   title: string
-  description: string          // Short one-liner
+  description: string          // Short one-liner (full JD is login-gated)
   seniorities: string[]        // ["신입","주니어","미들","시니어","C레벨"]
   workType: string             // "상시 출근" | "상시 재택" | "출근-재택 혼합"
   advertised: boolean
+}
+
+/** Build a structured description from available metadata (full JD is login-gated) */
+function buildMetaDescription(job: RPJob): string {
+  const parts: string[] = []
+  parts.push(`Position: ${job.title}`)
+  parts.push(`Company: ${job.companyName}`)
+  const level = mapSeniority(job.seniorities)
+  if (level) parts.push(`Level: ${level}`)
+  const remote = mapWorkType(job.workType)
+  parts.push(`Type: Full-time`)
+  parts.push(`Work Style: ${remote}`)
+  parts.push(`Location: Seoul, South Korea`)
+  if (job.description) parts.push(`\n${job.description}`)
+  parts.push(`\nFull job description available on Rocketpunch (login required).`)
+  return parts.join(' | ').replace(' | \n', '\n')
 }
 
 // Search keywords for web3/blockchain jobs
@@ -179,6 +195,8 @@ export async function crawlRocketPunch(): Promise<CrawlerReturn> {
         const remoteType = mapWorkType(job.workType)
         const experienceLevel = mapSeniority(job.seniorities)
 
+        const metaDescription = buildMetaDescription(job)
+
         const result = await validateAndSaveJob(
           {
             title: job.title,
@@ -191,7 +209,7 @@ export async function crawlRocketPunch(): Promise<CrawlerReturn> {
             source: 'rocketpunch.com',
             region: 'Korea',
             postedDate: new Date(),
-            description: job.description || undefined,
+            description: metaDescription,
             companyLogo: job.companyLogoUrl || undefined,
             remoteType,
             experienceLevel,

@@ -388,6 +388,35 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                     className="text-sm"
                   />
                 )}
+
+                {/* Rocketpunch metadata-only notice */}
+                {job.description?.includes('Full job description available on Rocketpunch') && (
+                  <div className="mt-6 p-5 border border-neun-primary/20 bg-gradient-to-br from-neun-primary/5 to-transparent">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-neun-primary/10 border border-neun-primary/20">
+                        <ExternalLink className="w-5 h-5 text-neun-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-a24-text dark:text-a24-dark-text mb-1">
+                          Full job description available on Rocketpunch
+                        </p>
+                        <p className="text-xs text-a24-muted dark:text-a24-dark-muted mb-4">
+                          This listing shows metadata only. View the complete job description and apply on Rocketpunch.
+                        </p>
+                        <a
+                          href={job.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => trackEvent('job_apply_click', { job_id: job.id, title: job.title, company: job.company, source: 'rocketpunch_cta' })}
+                          className="group inline-flex items-center gap-2 px-5 py-2.5 bg-neun-primary text-white text-xs font-medium uppercase tracking-wider hover:bg-neun-primary-hover transition-all"
+                        >
+                          Apply Now on Rocketpunch
+                          <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="border-t border-a24-border dark:border-a24-dark-border pt-8">
