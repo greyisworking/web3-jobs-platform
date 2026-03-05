@@ -10,7 +10,7 @@ import Pixelbara from './Pixelbara'
 
 const HeroTrendChart = dynamic(() => import('./HeroTrendChart'), {
   ssr: false,
-  loading: () => <div className="h-24 sm:h-32 w-full skeleton-shimmer rounded" />,
+  loading: () => <div className="h-20 sm:h-24 w-full skeleton-shimmer rounded" />,
 })
 
 function useCountUp(target: number, duration = 1200) {
@@ -66,17 +66,17 @@ export default function HeroTrendDashboard({ data }: HeroTrendDashboardProps) {
   return (
     <section className="max-w-6xl mx-auto px-4 sm:px-6">
       {/* Section 1: Hero Headline */}
-      <div className="pt-6 sm:pt-8 md:pt-10 pb-6">
+      <div className="pt-4 sm:pt-5 md:pt-6 pb-3">
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-base uppercase tracking-wide text-a24-muted dark:text-a24-dark-muted mb-3"
+          className="text-base uppercase tracking-wide text-a24-muted dark:text-a24-dark-muted mb-2"
         >
           Right now, Web3 is hiring for...
         </motion.p>
 
-        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+        <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
           {data.hotSkills.map((skill, i) => (
             <motion.div
               key={skill.name}
@@ -95,7 +95,7 @@ export default function HeroTrendDashboard({ data }: HeroTrendDashboardProps) {
       </div>
 
       {/* Section 2: Trend Cards + Pixelbara */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pb-3">
         <TrendCard
           label="Trending Up"
           icon={<TrendingUp className="w-3 h-3" />}
@@ -111,13 +111,13 @@ export default function HeroTrendDashboard({ data }: HeroTrendDashboardProps) {
           positive={false}
         />
         <MarketPulseCard pulse={data.marketPulse} />
-        <div className="hidden lg:flex items-center justify-center border border-a24-border dark:border-a24-dark-border rounded p-4">
+        <div className="hidden lg:flex items-center justify-center border border-a24-border dark:border-a24-dark-border rounded p-3">
           <Pixelbara pose="heroLaptop" size={120} clickable suppressHover />
         </div>
       </div>
 
       {/* Section 3: Mini Trend Chart + CTA */}
-      <div className="pb-4 sm:pb-6">
+      <div className="pb-2 sm:pb-3">
         {data.weeklyTrend.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -128,7 +128,7 @@ export default function HeroTrendDashboard({ data }: HeroTrendDashboardProps) {
           </motion.div>
         )}
 
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center mt-2">
           <Link
             href="/market"
             className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] font-medium border border-neun-success/50 text-neun-success hover:bg-neun-success/10 px-5 py-2.5 rounded transition-all duration-200"
@@ -156,8 +156,8 @@ function TrendCard({
   positive: boolean
 }) {
   return (
-    <div className="border border-a24-border dark:border-a24-dark-border rounded p-4 sm:p-5 hover:shadow-green-sm transition-shadow duration-300">
-      <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted mb-2">
+    <div className="border border-a24-border dark:border-a24-dark-border rounded p-3 sm:p-4 hover:shadow-green-sm transition-shadow duration-300">
+      <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-a24-muted dark:text-a24-dark-muted mb-1">
         {icon}
         {label}
       </p>

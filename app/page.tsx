@@ -23,7 +23,7 @@ export default async function Home() {
       <HomeJobList jobs={jobs} />
 
       {/* PWA Install — mobile only, inline */}
-      <section className="max-w-6xl mx-auto px-6 pb-6">
+      <section className="max-w-6xl mx-auto px-6 pb-3">
         <PWAInstallPrompt />
       </section>
 

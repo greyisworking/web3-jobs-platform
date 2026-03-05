@@ -8,7 +8,7 @@ interface HeroTrendChartProps {
 
 export default function HeroTrendChart({ data }: HeroTrendChartProps) {
   return (
-    <div className="h-24 sm:h-32 w-full">
+    <div className="h-20 sm:h-24 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data}>
           <defs>

@@ -14,8 +14,8 @@ interface HomeJobListProps {
 export default function HomeJobList({ jobs }: HomeJobListProps) {
   return (
     <ScrollReveal>
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 section-spacing">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline gap-2 mb-2">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-3 pb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline gap-1 mb-1.5">
           <h2 className="text-xl md:text-2xl lg:text-3xl font-light uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">
             Featured Positions
           </h2>
@@ -27,7 +27,7 @@ export default function HomeJobList({ jobs }: HomeJobListProps) {
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1" />
           </Link>
         </div>
-        <div className="w-12 h-px bg-neun-success mb-4 md:mb-6" />
+        <div className="w-12 h-px bg-neun-success mb-3" />
 
         {jobs.length === 0 ? (
           <div className="py-8 md:py-10 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
