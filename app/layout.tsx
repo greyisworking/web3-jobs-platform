@@ -167,9 +167,9 @@ export default function RootLayout({
                     url: 'https://neun.wtf/icon-512x512.png',
                   },
                   sameAs: [
-                    'https://twitter.com/neunjobs',
-                    'https://t.me/neunjobs',
-                    'https://discord.gg/neunjobs',
+                    'https://twitter.com/neunwtf',
+                    'https://t.me/neunwtf',
+                    'https://discord.gg/neunwtf',
                   ],
                   description: 'Web3 job aggregator tracking 2,400+ blockchain, DeFi, and crypto positions from 40+ sources.',
                   contactPoint: {

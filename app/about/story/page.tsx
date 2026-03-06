@@ -157,7 +157,7 @@ export default function OurStoryPage() {
           Email: neun@neun.wtf
         </p>
         <p className="font-light text-a24-muted dark:text-a24-dark-muted tracking-wide mb-4">
-          Twitter: @neunjobs
+          Twitter: @neunwtf
         </p>
         <p className="text-sm text-a24-muted/70 dark:text-a24-dark-muted/70">
           Got feedback? Found a bug? Want to list your company?{' '}

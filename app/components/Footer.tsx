@@ -40,7 +40,7 @@ export default function Footer() {
           {/* Social Links */}
           <div className="flex items-center gap-5">
             <a
-              href="https://twitter.com/neunjobs"
+              href="https://twitter.com/neunwtf"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[11px] text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors inline-flex items-center gap-1.5"
@@ -51,7 +51,7 @@ export default function Footer() {
               Twitter
             </a>
             <a
-              href="https://t.me/neunjobs"
+              href="https://t.me/neunwtf"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[11px] text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors inline-flex items-center gap-1.5"
@@ -60,7 +60,7 @@ export default function Footer() {
               Telegram
             </a>
             <a
-              href="https://discord.gg/neunjobs"
+              href="https://discord.gg/neunwtf"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[11px] text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors inline-flex items-center gap-1.5"
