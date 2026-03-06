@@ -13,8 +13,9 @@ interface ErrorProps {
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
     // Log to Sentry if available, otherwise console
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.captureException(error)
+    const win = typeof window !== 'undefined' ? window as Window & { Sentry?: { captureException: (e: Error) => void } } : null
+    if (win?.Sentry) {
+      win.Sentry.captureException(error)
     } else {
       console.error('App Error:', error)
     }

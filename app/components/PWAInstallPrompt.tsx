@@ -26,13 +26,15 @@ export default function PWAInstallPrompt() {
     setIsMobile(mobile)
 
     // Check if already installed
+    const nav = window.navigator as Navigator & { standalone?: boolean }
     const standalone = window.matchMedia('(display-mode: standalone)').matches
-      || (window.navigator as any).standalone === true
+      || nav.standalone === true
     setIsStandalone(standalone)
     if (standalone || !mobile) return
 
     // Check iOS
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
+    const win = window as Window & { MSStream?: unknown }
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !win.MSStream
     setIsIOS(iOS)
 
     if (iOS) {
