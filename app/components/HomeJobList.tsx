@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import type { Job } from '@/types/job'
-import JobCard from './JobCard'
+import FeaturedCard from './FeaturedCard'
 import Pixelbara from './Pixelbara'
 import ScrollReveal from './ScrollReveal'
 
@@ -37,10 +37,16 @@ export default function HomeJobList({ jobs }: HomeJobListProps) {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {jobs.map((job, index) => (
-              <JobCard key={job.id} job={job} index={index} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+            {jobs.slice(0, 2).map((job, i) => (
+              <FeaturedCard key={job.id} job={job} index={i} variant="hero" />
             ))}
+
+            <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0">
+              {jobs.slice(2).map((job, i) => (
+                <FeaturedCard key={job.id} job={job} index={i + 2} variant="default" />
+              ))}
+            </div>
           </div>
         )}
       </section>

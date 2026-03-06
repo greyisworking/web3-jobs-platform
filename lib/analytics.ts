@@ -9,6 +9,7 @@ export type AnalyticsEventType =
   | 'vc_click'
   | 'share_click'
   | 'web_vital'
+  | 'featured_card_click'
 
 function getSessionId(): string {
   if (typeof window === 'undefined') return ''
