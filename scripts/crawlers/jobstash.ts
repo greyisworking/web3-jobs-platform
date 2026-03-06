@@ -69,6 +69,12 @@ const JUNK_TITLE_PHRASES = [
   'define your role',
   "i'm proposing a role",
   'propose a role',
+  'talent network',
+  'talent pool',
+  'future opportunities',
+  'speculative application',
+  'we are always interested',
+  'join our talent',
 ]
 
 function isGarbageListing(title: string, company: string, description: string | undefined): string | null {
@@ -83,6 +89,7 @@ function isGarbageListing(title: string, company: string, description: string | 
     if (t.toLowerCase().includes(phrase)) return `junk phrase: "${phrase}"`
   }
   if (d.length < DESC_MIN_LENGTH) return `description too short (${d.length})`
+  if (d.toLowerCase().includes('share your cv') && d.length < DESC_MIN_LENGTH) return 'share your CV + short desc'
   return null
 }
 

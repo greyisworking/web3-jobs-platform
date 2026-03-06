@@ -46,7 +46,7 @@ async function fetchJobsFromDB(filters: {
     .select(LIST_FIELDS)
     .eq('isActive', true)
     .gte('crawledAt', threeMonthsAgo.toISOString())
-    .order('crawledAt', { ascending: false })
+    .order('postedDate', { ascending: false })
     .limit(Math.min(filters.limit, 500))
 
   if (filters.badge) {

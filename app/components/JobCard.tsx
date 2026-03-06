@@ -8,38 +8,37 @@ import type { Job } from '@/types/job'
 import { trackEvent } from '@/lib/analytics'
 import { cleanJobTitle, cleanCompanyName } from '@/lib/clean-job-title'
 import BookmarkButton from './BookmarkButton'
-import { MiniPixelbara } from './Pixelbara'
 import { Lock, Vote, Flag } from 'lucide-react'
 import { toast } from 'sonner'
 
-// 7 days in milliseconds (hoisted constant)
+// NEW badge: postedDate within 7 days only
 const NEW_JOB_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000
 
-function isNewJob(crawledAt: Date | string | null | undefined): boolean {
-  if (!crawledAt) return false
-  const crawled = new Date(crawledAt)
-  const diffMs = Date.now() - crawled.getTime()
-  return diffMs < NEW_JOB_THRESHOLD_MS
+function isNewJob(postedDate: Date | string | null | undefined): boolean {
+  if (!postedDate) return false
+  const posted = new Date(postedDate)
+  const diffMs = Date.now() - posted.getTime()
+  return diffMs >= 0 && diffMs < NEW_JOB_THRESHOLD_MS
 }
 
-// Format relative time (e.g., "2d ago", "1w ago")
+// Format relative time:
+// 0-7d: "Xd ago" (but these get NEW badge)
+// 7-30d: hidden (return '')
+// 30d+: "Xmo ago"
 function formatRelativeTime(date: Date | string | null | undefined): string {
   if (!date) return ''
   const d = new Date(date)
   const now = Date.now()
   const diffMs = now - d.getTime()
-  const diffSec = Math.floor(diffMs / 1000)
-  const diffMin = Math.floor(diffSec / 60)
-  const diffHour = Math.floor(diffMin / 60)
-  const diffDay = Math.floor(diffHour / 24)
-  const diffWeek = Math.floor(diffDay / 7)
+  if (diffMs < 0) return ''
+  const diffDay = Math.floor(diffMs / (1000 * 60 * 60 * 24))
   const diffMonth = Math.floor(diffDay / 30)
 
   if (diffMonth > 0) return `${diffMonth}mo ago`
-  if (diffWeek > 0) return `${diffWeek}w ago`
+  if (diffDay > 7) return '' // 7-30d: no label
   if (diffDay > 0) return `${diffDay}d ago`
+  const diffHour = Math.floor(diffMs / (1000 * 60 * 60))
   if (diffHour > 0) return `${diffHour}h ago`
-  if (diffMin > 0) return `${diffMin}m ago`
   return 'just now'
 }
 
@@ -124,17 +123,13 @@ const ReportButton = memo(function ReportButton({ jobId }: { jobId: string }) {
 // Memoized JobCard component (rerender-memo)
 const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
   const { opacity, isFading } = useDecayEffect(job.postedDate)
-  const [hovered, setHovered] = useState(false)
 
   // Memoize expensive string operations (js-cache-function-results)
   const displayTitle = useMemo(() => cleanJobTitle(job.title, job.company), [job.title, job.company])
   const displayCompany = useMemo(() => cleanCompanyName(job.company), [job.company])
-  const isNew = useMemo(() => isNewJob(job.crawledAt), [job.crawledAt])
+  const isNew = useMemo(() => isNewJob(job.postedDate), [job.postedDate])
   const relativeTime = useMemo(() => formatRelativeTime(job.postedDate || job.crawledAt), [job.postedDate, job.crawledAt])
 
-  // Memoize event handler (rerender-functional-setstate)
-  const handleMouseEnter = useCallback(() => setHovered(true), [])
-  const handleMouseLeave = useCallback(() => setHovered(false), [])
   const handleClick = useCallback(() => {
     trackEvent('job_card_click', { job_id: job.id, title: job.title, company: job.company })
   }, [job.id, job.title, job.company])
@@ -148,8 +143,6 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.4, delay: (index % 6) * 0.08, ease: [0.22, 1, 0.36, 1] }}
       style={{ opacity: isFading ? opacity : undefined }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       className="will-change-transform"
     >
       <motion.div
@@ -201,18 +194,6 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
             </span>
           )}
         </div>
-
-        {/* Mini pixelbara on hover */}
-        {hovered && (
-          <>
-            <div className="absolute bottom-2 right-2 opacity-30">
-              <MiniPixelbara />
-            </div>
-            <span aria-hidden="true" className="absolute top-1 right-10 text-[9px] text-a24-muted/50 dark:text-a24-dark-muted/50 italic pointer-events-none">
-              it&apos;s giving... job
-            </span>
-          </>
-        )}
 
         {/* Company + Actions */}
         <div className="flex items-start justify-between mb-2">
