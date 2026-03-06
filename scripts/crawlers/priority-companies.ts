@@ -100,7 +100,8 @@ export async function crawlPriorityCompanies(): Promise<CrawlerReturn> {
               source: `priority:${company.careerPlatform}`,
               region: 'Global',
               postedDate: job.postedDate,
-              description: job.description,  // Pass description from platform crawler
+              description: job.description,
+              salary: job.salary,
             },
             `priority:${company.careerPlatform}`
           )

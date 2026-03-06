@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchXML, fetchHTML, cleanText, extractHTML, detectExperienceLevel, detectRemoteType, delayWithJitter } from '../utils'
+import { fetchXML, fetchHTML, cleanText, extractHTML, detectExperienceLevel, detectRemoteType, delayWithJitter, parseSalary } from '../utils'
 
 interface CrawlerReturn {
   total: number
@@ -80,6 +80,9 @@ export async function crawlRemote3(): Promise<CrawlerReturn> {
     link: string
     pubDate: string
     description: string | null
+    rssSalary?: string
+    rssLocation: string
+    rssType: string
   }[] = []
 
   items.each((_, element) => {
@@ -87,8 +90,7 @@ export async function crawlRemote3(): Promise<CrawlerReturn> {
     const rawTitle = cleanText($item.find('title').text())
     const link = cleanText($item.find('link').text())
     const pubDate = $item.find('pubDate').text()
-    // RSS description is just meta info (e.g., "at Company - Full-Time - Location")
-    // We'll fetch full description from the job page
+    // RSS description contains meta: "at Company - Full-Time - Worldwide - $150k - $250k /yr"
     const rssDescription = cleanText($item.find('description').text())
       || cleanText($item.find('content\\:encoded').text())
       || null
@@ -104,8 +106,29 @@ export async function crawlRemote3(): Promise<CrawlerReturn> {
       company = atMatch[2].trim()
     }
 
-    // Store RSS description temporarily, will be replaced with full JD
-    jobEntries.push({ title, company, link, pubDate, description: rssDescription })
+    // Parse structured fields from RSS description
+    // Format: "at Company - Full-Time - Worldwide - $150k - $250k /yr"
+    let rssSalary: string | undefined
+    let rssLocation = 'Remote'
+    let rssType = 'Full-time'
+
+    if (rssDescription) {
+      const parts = rssDescription.split(' - ').map(s => s.trim())
+      for (const part of parts) {
+        if (/full.time/i.test(part)) rssType = 'Full-time'
+        else if (/part.time/i.test(part)) rssType = 'Part-time'
+        else if (/contract/i.test(part)) rssType = 'Contract'
+        else if (/\$[\d,]+k?\s*[-–]\s*\$[\d,]+k?/i.test(part) || /\$[\d,]+k/i.test(part)) {
+          rssSalary = part
+        } else if (/worldwide|remote|global/i.test(part)) {
+          rssLocation = 'Remote'
+        } else if (part.length > 2 && !part.startsWith('at ') && !/^\$/.test(part)) {
+          rssLocation = part
+        }
+      }
+    }
+
+    jobEntries.push({ title, company, link, pubDate, description: rssDescription, rssSalary, rssLocation, rssType })
   })
 
   let savedCount = 0
@@ -125,22 +148,28 @@ export async function crawlRemote3(): Promise<CrawlerReturn> {
       const experienceLevel = description ? detectExperienceLevel(description) : null
       const remoteType = detectRemoteType('Remote')
 
+      // Parse salary from RSS
+      const salaryInfo = job.rssSalary ? parseSalary(job.rssSalary) : { min: null, max: null, currency: null }
+
       const result = await validateAndSaveJob(
         {
           title: job.title,
           company: job.company,
           url: job.link,
-          location: 'Remote',
-          type: 'Full-time',
+          location: job.rssLocation,
+          type: job.rssType,
           category: 'Engineering',
-          tags: [],
+          tags: ['Web3', 'Remote'],
           source: 'remote3.co',
           region: 'Global',
           postedDate: job.pubDate ? new Date(job.pubDate) : new Date(),
-          // Enhanced job details
           description,
           experienceLevel,
           remoteType: remoteType || 'Remote',
+          salary: job.rssSalary,
+          salaryMin: salaryInfo.min,
+          salaryMax: salaryInfo.max,
+          salaryCurrency: salaryInfo.currency,
         },
         'remote3.co'
       )

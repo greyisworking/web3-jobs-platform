@@ -273,28 +273,37 @@ const HTML_ENTITY_MAP: Record<string, string> = {
 export function sanitizeDescriptionForStorage(text: string): string {
   let result = text
 
-  // 1. Convert block-level tags to newlines (preserve structure)
+  // 1. Decode HTML entities FIRST (handles double-encoded HTML like &lt;div&gt;)
+  function decodeEntities(s: string): string {
+    for (const [entity, char] of Object.entries(HTML_ENTITY_MAP)) {
+      s = s.replaceAll(entity, char)
+    }
+    s = s.replace(/&#(\d+);/g, (_, code) => {
+      const n = parseInt(code, 10)
+      return n > 0 && n < 0x10ffff ? String.fromCodePoint(n) : ''
+    })
+    s = s.replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => {
+      const n = parseInt(hex, 16)
+      return n > 0 && n < 0x10ffff ? String.fromCodePoint(n) : ''
+    })
+    return s
+  }
+
+  // Decode entities repeatedly until stable (handles multi-level encoding)
+  let prev = ''
+  for (let i = 0; i < 3 && result !== prev; i++) {
+    prev = result
+    result = decodeEntities(result)
+  }
+
+  // 2. Convert block-level tags to newlines (preserve structure)
   result = result
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/?(p|div|li|h[1-6]|tr|blockquote|section|article|header|footer)(?:\s[^>]*)?\/?>/gi, '\n')
     .replace(/<\/?(?:ul|ol)(?:\s[^>]*)?\/?>/gi, '\n')
 
-  // 2. Strip all remaining HTML tags
+  // 3. Strip all remaining HTML tags
   result = result.replace(/<[^>]+>/g, '')
-
-  // 3. Decode HTML entities
-  for (const [entity, char] of Object.entries(HTML_ENTITY_MAP)) {
-    result = result.replaceAll(entity, char)
-  }
-  // Numeric entities (&#123; &#x1A;)
-  result = result.replace(/&#(\d+);/g, (_, code) => {
-    const n = parseInt(code, 10)
-    return n > 0 && n < 0x10ffff ? String.fromCodePoint(n) : ''
-  })
-  result = result.replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => {
-    const n = parseInt(hex, 16)
-    return n > 0 && n < 0x10ffff ? String.fromCodePoint(n) : ''
-  })
 
   // 4. Remove zero-width and invisible characters
   result = result.replace(/[\u200B\u200C\u200D\u200E\u200F\uFEFF\u00AD]/g, '')

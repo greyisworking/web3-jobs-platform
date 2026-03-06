@@ -46,6 +46,24 @@ function buildDescription(posting: LeverPosting): string | undefined {
 }
 
 /**
+ * Extract salary info from description text.
+ * Looks for patterns like "$150,000 - $200,000", "USD 120K-180K", etc.
+ */
+function extractSalaryFromText(text: string): string | undefined {
+  if (!text) return undefined
+  const patterns = [
+    /\$[\d,]+k?\s*[-–—to]+\s*\$[\d,]+k?\s*(?:per\s+(?:year|annum)|\/\s*(?:yr|year)|annually)?/i,
+    /USD\s*[\d,]+k?\s*[-–—to]+\s*USD?\s*[\d,]+k?\s*(?:per\s+(?:year|annum))?/i,
+    /(?:salary|compensation|pay)[\s:]+\$[\d,]+k?\s*[-–—to]+\s*\$[\d,]+k?/i,
+  ]
+  for (const p of patterns) {
+    const match = text.match(p)
+    if (match) return match[0].trim()
+  }
+  return undefined
+}
+
+/**
  * Crawl jobs from Lever's public API.
  * API: GET https://api.lever.co/v0/postings/{slug}?mode=json
  */
@@ -62,6 +80,17 @@ export async function crawlLeverJobs(slug: string, companyName: string): Promise
   for (const posting of data) {
     if (!posting.text) continue
 
+    const description = buildDescription(posting)
+
+    // Build tags from posting tags + department/team
+    const tags: string[] = [...(posting.tags || [])]
+    const dept = posting.categories?.department || posting.categories?.team
+    if (dept && !tags.includes(dept)) tags.push(dept)
+    if (tags.length === 0) tags.push('Web3', 'Blockchain')
+
+    // Extract salary from description text
+    const salary = description ? extractSalaryFromText(description) : undefined
+
     jobs.push({
       title: posting.text,
       company: companyName,
@@ -69,9 +98,10 @@ export async function crawlLeverJobs(slug: string, companyName: string): Promise
       location: posting.categories?.location || 'Seoul, Korea',
       type: posting.categories?.commitment || 'Full-time',
       category: posting.categories?.department || posting.categories?.team || 'Engineering',
-      tags: posting.tags || [],
+      tags,
       postedDate: posting.createdAt ? new Date(posting.createdAt) : new Date(),
-      description: buildDescription(posting),
+      description,
+      salary,
     })
   }
 
