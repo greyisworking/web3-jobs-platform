@@ -55,6 +55,37 @@ const API_TIMEOUT = 30000 // 30s per request
 const MAX_RETRIES = 2
 const CONSECUTIVE_ERROR_LIMIT = 3 // Stop after 3 consecutive errors
 
+// ── Quality filters: skip garbage listings before saving ──
+
+const TITLE_MAX_LENGTH = 80
+const DESC_MIN_LENGTH = 200
+
+const JUNK_TITLE_PHRASES = [
+  'interested in meeting',
+  'get in touch',
+  'general application',
+  'open application',
+  'name your role',
+  'define your role',
+  "i'm proposing a role",
+  'propose a role',
+]
+
+function isGarbageListing(title: string, company: string, description: string | undefined): string | null {
+  const t = (title || '').trim()
+  const c = (company || '').trim()
+  const d = description || ''
+
+  if (!t) return 'empty title'
+  if (t.toLowerCase() === c.toLowerCase()) return 'title == company'
+  if (t.length > TITLE_MAX_LENGTH) return `title too long (${t.length})`
+  for (const phrase of JUNK_TITLE_PHRASES) {
+    if (t.toLowerCase().includes(phrase)) return `junk phrase: "${phrase}"`
+  }
+  if (d.length < DESC_MIN_LENGTH) return `description too short (${d.length})`
+  return null
+}
+
 /** Map numeric seniority to experience level */
 function mapSeniority(seniority: string | null): string | undefined {
   const map: Record<string, string> = {
@@ -261,6 +292,15 @@ export async function crawlJobStash(): Promise<CrawlerReturn> {
           const org = job.organization
           const orgName = org?.name || 'Unknown'
           const company = resolveCompany(orgName, job.url)
+          const desc = job.description || job.summary || undefined
+
+          // Quality filter: skip garbage listings
+          const garbageReason = isGarbageListing(job.title, company, desc)
+          if (garbageReason) {
+            console.log(`  🗑️ Skip: "${job.title.substring(0, 40)}" (${garbageReason})`)
+            continue
+          }
+
           const tags = job.tags?.map(t => t.name).slice(0, 10) || []
 
           // If company was remapped, preserve original project name in tags
@@ -281,7 +321,7 @@ export async function crawlJobStash(): Promise<CrawlerReturn> {
               source: 'jobstash.xyz',
               region: 'Global',
               postedDate: job.timestamp ? new Date(job.timestamp) : new Date(),
-              description: job.description || job.summary || undefined,
+              description: desc,
               requirements: arrayToString(job.requirements),
               responsibilities: arrayToString(job.responsibilities),
               benefits: arrayToString(job.benefits),
