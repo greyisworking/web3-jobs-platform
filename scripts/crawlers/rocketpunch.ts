@@ -54,6 +54,35 @@ function isWeb3Related(job: RPJob): boolean {
   return WEB3_RELEVANCE.test(text)
 }
 
+const HANGUL = /[\uAC00-\uD7AF]/
+
+/**
+ * Resolve English company name from Korean.
+ * Uses companyPermalink (English slug) as the primary source,
+ * falling back to "Slug (한국어명)" format.
+ */
+function resolveCompanyName(name: string, permalink: string): string {
+  // Already English — return as-is
+  if (!HANGUL.test(name)) return name
+
+  // Convert permalink slug to title case: "onblock" → "OnBlock", "rfd-korea" → "Rfd Korea"
+  if (permalink) {
+    const english = permalink
+      .replace(/[-_]/g, ' ')
+      .split(' ')
+      .filter(Boolean)
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ')
+
+    if (english && english !== name) {
+      return english
+    }
+  }
+
+  // No permalink — keep Korean name as fallback
+  return name
+}
+
 /** Map Korean seniority to English experience level */
 function mapSeniority(seniorities: string[]): string | undefined {
   const mapping: Record<string, string> = {
@@ -215,7 +244,7 @@ export async function crawlRocketPunch(): Promise<CrawlerReturn> {
         const result = await validateAndSaveJob(
           {
             title: job.title,
-            company: job.companyName,
+            company: resolveCompanyName(job.companyName, job.companyPermalink),
             url: jobUrl,
             location: 'Seoul, South Korea',
             type: 'Full-time',
