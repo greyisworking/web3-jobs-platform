@@ -3,11 +3,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, Clock, TrendingUp, X } from 'lucide-react'
+// Trending tags removed in minimal redesign
 import { motion, AnimatePresence } from 'framer-motion'
 
 const RECENT_KEY = 'recent-searches'
 const MAX_RECENT = 10
-const TRENDING_TAGS = ['Rust', 'Solidity', 'React', 'Remote']
 
 interface SearchWithSuggestionsProps {
   onSearch: (query: string) => void
@@ -170,18 +170,18 @@ export default function SearchWithSuggestions({
 
   return (
     <div ref={containerRef} className="relative w-full">
-      {/* Search input */}
+      {/* Search input - hero size */}
       <div className="relative">
-        <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-a24-muted" />
+        <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-5 h-5 text-a24-muted dark:text-a24-dark-muted" />
         <input
           ref={inputRef}
           type="text"
-          placeholder="Search jobs, companies, skills..."
+          placeholder="Search Solidity, Rust, Remote..."
           value={query}
           onChange={handleInputChange}
           onFocus={() => setFocused(true)}
           onKeyDown={handleKeyDown}
-          className="w-full pl-7 pr-8 py-2 border-b border-a24-border dark:border-a24-dark-border bg-transparent text-a24-text dark:text-a24-dark-text focus:border-a24-text dark:focus:border-a24-dark-text outline-none transition-colors text-sm"
+          className="w-full pl-8 pr-10 py-3 border-b-2 border-a24-border dark:border-a24-dark-border bg-transparent text-lg text-a24-text dark:text-a24-dark-text focus:border-a24-text dark:focus:border-a24-dark-text outline-none transition-colors placeholder:text-a24-muted/50 dark:placeholder:text-a24-dark-muted/50"
         />
         {query && (
           <button
@@ -191,28 +191,11 @@ export default function SearchWithSuggestions({
               syncToURL('')
               inputRef.current?.focus()
             }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 text-a24-muted hover:text-a24-text"
+            className="absolute right-0 top-1/2 -translate-y-1/2 p-1 text-a24-muted hover:text-a24-text dark:hover:text-a24-dark-text transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         )}
-      </div>
-
-      {/* Trending tags */}
-      <div className="flex items-center gap-2 mt-3 flex-wrap">
-        <span className="text-[11px] text-a24-muted dark:text-a24-dark-muted uppercase tracking-[0.2em]">Trending</span>
-        {TRENDING_TAGS.map((tag) => (
-          <button
-            key={tag}
-            onClick={() => {
-              setQuery(tag)
-              submitSearch(tag)
-            }}
-            className="text-[11px] px-2 py-0.5 text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:text-a24-text dark:hover:text-a24-dark-text hover:border-a24-text dark:hover:border-a24-dark-text transition-colors"
-          >
-            {tag}
-          </button>
-        ))}
       </div>
 
       {/* Dropdown */}

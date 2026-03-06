@@ -10,7 +10,7 @@ import { useJobs } from '@/hooks/useJobs'
 import SmartFilterBar, { SmartFilters } from '../components/SmartFilterBar'
 import SearchWithSuggestions from '../components/SearchWithSuggestions'
 import JobCard from '../components/JobCard'
-import VCBackersDashboard from '../components/VCBackersDashboard'
+// VCBackersDashboard integrated into SmartFilterBar
 import { JobCardSkeletonGrid } from '../components/JobCardSkeleton'
 import Pixelbara from '../components/Pixelbara'
 import ScrollReveal from '../components/ScrollReveal'
@@ -221,17 +221,6 @@ function CareersContent() {
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
       <main className="max-w-6xl mx-auto px-6 pt-24">
-        {/* Compact inline stats */}
-        <div className="mb-6">
-          <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted tracking-wide">
-            <span className="text-a24-text dark:text-a24-dark-text font-medium">{stats.total}</span> positions
-            {' | '}
-            <span className="text-a24-text dark:text-a24-dark-text font-medium">{stats.global}</span> global
-            {' | '}
-            <span className="text-a24-text dark:text-a24-dark-text font-medium">{stats.korea}</span> korea
-          </p>
-        </div>
-
         {/* Company filter badge */}
         {companyFilter && (
           <div className="mb-4">
@@ -248,23 +237,19 @@ function CareersContent() {
           </div>
         )}
 
-        {/* Search */}
+        {/* Search - hero */}
         <ScrollReveal>
-          <div className="mb-8">
-            <div className="max-w-lg">
+          <div className="mb-6">
+            <div className="max-w-xl">
               <SearchWithSuggestions onSearch={handleSearch} jobs={jobs} />
             </div>
           </div>
         </ScrollReveal>
 
-        {/* Filters */}
+        {/* Filters with integrated VC Backers */}
         <ScrollReveal delay={100}>
-          <SmartFilterBar onFilterChange={handleSmartFilterChange} />
-        </ScrollReveal>
-
-        {/* VC Backers */}
-        <ScrollReveal delay={150}>
-          <VCBackersDashboard
+          <SmartFilterBar
+            onFilterChange={handleSmartFilterChange}
             vcCounts={vcCounts}
             selectedVC={selectedVC}
             onSelectVC={handleVCSelect}
@@ -277,8 +262,8 @@ function CareersContent() {
             <h2 className="text-lg font-light uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">
               Open Positions
             </h2>
-            <span className="text-xs text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider">
-              {filteredJobs.length} results
+            <span className="text-xs text-a24-muted dark:text-a24-dark-muted tracking-wider">
+              {filteredJobs.length.toLocaleString()} jobs
             </span>
           </div>
           <div className="w-12 h-px bg-neun-success mb-4" />
