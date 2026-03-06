@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, Copy, ExternalLink, MapPin, Briefcase, Globe, Building2, AlertTriangle, Search, User } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Copy, ExternalLink, MapPin, Briefcase, Globe, AlertTriangle, Search, User } from 'lucide-react'
 import { useAccount } from 'wagmi'
 import { toast } from 'sonner'
 import type { Job } from '@/types/job'
@@ -24,12 +24,8 @@ import { TokenInfoSection, useTokenData } from '@/app/components/TokenInfo'
 import { calculateTrustScore } from '@/lib/trust-check'
 import { findPriorityCompany } from '@/lib/priority-companies'
 import {
-  VerifiedBadge,
-  PreIPOBadge,
   RemoteBadge,
   ActiveBadge,
-  Web3PerksBadge,
-  EnglishBadge,
 } from '@/app/components/badges'
 
 /**
@@ -46,12 +42,8 @@ function isValidUrl(url: string | null | undefined): boolean {
 }
 
 const BADGE_COMPONENT_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  Verified: VerifiedBadge,
-  'Pre-IPO': PreIPOBadge,
   Remote: RemoteBadge,
   Active: ActiveBadge,
-  'Web3 Perks': Web3PerksBadge,
-  English: EnglishBadge,
 }
 
 const VC_REASONS: Record<string, string> = {
@@ -211,7 +203,7 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
-      toast.success('Copied! now go shill it ser')
+      toast.success('Link copied!')
     })
     trackEvent('share_click', { job_id: job.id, method: 'copy_url', source: 'page' })
   }
@@ -242,7 +234,14 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
     trackEvent('share_click', { job_id: job.id, method: 'telegram', source: 'page' })
   }
 
-  const tags = parseTags(job.tags)
+  const NON_TECH_TAGS = new Set([
+    'communication', 'problem solving', 'teamwork', 'leadership', 'management',
+    'collaboration', 'analytical', 'detail-oriented', 'self-motivated', 'creative',
+    'flexible', 'organized', 'passionate', 'proactive', 'strategic',
+    'blockchain', 'web3', 'crypto', 'korea', 'global', 'engineering',
+    'full-time', 'part-time', 'remote', 'on-site', 'hybrid',
+  ])
+  const tags = parseTags(job.tags).filter(t => !NON_TECH_TAGS.has(t.toLowerCase()))
   const isNew = job.postedDate && (() => {
     const posted = new Date(job.postedDate!)
     const now = new Date()
@@ -294,10 +293,6 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                 <span className="flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5 flex-shrink-0" />
                   {job.region}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
-                  {job.source}
                 </span>
               </div>
             </div>
@@ -660,23 +655,21 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
 
             {/* Trust Status - Different display based on verification level */}
             {hasVCBacking(backers) ? (
-              // VC Portfolio Company - No warnings needed
               <div className="p-4 border border-amber-500/30 bg-amber-500/5">
                 <div className="flex items-center gap-2 mb-2">
                   <VCVerifiedBadge />
                 </div>
                 <p className="text-[11px] text-amber-400/80">
-                  Backed by top-tier VC investors. ser this ones legit fr.
+                  Backed by top-tier VC investors.
                 </p>
               </div>
             ) : isTrustedSource(job.source) ? (
-              // Crawled from trusted job board - Verified
               <div className="p-4 border border-emerald-500/30 bg-emerald-500/5">
                 <div className="flex items-center gap-2 mb-2">
                   <TrustVerifiedBadge />
                 </div>
                 <p className="text-[11px] text-emerald-400/80">
-                  Sourced from {job.source}. established job board, looking good ser.
+                  Source: {job.source}
                 </p>
               </div>
             ) : isUserPostedJob(job.source) ? (
@@ -700,13 +693,12 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
                 />
               </div>
             ) : (
-              // Other sources - Show as verified (trusted by default)
               <div className="p-4 border border-emerald-500/30 bg-emerald-500/5">
                 <div className="flex items-center gap-2 mb-2">
                   <TrustVerifiedBadge />
                 </div>
                 <p className="text-[11px] text-emerald-400/80">
-                  Sourced from {job.source}. looking good ser.
+                  Source: {job.source}
                 </p>
               </div>
             )}
@@ -764,9 +756,9 @@ export default function CareersDetailClient({ job }: CareersDetailClientProps) {
             {/* Report button */}
             <button
               onClick={() => setShowReportModal(true)}
-              className="w-full p-3 border border-a24-border dark:border-a24-dark-border text-[10px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted hover:text-red-500 hover:border-red-500/50 transition-colors flex items-center justify-center gap-2"
+              className="w-full p-2 border border-a24-border dark:border-a24-dark-border text-[10px] uppercase tracking-wider text-a24-muted/60 dark:text-a24-dark-muted/60 hover:text-red-500 hover:border-red-500/50 transition-colors flex items-center justify-center gap-1.5"
             >
-              🚩 Report this company
+              Report
             </button>
           </aside>
         </div>

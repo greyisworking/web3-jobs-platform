@@ -206,12 +206,11 @@ const WARNING_KEYWORDS = [
   'bankruptcy', 'insolvent',
 ]
 
-// Pixelbara comments for each trust level (Web3 degen style)
 export const TRUST_COMMENTS: Record<TrustLevel, string> = {
-  verified: 'looking good ser',
-  caution: 'some info missing... dyor',
-  warning: 'anon team... be careful',
-  blacklisted: 'they rugged. i was there.',
+  verified: 'Verified',
+  caution: 'Some info missing — DYOR',
+  warning: 'Unverified team — proceed with caution',
+  blacklisted: 'Flagged — known issues reported',
 }
 
 // Simplified Trust Check Labels for non-VC companies
@@ -259,13 +258,13 @@ export function simpleCompanyTrustCheck(company: {
 
   if (passedCount === 4) {
     level = 'verified'
-    comment = 'looking good ser'
+    comment = 'All checks passed'
   } else if (passedCount >= 2) {
     level = 'partial'
-    comment = 'some info missing... dyor'
+    comment = 'Some info missing — DYOR'
   } else {
     level = 'unknown'
-    comment = 'anon team... be careful'
+    comment = 'Unverified team — proceed with caution'
   }
 
   return { checks, passedCount, totalCount, level, comment }

@@ -33,7 +33,7 @@ export default function HomeJobList({ jobs }: HomeJobListProps) {
           <div className="py-8 md:py-10 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
             <Pixelbara pose="empty" size={160} className="mx-auto mb-4" clickable />
             <p className="text-a24-muted dark:text-a24-dark-muted text-base font-medium">
-              bruh... no jobs rn. touch grass.
+              No featured positions available.
             </p>
           </div>
         ) : (

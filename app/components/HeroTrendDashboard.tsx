@@ -14,7 +14,7 @@ const HeroTrendChart = dynamic(() => import('./HeroTrendChart'), {
 })
 
 function useCountUp(target: number, duration = 1200) {
-  const [value, setValue] = useState(0)
+  const [value, setValue] = useState(target)
   const ref = useRef<HTMLDivElement>(null)
   const started = useRef(false)
 
@@ -23,11 +23,15 @@ function useCountUp(target: number, duration = 1200) {
     const el = ref.current
     if (!el) return
 
+    // Show target immediately until animation starts
+    setValue(target)
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !started.current) {
           started.current = true
           observer.unobserve(entry.target)
+          setValue(0) // Reset to 0, then animate up
           const start = performance.now()
           const animate = (now: number) => {
             const elapsed = now - start

@@ -209,7 +209,7 @@ function CareersContent() {
           <div className="flex flex-col items-center justify-center py-16">
             <Pixelbara pose="careers" size={160} />
             <p className="mt-4 text-sm font-light text-a24-muted dark:text-a24-dark-muted tracking-wide">
-              searching for that bag...
+              Loading positions...
             </p>
           </div>
           <JobCardSkeletonGrid count={9} showLoader={false} />
@@ -281,7 +281,7 @@ function CareersContent() {
               {filteredJobs.length} results
             </span>
           </div>
-          <div className="w-12 h-px bg-neun-success mb-8" />
+          <div className="w-12 h-px bg-neun-success mb-4" />
 
           {filteredJobs.length === 0 ? (
             <div className="py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
@@ -323,7 +323,7 @@ function CareersContent() {
                   </motion.button>
                 ) : (
                   <p className="text-[11px] uppercase tracking-[0.3em] font-light text-a24-muted/50 dark:text-a24-dark-muted/50">
-                    that&apos;s all folks. touch grass.
+                    End of results.
                   </p>
                 )}
               </div>
