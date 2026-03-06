@@ -276,8 +276,8 @@ export function sanitizeDescriptionForStorage(text: string): string {
   // 1. Convert block-level tags to newlines (preserve structure)
   result = result
     .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/?(p|div|li|h[1-6]|tr|blockquote|section|article|header|footer)[\s>][^>]*>/gi, '\n')
-    .replace(/<\/?(?:ul|ol)[\s>][^>]*>/gi, '\n')
+    .replace(/<\/?(p|div|li|h[1-6]|tr|blockquote|section|article|header|footer)(?:\s[^>]*)?\/?>/gi, '\n')
+    .replace(/<\/?(?:ul|ol)(?:\s[^>]*)?\/?>/gi, '\n')
 
   // 2. Strip all remaining HTML tags
   result = result.replace(/<[^>]+>/g, '')
