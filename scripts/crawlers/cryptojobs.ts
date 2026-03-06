@@ -2,7 +2,7 @@ import axios from 'axios'
 import * as cheerio from 'cheerio'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { cleanText, parseSalary, getRandomUserAgent } from '../utils'
+import { cleanText, parseSalary, getRandomUserAgent, delay } from '../utils'
 
 interface CrawlerReturn {
   total: number
@@ -10,9 +10,38 @@ interface CrawlerReturn {
 }
 
 /**
+ * Fetch full job description from detail page via JSON-LD (JobPosting schema).
+ * The detail page embeds a JSON-LD block with the complete description.
+ */
+async function fetchDetailDescription(jobUrl: string): Promise<string | null> {
+  try {
+    const response = await axios.get(jobUrl, {
+      headers: { 'User-Agent': getRandomUserAgent() },
+      timeout: 15000,
+    })
+    const $ = cheerio.load(response.data)
+    const scripts = $('script[type="application/ld+json"]')
+    for (const script of scripts.toArray()) {
+      const text = $(script).text().trim()
+      if (!text) continue
+      try {
+        const data = JSON.parse(text)
+        if (data['@type'] === 'JobPosting' && data.description) {
+          return cleanText(data.description).slice(0, 10000)
+        }
+      } catch {}
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+/**
  * CryptoJobs (crypto.jobs) Crawler — RSS feed mode
  * The site blocks HTML scraping (Cloudflare 403), but the RSS feed is open.
  * Feed: https://crypto.jobs/feed/rss — returns ~50 most recent jobs with rich data.
+ * Detail pages provide full JD via JSON-LD (JobPosting schema).
  */
 export async function crawlCryptoJobs(): Promise<CrawlerReturn> {
   console.log('🚀 Starting CryptoJobs crawler (RSS mode)...')
@@ -100,7 +129,15 @@ export async function crawlCryptoJobs(): Promise<CrawlerReturn> {
 
       // Extract remaining text as description (after structured fields)
       $desc('p strong').parent().remove()
-      const description = cleanText($desc.text()).slice(0, 5000) || undefined
+      const rssBodyText = cleanText($desc.text()).slice(0, 5000) || undefined
+
+      // Fetch full description from detail page JSON-LD (preferred)
+      const detailUrl = link.split('?')[0]
+      const detailDescription = await fetchDetailDescription(detailUrl)
+      await delay(300)
+
+      // Use detail page JD if available, otherwise RSS body text
+      const description = detailDescription || rssBodyText
 
       // Map category
       const categoryMap: Record<string, string> = {
