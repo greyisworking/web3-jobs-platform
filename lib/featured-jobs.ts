@@ -9,7 +9,7 @@ const LIST_FIELDS = [
   'backers', 'sector', 'badges', 'is_featured', 'is_urgent'
 ].join(',')
 
-const FEATURED_COUNT = 8
+const FEATURED_COUNT = 9
 const POOL_LIMIT = 120
 const DAYS_WINDOW = 7
 
@@ -61,12 +61,23 @@ export async function getFeaturedJobs(): Promise<Job[]> {
   const seed = Math.floor(Date.now() / (30 * 60 * 1000))
   const rand = seededRandom(seed)
 
-  // Company dedup: keep first occurrence per company (newest), then shuffle
+  // Korean character regex (Hangul syllables)
+  const HANGUL = /[\uAC00-\uD7AF]/
+  // Broken titles: starts with conjunction/preposition leftover from Korean strip
+  const BROKEN_TITLE = /^(and|or|the|of|for|in|at|to)\s/i
+
+  // Company dedup + quality filter for Featured
   const seen = new Set<string>()
   const deduped = jobs.filter((job) => {
     const key = (job.company || '').toLowerCase().trim()
     if (seen.has(key)) return false
     seen.add(key)
+    // Exclude Korean company names (NEUN is English-only)
+    if (HANGUL.test(job.company || '')) return false
+    // Exclude rocketpunch (Korean job board)
+    if (job.source === 'rocketpunch') return false
+    // Exclude broken titles (e.g. "and Operations")
+    if (BROKEN_TITLE.test((job.title || '').trim())) return false
     return true
   })
 
