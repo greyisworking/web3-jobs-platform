@@ -57,7 +57,7 @@ const CONSECUTIVE_ERROR_LIMIT = 3 // Stop after 3 consecutive errors
 
 // ── Quality filters: skip garbage listings before saving ──
 
-const TITLE_MAX_LENGTH = 80
+const TITLE_MAX_LENGTH = 50
 const DESC_MIN_LENGTH = 200
 
 const JUNK_TITLE_PHRASES = [
@@ -116,6 +116,51 @@ function mapCommitment(commitment: string | null): string {
   if (lower.includes('contract') || lower.includes('freelance')) return 'Contract'
   if (lower.includes('intern')) return 'Internship'
   return 'Full-time'
+}
+
+// ── Salary normalization: detect monthly values stored as annual ──
+
+/** Currency-specific annual salary thresholds. Below this → likely monthly, multiply by 12 */
+const MONTHLY_SALARY_THRESHOLDS: Record<string, number> = {
+  USD: 15000,
+  EUR: 14000,
+  GBP: 12000,
+  MYR: 30000,
+  SGD: 20000,
+  INR: 200000,
+}
+const GARBAGE_SALARY_THRESHOLD = 500 // Below this → nonsense, clear it
+
+/**
+ * Normalize salary values: detect monthly→annual confusion and garbage values.
+ * Returns corrected { min, max } or null if salary should be cleared.
+ */
+function normalizeSalary(
+  min: number | null,
+  max: number | null,
+  currency: string | null
+): { min: number | null; max: number | null } | null {
+  if (!min && !max) return { min, max }
+
+  const cur = (currency || 'USD').toUpperCase()
+  const threshold = MONTHLY_SALARY_THRESHOLDS[cur] || MONTHLY_SALARY_THRESHOLDS.USD
+  const ref = max || min || 0
+
+  // Garbage: absurdly low values
+  if (ref > 0 && ref < GARBAGE_SALARY_THRESHOLD) {
+    console.log(`  💰 Salary cleared: ${cur} ${ref} (below ${GARBAGE_SALARY_THRESHOLD} threshold)`)
+    return null
+  }
+
+  // Monthly detection: below currency threshold → multiply by 12
+  if (ref > 0 && ref < threshold) {
+    const correctedMin = min ? min * 12 : null
+    const correctedMax = max ? max * 12 : null
+    console.log(`  💰 Salary corrected (monthly→annual): ${cur} ${ref} → ${correctedMax || correctedMin}`)
+    return { min: correctedMin, max: correctedMax }
+  }
+
+  return { min, max }
 }
 
 /** Format salary string from min/max/currency */
@@ -309,6 +354,17 @@ export async function crawlJobStash(): Promise<CrawlerReturn> {
             if (!tags.includes(projectTag)) tags.push(projectTag)
           }
 
+          // Salary normalization: monthly→annual correction + garbage removal
+          const normalizedSalary = normalizeSalary(job.minimumSalary, job.maximumSalary, job.salaryCurrency)
+          const salaryMin = normalizedSalary?.min ?? null
+          const salaryMax = normalizedSalary?.max ?? null
+
+          // AI description marking: JobStash uses AI-generated summaries
+          let finalDesc = desc
+          if (desc && /^you will\b/i.test(desc.trim())) {
+            finalDesc = `[AI-summarized by JobStash]\n\n${desc}`
+          }
+
           const result = await validateAndSaveJob(
             {
               title: job.title,
@@ -321,14 +377,14 @@ export async function crawlJobStash(): Promise<CrawlerReturn> {
               source: 'jobstash.xyz',
               region: 'Global',
               postedDate: job.timestamp ? new Date(job.timestamp) : new Date(),
-              description: desc,
+              description: finalDesc,
               requirements: arrayToString(job.requirements),
               responsibilities: arrayToString(job.responsibilities),
               benefits: arrayToString(job.benefits),
-              salaryMin: job.minimumSalary,
-              salaryMax: job.maximumSalary,
+              salaryMin,
+              salaryMax,
               salaryCurrency: job.salaryCurrency,
-              salary: formatSalary(job.minimumSalary, job.maximumSalary, job.salaryCurrency),
+              salary: formatSalary(salaryMin, salaryMax, job.salaryCurrency),
               experienceLevel: mapSeniority(job.seniority),
               remoteType: mapLocationType(job.locationType),
               companyLogo: org?.logoUrl || undefined,
