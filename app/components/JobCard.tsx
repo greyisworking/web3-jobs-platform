@@ -221,8 +221,8 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
 
         {/* Location + Relative Time */}
         <div className="flex items-center justify-between mt-2 gap-2">
-          <p className="text-[13px] font-light text-a24-muted/70 dark:text-a24-dark-muted/70 uppercase tracking-[0.15em] truncate">
-            {job.location}
+          <p className="text-[13px] font-light text-a24-muted/70 dark:text-a24-dark-muted/70 uppercase tracking-[0.15em] truncate" title={job.location}>
+            {job.location && job.location.length > 40 ? job.location.slice(0, 40) + '...' : job.location}
           </p>
           {relativeTime && (
             <span className="text-[11px] text-a24-muted/50 dark:text-a24-dark-muted/50 flex-shrink-0">

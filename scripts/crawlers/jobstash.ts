@@ -180,6 +180,65 @@ function formatSalary(min: number | null, max: number | null, currency: string |
   return undefined
 }
 
+/**
+ * Clean up verbose location strings.
+ * "Zug (primary) with regular presence in Vaduz, Switzerland" → "Zug, Switzerland"
+ * "New York, NY / Remote, Boston / Remote" → "New York, NY / Boston (Remote)"
+ */
+function cleanLocation(raw: string | null): string {
+  if (!raw) return 'Remote'
+  let loc = raw.trim()
+
+  // Strip parenthetical qualifiers
+  loc = loc.replace(/\s*\((primary|headquarters?)\)/gi, '')
+
+  // Strip verbose phrases
+  loc = loc.replace(/\bwith regular presence in\b/gi, ',')
+  loc = loc.replace(/\b(candidates must be based in|open to candidates based in|but must be located in)\b/gi, '')
+
+  // "REGION - Remote" pattern → strip " - Remote"
+  loc = loc.replace(/\s*-\s*Remote/gi, '')
+
+  // Handle "City / Remote, City2 / Remote" → extract cities, append (Remote)
+  if (/\/\s*Remote/i.test(loc)) {
+    const parts = loc.split(/\s*,\s*/)
+    const cities = parts.map(p => p.replace(/\s*\/\s*Remote/gi, '').trim()).filter(Boolean)
+    const unique = [...new Set(cities)].slice(0, 3)
+    return unique.length > 0 ? `${unique.join(' / ')} (Remote)` : 'Remote'
+  }
+
+  // Strip standalone "Remote," or ", Remote" from beginning
+  loc = loc.replace(/^Remote\s*,\s*/i, '')
+  loc = loc.replace(/,\s*Remote$/i, '')
+
+  // Handle semicolons → first 3
+  if (loc.includes(';')) {
+    const parts = loc.split(/\s*;\s*/).filter(Boolean).slice(0, 3)
+    loc = parts.join(', ')
+    if (raw.split(';').length > 3) loc += ', ...'
+  }
+
+  // Handle long comma-separated lists → first 3 meaningful parts
+  const commaParts = loc.split(/\s*,\s*/).filter(Boolean)
+  if (commaParts.length > 4) {
+    loc = commaParts.slice(0, 3).join(', ') + ', ...'
+  }
+
+  // Deduplicate repeated city names (e.g. "Berlin, Berlin, Germany")
+  const segments = loc.split(/\s*,\s*/)
+  const seen = new Set<string>()
+  const deduped = segments.filter(s => {
+    const key = s.trim().toLowerCase()
+    if (!key || seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+  loc = deduped.join(', ')
+
+  loc = loc.replace(/^[,;\s]+|[,;\s]+$/g, '').trim()
+  return loc || 'Remote'
+}
+
 /** Convert requirements/responsibilities array to string */
 function arrayToString(arr: string[] | null): string | undefined {
   if (!arr || arr.length === 0) return undefined
@@ -377,7 +436,7 @@ export async function crawlJobStash(): Promise<CrawlerReturn> {
               title: job.title,
               company,
               url: job.url,
-              location: job.location || 'Remote',
+              location: cleanLocation(job.location),
               type: mapCommitment(job.commitment),
               category: job.classification || 'Engineering',
               tags,
