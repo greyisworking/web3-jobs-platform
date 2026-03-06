@@ -46,6 +46,14 @@ function buildMetaDescription(job: RPJob): string {
 // Search keywords for web3/blockchain jobs
 const SEARCH_KEYWORDS = ['블록체인', 'web3', '크립토', 'DeFi', 'NFT']
 
+// Web3 relevance filter: at least one keyword must appear in title/company/description
+const WEB3_RELEVANCE = /blockchain|web3|crypto|defi|nft|solidity|smart\s*contract|token|dapp|decentralized|on-?chain|layer\s*2|\bl2\b|wallet|dao|metaverse|블록체인|웹3|크립토|디파이|solana|ethereum|polygon/i
+
+function isWeb3Related(job: RPJob): boolean {
+  const text = [job.title, job.companyName, job.description].join(' ')
+  return WEB3_RELEVANCE.test(text)
+}
+
 /** Map Korean seniority to English experience level */
 function mapSeniority(seniorities: string[]): string | undefined {
   const mapping: Record<string, string> = {
@@ -189,7 +197,14 @@ export async function crawlRocketPunch(): Promise<CrawlerReturn> {
     let savedCount = 0
     let newCount = 0
 
+    let skippedNonWeb3 = 0
     for (const [, job] of allJobs) {
+      // Skip non-Web3 jobs
+      if (!isWeb3Related(job)) {
+        skippedNonWeb3++
+        continue
+      }
+
       try {
         const jobUrl = `https://www.rocketpunch.com/jobs/${job.jobId}/${job.companyPermalink}`
         const remoteType = mapWorkType(job.workType)
@@ -230,6 +245,7 @@ export async function crawlRocketPunch(): Promise<CrawlerReturn> {
       createdAt: new Date().toISOString(),
     })
 
+    if (skippedNonWeb3 > 0) console.log(`  🗑️ Skipped ${skippedNonWeb3} non-Web3 jobs`)
     console.log(`✅ Saved ${savedCount} jobs from 로켓펀치 (${newCount} new)`)
     return { total: savedCount, new: newCount }
   } catch (error) {
