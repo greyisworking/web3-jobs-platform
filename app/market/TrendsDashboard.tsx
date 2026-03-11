@@ -41,10 +41,10 @@ interface SkillsData {
 }
 
 const SKILL_TABS: { label: string; value: SkillCategory }[] = [
-  { label: 'Languages', value: 'languages' },
-  { label: 'Chains', value: 'chains' },
-  { label: 'Tools', value: 'tools' },
-  { label: 'Domains', value: 'domains' },
+  { label: '언어', value: 'languages' },
+  { label: '체인', value: 'chains' },
+  { label: '도구', value: 'tools' },
+  { label: '도메인', value: 'domains' },
 ]
 
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name?: string }>; label?: string }) {
@@ -54,7 +54,7 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
       <p className="text-xs font-medium text-a24-text dark:text-a24-dark-text">{label}</p>
       {payload.map((p, i) => (
         <p key={i} className="text-[11px] text-a24-muted dark:text-a24-dark-muted">
-          {p.value.toLocaleString()} jobs
+          {p.value.toLocaleString()}개
         </p>
       ))}
     </div>
@@ -68,13 +68,17 @@ function PieTooltip({ active, payload }: { active?: boolean; payload?: Array<{ n
     <div className="px-3 py-2 rounded border border-a24-border dark:border-a24-dark-border bg-a24-bg dark:bg-a24-dark-bg shadow-lg">
       <p className="text-xs font-medium text-a24-text dark:text-a24-dark-text">{d.name}</p>
       <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted">
-        {d.value.toLocaleString()} jobs
+        {d.value.toLocaleString()}개
       </p>
     </div>
   )
 }
 
-export default function TrendsDashboard() {
+interface TrendsDashboardProps {
+  region?: string
+}
+
+export default function TrendsDashboard({ region = 'all' }: TrendsDashboardProps) {
   const [period, setPeriod] = useState('30')
   const [data, setData] = useState<TrendsData | null>(null)
   const [skillsData, setSkillsData] = useState<SkillsData | null>(null)
@@ -85,19 +89,19 @@ export default function TrendsDashboard() {
     setLoading(true)
     try {
       const [trendsRes, skillsRes] = await Promise.all([
-        fetch(`/api/market/trends?period=${p}`),
-        fetch(`/api/market/trends/skills?period=${p}`),
+        fetch(`/api/market/trends?period=${p}&region=${region}`),
+        fetch(`/api/market/trends/skills?period=${p}&region=${region}`),
       ])
       if (trendsRes.ok) setData(await trendsRes.json())
       if (skillsRes.ok) setSkillsData(await skillsRes.json())
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [region])
 
   useEffect(() => {
     fetchData(period)
-  }, [period, fetchData])
+  }, [period, region, fetchData])
 
   const handlePeriod = (p: string) => {
     if (p !== period) setPeriod(p)
@@ -109,11 +113,11 @@ export default function TrendsDashboard() {
       <div className="flex items-center justify-between mb-5">
         <div>
           <h2 className="text-sm font-semibold tracking-wide uppercase text-a24-text dark:text-a24-dark-text">
-            Market Trends
+            시장 트렌드
           </h2>
           {data && (
             <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted mt-0.5">
-              {data.totalJobs.toLocaleString()} active jobs
+              활성 공고 {data.totalJobs.toLocaleString()}개
             </p>
           )}
         </div>
@@ -141,7 +145,7 @@ export default function TrendsDashboard() {
         }`}
       >
         {/* 1. Weekly New Jobs — full width */}
-        <ChartCard title="Weekly New Jobs" className="lg:col-span-2">
+        <ChartCard title="주간 신규 공고" className="lg:col-span-2">
           {data?.weeklyJobs && (
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={data.weeklyJobs} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
@@ -177,7 +181,7 @@ export default function TrendsDashboard() {
         </ChartCard>
 
         {/* 2. Source Breakdown — donut */}
-        <ChartCard title="Source Breakdown">
+        <ChartCard title="소스별 분포">
           {data?.sourceBreakdown && (
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
@@ -202,7 +206,7 @@ export default function TrendsDashboard() {
         </ChartCard>
 
         {/* 3. Work Type — donut */}
-        <ChartCard title="Remote / Onsite / Hybrid">
+        <ChartCard title="리모트 / 오피스 / 하이브리드">
           {data?.workType && (
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
@@ -227,7 +231,7 @@ export default function TrendsDashboard() {
         </ChartCard>
 
         {/* 4. Top Hiring Companies — horizontal bar */}
-        <ChartCard title="Top Hiring Companies">
+        <ChartCard title="채용 Top 기업">
           {data?.topCompanies && (
             <ResponsiveContainer width="100%" height={Math.max(300, data.topCompanies.length * 24)}>
               <BarChart data={data.topCompanies} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
@@ -252,7 +256,7 @@ export default function TrendsDashboard() {
         </ChartCard>
 
         {/* 5. Location Breakdown — horizontal bar */}
-        <ChartCard title="Location Breakdown">
+        <ChartCard title="지역별 분포">
           {data?.locationBreakdown && (
             <ResponsiveContainer width="100%" height={Math.max(300, data.locationBreakdown.length * 24)}>
               <BarChart data={data.locationBreakdown} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
@@ -281,7 +285,7 @@ export default function TrendsDashboard() {
       <div className={`mt-8 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-sm font-semibold tracking-wide uppercase text-a24-text dark:text-a24-dark-text">
-            Tech Stack Analysis
+            기술 스택 분석
           </h2>
           <div className="flex gap-1">
             {SKILL_TABS.map((tab) => (
@@ -302,7 +306,7 @@ export default function TrendsDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* 6. Skill Ranking Bar Chart */}
-          <ChartCard title={`${SKILL_TABS.find(t => t.value === skillCategory)?.label} Ranking`}>
+          <ChartCard title={`${SKILL_TABS.find(t => t.value === skillCategory)?.label} 랭킹`}>
             {skillsData?.[skillCategory] && skillsData[skillCategory].length > 0 && (
               <ResponsiveContainer width="100%" height={Math.max(300, skillsData[skillCategory].length * 28)}>
                 <BarChart data={skillsData[skillCategory]} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
@@ -327,7 +331,7 @@ export default function TrendsDashboard() {
           </ChartCard>
 
           {/* 7. Skill by Level Table */}
-          <ChartCard title="Skills by Experience Level">
+          <ChartCard title="경력별 스킬 분포">
             {skillsData && (
               <SkillLevelTable
                 skills={skillsData[skillCategory]}

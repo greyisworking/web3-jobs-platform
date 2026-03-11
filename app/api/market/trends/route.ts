@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
+const REGION_KEYWORDS: Record<string, string[]> = {
+  korea: ['korea', 'south korea', 'seoul', '한국', '서울', '부산', '판교', '강남'],
+  us: ['usa', 'united states', 'new york', 'san francisco', 'california', 'texas', 'chicago', 'miami', 'seattle', 'boston', 'los angeles'],
+  remote: ['remote', 'worldwide', 'anywhere', 'global'],
+}
+
+function matchesRegion(location: string, region: string): boolean {
+  if (region === 'all' || !region) return true
+  const keywords = REGION_KEYWORDS[region]
+  if (!keywords) return true
+  const lower = location.toLowerCase()
+  return keywords.some(kw => lower.includes(kw))
+}
+
 export async function GET(request: NextRequest) {
   const periodParam = request.nextUrl.searchParams.get('period') || '30'
+  const regionParam = request.nextUrl.searchParams.get('region') || 'all'
   const periodDays = periodParam === 'all' ? 365 : parseInt(periodParam, 10)
   if (![7, 30, 90, 365].includes(periodDays)) {
     return NextResponse.json({ error: 'Invalid period' }, { status: 400 })
@@ -24,7 +39,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const rows = jobs || []
+  const rows = (jobs || []).filter(row => matchesRegion(row.location || '', regionParam))
 
   // --- weeklyJobs: last 12 weeks ---
   const weeklyMap = new Map<string, number>()
