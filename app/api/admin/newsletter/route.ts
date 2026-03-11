@@ -39,12 +39,14 @@ export const GET = withAdminAuth(async (request, _admin) => {
   startDate.setDate(startDate.getDate() - days)
 
   // Fetch recent jobs
+  // Use updatedAt (refreshed on every crawl) instead of crawledAt (only set on first INSERT)
+  // so re-crawled active jobs appear in the newsletter window
   const { data: jobs, error } = await supabase
     .from('Job')
     .select('id, title, company, location, url, role, salary, salaryMin, salaryMax, salaryCurrency, remoteType, is_featured, crawledAt, postedDate, backers, source')
     .eq('isActive', true)
-    .gte('crawledAt', startDate.toISOString())
-    .order('crawledAt', { ascending: false })
+    .gte('updatedAt', startDate.toISOString())
+    .order('updatedAt', { ascending: false })
     .limit(limit)
 
   if (error) {

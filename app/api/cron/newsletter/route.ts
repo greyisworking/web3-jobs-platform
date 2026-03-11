@@ -53,12 +53,13 @@ export async function GET(request: Request) {
 
   try {
     // Fetch recent jobs
+    // Use updatedAt (refreshed on every crawl) instead of crawledAt (only set on first INSERT)
     const { data: jobs, error } = await supabase
       .from('Job')
       .select('id, title, company, location, url, role, salary, salaryMin, salaryMax, salaryCurrency, is_featured, source')
       .eq('isActive', true)
-      .gte('crawledAt', startDate.toISOString())
-      .order('crawledAt', { ascending: false })
+      .gte('updatedAt', startDate.toISOString())
+      .order('updatedAt', { ascending: false })
       .limit(200)
 
     if (error) throw error

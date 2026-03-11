@@ -33,7 +33,7 @@ interface Job {
   salaryCurrency: string | null
   remoteType: string | null
   is_featured: boolean | null
-  crawledAt: string | null
+  updatedAt: string | null
 }
 
 interface Stats {
@@ -50,12 +50,13 @@ async function fetchRecentJobs(days: number): Promise<Job[]> {
 
   console.log(`\n📅 Fetching jobs from last ${days} days...`)
 
+  // Use updatedAt (refreshed on every crawl) instead of crawledAt (only set on first INSERT)
   const { data: jobs, error } = await supabase
     .from('Job')
-    .select('id, title, company, location, role, salary, salaryMin, salaryMax, salaryCurrency, remoteType, is_featured, crawledAt')
+    .select('id, title, company, location, role, salary, salaryMin, salaryMax, salaryCurrency, remoteType, is_featured, updatedAt')
     .eq('isActive', true)
-    .gte('crawledAt', startDate.toISOString())
-    .order('crawledAt', { ascending: false })
+    .gte('updatedAt', startDate.toISOString())
+    .order('updatedAt', { ascending: false })
     .limit(200)
 
   if (error) {
