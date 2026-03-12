@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { WalletConnect } from '../components/WalletConnect'
 import Footer from '../components/Footer'
 
-// Detect in-app browsers (KakaoTalk, Instagram, Facebook, etc.)
+// Detect in-app browsers (Instagram, Facebook, etc.)
 function isInAppBrowser(): boolean {
   if (typeof window === 'undefined') return false
   const ua = navigator.userAgent || ''

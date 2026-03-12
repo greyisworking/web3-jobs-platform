@@ -94,16 +94,6 @@ async function testLoginFeatures() {
     assert(hasGoogle, 'Google OAuth option should be available')
   })
 
-  await test('Kakao OAuth button is present (optional)', async () => {
-    await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle0', timeout: 30000 })
-    const content = await page.content()
-    const hasKakao = content.includes('Kakao') || content.includes('kakao')
-    // Kakao is optional - just log if missing
-    if (!hasKakao) {
-      console.log('    Note: Kakao OAuth not implemented')
-    }
-    assert(true, 'Kakao OAuth check completed')
-  })
 }
 
 async function testMemeFeatures() {
