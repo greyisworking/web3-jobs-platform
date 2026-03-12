@@ -240,7 +240,7 @@ export function LoginMethodExplainer() {
           </div>
           <div>
             <p className="text-sm font-medium text-a24-text dark:text-a24-dark-text">
-              Social Login (Google/Kakao)
+              Social Login (Google)
             </p>
             <p className="text-xs text-a24-muted dark:text-a24-dark-muted">
               Easy login • Save bookmarks • Apply to jobs

@@ -59,11 +59,6 @@ export default function SignupPage() {
     window.location.href = `/api/auth/google?next=${encodeURIComponent(nextUrl)}`
   }
 
-  const handleKakaoSignup = () => {
-    setError('')
-    setLoading(true)
-    window.location.href = `/api/auth/kakao?next=${encodeURIComponent(nextUrl)}`
-  }
 
   if (success) {
     return (
@@ -183,24 +178,6 @@ export default function SignupPage() {
           {loading ? 'Signing in...' : 'Continue with Google'}
         </button>
 
-        <div className="h-3" />
-
-        {/* Kakao OAuth */}
-        <button
-          onClick={handleKakaoSignup}
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-3 py-3.5 bg-[#FEE500] text-[#191919] text-sm font-medium rounded-none hover:bg-[#FDD800] transition-colors disabled:opacity-50"
-        >
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M9 0.6C4.029 0.6 0 3.726 0 7.554C0 9.918 1.558 12.006 3.931 13.239L2.933 16.827C2.845 17.139 3.213 17.385 3.483 17.193L7.773 14.355C8.175 14.397 8.583 14.418 9 14.418C13.971 14.418 18 11.382 18 7.554C18 3.726 13.971 0.6 9 0.6Z"
-              fill="#191919"
-            />
-          </svg>
-          {loading ? 'Signing in...' : 'Continue with Kakao'}
-        </button>
 
         <p className="text-center text-xs font-light text-a24-muted dark:text-a24-dark-muted mt-8">
           Already have an account?{' '}

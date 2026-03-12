@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useAccount, useConnect, useDisconnect, useEnsName } from 'wagmi'
+import { useAccount, useConnect, useDisconnect, useSignMessage, useEnsName } from 'wagmi'
 import { Wallet, LogOut, Copy, Check, ChevronDown, X, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { SiweMessage } from 'siwe'
 import { getErrorForToast } from '@/lib/error-messages'
 
 // Truncate address for display
@@ -52,7 +53,7 @@ function MobileSheet({ open, onClose, children }: { open: boolean; onClose: () =
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!dragging.current) return
     const diff = e.touches[0].clientY - startY.current
-    currentY.current = Math.max(0, diff) // only allow downward drag
+    currentY.current = Math.max(0, diff)
     if (sheetRef.current) {
       sheetRef.current.style.transform = `translateY(${currentY.current}px)`
     }
@@ -72,12 +73,10 @@ function MobileSheet({ open, onClose, children }: { open: boolean; onClose: () =
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/60 z-50 animate-fade-in"
         onClick={onClose}
       />
-      {/* Sheet */}
       <div
         ref={sheetRef}
         className="fixed bottom-0 left-0 right-0 z-50 bg-a24-surface dark:bg-a24-dark-surface border-t border-a24-border dark:border-a24-dark-border rounded-t-2xl max-h-[85vh] overflow-y-auto transition-transform duration-200"
@@ -86,7 +85,6 @@ function MobileSheet({ open, onClose, children }: { open: boolean; onClose: () =
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-a24-muted/30 dark:bg-a24-dark-muted/30" />
         </div>
@@ -102,17 +100,60 @@ function MobileSheet({ open, onClose, children }: { open: boolean; onClose: () =
   )
 }
 
+// SIWE sign-in flow
+async function performSiwe(
+  address: string,
+  chainId: number,
+  signMessageAsync: (args: { message: string }) => Promise<string>,
+): Promise<boolean> {
+  // 1. Get nonce
+  const nonceRes = await fetch('/api/auth/siwe/nonce')
+  const { nonce } = await nonceRes.json()
+
+  // 2. Create SIWE message
+  const siweMessage = new SiweMessage({
+    domain: window.location.host,
+    address,
+    statement: 'Sign in to NEUN with your wallet.',
+    uri: window.location.origin,
+    version: '1',
+    chainId,
+    nonce,
+  })
+  const messageString = siweMessage.prepareMessage()
+
+  // 3. Sign
+  const signature = await signMessageAsync({ message: messageString })
+
+  // 4. Verify on server
+  const verifyRes = await fetch('/api/auth/siwe/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: messageString, signature }),
+  })
+
+  if (!verifyRes.ok) {
+    const { error } = await verifyRes.json()
+    throw new Error(error || 'Verification failed')
+  }
+
+  return true
+}
+
 export function WalletConnect() {
   const [isOpen, setIsOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [connectingId, setConnectingId] = useState<string | null>(null)
+  const [signingIn, setSigningIn] = useState(false)
+  const [pendingSiwe, setPendingSiwe] = useState(false)
   const isMobile = useIsMobile()
 
-  const { address, isConnected, connector } = useAccount()
+  const { address, isConnected, connector, chain } = useAccount()
   const { connect, connectors, isPending, error: connectError } = useConnect()
   const { disconnect } = useDisconnect()
   const { data: ensName } = useEnsName({ address })
+  const { signMessageAsync } = useSignMessage()
 
   // Hydration fix
   useEffect(() => {
@@ -126,8 +167,40 @@ export function WalletConnect() {
       const { title, description } = getErrorForToast(connectError)
       toast.error(title, { description })
       setConnectingId(null)
+      setPendingSiwe(false)
+      setSigningIn(false)
     }
   }, [connectError])
+
+  // After wallet connects, trigger SIWE
+  useEffect(() => {
+    if (isConnected && address && chain && pendingSiwe && !signingIn) {
+      setSigningIn(true)
+      performSiwe(address, chain.id, signMessageAsync)
+        .then(() => {
+          toast.success('gm ser! signed in', { duration: 2000 })
+          setIsOpen(false)
+          setPendingSiwe(false)
+          setSigningIn(false)
+          setConnectingId(null)
+          // Refresh to update auth state
+          window.location.reload()
+        })
+        .catch((err) => {
+          console.error('SIWE error:', err)
+          // User rejected signature — disconnect wallet
+          if (err?.message?.includes('User rejected') || err?.code === 4001) {
+            toast.error('Sign-in cancelled')
+            disconnect()
+          } else {
+            toast.error('Sign-in failed', { description: err.message })
+          }
+          setPendingSiwe(false)
+          setSigningIn(false)
+          setConnectingId(null)
+        })
+    }
+  }, [isConnected, address, chain, pendingSiwe, signingIn, signMessageAsync, disconnect])
 
   // Close dropdown on outside click (desktop only)
   useEffect(() => {
@@ -161,44 +234,27 @@ export function WalletConnect() {
     }
 
     setConnectingId(connectorId)
+    setPendingSiwe(true)
 
     try {
       connect(
         { connector: selectedConnector },
         {
-          onSuccess: () => {
-            toast.success('gm ser! wallet connected', { duration: 2000 })
-            setIsOpen(false)
-            setConnectingId(null)
-          },
           onError: (err) => {
             console.error('Connect error:', err)
             const { title, description } = getErrorForToast(err)
             toast.error(title, { description })
             setConnectingId(null)
+            setPendingSiwe(false)
           },
         }
       )
     } catch (err) {
       console.error('Connect exception:', err)
       setConnectingId(null)
+      setPendingSiwe(false)
     }
   }, [connect, connectors])
-
-  const [oauthLoading, setOauthLoading] = useState(false)
-
-  // Server-side OAuth via API routes - avoids client-side cookie sync issues
-  const handleGoogleLogin = () => {
-    setOauthLoading(true)
-    // Use server-side OAuth initiation
-    window.location.href = '/api/auth/google'
-  }
-
-  const handleKakaoLogin = () => {
-    setOauthLoading(true)
-    // Use server-side OAuth initiation
-    window.location.href = '/api/auth/kakao'
-  }
 
   if (!mounted) {
     return (
@@ -212,13 +268,13 @@ export function WalletConnect() {
     )
   }
 
-  // Shared popup content (used by both desktop dropdown and mobile sheet)
+  // Shared popup content
   const popupContent = (
     <>
       {/* Header */}
       <div className="p-4 border-b border-a24-border dark:border-a24-dark-border flex items-center justify-between">
         <p className="text-sm font-bold text-a24-text dark:text-a24-dark-text">
-          Connect
+          Connect Wallet
         </p>
         {!isMobile && (
           <button
@@ -230,11 +286,18 @@ export function WalletConnect() {
         )}
       </div>
 
-      {/* Web3 Login Section */}
+      {/* Signing state */}
+      {signingIn && (
+        <div className="p-4 flex items-center gap-3 bg-neun-success/5 border-b border-a24-border dark:border-a24-dark-border">
+          <Loader2 className="w-4 h-4 animate-spin text-neun-success" />
+          <p className="text-xs text-a24-text dark:text-a24-dark-text">
+            Sign the message in your wallet to log in...
+          </p>
+        </div>
+      )}
+
+      {/* Wallet connectors */}
       <div className="p-3">
-        <p className="text-[10px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted mb-2 px-1">
-          Web3 Wallet
-        </p>
         <div className="space-y-1">
           {connectors.map((c) => {
             const info = CONNECTOR_INFO[c.id] || { icon: '🔗', label: c.name, description: '' }
@@ -244,7 +307,7 @@ export function WalletConnect() {
               <button
                 key={c.uid}
                 onClick={() => handleConnect(c.id)}
-                disabled={isPending || isConnecting}
+                disabled={isPending || isConnecting || signingIn}
                 className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors disabled:opacity-50 touch-target"
               >
                 <span className="text-lg">{info.icon}</span>
@@ -260,63 +323,6 @@ export function WalletConnect() {
               </button>
             )
           })}
-        </div>
-      </div>
-
-      {/* Divider */}
-      <div className="flex items-center gap-3 px-4 py-2">
-        <div className="flex-1 h-px bg-a24-border dark:bg-a24-dark-border" />
-        <span className="text-[9px] uppercase tracking-wider text-a24-muted dark:text-a24-dark-muted">
-          or continue with
-        </span>
-        <div className="flex-1 h-px bg-a24-border dark:bg-a24-dark-border" />
-      </div>
-
-      {/* Social Login Section */}
-      <div className="p-3 pt-1">
-        <div className="space-y-1">
-          <button
-            type="button"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleGoogleLogin() }}
-            disabled={oauthLoading}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors disabled:opacity-50 touch-target"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-            </svg>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-a24-text dark:text-a24-dark-text">
-                {oauthLoading ? 'Signing in...' : 'Google'}
-              </p>
-            </div>
-            {oauthLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-          </button>
-          <button
-            type="button"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleKakaoLogin() }}
-            disabled={oauthLoading}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-a24-border dark:hover:bg-a24-dark-border transition-colors disabled:opacity-50 touch-target"
-          >
-            <div className="w-5 h-5 bg-[#FEE500] rounded flex items-center justify-center">
-              <svg width="12" height="12" viewBox="0 0 18 18" fill="none">
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M9 0.6C4.029 0.6 0 3.726 0 7.554C0 9.918 1.558 12.006 3.931 13.239L2.933 16.827C2.845 17.139 3.213 17.385 3.483 17.193L7.773 14.355C8.175 14.397 8.583 14.418 9 14.418C13.971 14.418 18 11.382 18 7.554C18 3.726 13.971 0.6 9 0.6Z"
-                  fill="#191919"
-                />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-a24-text dark:text-a24-dark-text">
-                {oauthLoading ? 'Signing in...' : 'Kakao'}
-              </p>
-            </div>
-            {oauthLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-          </button>
         </div>
       </div>
 
@@ -400,7 +406,7 @@ export function WalletConnect() {
         <span className="hidden sm:inline">Connect</span>
       </button>
 
-      {/* Mobile: bottom sheet with swipe */}
+      {/* Mobile: bottom sheet */}
       {isMobile && (
         <MobileSheet open={isOpen} onClose={() => setIsOpen(false)}>
           {popupContent}
