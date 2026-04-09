@@ -99,7 +99,7 @@ function sanitizeHtml(html: string, allowedTags: string[] = []): string {
 // Text Length Limits
 // ════════════════════════════════════════════════════════════════════════════
 
-export const TEXT_LIMITS = {
+const TEXT_LIMITS = {
   // General
   name: 100,
   title: 200,
@@ -135,7 +135,7 @@ type TextLimitKey = keyof typeof TEXT_LIMITS
 /**
  * Validate and truncate text to limit
  */
-export function limitText(text: string, limitKey: TextLimitKey): string {
+function limitText(text: string, limitKey: TextLimitKey): string {
   if (!text || typeof text !== 'string') return ''
   const limit = TEXT_LIMITS[limitKey]
   return text.slice(0, limit)
@@ -144,7 +144,7 @@ export function limitText(text: string, limitKey: TextLimitKey): string {
 /**
  * Check if text exceeds limit
  */
-export function exceedsLimit(text: string, limitKey: TextLimitKey): boolean {
+function exceedsLimit(text: string, limitKey: TextLimitKey): boolean {
   if (!text || typeof text !== 'string') return false
   return text.length > TEXT_LIMITS[limitKey]
 }

@@ -27,7 +27,7 @@ setInterval(() => {
 }, 60000)
 
 // Default rate limit configs for different endpoints
-export const RATE_LIMITS: Record<string, RateLimitConfig> = {
+const RATE_LIMITS: Record<string, RateLimitConfig> = {
   // Authentication - strict limits
   auth: {
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -85,7 +85,7 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
   },
 }
 
-export type RateLimitType = keyof typeof RATE_LIMITS
+type RateLimitType = keyof typeof RATE_LIMITS
 
 /**
  * Check rate limit for an identifier
@@ -139,7 +139,7 @@ export function checkRateLimit(
  * Get client identifier from request
  * Uses IP address and optionally wallet address
  */
-export function getClientIdentifier(
+function getClientIdentifier(
   ip: string | null,
   wallet?: string
 ): string {
