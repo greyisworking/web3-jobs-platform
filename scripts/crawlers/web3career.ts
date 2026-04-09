@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { fetchHTML, cleanText, parseSalary, detectExperienceLevel, detectRemoteType, getRandomUserAgent, delayWithJitter, delay } from '../utils'
 import { cleanDescriptionHtml } from '../../lib/clean-description'
+import type { CrawlerReturn } from './platforms'
 
 interface JobData {
   title: string
@@ -194,11 +195,6 @@ async function fetchJobDetailsWithPlaywright(jobUrl: string): Promise<Partial<Jo
   }
 
   return {}
-}
-
-interface CrawlerReturn {
-  total: number
-  new: number
 }
 
 export async function crawlWeb3Career(): Promise<CrawlerReturn> {

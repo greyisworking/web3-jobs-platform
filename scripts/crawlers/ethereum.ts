@@ -2,6 +2,7 @@ import axios from 'axios'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { delay, detectExperienceLevel, detectRemoteType } from '../utils'
+import type { CrawlerReturn } from './platforms'
 
 interface AshbyJob {
   id: string
@@ -32,11 +33,6 @@ interface AshbyJob {
 
 interface AshbyResponse {
   jobs: AshbyJob[]
-}
-
-interface CrawlerReturn {
-  total: number
-  new: number
 }
 
 export async function crawlEthereumJobs(): Promise<CrawlerReturn> {

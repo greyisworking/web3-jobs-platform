@@ -1,11 +1,7 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { fetchHTML, delay, cleanText, parseSalary, detectRemoteType } from '../utils'
-
-interface CrawlerReturn {
-  total: number
-  new: number
-}
+import type { CrawlerReturn } from './platforms'
 
 interface HirechainCompany {
   id: string

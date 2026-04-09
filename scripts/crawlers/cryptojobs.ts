@@ -3,11 +3,7 @@ import * as cheerio from 'cheerio'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { cleanText, parseSalary, getRandomUserAgent, delay } from '../utils'
-
-interface CrawlerReturn {
-  total: number
-  new: number
-}
+import type { CrawlerReturn } from './platforms'
 
 /**
  * Fetch full job description from detail page via JSON-LD (JobPosting schema).

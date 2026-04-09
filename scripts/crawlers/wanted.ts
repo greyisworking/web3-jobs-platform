@@ -2,11 +2,7 @@ import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { delay } from '../utils'
 import { translateLocation, translateTags } from '../../lib/translation'
-
-interface CrawlerReturn {
-  total: number
-  new: number
-}
+import type { CrawlerReturn } from './platforms'
 
 interface WantedJob {
   id: number

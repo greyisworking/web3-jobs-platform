@@ -1,11 +1,7 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { fetchHTML, delay } from '../utils'
-
-interface CrawlerReturn {
-  total: number
-  new: number
-}
+import type { CrawlerReturn } from './platforms'
 
 export async function crawlCryptoJobsList(): Promise<CrawlerReturn> {
   console.log('🚀 Starting CryptoJobsList crawler...')

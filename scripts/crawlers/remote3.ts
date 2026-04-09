@@ -1,11 +1,7 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { fetchXML, fetchHTML, cleanText, extractHTML, detectExperienceLevel, detectRemoteType, delayWithJitter, parseSalary } from '../utils'
-
-interface CrawlerReturn {
-  total: number
-  new: number
-}
+import type { CrawlerReturn } from './platforms'
 
 /**
  * Fetch full job description from Remote3.co job page.

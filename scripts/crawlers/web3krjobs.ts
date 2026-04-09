@@ -2,6 +2,7 @@ import puppeteer, { type Page } from 'puppeteer'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { delay } from '../utils'
+import type { CrawlerReturn } from './platforms'
 
 /**
  * Fetch job description from a web3kr.jobs detail page using Puppeteer.
@@ -124,11 +125,6 @@ async function fetchDescriptionFromDetailPage(
     console.error(`  ⚠️ Failed to fetch description from ${detailUrl}:`, error)
     return null
   }
-}
-
-interface CrawlerReturn {
-  total: number
-  new: number
 }
 
 export async function crawlWeb3KRJobs(): Promise<CrawlerReturn> {

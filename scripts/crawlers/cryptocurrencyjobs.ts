@@ -4,11 +4,7 @@ import { fetchHTML, delay, cleanText, detectExperienceLevel, detectRemoteType } 
 import { cleanDescriptionHtml } from '../../lib/clean-description'
 import { parseStringPromise } from 'xml2js'
 import axios from 'axios'
-
-interface CrawlerReturn {
-  total: number
-  new: number
-}
+import type { CrawlerReturn } from './platforms'
 
 interface RssItem {
   title: string[]

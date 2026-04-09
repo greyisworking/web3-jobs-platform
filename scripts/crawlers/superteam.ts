@@ -1,11 +1,7 @@
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { fetchJSON, fetchHTML, delay, cleanText, parseSalary } from '../utils'
-
-interface CrawlerReturn {
-  total: number
-  new: number
-}
+import type { CrawlerReturn } from './platforms'
 
 interface SuperteamListing {
   id: string

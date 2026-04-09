@@ -2,11 +2,7 @@ import axios from 'axios'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { delay, getRandomUserAgent } from '../utils'
-
-interface CrawlerReturn {
-  total: number
-  new: number
-}
+import type { CrawlerReturn } from './platforms'
 
 /** JobStash API response */
 interface JSApiResponse {

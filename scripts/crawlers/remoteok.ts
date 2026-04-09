@@ -2,6 +2,7 @@ import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { fetchJSON, delay, detectExperienceLevel, detectRemoteType, getRandomUserAgent } from '../utils'
 import { cleanDescriptionHtml } from '../../lib/clean-description'
+import type { CrawlerReturn } from './platforms'
 
 interface RemoteOKJob {
   slug?: string
@@ -19,11 +20,6 @@ interface RemoteOKJob {
   salary_max?: number
   url?: string
   original?: boolean
-}
-
-interface CrawlerReturn {
-  total: number
-  new: number
 }
 
 export async function crawlRemoteOK(): Promise<CrawlerReturn> {

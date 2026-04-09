@@ -2,11 +2,7 @@ import puppeteer, { Page, HTTPResponse } from 'puppeteer'
 import { supabase } from '../../lib/supabase-script'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { delay, getRandomUserAgent } from '../utils'
-
-interface CrawlerReturn {
-  total: number
-  new: number
-}
+import type { CrawlerReturn } from './platforms'
 
 /** Shape returned by RocketPunch internal API */
 interface RPApiResponse {

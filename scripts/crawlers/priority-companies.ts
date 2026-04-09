@@ -8,7 +8,7 @@ import {
   crawlGreenhouseJobs,
   crawlAshbyJobs,
 } from './platforms'
-import type { PlatformJob } from './platforms'
+import type { PlatformJob, CrawlerReturn } from './platforms'
 
 /**
  * Extract the slug/identifier from a career URL based on the platform.
@@ -55,11 +55,6 @@ async function crawlCompanyJobs(
  * Master crawler: iterates all priority companies with career pages,
  * dispatches to platform-specific crawlers, and saves jobs.
  */
-interface CrawlerReturn {
-  total: number
-  new: number
-}
-
 export async function crawlPriorityCompanies(): Promise<CrawlerReturn> {
   console.log('🚀 Starting Priority Companies crawler...')
 
