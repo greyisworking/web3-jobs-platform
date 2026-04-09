@@ -1,7 +1,6 @@
-import { supabase } from '../../lib/supabase-script'
-import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchJSON, delay, detectExperienceLevel, detectRemoteType, getRandomUserAgent } from '../utils'
+import { fetchJSON, detectExperienceLevel, detectRemoteType, getRandomUserAgent } from '../utils'
 import { cleanDescriptionHtml } from '../../lib/clean-description'
+import { runCrawler } from './runner'
 import type { CrawlerReturn } from './platforms'
 
 interface RemoteOKJob {
@@ -23,32 +22,26 @@ interface RemoteOKJob {
 }
 
 export async function crawlRemoteOK(): Promise<CrawlerReturn> {
-  console.log('🚀 Starting RemoteOK crawler...')
+  return runCrawler<RemoteOKJob>({
+    source: 'remoteok.com',
+    displayName: 'RemoteOK',
+    emoji: '🚀',
 
-  const data = await fetchJSON<RemoteOKJob[]>(
-    'https://remoteok.com/remote-web3-jobs.json',
-    { 'User-Agent': getRandomUserAgent() },
-    { useBrowserHeaders: true }
-  )
+    async fetchJobs() {
+      const data = await fetchJSON<RemoteOKJob[]>(
+        'https://remoteok.com/remote-web3-jobs.json',
+        { 'User-Agent': getRandomUserAgent() },
+        { useBrowserHeaders: true },
+      )
+      if (!data || !Array.isArray(data)) return []
+      return data.slice(1) // first element is metadata
+    },
 
-  if (!data || !Array.isArray(data)) {
-    console.error('❌ Failed to fetch RemoteOK JSON')
-    return { total: 0, new: 0 }
-  }
-
-  // First element is metadata/legal notice — skip it
-  const jobEntries = data.slice(1)
-
-  console.log(`📦 Found ${jobEntries.length} jobs from RemoteOK`)
-
-  let savedCount = 0
-  let newCount = 0
-  for (const job of jobEntries) {
-    try {
-      if (!job.position || !job.company) continue
+    mapToJobInput(job) {
+      if (!job.position || !job.company) return null
 
       const jobUrl = job.url || (job.slug ? `https://remoteok.com/remote-jobs/${job.slug}` : '')
-      if (!jobUrl) continue
+      if (!jobUrl) return null
 
       let salary: string | undefined
       if (job.salary_min && job.salary_max) {
@@ -57,51 +50,30 @@ export async function crawlRemoteOK(): Promise<CrawlerReturn> {
         salary = `$${job.salary_min.toLocaleString()}+`
       }
 
-      // Extract enhanced details – preserve HTML structure for proper rendering
       const description = job.description ? cleanDescriptionHtml(job.description) || null : null
       const experienceLevel = description ? detectExperienceLevel(description) : null
       const remoteType = detectRemoteType(job.location || 'Remote')
-      const companyLogo = job.company_logo || job.logo || null
 
-      const result = await validateAndSaveJob(
-        {
-          title: job.position,
-          company: job.company,
-          url: jobUrl,
-          location: job.location || 'Remote',
-          type: 'Full-time',
-          category: 'Engineering',
-          salary,
-          tags: job.tags || [],
-          source: 'remoteok.com',
-          region: 'Global',
-          postedDate: job.date ? new Date(job.date) : new Date(),
-          // Enhanced job details
-          description,
-          salaryMin: job.salary_min || null,
-          salaryMax: job.salary_max || null,
-          salaryCurrency: job.salary_min ? 'USD' : null,
-          experienceLevel,
-          remoteType: remoteType || 'Remote',
-          companyLogo,
-        },
-        'remoteok.com'
-      )
-      if (result.saved) savedCount++
-      if (result.isNew) newCount++
-      await delay(100)
-    } catch (error) {
-      console.error('Error saving RemoteOK job:', error)
-    }
-  }
-
-  await supabase.from('CrawlLog').insert({
-    source: 'remoteok.com',
-    status: 'success',
-    jobCount: savedCount,
-    createdAt: new Date().toISOString(),
+      return {
+        title: job.position,
+        company: job.company,
+        url: jobUrl,
+        location: job.location || 'Remote',
+        type: 'Full-time',
+        category: 'Engineering',
+        salary,
+        tags: job.tags || [],
+        source: 'remoteok.com',
+        region: 'Global',
+        postedDate: job.date ? new Date(job.date) : new Date(),
+        description,
+        salaryMin: job.salary_min || null,
+        salaryMax: job.salary_max || null,
+        salaryCurrency: job.salary_min ? 'USD' : null,
+        experienceLevel,
+        remoteType: remoteType || 'Remote',
+        companyLogo: job.company_logo || job.logo || null,
+      }
+    },
   })
-
-  console.log(`✅ Saved ${savedCount} jobs from RemoteOK (${newCount} new)`)
-  return { total: savedCount, new: newCount }
 }
