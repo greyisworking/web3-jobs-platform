@@ -1,51 +1,37 @@
-import { supabase } from '../../lib/supabase-script'
-import { validateAndSaveJob } from '../../lib/validations/validate-job'
-import { fetchHTML, delay } from '../utils'
+import { fetchHTML } from '../utils'
+import { runCrawler } from './runner'
 import type { CrawlerReturn } from './platforms'
 
 export async function crawlCryptoJobsList(): Promise<CrawlerReturn> {
-  console.log('🚀 Starting CryptoJobsList crawler...')
-
   const baseUrl = 'https://cryptojobslist.com'
-  const $ = await fetchHTML(baseUrl)
 
-  if (!$) {
-    console.error('❌ Failed to fetch CryptoJobsList')
-    return { total: 0, new: 0 }
-  }
+  return runCrawler<any>({
+    source: 'cryptojobslist.com',
+    displayName: 'CryptoJobsList',
+    emoji: '🚀',
 
-  // Extract __NEXT_DATA__ JSON from the page
-  const nextDataScript = $('script#__NEXT_DATA__').html()
-  if (!nextDataScript) {
-    console.error('❌ Could not find __NEXT_DATA__ script tag on CryptoJobsList')
-    return { total: 0, new: 0 }
-  }
+    async fetchJobs() {
+      const $ = await fetchHTML(baseUrl)
+      if (!$) return []
 
-  let pageProps: any
-  try {
-    const nextData = JSON.parse(nextDataScript)
-    pageProps = nextData?.props?.pageProps
-  } catch (error) {
-    console.error('❌ Failed to parse __NEXT_DATA__ JSON:', error)
-    return { total: 0, new: 0 }
-  }
+      const nextDataScript = $('script#__NEXT_DATA__').html()
+      if (!nextDataScript) return []
 
-  if (!pageProps) {
-    console.error('❌ No pageProps found in __NEXT_DATA__')
-    return { total: 0, new: 0 }
-  }
+      let pageProps: any
+      try {
+        const nextData = JSON.parse(nextDataScript)
+        pageProps = nextData?.props?.pageProps
+      } catch {
+        return []
+      }
 
-  // Jobs may be at pageProps.jobs, pageProps.initialJobs, or similar
-  const jobsArray: any[] = pageProps.jobs || pageProps.initialJobs || pageProps.data?.jobs || []
+      if (!pageProps) return []
+      return pageProps.jobs || pageProps.initialJobs || pageProps.data?.jobs || []
+    },
 
-  console.log(`📦 Found ${jobsArray.length} jobs from CryptoJobsList`)
-
-  let savedCount = 0
-  let newCount = 0
-  for (const job of jobsArray) {
-    try {
+    mapToJobInput(job) {
       const title = job.jobTitle || job.title || job.name
-      if (!title) continue
+      if (!title) return null
 
       const companyName = job.companyName || job.company?.name || job.company || 'Unknown'
 
@@ -59,7 +45,7 @@ export async function crawlCryptoJobsList(): Promise<CrawlerReturn> {
       } else if (job.id) {
         jobUrl = `${baseUrl}/jobs/${job.id}`
       } else {
-        continue
+        return null
       }
 
       const location = job.jobLocation || job.location || job.locationName || 'Remote'
@@ -67,38 +53,20 @@ export async function crawlCryptoJobsList(): Promise<CrawlerReturn> {
         ? job.tags.map((t: any) => typeof t === 'string' ? t : t.name || t.label || '').filter(Boolean)
         : []
 
-      const result = await validateAndSaveJob(
-        {
-          title,
-          company: companyName,
-          url: jobUrl,
-          location: typeof location === 'string' ? location : 'Remote',
-          type: job.type || job.employmentType || 'Full-time',
-          category: job.category || 'Engineering',
-          salary: job.salaryString || job.salary || undefined,
-          companyLogo: job.companyLogo || undefined,
-          tags,
-          source: 'cryptojobslist.com',
-          region: 'Global',
-          postedDate: job.publishedAt ? new Date(job.publishedAt) : job.createdAt ? new Date(job.createdAt) : new Date(),
-        },
-        'cryptojobslist.com'
-      )
-      if (result.saved) savedCount++
-      if (result.isNew) newCount++
-      await delay(100)
-    } catch (error) {
-      console.error('Error saving CryptoJobsList job:', error)
-    }
-  }
-
-  await supabase.from('CrawlLog').insert({
-    source: 'cryptojobslist.com',
-    status: 'success',
-    jobCount: savedCount,
-    createdAt: new Date().toISOString(),
+      return {
+        title,
+        company: companyName,
+        url: jobUrl,
+        location: typeof location === 'string' ? location : 'Remote',
+        type: job.type || job.employmentType || 'Full-time',
+        category: job.category || 'Engineering',
+        salary: job.salaryString || job.salary || undefined,
+        companyLogo: job.companyLogo || undefined,
+        tags,
+        source: 'cryptojobslist.com',
+        region: 'Global',
+        postedDate: job.publishedAt ? new Date(job.publishedAt) : job.createdAt ? new Date(job.createdAt) : new Date(),
+      }
+    },
   })
-
-  console.log(`✅ Saved ${savedCount} jobs from CryptoJobsList (${newCount} new)`)
-  return { total: savedCount, new: newCount }
 }
