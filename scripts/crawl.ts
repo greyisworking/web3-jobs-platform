@@ -19,7 +19,6 @@ import { cleanupExpiredJobs } from './cleanup/expire'
 import { sendCrawlStart, sendCrawlReport, sendFatalError } from './notify'
 import type { CrawlResult } from './notify'
 // Skipped imports (403 errors, 0 results, or SSL errors):
-// import { crawlWellfound } from './crawlers/wellfound'
 // import { crawlSuperteamEarn } from './crawlers/superteam'
 // import { crawlBaseHirechain } from './crawlers/basehirechain'
 
@@ -103,7 +102,7 @@ async function main() {
   console.log(`⏱️  Overall timeout: ${OVERALL_TIMEOUT_MS / 60000} minutes`)
   console.log(`⏱️  Per-source timeout: ${PER_SOURCE_TIMEOUT_MS / 60000} minutes`)
   console.log(`🔀 Concurrency: ${CONCURRENCY} crawlers in parallel`)
-  console.log(`⏭️  Skipping: wellfound.com, superteam.fun, base.hirechain.io, web3kr.jobs (SSL)`)
+  console.log(`⏭️  Skipping: superteam.fun, base.hirechain.io, web3kr.jobs (SSL)`)
 
   const startTime = Date.now()
   const results: CrawlResult[] = []
@@ -134,8 +133,7 @@ async function main() {
     { name: 'cryptocurrencyjobs.co', fn: crawlCryptocurrencyJobs },
     { name: 'crypto.jobs', fn: crawlCryptoJobs },  // Restored: RSS feed mode (was 403 on HTML)
     { name: 'jobstash.xyz', fn: crawlJobStash, timeout: 8 * 60 * 1000 },  // 8 min (192 pages)
-    // Skipped sources (403, 0 results, or SSL):
-    // - wellfound.com (403 error)
+    // Skipped sources (0 results or SSL):
     // - talent.superteam.fun (0 results)
     // - base.hirechain.io (0 results)
     // - web3kr.jobs (SSL cert broken since 2026-03)
