@@ -3,6 +3,7 @@ import * as cheerio from 'cheerio'
 import { cleanText, parseSalary, getRandomUserAgent, delay } from '../utils'
 import { runCrawler } from './runner'
 import { parseTitleAtCompany } from './utils/rss'
+import { extractJsonLdDescription } from './utils/extractors'
 import type { CrawlerReturn } from './platforms'
 
 async function fetchDetailDescription(jobUrl: string): Promise<string | null> {
@@ -12,17 +13,8 @@ async function fetchDetailDescription(jobUrl: string): Promise<string | null> {
       timeout: 15000,
     })
     const $ = cheerio.load(response.data)
-    for (const script of $('script[type="application/ld+json"]').toArray()) {
-      const text = $(script).text().trim()
-      if (!text) continue
-      try {
-        const data = JSON.parse(text)
-        if (data['@type'] === 'JobPosting' && data.description) {
-          return cleanText(data.description).slice(0, 10000)
-        }
-      } catch {}
-    }
-    return null
+    const desc = extractJsonLdDescription($)
+    return desc ? cleanText(desc).slice(0, 10000) : null
   } catch {
     return null
   }

@@ -1,5 +1,6 @@
 import { fetchHTML } from '../utils'
 import { runCrawler } from './runner'
+import { extractPageProps } from './utils/extractors'
 import type { CrawlerReturn } from './platforms'
 
 export async function crawlCryptoJobsList(): Promise<CrawlerReturn> {
@@ -14,17 +15,7 @@ export async function crawlCryptoJobsList(): Promise<CrawlerReturn> {
       const $ = await fetchHTML(baseUrl)
       if (!$) return []
 
-      const nextDataScript = $('script#__NEXT_DATA__').html()
-      if (!nextDataScript) return []
-
-      let pageProps: any
-      try {
-        const nextData = JSON.parse(nextDataScript)
-        pageProps = nextData?.props?.pageProps
-      } catch {
-        return []
-      }
-
+      const pageProps = extractPageProps($)
       if (!pageProps) return []
       return pageProps.jobs || pageProps.initialJobs || pageProps.data?.jobs || []
     },

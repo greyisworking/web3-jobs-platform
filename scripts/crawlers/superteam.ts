@@ -1,5 +1,6 @@
-import { fetchJSON, fetchHTML, cleanText, parseSalary } from '../utils'
+import { fetchHTML, cleanText, parseSalary } from '../utils'
 import { runCrawler } from './runner'
+import { extractPageProps } from './utils/extractors'
 import type { CrawlerReturn } from './platforms'
 
 interface SuperteamListing {
@@ -52,11 +53,9 @@ export async function crawlSuperteamEarn(): Promise<CrawlerReturn> {
       if (!$) return []
 
       // Try __NEXT_DATA__ first
-      const nextDataScript = $('script#__NEXT_DATA__').html()
-      if (nextDataScript) {
+      const pp = extractPageProps($)
+      if (pp) {
         try {
-          const nextData = JSON.parse(nextDataScript)
-          const pp = nextData?.props?.pageProps
           const listings: SuperteamListing[] = pp?.listings || pp?.bounties || pp?.projects || pp?.initialData?.listings || []
 
           if (listings.length > 0) {

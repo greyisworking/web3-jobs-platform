@@ -3,6 +3,7 @@ import type { CheerioAPI } from 'cheerio'
 import { supabase } from '../../../lib/supabase-script'
 import { validateAndSaveJob } from '../../../lib/validations/validate-job'
 import { fetchHTML, delay, detectExperienceLevel, detectRemoteType } from '../../utils'
+import { extractNextData, extractJsonLdDescription } from '../utils/extractors'
 
 const GETRO_SEARCH_API = 'https://api.getro.com/api/v2'
 
@@ -36,33 +37,21 @@ export async function fetchJobDescription(jobUrl: string): Promise<string | null
     if (jobUrl.includes('jobs.ashbyhq.com')) {
       // Ashby API requires auth now — scrape JSON-LD from the page instead
       const $ = await fetchHTML(jobUrl, { useBrowserHeaders: true })
-      if ($) {
-        const ldScript = $('script[type="application/ld+json"]').html()
-        if (ldScript) {
-          const ld = JSON.parse(ldScript)
-          if (ld.description) return ld.description
-        }
-      }
+      if ($) return extractJsonLdDescription($)
       return null
     }
 
-    // Getro-hosted pages or other URLs: fetch and parse __NEXT_DATA__
+    // Getro-hosted pages or other URLs
     const $ = await fetchHTML(jobUrl, { useBrowserHeaders: true })
     if (!$) return null
 
     // Try JSON-LD first (works across many platforms)
-    const ldScript = $('script[type="application/ld+json"]').html()
-    if (ldScript) {
-      try {
-        const ld = JSON.parse(ldScript)
-        if (ld.description && ld.description.length > 50) return ld.description
-      } catch {}
-    }
+    const ldDesc = extractJsonLdDescription($)
+    if (ldDesc && ldDesc.length > 50) return ldDesc
 
-    const script = $('script#__NEXT_DATA__').html()
-    if (script) {
-      const nextData = JSON.parse(script)
-
+    // Try __NEXT_DATA__
+    const nextData = extractNextData($)
+    if (nextData) {
       // Path 1: pageProps.job (older Getro layout)
       const job = nextData?.props?.pageProps?.job
       if (job) {
@@ -131,16 +120,6 @@ async function fetchSearchPage(
 }
 
 // ── SSR __NEXT_DATA__ fallback ──────────────────────────────────────
-
-function parseNextData($: CheerioAPI): any | null {
-  const script = $('script#__NEXT_DATA__').html()
-  if (!script) return null
-  try {
-    return JSON.parse(script)
-  } catch {
-    return null
-  }
-}
 
 function extractJobsFromNextData(nextData: any, $: CheerioAPI, config: GetroConfig): any[] {
   const pageProps = nextData?.props?.pageProps || {}
@@ -270,7 +249,7 @@ export async function crawlGetroBoard(config: GetroConfig): Promise<CrawlerRetur
       console.error(`❌ Failed to fetch ${displayName}`)
       return { total: 0, new: 0 }
     }
-    const nextData = parseNextData($)
+    const nextData = extractNextData($)
     if (!nextData) {
       console.error(`❌ Could not find __NEXT_DATA__ on ${displayName}`)
       return { total: 0, new: 0 }
@@ -286,7 +265,7 @@ export async function crawlGetroBoard(config: GetroConfig): Promise<CrawlerRetur
       await delay(pageDelay)
       const page$ = await fetchHTML(`${baseUrl}/jobs?page=${page}`)
       if (!page$) break
-      const pageNextData = parseNextData(page$)
+      const pageNextData = extractNextData(page$)
       if (!pageNextData) break
       const pageJobs = extractJobsFromNextData(pageNextData, page$, config)
       if (pageJobs.length === 0) break

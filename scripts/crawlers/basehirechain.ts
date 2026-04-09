@@ -1,5 +1,6 @@
 import { fetchHTML, cleanText, parseSalary, detectRemoteType } from '../utils'
 import { runCrawler } from './runner'
+import { extractPageProps } from './utils/extractors'
 import type { CrawlerReturn } from './platforms'
 
 interface HirechainCompany {
@@ -62,11 +63,9 @@ export async function crawlBaseHirechain(): Promise<CrawlerReturn> {
       if (!$) return []
 
       // Try __NEXT_DATA__ first
-      const nextDataScript = $('script#__NEXT_DATA__').html()
-      if (nextDataScript) {
+      const pageProps = extractPageProps($)
+      if (pageProps) {
         try {
-          const nextData = JSON.parse(nextDataScript)
-          const pageProps = nextData?.props?.pageProps
           const companies: HirechainCompany[] = pageProps?.companies || pageProps?.initialCompanies || []
           const jobs: HirechainJob[] = pageProps?.jobs || pageProps?.initialJobs || pageProps?.allJobs || []
 
