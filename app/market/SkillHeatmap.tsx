@@ -19,6 +19,7 @@ interface SkillsData {
   tools: { name: string; value: number }[]
   domains: { name: string; value: number }[]
   byLevel: Record<string, Record<string, number>>
+  prevByLevel?: Record<string, Record<string, number>>
   totalJobs: number
 }
 
@@ -41,6 +42,7 @@ interface HoveredCell {
   skill: string
   level: string
   count: number
+  prevCount: number
 }
 
 function getCellColor(count: number, maxInColumn: number): string {
@@ -100,6 +102,7 @@ export default function SkillHeatmap({
     skill: string,
     level: string,
     count: number,
+    prevCount: number,
   ) => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect()
@@ -108,7 +111,7 @@ export default function SkillHeatmap({
         y: e.clientY - rect.top - 40,
       })
     }
-    setHoveredCell({ skill, level, count })
+    setHoveredCell({ skill, level, count, prevCount })
   }
 
   const handleCellMouseLeave = () => {
@@ -128,7 +131,7 @@ export default function SkillHeatmap({
       {/* Section Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-semibold tracking-wide uppercase text-a24-text dark:text-a24-dark-text">
-          스킬 × 경력 히트맵
+          Intelligence Report
         </h2>
         {data && (
           <span className="text-[11px] text-a24-muted dark:text-a24-dark-muted">
@@ -205,13 +208,14 @@ export default function SkillHeatmap({
                     </td>
                     {LEVELS.map((lv) => {
                       const count = data.byLevel[lv]?.[skill.name] ?? 0
+                      const prevCount = data.prevByLevel?.[lv]?.[skill.name] ?? 0
                       const colorClass = getCellColor(count, columnMaxes[lv])
                       const isSelectedCol = selectedLevel === lv
                       return (
                         <td
                           key={lv}
                           onMouseMove={(e) =>
-                            handleCellMouseMove(e, skill.name, LEVEL_LABELS[lv], count)
+                            handleCellMouseMove(e, skill.name, LEVEL_LABELS[lv], count, prevCount)
                           }
                           onMouseLeave={handleCellMouseLeave}
                           className={`text-center py-1.5 px-2 min-w-[80px] transition-all duration-150 rounded-sm cursor-default ${colorClass} ${
@@ -220,7 +224,7 @@ export default function SkillHeatmap({
                               : 'text-a24-text dark:text-a24-dark-text'
                           } ${
                             isSelectedCol ? 'bg-green-500/10' : ''
-                          } hover:shadow-[0_0_12px_rgba(34,197,94,0.2)] hover:scale-[1.03]`}
+                          } hover:shadow-[0_0_20px_rgba(34,197,94,0.35)] hover:ring-1 hover:ring-green-500/20 hover:scale-[1.05]`}
                         >
                           {count === 0 ? '-' : count}
                         </td>
@@ -249,15 +253,33 @@ export default function SkillHeatmap({
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 4 }}
-                className="absolute z-50 bg-[#1e293b] border border-green-500/30 rounded-lg px-3 py-2 shadow-lg pointer-events-none"
+                className="absolute z-50 bg-[#1e293b] border border-green-500/30 rounded-lg px-3 py-2 shadow-lg shadow-green-500/10 pointer-events-none"
                 style={{ left: tooltipPos.x, top: tooltipPos.y }}
               >
                 <p className="text-white text-xs font-medium">
                   {hoveredCell.skill} × {hoveredCell.level}
                 </p>
-                <p className="text-green-400 text-sm font-bold">
-                  {hoveredCell.count}건
-                </p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-green-400 text-sm font-bold">
+                    {hoveredCell.count}건
+                  </p>
+                  {hoveredCell.prevCount > 0 && (
+                    <span className={`text-[10px] font-medium ${
+                      hoveredCell.count > hoveredCell.prevCount
+                        ? 'text-green-400'
+                        : hoveredCell.count < hoveredCell.prevCount
+                          ? 'text-red-400'
+                          : 'text-a24-dark-muted'
+                    }`}>
+                      {hoveredCell.count > hoveredCell.prevCount ? '+' : ''}
+                      {hoveredCell.prevCount > 0
+                        ? `${Math.round(((hoveredCell.count - hoveredCell.prevCount) / hoveredCell.prevCount) * 100)}%`
+                        : ''
+                      }
+                      {' '}vs 전기
+                    </span>
+                  )}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

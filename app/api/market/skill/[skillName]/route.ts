@@ -68,6 +68,27 @@ function classifyRegion(location: string): string | null {
   return null
 }
 
+const LEVEL_PATTERNS_MAP: Record<string, string[]> = {
+  entry: ['junior', 'jr.', 'jr ', 'entry level', 'entry-level', 'associate', 'graduate', 'trainee'],
+  senior: ['senior', 'sr.', 'sr ', 'staff', 'principal', 'distinguished'],
+  lead: [
+    'head of', 'director', 'vp ', 'vice president', 'chief',
+    'team lead', 'tech lead', 'c-level', 'cto', 'cfo', 'coo ', ' coo,', 'cmo',
+    'engineering manager', 'general manager',
+  ],
+}
+
+function classifyLevel(title: string): 'entry' | 'mid' | 'senior' | 'lead' {
+  const t = title.toLowerCase()
+  if (LEVEL_PATTERNS_MAP.lead.some(p => t.includes(p))) return 'lead'
+  if (t.includes('lead') && !['lead generat', 'leading'].some(fp => t.includes(fp))) return 'lead'
+  if (t.includes('manager') && ['engineering manager', 'general manager', 'managing director', 'country manager', 'regional manager', 'finance manager'].some(p => t.includes(p))) return 'lead'
+  if (LEVEL_PATTERNS_MAP.senior.some(p => t.includes(p))) return 'senior'
+  if (LEVEL_PATTERNS_MAP.entry.some(p => t.includes(p))) return 'entry'
+  if (/\bintern\b/.test(t)) return 'entry'
+  return 'mid'
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ skillName: string }> }
@@ -84,6 +105,7 @@ export async function GET(
   }
 
   const regionParam = request.nextUrl.searchParams.get('region') || 'all'
+  const levelParam = request.nextUrl.searchParams.get('level') || null
   if (!['korea', 'us', 'remote', 'all'].includes(regionParam)) {
     return NextResponse.json(
       { error: 'Invalid region. Must be one of: korea, us, remote, all' },
@@ -114,12 +136,17 @@ export async function GET(
   })
 
   // Filter by region if specified
-  const filtered = regionParam === 'all'
+  let filtered = regionParam === 'all'
     ? skillMatched
     : skillMatched.filter(job => {
         const region = classifyRegion(job.location || '')
         return region === regionParam
       })
+
+  // Filter by level if specified
+  if (levelParam && ['entry', 'mid', 'senior', 'lead'].includes(levelParam)) {
+    filtered = filtered.filter(job => classifyLevel(job.title || '') === levelParam)
+  }
 
   // Job count
   const jobCount = filtered.length

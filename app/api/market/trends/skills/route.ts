@@ -100,6 +100,7 @@ function matchesRegion(location: string, region: string): boolean {
 export async function GET(request: NextRequest) {
   const periodParam = request.nextUrl.searchParams.get('period') || '30'
   const regionParam = request.nextUrl.searchParams.get('region') || 'all'
+  const levelParam = request.nextUrl.searchParams.get('level') || null
   const periodDays = periodParam === 'all' ? 365 : parseInt(periodParam, 10)
   if (![7, 30, 90, 365].includes(periodDays)) {
     return NextResponse.json({ error: 'Invalid period' }, { status: 400 })
@@ -107,21 +108,35 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createSupabaseServerClient()
 
+  // Fetch current + previous period for week-over-week comparison
+  const prevCutoff = new Date()
+  prevCutoff.setDate(prevCutoff.getDate() - periodDays * 2)
+
   const cutoff = new Date()
   cutoff.setDate(cutoff.getDate() - periodDays)
 
-  const { data: jobs, error } = await supabase
+  const { data: allJobs, error } = await supabase
     .from('Job')
-    .select('id, title, description, experienceLevel, location')
+    .select('id, title, description, experienceLevel, location, crawledAt')
     .eq('isActive', true)
-    .gte('crawledAt', cutoff.toISOString())
-    .limit(10000)
+    .gte('crawledAt', prevCutoff.toISOString())
+    .limit(20000)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const rows = (jobs || []).filter(row => matchesRegion(row.location || '', regionParam))
+  const regionFiltered = (allJobs || []).filter(row => matchesRegion(row.location || '', regionParam))
+
+  let rows = regionFiltered.filter(row => new Date(row.crawledAt) >= cutoff)
+  const prevRows = regionFiltered.filter(row => {
+    const d = new Date(row.crawledAt)
+    return d < cutoff && d >= prevCutoff
+  })
+
+  if (levelParam && ['entry', 'mid', 'senior', 'lead'].includes(levelParam)) {
+    rows = rows.filter(row => classifyLevel(row.title || '') === levelParam)
+  }
 
   // Aggregate skill counts
   const skillCounts: Record<string, Record<string, number>> = {
@@ -145,6 +160,24 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Previous period byLevel for week-over-week tooltip
+  const prevByLevel: Record<string, Record<string, number>> = {
+    entry: {}, mid: {}, senior: {}, lead: {},
+  }
+
+  for (const job of prevRows) {
+    const text = ((job.title || '') + ' ' + (job.description || '')).toLowerCase()
+    const level = classifyLevel(job.title || '')
+
+    for (const [, skills] of Object.entries(SKILL_CATEGORIES)) {
+      for (const [name, regex] of Object.entries(skills)) {
+        if (regex.test(text)) {
+          prevByLevel[level][name] = (prevByLevel[level][name] || 0) + 1
+        }
+      }
+    }
+  }
+
   // Sort each category descending
   const toSorted = (counts: Record<string, number>) =>
     Object.entries(counts)
@@ -157,6 +190,7 @@ export async function GET(request: NextRequest) {
     tools: toSorted(skillCounts.tools),
     domains: toSorted(skillCounts.domains),
     byLevel,
+    prevByLevel,
     totalJobs: rows.length,
   })
 

@@ -72,10 +72,11 @@ export default function MarketPage() {
         <SkillDetailPanel
           skillName={selectedSkill}
           region={region}
+          level={selectedLevel}
         />
 
         {/* Trends Dashboard */}
-        <TrendsDashboard region={region} />
+        <TrendsDashboard region={region} level={selectedLevel} />
 
         {/* Footer note */}
         <div className="text-center mt-6">

@@ -76,9 +76,10 @@ function PieTooltip({ active, payload }: { active?: boolean; payload?: Array<{ n
 
 interface TrendsDashboardProps {
   region?: string
+  level?: string | null
 }
 
-export default function TrendsDashboard({ region = 'all' }: TrendsDashboardProps) {
+export default function TrendsDashboard({ region = 'all', level = null }: TrendsDashboardProps) {
   const [period, setPeriod] = useState('30')
   const [data, setData] = useState<TrendsData | null>(null)
   const [skillsData, setSkillsData] = useState<SkillsData | null>(null)
@@ -88,20 +89,21 @@ export default function TrendsDashboard({ region = 'all' }: TrendsDashboardProps
   const fetchData = useCallback(async (p: string) => {
     setLoading(true)
     try {
+      const levelQuery = level ? `&level=${encodeURIComponent(level)}` : ''
       const [trendsRes, skillsRes] = await Promise.all([
-        fetch(`/api/market/trends?period=${p}&region=${region}`),
-        fetch(`/api/market/trends/skills?period=${p}&region=${region}`),
+        fetch(`/api/market/trends?period=${p}&region=${region}${levelQuery}`),
+        fetch(`/api/market/trends/skills?period=${p}&region=${region}${levelQuery}`),
       ])
       if (trendsRes.ok) setData(await trendsRes.json())
       if (skillsRes.ok) setSkillsData(await skillsRes.json())
     } finally {
       setLoading(false)
     }
-  }, [region])
+  }, [region, level])
 
   useEffect(() => {
     fetchData(period)
-  }, [period, region, fetchData])
+  }, [period, region, level, fetchData])
 
   const handlePeriod = (p: string) => {
     if (p !== period) setPeriod(p)

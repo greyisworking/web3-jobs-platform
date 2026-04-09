@@ -11,6 +11,7 @@ import Link from 'next/link'
 interface SkillDetailPanelProps {
   skillName: string | null
   region: string
+  level?: string | null
 }
 
 interface SkillData {
@@ -49,7 +50,7 @@ function SkillTooltip({ active, payload, label }: { active?: boolean; payload?: 
   )
 }
 
-export default function SkillDetailPanel({ skillName, region }: SkillDetailPanelProps) {
+export default function SkillDetailPanel({ skillName, region, level }: SkillDetailPanelProps) {
   const [data, setData] = useState<SkillData | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -62,7 +63,8 @@ export default function SkillDetailPanel({ skillName, region }: SkillDetailPanel
     let cancelled = false
     setLoading(true)
 
-    fetch(`/api/market/skill/${encodeURIComponent(skillName)}?region=${encodeURIComponent(region)}`)
+    const levelQuery = level ? `&level=${encodeURIComponent(level)}` : ''
+    fetch(`/api/market/skill/${encodeURIComponent(skillName)}?region=${encodeURIComponent(region)}${levelQuery}`)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch')
         return res.json()
@@ -78,7 +80,7 @@ export default function SkillDetailPanel({ skillName, region }: SkillDetailPanel
       })
 
     return () => { cancelled = true }
-  }, [skillName, region])
+  }, [skillName, region, level])
 
   const lastWeek = data?.weeklyTrend[data.weeklyTrend.length - 1]?.count || 0
   const prevWeek = data?.weeklyTrend[data.weeklyTrend.length - 2]?.count || 0

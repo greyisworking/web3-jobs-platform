@@ -15,9 +15,37 @@ function matchesRegion(location: string, region: string): boolean {
   return keywords.some(kw => lower.includes(kw))
 }
 
+const LEVEL_PATTERNS: Record<string, string[]> = {
+  entry: ['junior', 'jr.', 'jr ', 'entry level', 'entry-level', 'associate', 'graduate', 'trainee'],
+  senior: ['senior', 'sr.', 'sr ', 'staff', 'principal', 'distinguished'],
+  lead: [
+    'head of', 'director', 'vp ', 'vice president', 'chief',
+    'team lead', 'tech lead', 'c-level', 'cto', 'cfo', 'coo ', ' coo,', 'cmo',
+    'engineering manager', 'general manager',
+  ],
+}
+
+const LEAD_FALSE_POSITIVES = ['lead generat', 'leading']
+const MANAGER_LEAD_PATTERNS = [
+  'engineering manager', 'general manager', 'managing director',
+  'country manager', 'regional manager', 'finance manager',
+]
+
+function classifyLevel(title: string): 'entry' | 'mid' | 'senior' | 'lead' {
+  const t = title.toLowerCase()
+  if (LEVEL_PATTERNS.lead.some(p => t.includes(p))) return 'lead'
+  if (t.includes('lead') && !LEAD_FALSE_POSITIVES.some(fp => t.includes(fp))) return 'lead'
+  if (t.includes('manager') && MANAGER_LEAD_PATTERNS.some(p => t.includes(p))) return 'lead'
+  if (LEVEL_PATTERNS.senior.some(p => t.includes(p))) return 'senior'
+  if (LEVEL_PATTERNS.entry.some(p => t.includes(p))) return 'entry'
+  if (/\bintern\b/.test(t)) return 'entry'
+  return 'mid'
+}
+
 export async function GET(request: NextRequest) {
   const periodParam = request.nextUrl.searchParams.get('period') || '30'
   const regionParam = request.nextUrl.searchParams.get('region') || 'all'
+  const levelParam = request.nextUrl.searchParams.get('level') || null
   const periodDays = periodParam === 'all' ? 365 : parseInt(periodParam, 10)
   if (![7, 30, 90, 365].includes(periodDays)) {
     return NextResponse.json({ error: 'Invalid period' }, { status: 400 })
@@ -30,7 +58,7 @@ export async function GET(request: NextRequest) {
 
   const { data: jobs, error } = await supabase
     .from('Job')
-    .select('id, crawledAt, source, company, location, remoteType')
+    .select('id, title, crawledAt, source, company, location, remoteType')
     .eq('isActive', true)
     .gte('crawledAt', cutoff.toISOString())
     .limit(10000)
@@ -39,7 +67,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const rows = (jobs || []).filter(row => matchesRegion(row.location || '', regionParam))
+  let rows = (jobs || []).filter(row => matchesRegion(row.location || '', regionParam))
+
+  if (levelParam && ['entry', 'mid', 'senior', 'lead'].includes(levelParam)) {
+    rows = rows.filter(row => classifyLevel(row.title || '') === levelParam)
+  }
 
   // --- weeklyJobs: last 12 weeks ---
   const weeklyMap = new Map<string, number>()
