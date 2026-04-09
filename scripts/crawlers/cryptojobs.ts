@@ -1,14 +1,10 @@
 import axios from 'axios'
 import * as cheerio from 'cheerio'
-import { supabase } from '../../lib/supabase-script'
-import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { cleanText, parseSalary, getRandomUserAgent, delay } from '../utils'
+import { runCrawler } from './runner'
+import { parseTitleAtCompany } from './utils/rss'
 import type { CrawlerReturn } from './platforms'
 
-/**
- * Fetch full job description from detail page via JSON-LD (JobPosting schema).
- * The detail page embeds a JSON-LD block with the complete description.
- */
 async function fetchDetailDescription(jobUrl: string): Promise<string | null> {
   try {
     const response = await axios.get(jobUrl, {
@@ -16,8 +12,7 @@ async function fetchDetailDescription(jobUrl: string): Promise<string | null> {
       timeout: 15000,
     })
     const $ = cheerio.load(response.data)
-    const scripts = $('script[type="application/ld+json"]')
-    for (const script of scripts.toArray()) {
+    for (const script of $('script[type="application/ld+json"]').toArray()) {
       const text = $(script).text().trim()
       if (!text) continue
       try {
@@ -33,162 +28,121 @@ async function fetchDetailDescription(jobUrl: string): Promise<string | null> {
   }
 }
 
-/**
- * CryptoJobs (crypto.jobs) Crawler — RSS feed mode
- * The site blocks HTML scraping (Cloudflare 403), but the RSS feed is open.
- * Feed: https://crypto.jobs/feed/rss — returns ~50 most recent jobs with rich data.
- * Detail pages provide full JD via JSON-LD (JobPosting schema).
- */
+// Intermediate type after RSS parse + detail fetch
+interface CryptoJob {
+  title: string
+  company: string
+  link: string
+  category: string
+  pubDate: string
+  location: string
+  salary?: string
+  type: string
+  skills: string[]
+  rssBodyText?: string
+  description?: string
+}
+
+const CATEGORY_MAP: Record<string, string> = {
+  'Tech': 'Engineering',
+  'Marketing': 'Marketing',
+  'Sales': 'Sales',
+  'Design': 'Design',
+  'Other': 'Operations',
+}
+
 export async function crawlCryptoJobs(): Promise<CrawlerReturn> {
-  console.log('🚀 Starting CryptoJobs crawler (RSS mode)...')
+  return runCrawler<CryptoJob>({
+    source: 'crypto.jobs',
+    displayName: 'CryptoJobs (RSS)',
+    emoji: '🚀',
 
-  const feedUrl = 'https://crypto.jobs/feed/rss'
-
-  let xml: string
-  try {
-    const response = await axios.get(feedUrl, {
-      headers: { 'User-Agent': getRandomUserAgent() },
-      timeout: 15000,
-    })
-    xml = response.data
-  } catch (error: any) {
-    console.error(`  ❌ Failed to fetch RSS feed: ${error.message}`)
-    await supabase.from('CrawlLog').insert({
-      source: 'crypto.jobs',
-      status: 'failed',
-      jobCount: 0,
-      createdAt: new Date().toISOString(),
-    })
-    return { total: 0, new: 0 }
-  }
-
-  const $ = cheerio.load(xml, { xmlMode: true })
-  const items = $('item')
-  console.log(`  📡 RSS feed: ${items.length} items`)
-
-  let savedCount = 0
-  let newCount = 0
-
-  items.each((_, item) => {
-    // Queued for processing below (cheerio .each is sync)
-  })
-
-  // Process items sequentially (for DB writes)
-  const itemElements = items.toArray()
-  for (const item of itemElements) {
-    try {
-      const $item = $(item)
-
-      // Title: "Senior Blockchain Engineer at Unlimit Pro"
-      const rawTitle = cleanText($item.find('title').text())
-      const link = $item.find('link').text().trim().split('?')[0] // Strip UTM params
-      const category = cleanText($item.find('category').text()) || 'Engineering'
-      const pubDateStr = $item.find('pubDate').text().trim()
-      const descriptionHtml = $item.find('description').text()
-
-      if (!rawTitle || !link) continue
-
-      // Parse "Title at Company" pattern
-      let title = rawTitle
-      let company = 'Unknown'
-      const atMatch = rawTitle.match(/^(.+?)\s+at\s+(.+)$/i)
-      if (atMatch) {
-        title = cleanText(atMatch[1])
-        company = cleanText(atMatch[2])
-      }
-
-      // Parse description HTML for structured fields
-      const $desc = cheerio.load(descriptionHtml)
-      let location = 'Remote'
-      let salary: string | undefined
-      let type = 'Full-time'
-      let skills: string[] = []
-
-      $desc('p').each((_, p) => {
-        const text = $desc(p).text()
-        if (text.startsWith('Company:') && company === 'Unknown') {
-          company = cleanText(text.replace('Company:', ''))
-        }
-        if (text.startsWith('Location:')) {
-          location = cleanText(text.replace('Location:', ''))
-        }
-        if (text.startsWith('Salary:')) {
-          salary = cleanText(text.replace('Salary:', ''))
-        }
-        if (text.startsWith('Type:')) {
-          type = cleanText(text.replace('Type:', ''))
-        }
-        if (text.startsWith('Skills:')) {
-          skills = text.replace('Skills:', '').split(',').map(s => cleanText(s)).filter(Boolean)
-        }
+    async fetchJobs() {
+      const response = await axios.get('https://crypto.jobs/feed/rss', {
+        headers: { 'User-Agent': getRandomUserAgent() },
+        timeout: 15000,
       })
 
-      // Extract remaining text as description (after structured fields)
-      $desc('p strong').parent().remove()
-      const rssBodyText = cleanText($desc.text()).slice(0, 5000) || undefined
+      const $ = cheerio.load(response.data, { xmlMode: true })
+      const entries: CryptoJob[] = []
 
-      // Fetch full description from detail page JSON-LD (preferred)
-      const detailUrl = link.split('?')[0]
-      const detailDescription = await fetchDetailDescription(detailUrl)
-      await delay(300)
+      // Phase 1: parse RSS items
+      for (const item of $('item').toArray()) {
+        const $item = $(item)
+        const rawTitle = cleanText($item.find('title').text())
+        const link = $item.find('link').text().trim().split('?')[0]
+        const category = cleanText($item.find('category').text()) || 'Engineering'
+        const pubDate = $item.find('pubDate').text().trim()
+        const descriptionHtml = $item.find('description').text()
 
-      // Use detail page JD if available, otherwise RSS body text
-      const description = detailDescription || rssBodyText
+        if (!rawTitle || !link) continue
 
-      // Map category
-      const categoryMap: Record<string, string> = {
-        'Tech': 'Engineering',
-        'Marketing': 'Marketing',
-        'Sales': 'Sales',
-        'Design': 'Design',
-        'Other': 'Operations',
-      }
-      const mappedCategory = categoryMap[category] || 'Engineering'
+        const { title, company } = parseTitleAtCompany(rawTitle)
 
-      // Parse salary
-      const salaryInfo = parseSalary(salary)
+        const $desc = cheerio.load(descriptionHtml)
+        let location = 'Remote'
+        let salary: string | undefined
+        let type = 'Full-time'
+        let skills: string[] = []
+        let resolvedCompany = company
 
-      // Tags: combine RSS skills + detected from title
-      const tags = skills.length > 0 ? skills : ['Web3', 'Crypto']
+        $desc('p').each((_, p) => {
+          const text = $desc(p).text()
+          if (text.startsWith('Company:') && !resolvedCompany) resolvedCompany = cleanText(text.replace('Company:', ''))
+          if (text.startsWith('Location:')) location = cleanText(text.replace('Location:', ''))
+          if (text.startsWith('Salary:')) salary = cleanText(text.replace('Salary:', ''))
+          if (text.startsWith('Type:')) type = cleanText(text.replace('Type:', ''))
+          if (text.startsWith('Skills:')) skills = text.replace('Skills:', '').split(',').map(s => cleanText(s)).filter(Boolean)
+        })
 
-      // Parse date
-      const postedDate = pubDateStr ? new Date(pubDateStr) : new Date()
+        $desc('p strong').parent().remove()
+        const rssBodyText = cleanText($desc.text()).slice(0, 5000) || undefined
 
-      const result = await validateAndSaveJob(
-        {
+        entries.push({
           title,
-          company,
-          url: link,
+          company: resolvedCompany || 'Unknown',
+          link,
+          category,
+          pubDate,
           location,
+          salary,
           type,
-          category: mappedCategory,
-          salary: salary || undefined,
-          salaryMin: salaryInfo.min,
-          salaryMax: salaryInfo.max,
-          salaryCurrency: salaryInfo.currency,
-          tags,
-          source: 'crypto.jobs',
-          region: 'Global',
-          postedDate,
-          description,
-        },
-        'crypto.jobs'
-      )
+          skills,
+          rssBodyText,
+        })
+      }
 
-      if (result.saved) savedCount++
-      if (result.isNew) newCount++
-    } catch (error) {
-      console.error('  Error processing RSS item:', error)
-    }
-  }
+      // Phase 2: fetch detail pages for full JD
+      for (const job of entries) {
+        const detail = await fetchDetailDescription(job.link)
+        job.description = detail || job.rssBodyText
+        await delay(300)
+      }
 
-  await supabase.from('CrawlLog').insert({
-    source: 'crypto.jobs',
-    status: 'success',
-    jobCount: savedCount,
-    createdAt: new Date().toISOString(),
+      return entries
+    },
+
+    mapToJobInput(job) {
+      const salaryInfo = parseSalary(job.salary)
+      const tags = job.skills.length > 0 ? job.skills : ['Web3', 'Crypto']
+
+      return {
+        title: job.title,
+        company: job.company,
+        url: job.link,
+        location: job.location,
+        type: job.type,
+        category: CATEGORY_MAP[job.category] || 'Engineering',
+        salary: job.salary || undefined,
+        salaryMin: salaryInfo.min,
+        salaryMax: salaryInfo.max,
+        salaryCurrency: salaryInfo.currency,
+        tags,
+        source: 'crypto.jobs',
+        region: 'Global',
+        postedDate: job.pubDate ? new Date(job.pubDate) : new Date(),
+        description: job.description,
+      }
+    },
   })
-
-  console.log(`✅ Saved ${savedCount} jobs from CryptoJobs (${newCount} new)`)
-  return { total: savedCount, new: newCount }
 }

@@ -1,9 +1,9 @@
-import { supabase } from '../../lib/supabase-script'
-import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { fetchHTML, delay, cleanText, detectExperienceLevel, detectRemoteType } from '../utils'
 import { cleanDescriptionHtml } from '../../lib/clean-description'
 import { parseStringPromise } from 'xml2js'
 import axios from 'axios'
+import { runCrawler } from './runner'
+import { parseTitleAtCompany } from './utils/rss'
 import type { CrawlerReturn } from './platforms'
 
 interface RssItem {
@@ -14,10 +14,8 @@ interface RssItem {
   guid: string[]
 }
 
-/**
- * Fetch and parse job details from individual job page
- */
-async function fetchJobDetails(jobUrl: string): Promise<{
+// Detail page enrichment
+interface JobDetails {
   description?: string
   requirements?: string
   responsibilities?: string
@@ -28,29 +26,25 @@ async function fetchJobDetails(jobUrl: string): Promise<{
   location?: string
   type?: string
   tags?: string[]
-}> {
+}
+
+async function fetchJobDetails(jobUrl: string): Promise<JobDetails> {
   const $ = await fetchHTML(jobUrl)
   if (!$) return {}
 
-  const details: Record<string, any> = {}
+  const details: JobDetails = {}
 
   try {
-    // Job description - inside .prose div (preserve HTML for proper rendering)
     const proseEl = $('.prose')
     if (proseEl.length) {
-      // Get the HTML content and clean while preserving structure
-      let descHtml = proseEl.html() || ''
-
+      const descHtml = proseEl.html() || ''
       if (descHtml.length > 100) {
         details.description = cleanDescriptionHtml(descHtml.slice(0, 10000))
       }
 
-      // Extract sections from headers
       proseEl.find('h2, h3').each((_, el) => {
         const header = cleanText($(el).text()).toLowerCase()
         let content = ''
-
-        // Get all content until next header
         let nextEl = $(el).next()
         while (nextEl.length && !nextEl.is('h2, h3')) {
           content += nextEl.text() + '\n'
@@ -72,14 +66,9 @@ async function fetchJobDetails(jobUrl: string): Promise<{
       })
     }
 
-    // Extract metadata from sidebar
-    // Location
     const locationSection = $('h3:contains("Location")').next('ul')
-    if (locationSection.length) {
-      details.location = cleanText(locationSection.text())
-    }
+    if (locationSection.length) details.location = cleanText(locationSection.text())
 
-    // Job type
     const typeSection = $('h3:contains("Job type")').next('ul')
     if (typeSection.length) {
       const typeText = cleanText(typeSection.text()).toLowerCase()
@@ -89,79 +78,112 @@ async function fetchJobDetails(jobUrl: string): Promise<{
       else if (typeText.includes('internship')) details.type = 'Internship'
     }
 
-    // Keywords/Tags - from "Keywords" section only
     const keywordsSection = $('h3:contains("Keywords")').next('ul')
     if (keywordsSection.length) {
       const tags: string[] = []
       keywordsSection.find('a').each((_, el) => {
         const tag = cleanText($(el).text())
-        // Only include valid tech-related tags
-        if (tag.length > 1 && tag.length < 40) {
-          tags.push(tag)
-        }
+        if (tag.length > 1 && tag.length < 40) tags.push(tag)
       })
-      if (tags.length > 0) {
-        details.tags = tags.slice(0, 10)
-      }
+      if (tags.length > 0) details.tags = tags.slice(0, 10)
     }
 
-    // Company logo
     const logoImg = $('img[alt$="logo"]').first()
     if (logoImg.length) {
       let logoSrc = logoImg.attr('data-src') || logoImg.attr('src')
       if (logoSrc && !logoSrc.includes('placeholder')) {
-        if (!logoSrc.startsWith('http')) {
-          logoSrc = `https://cryptocurrencyjobs.co${logoSrc}`
-        }
+        if (!logoSrc.startsWith('http')) logoSrc = `https://cryptocurrencyjobs.co${logoSrc}`
         details.companyLogo = logoSrc
       }
     }
 
-    // Detect experience level and remote type from full text
     const fullText = $('body').text()
     details.experienceLevel = detectExperienceLevel(fullText) || undefined
     details.remoteType = detectRemoteType(fullText) || undefined
-
-  } catch (error) {
-    console.error(`  Error fetching details from ${jobUrl}:`, error)
+  } catch {
+    // skip detail errors
   }
 
   return details
 }
 
-/**
- * CryptocurrencyJobs.co Crawler
- * Uses RSS feed for reliable job listing extraction
- */
+// Enriched job after RSS parse + detail fetch
+interface EnrichedJob {
+  title: string
+  company: string
+  url: string
+  category: string
+  pubDate: string
+  rssDescription: string
+  details: JobDetails
+}
+
+const JOB_WORDS = new Set([
+  'senior', 'junior', 'lead', 'head', 'chief', 'staff', 'principal', 'associate',
+  'manager', 'engineer', 'developer', 'designer', 'analyst', 'specialist',
+  'coordinator', 'director', 'vp', 'marketing', 'sales', 'product', 'tech',
+  'software', 'web', 'web3', 'blockchain', 'crypto', 'defi', 'backend',
+  'frontend', 'fullstack', 'devops', 'data', 'growth', 'community', 'content',
+  'social', 'legal', 'finance', 'hr', 'ops', 'operations', 'business',
+  'partner', 'talent', 'recruiter', 'recruiting', 'counsel', 'deputy', 'commercial',
+])
+
+function extractCompanyFromUrl(url: string): string {
+  const match = url.match(/cryptocurrencyjobs\.co\/[^/]+\/([^/]+)/)
+  if (!match) return ''
+  const parts = match[1].split('-')
+  const companyParts: string[] = []
+  for (const part of parts) {
+    if (JOB_WORDS.has(part.toLowerCase())) break
+    companyParts.push(part)
+  }
+  if (companyParts.length === 0) return ''
+  return companyParts
+    .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(' ')
+    .replace(/\bLi Fi\b/i, 'LI.FI')
+    .replace(/\bDefi\b/i, 'DeFi')
+    .replace(/\bNft\b/i, 'NFT')
+    .replace(/\bDao\b/i, 'DAO')
+    .replace(/\bAi\b/i, 'AI')
+}
+
+const CATEGORY_MAP: Record<string, string> = {
+  'engineering': 'Engineering',
+  'design': 'Design',
+  'marketing': 'Marketing',
+  'sales': 'Sales',
+  'product': 'Product',
+  'operations': 'Operations',
+  'finance': 'Finance',
+  'community': 'Community',
+  'customer-support': 'Customer Support',
+  'non-tech': 'Non-Tech',
+  'other': 'Other',
+}
+
 export async function crawlCryptocurrencyJobs(): Promise<CrawlerReturn> {
-  console.log('🚀 Starting CryptocurrencyJobs crawler...')
+  return runCrawler<EnrichedJob>({
+    source: 'cryptocurrencyjobs.co',
+    displayName: 'CryptocurrencyJobs',
+    emoji: '🚀',
 
-  const rssUrl = 'https://cryptocurrencyjobs.co/index.xml'
+    async fetchJobs() {
+      const response = await axios.get('https://cryptocurrencyjobs.co/index.xml', {
+        timeout: 15000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+          'Accept': 'application/rss+xml, application/xml, text/xml',
+        },
+      })
 
-  try {
-    // Fetch RSS feed
-    const response = await axios.get(rssUrl, {
-      timeout: 15000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-        'Accept': 'application/rss+xml, application/xml, text/xml',
-      },
-    })
+      const rssData = await parseStringPromise(response.data)
+      const items: RssItem[] = rssData?.rss?.channel?.[0]?.item || []
+      const jobItems = items.slice(0, 100)
 
-    // Parse RSS XML
-    const rssData = await parseStringPromise(response.data)
-    const items: RssItem[] = rssData?.rss?.channel?.[0]?.item || []
-
-    console.log(`📦 Found ${items.length} jobs from RSS feed`)
-
-    // Limit to recent jobs (first 100)
-    const jobItems = items.slice(0, 100)
-
-    let savedCount = 0
-    let newCount = 0
-
-    for (const item of jobItems) {
-      try {
+      // Phase 1: parse RSS
+      const entries: EnrichedJob[] = []
+      for (const item of jobItems) {
         const fullTitle = item.title?.[0] || ''
         const url = item.link?.[0] || item.guid?.[0] || ''
         const rssDescription = item.description?.[0] || ''
@@ -169,152 +191,54 @@ export async function crawlCryptocurrencyJobs(): Promise<CrawlerReturn> {
 
         if (!fullTitle || !url) continue
 
-        // Parse "Job Title at Company" format
-        const titleMatch = fullTitle.match(/^(.+?)\s+at\s+(.+)$/i)
-        let title = fullTitle
-        let company = ''
+        let { title, company } = parseTitleAtCompany(fullTitle)
+        if (!company) company = extractCompanyFromUrl(url)
+        if (!company) company = 'Unknown'
 
-        if (titleMatch) {
-          title = titleMatch[1].trim()
-          company = titleMatch[2].trim()
-        }
-
-        // Fallback: Extract company from URL if not found in title
-        // URL format: /category/company-job-slug/
-        if (!company) {
-          const urlSlugMatch = url.match(/cryptocurrencyjobs\.co\/[^/]+\/([^/]+)/)
-          if (urlSlugMatch) {
-            const slug = urlSlugMatch[1]
-            // Extract company from slug (first part before job title words)
-            // e.g., "dialectic-senior-finance-manager" -> "dialectic"
-            // e.g., "sei-foundation-chief-of-staff" -> "sei-foundation"
-            const slugParts = slug.split('-')
-            // Find where job title starts (common job words)
-            const jobWords = ['senior', 'junior', 'lead', 'head', 'chief', 'staff', 'principal', 'associate', 'manager', 'engineer', 'developer', 'designer', 'analyst', 'specialist', 'coordinator', 'director', 'vp', 'marketing', 'sales', 'product', 'tech', 'software', 'web', 'web3', 'blockchain', 'crypto', 'defi', 'backend', 'frontend', 'fullstack', 'full-stack', 'devops', 'data', 'growth', 'community', 'content', 'social', 'legal', 'finance', 'hr', 'ops', 'operations', 'business', 'partner', 'talent', 'recruiter', 'recruiting', 'counsel', 'deputy', 'commercial']
-
-            let companyParts: string[] = []
-            for (const part of slugParts) {
-              if (jobWords.includes(part.toLowerCase())) break
-              companyParts.push(part)
-            }
-
-            if (companyParts.length > 0) {
-              // Convert slug to proper company name (capitalize, handle common patterns)
-              company = companyParts
-                .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-                .join(' ')
-                .replace(/\bLi Fi\b/i, 'LI.FI')
-                .replace(/\bDefi\b/i, 'DeFi')
-                .replace(/\bNft\b/i, 'NFT')
-                .replace(/\bDao\b/i, 'DAO')
-                .replace(/\bAi\b/i, 'AI')
-            }
-          }
-        }
-
-        // Final fallback
-        if (!company) {
-          company = 'Unknown'
-        }
-
-        // Extract category from URL
-        // URL format: /category/company-job-title/
         const urlMatch = url.match(/cryptocurrencyjobs\.co\/([^/]+)\//)
-        let category = 'Engineering'
-        if (urlMatch) {
-          const rawCategory = urlMatch[1]
-          const categoryMap: Record<string, string> = {
-            'engineering': 'Engineering',
-            'design': 'Design',
-            'marketing': 'Marketing',
-            'sales': 'Sales',
-            'product': 'Product',
-            'operations': 'Operations',
-            'finance': 'Finance',
-            'community': 'Community',
-            'customer-support': 'Customer Support',
-            'non-tech': 'Non-Tech',
-            'other': 'Other',
-          }
-          category = categoryMap[rawCategory] || 'Engineering'
-        }
+        const category = urlMatch ? (CATEGORY_MAP[urlMatch[1]] || 'Engineering') : 'Engineering'
 
-        // Fetch job details for all jobs (with rate limiting)
-        let details: any = {}
-        console.log(`  📄 Fetching: ${title.slice(0, 50)}...`)
-        details = await fetchJobDetails(url)
-        await delay(200)
-
-        // Use RSS description as fallback if no detailed description
-        let description = details.description
-        if (!description && rssDescription) {
-          description = cleanDescriptionHtml(rssDescription)
-        }
-
-        // Determine location and type
-        const location = details.location || 'Remote'
-        const type = details.type || 'Full-time'
-
-        // Build tags - only from keywords, add Web3/Blockchain defaults
-        const tags: string[] = ['Web3', 'Blockchain']
-        if (details.tags) {
-          tags.push(...details.tags)
-        }
-
-        const result = await validateAndSaveJob(
-          {
-            title,
-            company,
-            url,
-            location,
-            type,
-            category,
-            tags: [...new Set(tags)].slice(0, 10), // Dedupe and limit
-            source: 'cryptocurrencyjobs.co',
-            region: 'Global',
-            postedDate: pubDate ? new Date(pubDate) : new Date(),
-            description,
-            requirements: details.requirements,
-            responsibilities: details.responsibilities,
-            benefits: details.benefits,
-            experienceLevel: details.experienceLevel,
-            remoteType: details.remoteType,
-            companyLogo: details.companyLogo,
-          },
-          'cryptocurrencyjobs.co'
-        )
-
-        if (result.saved) savedCount++
-        if (result.isNew) newCount++
-
-        await delay(100)
-      } catch (error) {
-        console.error(`  Error processing job:`, error)
+        entries.push({ title, company, url, category, pubDate, rssDescription, details: {} })
       }
-    }
 
-    // Log crawl result
-    await supabase.from('CrawlLog').insert({
-      source: 'cryptocurrencyjobs.co',
-      status: 'success',
-      jobCount: savedCount,
-      createdAt: new Date().toISOString(),
-    })
+      // Phase 2: fetch detail pages
+      for (const job of entries) {
+        console.log(`  📄 Fetching: ${job.title.slice(0, 50)}...`)
+        job.details = await fetchJobDetails(job.url)
+        await delay(200)
+      }
 
-    console.log(`✅ Saved ${savedCount} jobs from CryptocurrencyJobs (${newCount} new)`)
-    return { total: savedCount, new: newCount }
+      return entries
+    },
 
-  } catch (error: any) {
-    console.error('❌ Failed to fetch RSS feed:', error.message)
+    mapToJobInput(job) {
+      let description = job.details.description
+      if (!description && job.rssDescription) {
+        description = cleanDescriptionHtml(job.rssDescription)
+      }
 
-    await supabase.from('CrawlLog').insert({
-      source: 'cryptocurrencyjobs.co',
-      status: 'failed',
-      jobCount: 0,
-      error: error.message,
-      createdAt: new Date().toISOString(),
-    })
+      const tags: string[] = ['Web3', 'Blockchain']
+      if (job.details.tags) tags.push(...job.details.tags)
 
-    return { total: 0, new: 0 }
-  }
+      return {
+        title: job.title,
+        company: job.company,
+        url: job.url,
+        location: job.details.location || 'Remote',
+        type: job.details.type || 'Full-time',
+        category: job.category,
+        tags: [...new Set(tags)].slice(0, 10),
+        source: 'cryptocurrencyjobs.co',
+        region: 'Global',
+        postedDate: job.pubDate ? new Date(job.pubDate) : new Date(),
+        description,
+        requirements: job.details.requirements,
+        responsibilities: job.details.responsibilities,
+        benefits: job.details.benefits,
+        experienceLevel: job.details.experienceLevel,
+        remoteType: job.details.remoteType,
+        companyLogo: job.details.companyLogo,
+      }
+    },
+  })
 }
