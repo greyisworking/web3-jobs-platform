@@ -10,19 +10,73 @@ const GETRO_SEARCH_API = 'https://api.getro.com/api/v2'
  * Fetch job description from Getro job detail page.
  * The detail page has __NEXT_DATA__ with the full job object including description.
  */
-async function fetchJobDescription(jobUrl: string): Promise<string | null> {
+export async function fetchJobDescription(jobUrl: string): Promise<string | null> {
   try {
-    const $ = await fetchHTML(jobUrl)
+    // External ATS URLs: use their public APIs directly
+    if (jobUrl.includes('boards.greenhouse.io')) {
+      const m = jobUrl.match(/boards\.greenhouse\.io\/([^/]+)\/jobs\/(\d+)/)
+      if (m) {
+        const { data } = await axios.get(
+          `https://boards-api.greenhouse.io/v1/boards/${m[1]}/jobs/${m[2]}`,
+          { timeout: 10000 },
+        )
+        return data?.content || null
+      }
+    }
+    if (jobUrl.includes('jobs.lever.co')) {
+      const m = jobUrl.match(/jobs\.lever\.co\/([^/]+)\/([^/?]+)/)
+      if (m) {
+        const { data } = await axios.get(
+          `https://api.lever.co/v0/postings/${m[1]}/${m[2]}`,
+          { timeout: 10000 },
+        )
+        return data?.descriptionPlain || data?.description || null
+      }
+    }
+    if (jobUrl.includes('jobs.ashbyhq.com')) {
+      // Ashby API requires auth now — scrape JSON-LD from the page instead
+      const $ = await fetchHTML(jobUrl, { useBrowserHeaders: true })
+      if ($) {
+        const ldScript = $('script[type="application/ld+json"]').html()
+        if (ldScript) {
+          const ld = JSON.parse(ldScript)
+          if (ld.description) return ld.description
+        }
+      }
+      return null
+    }
+
+    // Getro-hosted pages or other URLs: fetch and parse __NEXT_DATA__
+    const $ = await fetchHTML(jobUrl, { useBrowserHeaders: true })
     if (!$) return null
 
+    // Try JSON-LD first (works across many platforms)
+    const ldScript = $('script[type="application/ld+json"]').html()
+    if (ldScript) {
+      try {
+        const ld = JSON.parse(ldScript)
+        if (ld.description && ld.description.length > 50) return ld.description
+      } catch {}
+    }
+
     const script = $('script#__NEXT_DATA__').html()
-    if (!script) return null
+    if (script) {
+      const nextData = JSON.parse(script)
 
-    const nextData = JSON.parse(script)
-    const job = nextData?.props?.pageProps?.job
-    if (!job) return null
+      // Path 1: pageProps.job (older Getro layout)
+      const job = nextData?.props?.pageProps?.job
+      if (job) {
+        return job.description || job.descriptionHtml || job.content || null
+      }
 
-    return job.description || job.descriptionHtml || job.content || null
+      // Path 2: initialState.jobs.currentJob (current Getro layout)
+      const currentJob = nextData?.props?.pageProps?.initialState?.jobs?.currentJob
+      if (currentJob) {
+        return currentJob.description || currentJob.descriptionHtml || currentJob.content || null
+      }
+    }
+
+    return null
   } catch {
     return null
   }
@@ -311,17 +365,13 @@ export async function crawlGetroBoard(config: GetroConfig): Promise<CrawlerRetur
 
       let description = job.description || job.descriptionHtml || job.content || null
 
-      // Fetch description from Getro detail page if not available
-      // Use slug/id to construct Getro page URL, not the external job URL
+      // Fetch description from detail page if not in API response
+      // Use the job's own url (correct Getro path or external ATS URL)
       if (!description && fetchDescriptions && descriptionsFetched < maxDescriptionFetches) {
-        const getroDetailUrl = job.slug
-          ? `${baseUrl}/jobs/${job.slug}`
-          : job.id
-          ? `${baseUrl}/jobs/${job.id}`
-          : null
+        const detailUrl = jobUrl  // already resolved above from job.url / slug / id
 
-        if (getroDetailUrl) {
-          description = await fetchJobDescription(getroDetailUrl)
+        if (detailUrl) {
+          description = await fetchJobDescription(detailUrl)
           descriptionsFetched++
           if (description) {
             console.log(`    📄 Got description for "${title}" (${description.length} chars)`)

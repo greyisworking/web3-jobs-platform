@@ -9,5 +9,7 @@ export async function crawlSolanaJobs(): Promise<CrawlerReturn> {
     defaultCompany: 'Solana Foundation',
     emoji: '🚀',
     networkId: '858',
+    fetchDescriptions: true,
+    maxDescriptionFetches: 500,
   })
 }

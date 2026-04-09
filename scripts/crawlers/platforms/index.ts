@@ -15,5 +15,5 @@ export interface PlatformJob {
 export { crawlLeverJobs } from './lever'
 export { crawlGreenhouseJobs } from './greenhouse'
 export { crawlAshbyJobs } from './ashby'
-export { crawlGetroBoard } from './getro'
+export { crawlGetroBoard, fetchJobDescription } from './getro'
 export type { GetroConfig, CrawlerReturn } from './getro'
