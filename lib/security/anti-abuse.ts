@@ -253,6 +253,7 @@ const IP_WALLET_STORE = new Map<string, Set<string>>()
 const WALLET_IP_STORE = new Map<string, Set<string>>()
 const MAX_WALLETS_PER_IP = 5
 
+// TODO(security): wire to trust API middleware — IP-지갑 어뷰징 방어 미연결 상태
 /**
  * Track IP-wallet association
  */
@@ -272,6 +273,7 @@ export function trackIpWallet(ip: string, wallet: string): void {
   WALLET_IP_STORE.get(normalizedWallet)!.add(ip)
 }
 
+// TODO(security): wire to trust API middleware — IP-지갑 어뷰징 방어 미연결 상태
 /**
  * Check if IP has too many associated wallets
  */
@@ -288,6 +290,7 @@ export function checkIpWalletLimit(ip: string): {
   }
 }
 
+// TODO(security): wire to trust API middleware — IP-지갑 어뷰징 방어 미연결 상태
 /**
  * Check if wallet uses multiple IPs (potential bot)
  */

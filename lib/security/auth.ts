@@ -36,13 +36,7 @@ export async function generateNonce(wallet: string): Promise<string> {
   return nonce
 }
 
-/**
- * Create a message for wallet signing
- */
-export function createSignMessage(nonce: string, action: string = 'authenticate'): string {
-  return `NEUN Verification\n\nAction: ${action}\nNonce: ${nonce}\n\nSign this message to verify you own this wallet.`
-}
-
+// TODO(siwe): wire to /api/auth/siwe — 자체 SIWE 백엔드 검증으로 전환 시 사용
 /**
  * Verify a wallet signature with nonce
  */
@@ -76,7 +70,7 @@ export async function verifyWalletSignature(
     }
 
     // Verify signature
-    const message = createSignMessage(nonceRecord.nonce, action)
+    const message = `NEUN Verification\n\nAction: ${action}\nNonce: ${nonceRecord.nonce}\n\nSign this message to verify you own this wallet.`
     const isValid = await verifyMessage({
       address: normalizedWallet,
       message,
@@ -106,6 +100,7 @@ export async function verifyWalletSignature(
 
 const SESSION_EXPIRY_MS = 24 * 60 * 60 * 1000 // 24 hours
 
+// TODO(siwe): wire to /api/auth/siwe — 자체 SIWE 백엔드 검증으로 전환 시 사용
 /**
  * Create a session token after successful wallet verification
  */
@@ -133,6 +128,7 @@ export async function createSessionToken(wallet: string): Promise<string | null>
   return token
 }
 
+// TODO(siwe): wire to /api/auth/siwe — 자체 SIWE 백엔드 검증으로 전환 시 사용
 /**
  * Verify a session token
  */
@@ -160,17 +156,6 @@ export async function verifySessionToken(
   return { valid: true }
 }
 
-/**
- * Invalidate a session
- */
-export async function invalidateSession(wallet: string): Promise<void> {
-  const normalizedWallet = wallet.toLowerCase()
-  await supabase
-    .from('wallet_sessions')
-    .delete()
-    .eq('wallet', normalizedWallet)
-}
-
 // ════════════════════════════════════════════════════════════════════════════
 // Wallet Validation
 // ════════════════════════════════════════════════════════════════════════════
@@ -180,11 +165,4 @@ export async function invalidateSession(wallet: string): Promise<void> {
  */
 export function isValidWalletAddress(address: string): boolean {
   return /^0x[a-fA-F0-9]{40}$/.test(address)
-}
-
-/**
- * Normalize wallet address
- */
-export function normalizeWallet(address: string): string {
-  return address.toLowerCase()
 }

@@ -152,26 +152,6 @@ export function getClientIdentifier(
   return ip || 'anonymous'
 }
 
-/**
- * Create rate limit headers for response
- */
-export function getRateLimitHeaders(result: {
-  remaining: number
-  resetAt: number
-  retryAfter?: number
-}): Record<string, string> {
-  const headers: Record<string, string> = {
-    'X-RateLimit-Remaining': result.remaining.toString(),
-    'X-RateLimit-Reset': Math.ceil(result.resetAt / 1000).toString(),
-  }
-
-  if (result.retryAfter) {
-    headers['Retry-After'] = result.retryAfter.toString()
-  }
-
-  return headers
-}
-
 // ════════════════════════════════════════════════════════════════════════════
 // Rate Limit Response Helper
 // ════════════════════════════════════════════════════════════════════════════
@@ -194,35 +174,3 @@ export function rateLimitedResponse(retryAfter: number): NextResponse {
   )
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-// Middleware Helper
-// ════════════════════════════════════════════════════════════════════════════
-
-export function withRateLimit(
-  handler: (req: Request) => Promise<Response>,
-  type: RateLimitType = 'api'
-) {
-  return async (req: Request): Promise<Response> => {
-    // Get IP from headers
-    const forwardedFor = req.headers.get('x-forwarded-for')
-    const ip = forwardedFor?.split(',')[0]?.trim() || req.headers.get('x-real-ip')
-
-    const identifier = getClientIdentifier(ip)
-    const result = checkRateLimit(identifier, type)
-
-    if (result.limited) {
-      return rateLimitedResponse(result.retryAfter!)
-    }
-
-    // Execute handler
-    const response = await handler(req)
-
-    // Add rate limit headers
-    const headers = getRateLimitHeaders(result)
-    for (const [key, value] of Object.entries(headers)) {
-      response.headers.set(key, value)
-    }
-
-    return response
-  }
-}

@@ -34,7 +34,7 @@ function escapeHtml(text: string): string {
 /**
  * Sanitize text by removing dangerous patterns
  */
-export function sanitizeText(text: string): string {
+function sanitizeText(text: string): string {
   if (!text || typeof text !== 'string') return ''
 
   let sanitized = text
@@ -58,7 +58,7 @@ export function sanitizeText(text: string): string {
 /**
  * Sanitize HTML while allowing safe tags
  */
-export function sanitizeHtml(html: string, allowedTags: string[] = []): string {
+function sanitizeHtml(html: string, allowedTags: string[] = []): string {
   if (!html || typeof html !== 'string') return ''
 
   // Default allowed tags for rich text content

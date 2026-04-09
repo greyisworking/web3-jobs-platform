@@ -118,33 +118,6 @@ export function formatSalary(
 }
 
 /**
- * Format crypto amount with token symbol
- */
-export function formatCryptoAmount(
-  amount: number | null | undefined,
-  token: string
-): string {
-  if (amount == null) return ''
-
-  if (amount >= 1000) {
-    return `${formatCompactNumber(amount)} ${token}`
-  }
-  return `${amount} ${token}`
-}
-
-// ═══════════════════════════════════════════════════════════════
-// TEXT FORMATTING
-// ═══════════════════════════════════════════════════════════════
-
-/**
- * Truncate text with ellipsis
- */
-export function truncateText(text: string, maxLength: number): string {
-  if (!text || text.length <= maxLength) return text
-  return text.slice(0, maxLength).trim() + '...'
-}
-
-/**
  * Format wallet address (0x1234...5678)
  */
 export function formatWalletAddress(address: string | null | undefined): string {
