@@ -1,26 +1,16 @@
-import { supabase } from '../../lib/supabase-script'
-import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { delay } from '../utils'
 import { translateLocation, translateTags } from '../../lib/translation'
+import { runCrawler } from './runner'
 import type { CrawlerReturn } from './platforms'
 
 interface WantedJob {
   id: number
   position: string
   status: string
-  company: {
-    id: number
-    name: string
-    industry_name: string
-  }
-  address: {
-    location: string
-    full_location: string
-    country: string
-  }
+  company: { id: number; name: string; industry_name: string }
+  address: { location: string; full_location: string; country: string }
   annual_from: number | null
   annual_to: number | null
-  category_tags: { parent_id: number; id: number }[]
 }
 
 interface WantedJobDetail extends WantedJob {
@@ -43,189 +33,123 @@ const SEARCH_KEYWORDS = [
   'NFT', 'DAO', 'solidity', '가상자산', '디파이', '토큰',
 ]
 
-/**
- * Fetch job listings from Wanted search API
- */
 async function fetchJobsByKeyword(keyword: string): Promise<WantedJob[]> {
   const jobs: WantedJob[] = []
-
   for (let offset = 0; offset < 100; offset += 20) {
     const url = `${WANTED_API}?query=${encodeURIComponent(keyword)}&country=kr&job_sort=job.latest_order&years=-1&limit=20&offset=${offset}`
-
     try {
-      const res = await fetch(url, {
-        headers: { 'User-Agent': UA },
-      })
-
-      if (!res.ok) {
-        console.log(`    ⚠️ API returned ${res.status} for "${keyword}" offset=${offset}`)
-        break
-      }
-
+      const res = await fetch(url, { headers: { 'User-Agent': UA } })
+      if (!res.ok) break
       const data = await res.json()
       if (!data.data || data.data.length === 0) break
-
       jobs.push(...data.data)
-    } catch (error) {
-      console.log(`    ❌ API error for "${keyword}": ${error}`)
-      break
-    }
-
+    } catch { break }
     await delay(300)
   }
-
   return jobs
 }
 
-/**
- * Fetch job detail from Wanted API
- */
 async function fetchJobDetail(jobId: number): Promise<WantedJobDetail | null> {
   try {
-    const res = await fetch(`${WANTED_API}/${jobId}`, {
-      headers: { 'User-Agent': UA },
-    })
-
+    const res = await fetch(`${WANTED_API}/${jobId}`, { headers: { 'User-Agent': UA } })
     if (!res.ok) return null
-
     const data = await res.json()
     return data.job || data
-  } catch {
-    return null
-  }
+  } catch { return null }
 }
 
-/**
- * Build location string from Wanted address (always returns English)
- */
-function buildLocation(address: WantedJob['address']): string {
-  if (!address) return 'Seoul'
-  const raw = address.full_location || address.location || 'Seoul'
-  return translateLocation(raw)
-}
-
-/**
- * Build salary string from annual range (unit: 만원)
- */
-function buildSalary(annualFrom: number | null, annualTo: number | null): string | undefined {
-  if (!annualFrom && !annualTo) return undefined
-  if (annualFrom && annualTo) {
-    return `${annualFrom * 10000}-${annualTo * 10000}`
-  }
-  return undefined
+// Enriched job after keyword search + detail fetch
+interface EnrichedWantedJob {
+  id: number
+  position: string
+  companyName: string
+  location: string
+  tags: string[]
+  salary?: string
+  salaryMin?: number
+  salaryMax?: number
+  description?: string
 }
 
 export async function crawlWanted(): Promise<CrawlerReturn> {
-  console.log('🔵 Starting 원티드(Wanted) API crawler...')
+  return runCrawler<EnrichedWantedJob>({
+    source: 'wanted.co.kr',
+    displayName: '원티드(Wanted)',
+    emoji: '🔵',
 
-  try {
-    // 1. Collect all jobs across keywords
-    const jobMap = new Map<number, WantedJob>()
-
-    for (const keyword of SEARCH_KEYWORDS) {
-      console.log(`  🔍 Searching: "${keyword}"`)
-      const jobs = await fetchJobsByKeyword(keyword)
-      console.log(`    📦 Found ${jobs.length} jobs`)
-
-      for (const job of jobs) {
-        if (job.status === 'active' && !jobMap.has(job.id)) {
-          jobMap.set(job.id, job)
+    async fetchJobs() {
+      // Phase 1: collect jobs across keywords, deduplicate by ID
+      const jobMap = new Map<number, WantedJob>()
+      for (const keyword of SEARCH_KEYWORDS) {
+        console.log(`  🔍 Searching: "${keyword}"`)
+        const jobs = await fetchJobsByKeyword(keyword)
+        console.log(`    📦 Found ${jobs.length} jobs`)
+        for (const job of jobs) {
+          if (job.status === 'active' && !jobMap.has(job.id)) jobMap.set(job.id, job)
         }
+        await delay(500)
       }
+      console.log(`  📦 Total unique jobs: ${jobMap.size}`)
 
-      await delay(500)
-    }
-
-    console.log(`📦 Total unique jobs: ${jobMap.size}`)
-
-    // 2. Fetch details and save each job
-    let savedCount = 0
-    let newCount = 0
-
-    for (const [jobId, job] of Array.from(jobMap.entries())) {
-      try {
-        console.log(`  📄 Fetching: ${job.position.slice(0, 50)}...`)
-
+      // Phase 2: fetch details and enrich
+      const enriched: EnrichedWantedJob[] = []
+      for (const [jobId, job] of jobMap) {
         const detail = await fetchJobDetail(jobId)
 
-        // Build description from detail sections (English headers)
-        let fullDescription = ''
+        let description = ''
         if (detail?.detail) {
           const { intro, main_tasks, requirements, preferred_points, benefits } = detail.detail
-          if (intro) fullDescription += `## About Company\n${intro}\n\n`
-          if (main_tasks) fullDescription += `## Key Responsibilities\n${main_tasks}\n\n`
-          if (requirements) fullDescription += `## Requirements\n${requirements}\n\n`
-          if (preferred_points) fullDescription += `## Preferred Qualifications\n${preferred_points}\n\n`
-          if (benefits) fullDescription += `## Benefits & Perks\n${benefits}\n\n`
+          if (intro) description += `## About Company\n${intro}\n\n`
+          if (main_tasks) description += `## Key Responsibilities\n${main_tasks}\n\n`
+          if (requirements) description += `## Requirements\n${requirements}\n\n`
+          if (preferred_points) description += `## Preferred Qualifications\n${preferred_points}\n\n`
+          if (benefits) description += `## Benefits & Perks\n${benefits}\n\n`
         }
 
-        // Extract tags from skill_tags (translate any Korean tags)
         let tags = detail?.skill_tags?.map(t => t.title).filter(Boolean) || []
         if (tags.length === 0) tags.push('Blockchain', 'Web3', 'Korea')
         tags = translateTags(tags)
 
-        const location = buildLocation(job.address)
-        const salary = buildSalary(job.annual_from, job.annual_to)
-        const jobUrl = `${WANTED_URL}/${jobId}`
+        const raw = job.address?.full_location || job.address?.location || 'Seoul'
+        const location = translateLocation(raw)
 
+        let salary: string | undefined
+        if (job.annual_from && job.annual_to) {
+          salary = `${job.annual_from * 10000}-${job.annual_to * 10000}`
+        }
+
+        enriched.push({
+          id: jobId,
+          position: job.position,
+          companyName: job.company.name,
+          location, tags, salary,
+          salaryMin: job.annual_from ? job.annual_from * 10000 : undefined,
+          salaryMax: job.annual_to ? job.annual_to * 10000 : undefined,
+          description: description || undefined,
+        })
         await delay(300)
-
-        const result = await validateAndSaveJob(
-          {
-            title: job.position,
-            company: job.company.name,
-            url: jobUrl,
-            location,
-            type: 'Full-time',
-            salary,
-            salaryMin: job.annual_from ? job.annual_from * 10000 : undefined,
-            salaryMax: job.annual_to ? job.annual_to * 10000 : undefined,
-            salaryCurrency: 'KRW',
-            category: 'Engineering',
-            tags,
-            source: 'wanted.co.kr',
-            region: 'Korea',
-            postedDate: new Date(),
-            description: fullDescription || undefined,
-          },
-          'wanted.co.kr'
-        )
-
-        if (result.saved) savedCount++
-        if (result.isNew) newCount++
-      } catch (error) {
-        console.error(`  ❌ Error saving job ${jobId}:`, error)
       }
-    }
+      return enriched
+    },
 
-    // 3. Log results
-    try {
-      await supabase.from('CrawlLog').insert({
+    mapToJobInput(job) {
+      return {
+        title: job.position,
+        company: job.companyName,
+        url: `${WANTED_URL}/${job.id}`,
+        location: job.location,
+        type: 'Full-time',
+        salary: job.salary,
+        salaryMin: job.salaryMin,
+        salaryMax: job.salaryMax,
+        salaryCurrency: 'KRW',
+        category: 'Engineering',
+        tags: job.tags,
         source: 'wanted.co.kr',
-        status: 'success',
-        jobCount: savedCount,
-        createdAt: new Date().toISOString(),
-      })
-    } catch {
-      // CrawlLog table may not exist
-    }
-
-    console.log(`✅ Saved ${savedCount} jobs from 원티드 (${newCount} new)`)
-    return { total: savedCount, new: newCount }
-  } catch (error) {
-    console.error('❌ Wanted crawler error:', error)
-
-    try {
-      await supabase.from('CrawlLog').insert({
-        source: 'wanted.co.kr',
-        status: 'failed',
-        jobCount: 0,
-        createdAt: new Date().toISOString(),
-      })
-    } catch {
-      // CrawlLog table may not exist
-    }
-
-    return { total: 0, new: 0 }
-  }
+        region: 'Korea',
+        postedDate: new Date(),
+        description: job.description,
+      }
+    },
+  })
 }
