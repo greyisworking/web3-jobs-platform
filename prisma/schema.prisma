@@ -3,12 +3,13 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Job {
-  id          String   @id @default(uuid())
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
   title       String
   company     String
   location    String
@@ -41,6 +42,14 @@ model Job {
   companyLogo      String?  // Company logo URL
   companyWebsite   String?  // Company website URL
 
+  // Enrichment fields (from priority-companies registry)
+  backers         String[]  // VC backers
+  badges          String[]  // Computed badges (Verified, Web3 Perks, etc.)
+  sector          String?   // Company sector (DeFi, Layer 1, etc.)
+  office_location String?   // Company office location
+  is_featured     Boolean   @default(false)
+  is_urgent       Boolean   @default(false)
+
   // User-posted job fields
   postedBy      String?  // Wallet address of poster
   reportCount   Int      @default(0)
@@ -60,7 +69,7 @@ model Job {
 }
 
 model JobReport {
-  id             String   @id @default(uuid())
+  id             String   @id @default(dbgenerated("gen_random_uuid()"))
   jobId          String
   job            Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
   reporterWallet String?
@@ -74,7 +83,7 @@ model JobReport {
 }
 
 model WalletBlacklist {
-  id          String   @id @default(uuid())
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
   wallet      String   @unique
   reason      String?
   createdAt   DateTime @default(now())
@@ -83,7 +92,7 @@ model WalletBlacklist {
 }
 
 model CrawlLog {
-  id        String   @id @default(uuid())
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
   source    String
   status    String   // success, failed
   jobCount  Int      @default(0)
