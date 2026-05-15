@@ -222,6 +222,10 @@ npm run schedule     # Start scheduler (3h interval)
 npm run dev:all      # Dev server + scheduler
 ```
 
+### Coming Back After a Break?
+
+See **[Revival Guide](docs/REVIVAL.md)** — step-by-step checklist for resuming after weeks/months of inactivity (Supabase restore, env sync, crawler health checks).
+
 ---
 
 ## Roadmap
