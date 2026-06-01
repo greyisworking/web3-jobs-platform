@@ -98,7 +98,7 @@ export async function getHeroData(): Promise<HeroData> {
         .from('Job')
         .select('title, tags')
         .eq('isActive', true)
-        .gte('crawledAt', sevenDaysAgo.toISOString())
+        .gte('postedDate', sevenDaysAgo.toISOString())
         .limit(3000),
 
       // Skills: last week
@@ -106,8 +106,8 @@ export async function getHeroData(): Promise<HeroData> {
         .from('Job')
         .select('title, tags')
         .eq('isActive', true)
-        .gte('crawledAt', fourteenDaysAgo.toISOString())
-        .lt('crawledAt', sevenDaysAgo.toISOString())
+        .gte('postedDate', fourteenDaysAgo.toISOString())
+        .lt('postedDate', sevenDaysAgo.toISOString())
         .limit(3000),
 
       // Total active count (head-only, no row data)
@@ -121,15 +121,15 @@ export async function getHeroData(): Promise<HeroData> {
         .from('Job')
         .select('id', { count: 'exact', head: true })
         .eq('isActive', true)
-        .gte('crawledAt', sevenDaysAgo.toISOString()),
+        .gte('postedDate', sevenDaysAgo.toISOString()),
 
       // New last week count
       supabase
         .from('Job')
         .select('id', { count: 'exact', head: true })
         .eq('isActive', true)
-        .gte('crawledAt', fourteenDaysAgo.toISOString())
-        .lt('crawledAt', sevenDaysAgo.toISOString()),
+        .gte('postedDate', fourteenDaysAgo.toISOString())
+        .lt('postedDate', sevenDaysAgo.toISOString()),
 
       // Remote job count (location contains remote/worldwide/anywhere)
       supabase
@@ -138,12 +138,12 @@ export async function getHeroData(): Promise<HeroData> {
         .eq('isActive', true)
         .or('location.ilike.%remote%,location.ilike.%worldwide%,location.ilike.%anywhere%'),
 
-      // Weekly trend: just crawledAt
+      // Weekly trend: by postedDate
       supabase
         .from('Job')
-        .select('crawledAt')
+        .select('postedDate')
         .eq('isActive', true)
-        .gte('crawledAt', fiftySixDaysAgo.toISOString())
+        .gte('postedDate', fiftySixDaysAgo.toISOString())
         .limit(10000),
     ])
 
@@ -209,8 +209,8 @@ export async function getHeroData(): Promise<HeroData> {
       weeklyMap.set(getISOWeek(d), 0)
     }
     for (const row of trendJobs) {
-      if (!row.crawledAt) continue
-      const wk = getISOWeek(new Date(row.crawledAt))
+      if (!row.postedDate) continue
+      const wk = getISOWeek(new Date(row.postedDate))
       if (weeklyMap.has(wk)) {
         weeklyMap.set(wk, (weeklyMap.get(wk) || 0) + 1)
       }
