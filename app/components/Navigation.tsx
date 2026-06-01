@@ -313,10 +313,12 @@ export default function Navigation() {
   const { disconnect: disconnectWallet } = useDisconnect()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [mobileUser, setMobileUser] = useState<SupabaseUser | null>(null)
   const supabase = createSupabaseBrowserClient()
 
   useEffect(() => {
+    setMounted(true)
     const handleScroll = () => setScrolled(window.scrollY > 10)
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
@@ -345,6 +347,7 @@ export default function Navigation() {
   if (pathname?.startsWith('/admin')) return null
 
   const isActive = (href: string) => {
+    if (!mounted) return false
     if (href === '/') return pathname === '/'
     return pathname?.startsWith(href)
   }
