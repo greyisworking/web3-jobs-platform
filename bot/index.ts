@@ -61,7 +61,8 @@ bot.on('message:text', async (ctx) => {
     })
 
     if (count > 3) {
-      text += `\n\n전체 ${count}건 보기 → <a href="https://neun.wtf">neun.wtf</a>`
+      const q = encodeURIComponent(parsed.roleKeyword || userMessage)
+      text += `\n\n전체 ${count}건 보기 → <a href="https://neun.wtf/jobs?q=${q}">neun.wtf</a>`
     }
 
     await ctx.reply(text, { parse_mode: 'HTML' })
