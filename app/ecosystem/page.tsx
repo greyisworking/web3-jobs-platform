@@ -137,7 +137,7 @@ const VC_INFO: Record<string, { description: string; website?: string; tier: 'to
   Dunamu: { description: 'Upbit operator, digital asset ecosystem builder', website: 'https://dunamu.com', tier: 'major' },
   SoftBank: { description: 'Global tech investment leader with blockchain portfolio', website: 'https://softbank.com', tier: 'major' },
   'Animoca Brands': { description: 'GameFi & metaverse pioneer, 400+ portfolio companies', website: 'https://animocabrands.com', tier: 'major' },
-  Binance: { description: "World's largest crypto exchange with Labs arm", website: 'https://binance.com', tier: 'major' },
+  'Binance Labs': { description: "Binance's venture arm backing Web3 builders", website: 'https://labs.binance.com', tier: 'major' },
   'LINE Corporation': { description: 'LINE-based blockchain services and ecosystem', website: 'https://linecorp.com', tier: 'major' },
   'Mirae Asset': { description: 'Korean financial giant with digital asset focus', website: 'https://miraeasset.com', tier: 'notable' },
   'KB Investment': { description: 'KB Financial Group blockchain fintech arm', website: 'https://kbic.co.kr', tier: 'notable' },
@@ -163,14 +163,14 @@ function InvestorCard({ vc, index }: { vc: VCData; index: number }) {
   const slug = vcToSlug(vc.name)
 
   return (
-    <Link href={`/investors/${slug}`}>
+    <Link href={`/investors/${slug}`} className="block h-full">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.05 }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="group relative p-6 h-full bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+        className="group relative h-full flex flex-col p-6 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border hover:-translate-y-1 hover:border-neun-success/50 transition-all duration-300 cursor-pointer"
       >
         <span className={`absolute top-3 right-3 px-2 py-0.5 text-[10px] font-medium tracking-wider ${
           vc.tier === 'top'
@@ -182,7 +182,7 @@ function InvestorCard({ vc, index }: { vc: VCData; index: number }) {
           {vc.tier === 'top' ? 'TOP TIER' : vc.tier === 'major' ? 'MAJOR' : 'NOTABLE'}
         </span>
 
-        <h3 className="text-xl font-semibold text-a24-text dark:text-a24-dark-text mb-2 pr-20 group-hover:underline decoration-1 underline-offset-4">
+        <h3 className="text-xl font-semibold text-a24-text dark:text-a24-dark-text mb-2 pr-20 group-hover:text-neun-success transition-colors">
           {vc.name}
         </h3>
 
@@ -190,33 +190,36 @@ function InvestorCard({ vc, index }: { vc: VCData; index: number }) {
           {vc.description}
         </p>
 
-        <div className="flex items-center gap-2 mb-4">
-          <Building2 className="w-4 h-4 text-a24-muted/60 dark:text-a24-dark-muted/60" />
-          <span className="text-[12px] text-a24-muted dark:text-a24-dark-muted">
-            <strong className="text-a24-text dark:text-a24-dark-text">{vc.portfolioCount}</strong> companies hiring
+        {/* Bottom section pushed down */}
+        <div className="mt-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <Building2 className="w-4 h-4 text-a24-muted/60 dark:text-a24-dark-muted/60" />
+            <span className="text-[12px] text-a24-muted dark:text-a24-dark-muted">
+              <strong className="text-a24-text dark:text-a24-dark-text">{vc.portfolioCount}</strong> portfolio {vc.portfolioCount === 1 ? 'company' : 'companies'}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {vc.companies.slice(0, 3).map((company) => (
+              <span
+                key={company}
+                className="px-2 py-0.5 text-[10px] bg-a24-bg dark:bg-a24-dark-bg text-a24-muted dark:text-a24-dark-muted border border-a24-border/50 dark:border-a24-dark-border/50"
+              >
+                {company}
+              </span>
+            ))}
+            {vc.companies.length > 3 && (
+              <span className="px-2 py-0.5 text-[10px] text-a24-muted/60 dark:text-a24-dark-muted/60">
+                +{vc.companies.length - 3} more
+              </span>
+            )}
+          </div>
+
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-a24-muted dark:text-a24-dark-muted group-hover:text-neun-success transition-colors">
+            View portfolio
+            <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
           </span>
         </div>
-
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {vc.companies.slice(0, 3).map((company) => (
-            <span
-              key={company}
-              className="px-2 py-0.5 text-[10px] bg-a24-bg dark:bg-a24-dark-bg text-a24-muted dark:text-a24-dark-muted border border-a24-border/50 dark:border-a24-dark-border/50"
-            >
-              {company}
-            </span>
-          ))}
-          {vc.companies.length > 3 && (
-            <span className="px-2 py-0.5 text-[10px] text-a24-muted/60 dark:text-a24-dark-muted/60">
-              +{vc.companies.length - 3} more
-            </span>
-          )}
-        </div>
-
-        <span className="inline-flex items-center gap-1.5 text-[11px] text-a24-muted dark:text-a24-dark-muted group-hover:text-a24-text dark:group-hover:text-a24-dark-text transition-colors">
-          View portfolio
-          <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
-        </span>
 
         {hovered && (
           <span className="absolute top-1 left-4 text-[9px] text-a24-muted/40 dark:text-a24-dark-muted/40 italic">
