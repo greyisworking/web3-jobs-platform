@@ -9,48 +9,58 @@ export default function OurStoryPage() {
       {/* Hero section with Pixelbara */}
       <div className="flex flex-col md:flex-row items-start gap-8 mb-8">
         <div className="flex-1">
-          <p className="text-lg font-medium text-a24-text dark:text-a24-dark-text mb-4">
-            NEUN is a Web3 job aggregator tracking 2,400+ open positions across the blockchain ecosystem.
-          </p>
-          <p className="text-base font-light text-a24-muted dark:text-a24-dark-muted">
-            We crawl 40+ data sources every 3 hours to bring you verified, VC-backed opportunities.
-            No scams, no rugs, no bs.
-          </p>
+          <h1 className="text-lg font-medium text-a24-text dark:text-a24-dark-text mb-4">
+            Our Story
+          </h1>
         </div>
         <Pixelbara pose="bling" size={120} clickable />
       </div>
 
-      {/* Pixelbara quote */}
-      <div className="p-4 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border">
-        <p className="text-sm text-a24-muted dark:text-a24-dark-muted italic">
-          &quot;we&apos;re just tryna help u get a job fr&quot; - pixelbara
-        </p>
+      <div className="border-t border-a24-border dark:border-a24-dark-border pt-10">
+        <div className="space-y-4 font-light leading-relaxed">
+          <p>
+            I used to be a recruiter.
+          </p>
+          <p>
+            Spent my days on hiring platforms, watching the same thing break over and over &mdash; great people falling for fake posts, companies that ghost after the interview, &quot;trust me bro&quot; everywhere. So I built NEUN. A job board you could actually trust.
+          </p>
+          <p>
+            The first answer was simple: only list jobs from VC-backed companies. a16z, Paradigm, Hashed &mdash; let the top-tier investors do the due diligence, and trust their judgment.
+          </p>
+          <p>
+            It worked. Kind of.
+          </p>
+          <p>
+            But here&apos;s the thing I couldn&apos;t unsee: trusting the VCs is still just outsourcing trust to someone else. It tells you a company raised money. It doesn&apos;t tell you the job post is real, that the role still exists, that they won&apos;t ghost you after three interviews. I&apos;d moved the trust around. I hadn&apos;t actually built it.
+          </p>
+          <p>
+            That&apos;s the question I got stuck on. Not &quot;how do I aggregate more jobs&quot; &mdash; anyone can crawl 40 sources (I do, every 3 hours). The real question is: how do you verify trust in hiring without just handing it to another middleman? Turns out that&apos;s hard. Cryptographically hard. The kind of problem where signaling theory and zero-knowledge proofs start to feel relevant, and where most easy answers quietly fall apart.
+          </p>
+          <p>
+            NEUN is where I think out loud about that. The job board works &mdash; real jobs, real companies, updated every 3 hours, a Telegram bot that actually finds you things. That part&apos;s table stakes. The interesting part is the question underneath it.
+          </p>
+          <p>
+            Pixelbara survived the 2022 bear market. 90% down, still vibing, still shipping. Same energy here &mdash; quietly building, sitting with the hard problem instead of pretending it&apos;s solved.
+          </p>
+          <p>
+            If any of this resonates &mdash; if you&apos;re building in Web3 hiring, trust infrastructure, or you just think the trust problem is as interesting as I do &mdash; let&apos;s talk.
+          </p>
+          <p>
+            <a href="mailto:dahye562@gmail.com" className="underline hover:text-a24-text dark:hover:text-a24-dark-text">
+              dahye562@gmail.com
+            </a>
+          </p>
+          <p className="text-a24-muted dark:text-a24-dark-muted italic">
+            &quot;down bad but still building&quot; &mdash; pixelbara
+          </p>
+        </div>
       </div>
 
       <div className="border-t border-a24-border dark:border-a24-dark-border pt-10">
         <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
-          The Problem
+          What NEUN Does
         </h2>
         <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-5" />
-        <p className="font-light leading-relaxed mb-4">
-          Web3 job hunting is a mess. Scam projects everywhere. Fake job posts.
-          Companies that rug after you join. LinkedIn is scary. Twitter is chaotic.
-        </p>
-        <p className="font-light leading-relaxed">
-          We got tired of seeing talented people fall for fake opportunities.
-          So we built NEUN &mdash; a job board you can actually trust.
-        </p>
-      </div>
-
-      <div className="border-t border-a24-border dark:border-a24-dark-border pt-10">
-        <h2 className="text-[11px] font-light uppercase tracking-[0.35em] text-a24-muted dark:text-a24-dark-muted mb-1">
-          Our Solution
-        </h2>
-        <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-5" />
-        <p className="font-light leading-relaxed mb-4">
-          We only list jobs from VC-backed companies. a16z, Paradigm, Hashed, and 40+ other
-          top-tier investors have done the due diligence. We trust their judgment.
-        </p>
         <ul className="space-y-2 text-a24-muted dark:text-a24-dark-muted">
           <li className="flex items-center gap-2">
             <span className="text-neun-success">✓</span> 2,400+ active positions from VC-backed companies
@@ -59,13 +69,13 @@ export default function OurStoryPage() {
             <span className="text-neun-success">✓</span> 40+ data sources crawled every 3 hours
           </li>
           <li className="flex items-center gap-2">
-            <span className="text-neun-success">✓</span> Real companies with real products &mdash; verified by Tier 1 VCs
-          </li>
-          <li className="flex items-center gap-2">
             <span className="text-neun-success">✓</span> Direct links to official career pages
           </li>
           <li className="flex items-center gap-2">
             <span className="text-neun-success">✓</span> Market intelligence dashboard with skill trends &amp; salary data
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-neun-success">✓</span> Telegram bot for natural language job search
           </li>
         </ul>
       </div>
@@ -154,7 +164,7 @@ export default function OurStoryPage() {
         </h2>
         <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-5" />
         <p className="font-light text-a24-muted dark:text-a24-dark-muted tracking-wide mb-2">
-          Email: neun@neun.wtf
+          Email: dahye562@gmail.com
         </p>
         <p className="font-light text-a24-muted dark:text-a24-dark-muted tracking-wide mb-4">
           Twitter: @neunwtf
