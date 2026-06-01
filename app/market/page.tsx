@@ -33,10 +33,10 @@ export default function MarketPage() {
         {/* Page Header */}
         <section className="text-center py-8 sm:py-12">
           <h1 className="text-2xl sm:text-3xl font-light uppercase tracking-[0.25em] text-a24-text dark:text-a24-dark-text mb-3">
-            Web3 채용 시장 트렌드
+            Web3 Job Market Trends
           </h1>
           <p className="text-sm text-a24-muted dark:text-a24-dark-muted font-light max-w-lg mx-auto">
-            실시간 채용 데이터, 스킬 수요, 시장 시그널
+            Real-time hiring data, skill demand, and market signals
           </p>
           <div className="w-12 h-px bg-neun-success mx-auto mt-6" />
         </section>
@@ -81,7 +81,7 @@ export default function MarketPage() {
         {/* Footer note */}
         <div className="text-center mt-6">
           <p className="text-[9px] text-a24-muted/30 dark:text-a24-dark-muted/30 uppercase tracking-[0.3em] font-light">
-            매시간 업데이트 · 모든 활성 공고 기준
+            Updated hourly · Based on all active listings
           </p>
         </div>
 

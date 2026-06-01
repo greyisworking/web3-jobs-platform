@@ -5,7 +5,7 @@ export default function NoticePage() {
         Coming Soon
       </p>
       <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted tracking-wide">
-        공지사항은 곧 업데이트될 예정입니다.
+        Notices will be updated soon.
       </p>
     </div>
   )

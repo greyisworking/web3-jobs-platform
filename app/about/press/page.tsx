@@ -5,7 +5,7 @@ export default function PressPage() {
         Coming Soon
       </p>
       <p className="text-sm font-light text-a24-muted dark:text-a24-dark-muted tracking-wide">
-        보도자료 및 미디어 관련 내용은 곧 업데이트될 예정입니다.
+        Press and media content will be updated soon.
       </p>
     </div>
   )

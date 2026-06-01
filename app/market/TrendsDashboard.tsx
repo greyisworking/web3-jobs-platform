@@ -41,10 +41,10 @@ interface SkillsData {
 }
 
 const SKILL_TABS: { label: string; value: SkillCategory }[] = [
-  { label: '언어', value: 'languages' },
-  { label: '체인', value: 'chains' },
-  { label: '도구', value: 'tools' },
-  { label: '도메인', value: 'domains' },
+  { label: 'Languages', value: 'languages' },
+  { label: 'Chains', value: 'chains' },
+  { label: 'Tools', value: 'tools' },
+  { label: 'Domains', value: 'domains' },
 ]
 
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name?: string }>; label?: string }) {
@@ -54,7 +54,7 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
       <p className="text-xs font-medium text-a24-text dark:text-a24-dark-text">{label}</p>
       {payload.map((p, i) => (
         <p key={i} className="text-[11px] text-a24-muted dark:text-a24-dark-muted">
-          {p.value.toLocaleString()}개
+          {p.value.toLocaleString()}
         </p>
       ))}
     </div>
@@ -68,7 +68,7 @@ function PieTooltip({ active, payload }: { active?: boolean; payload?: Array<{ n
     <div className="px-3 py-2 rounded border border-a24-border dark:border-a24-dark-border bg-a24-bg dark:bg-a24-dark-bg shadow-lg">
       <p className="text-xs font-medium text-a24-text dark:text-a24-dark-text">{d.name}</p>
       <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted">
-        {d.value.toLocaleString()}개
+        {d.value.toLocaleString()}
       </p>
     </div>
   )
@@ -115,11 +115,11 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
       <div className="flex items-center justify-between mb-5">
         <div>
           <h2 className="text-sm font-semibold tracking-wide uppercase text-a24-text dark:text-a24-dark-text">
-            시장 트렌드
+            Market Trends
           </h2>
           {data && (
             <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted mt-0.5">
-              활성 공고 {data.totalJobs.toLocaleString()}개
+              {data.totalJobs.toLocaleString()} active listings
             </p>
           )}
         </div>
@@ -147,7 +147,7 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
         }`}
       >
         {/* 1. Weekly New Jobs — full width */}
-        <ChartCard title="주간 신규 공고" className="lg:col-span-2">
+        <ChartCard title="Weekly New Listings" className="lg:col-span-2">
           {data?.weeklyJobs && (
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={data.weeklyJobs} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
@@ -183,7 +183,7 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
         </ChartCard>
 
         {/* 2. Source Breakdown — donut */}
-        <ChartCard title="소스별 분포">
+        <ChartCard title="Distribution by Source">
           {data?.sourceBreakdown && (
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
@@ -208,7 +208,7 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
         </ChartCard>
 
         {/* 3. Work Type — donut */}
-        <ChartCard title="리모트 / 오피스 / 하이브리드">
+        <ChartCard title="Remote / Onsite / Hybrid">
           {data?.workType && (
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
@@ -233,7 +233,7 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
         </ChartCard>
 
         {/* 4. Top Hiring Companies — horizontal bar */}
-        <ChartCard title="채용 Top 기업">
+        <ChartCard title="Top Hiring Companies">
           {data?.topCompanies && (
             <ResponsiveContainer width="100%" height={Math.max(300, data.topCompanies.length * 24)}>
               <BarChart data={data.topCompanies} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
@@ -258,7 +258,7 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
         </ChartCard>
 
         {/* 5. Location Breakdown — horizontal bar */}
-        <ChartCard title="지역별 분포">
+        <ChartCard title="Distribution by Region">
           {data?.locationBreakdown && (
             <ResponsiveContainer width="100%" height={Math.max(300, data.locationBreakdown.length * 24)}>
               <BarChart data={data.locationBreakdown} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
@@ -287,7 +287,7 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
       <div className={`mt-8 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-sm font-semibold tracking-wide uppercase text-a24-text dark:text-a24-dark-text">
-            기술 스택 분석
+            Tech Stack Analysis
           </h2>
           <div className="flex gap-1">
             {SKILL_TABS.map((tab) => (
@@ -308,7 +308,7 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* 6. Skill Ranking Bar Chart */}
-          <ChartCard title={`${SKILL_TABS.find(t => t.value === skillCategory)?.label} 랭킹`}>
+          <ChartCard title={`${SKILL_TABS.find(t => t.value === skillCategory)?.label} Ranking`}>
             {skillsData?.[skillCategory] && skillsData[skillCategory].length > 0 && (
               <ResponsiveContainer width="100%" height={Math.max(300, skillsData[skillCategory].length * 28)}>
                 <BarChart data={skillsData[skillCategory]} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
@@ -333,7 +333,7 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
           </ChartCard>
 
           {/* 7. Skill by Level Table */}
-          <ChartCard title="경력별 스킬 분포">
+          <ChartCard title="Skills by Experience Level">
             {skillsData && (
               <SkillLevelTable
                 skills={skillsData[skillCategory]}

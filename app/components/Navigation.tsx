@@ -388,6 +388,7 @@ export default function Navigation() {
               items={jobsDropdownItems}
               isActive={isJobsActive}
             />
+            <Link href="/market" className={`${linkClass(isActive('/market'))} font-medium`}>Intelligence</Link>
             <a
               href="https://t.me/neunwtf_bot"
               target="_blank"
@@ -448,6 +449,13 @@ export default function Navigation() {
                 isActive={isJobsActive}
                 onClose={() => setMobileMenuOpen(false)}
               />
+              <Link
+                href="/market"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/market'))} font-medium`}
+              >
+                Intelligence
+              </Link>
               {(mobileUser || address) && (
                 <Link
                   href="/account"

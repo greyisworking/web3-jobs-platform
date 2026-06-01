@@ -24,10 +24,10 @@ interface SkillsData {
 }
 
 const SKILL_TABS: { label: string; value: SkillCategory }[] = [
-  { label: '언어', value: 'languages' },
-  { label: '체인', value: 'chains' },
-  { label: '도구', value: 'tools' },
-  { label: '도메인', value: 'domains' },
+  { label: 'Languages', value: 'languages' },
+  { label: 'Chains', value: 'chains' },
+  { label: 'Tools', value: 'tools' },
+  { label: 'Domains', value: 'domains' },
 ]
 
 const LEVELS = ['entry', 'mid', 'senior', 'lead'] as const
@@ -135,7 +135,7 @@ export default function SkillHeatmap({
         </h2>
         {data && (
           <span className="text-[11px] text-a24-muted dark:text-a24-dark-muted">
-            {data.totalJobs.toLocaleString()}개 공고 기준
+            Based on {data.totalJobs.toLocaleString()} listings
           </span>
         )}
       </div>
@@ -239,7 +239,7 @@ export default function SkillHeatmap({
                     colSpan={LEVELS.length + 1}
                     className="py-6 text-center text-a24-muted dark:text-a24-dark-muted text-xs"
                   >
-                    데이터가 없습니다
+                    No data available
                   </td>
                 </tr>
               )}
@@ -261,7 +261,7 @@ export default function SkillHeatmap({
                 </p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-green-400 text-sm font-bold">
-                    {hoveredCell.count}건
+                    {hoveredCell.count}
                   </p>
                   {hoveredCell.prevCount > 0 && (
                     <span className={`text-[10px] font-medium ${
@@ -276,7 +276,7 @@ export default function SkillHeatmap({
                         ? `${Math.round(((hoveredCell.count - hoveredCell.prevCount) / hoveredCell.prevCount) * 100)}%`
                         : ''
                       }
-                      {' '}vs 전기
+                      {' '}vs prev
                     </span>
                   )}
                 </div>

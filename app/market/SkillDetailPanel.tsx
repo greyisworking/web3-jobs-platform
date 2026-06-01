@@ -24,7 +24,7 @@ interface SkillData {
 function formatSalary(amount: number): string {
   if (!amount || amount === 0) return '-'
   if (amount >= 1000000) {
-    return `₩${Math.round(amount / 10000).toLocaleString()}만`
+    return `₩${Math.round(amount / 10000).toLocaleString()}M`
   }
   return `$${Math.round(amount / 1000)}K`
 }
@@ -45,7 +45,7 @@ function SkillTooltip({ active, payload, label }: { active?: boolean; payload?: 
   return (
     <div className="px-3 py-2 rounded border border-a24-border dark:border-a24-dark-border bg-a24-bg dark:bg-a24-dark-bg shadow-lg">
       <p className="text-xs font-medium text-a24-text dark:text-a24-dark-text">{label}</p>
-      <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted">{payload[0].value}건</p>
+      <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted">{payload[0].value}</p>
     </div>
   )
 }
@@ -120,10 +120,10 @@ export default function SkillDetailPanel({ skillName, region, level }: SkillDeta
               <>
                 {/* Stat Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4">
-                  <StatCard label="공고 수" value={data.jobCount.toLocaleString()} suffix="개" />
-                  <StatCard label="평균 연봉" value={formatSalary(data.avgSalary[region as keyof typeof data.avgSalary] || data.avgSalary.all)} />
-                  <StatCard label="채용 1위" value={data.topCompanies[0]?.name || '-'} />
-                  <StatCard label="주간 추이" value={trendDirection} accent />
+                  <StatCard label="Listings" value={data.jobCount.toLocaleString()} />
+                  <StatCard label="Avg Salary" value={formatSalary(data.avgSalary[region as keyof typeof data.avgSalary] || data.avgSalary.all)} />
+                  <StatCard label="Top Hiring" value={data.topCompanies[0]?.name || '-'} />
+                  <StatCard label="Weekly Trend" value={trendDirection} accent />
                 </div>
 
                 {/* Trend Chart */}
@@ -150,7 +150,7 @@ export default function SkillDetailPanel({ skillName, region, level }: SkillDeta
                     href={`/jobs?q=${encodeURIComponent(skillName)}`}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neun-primary hover:text-white hover:bg-neun-primary/20 rounded transition-colors"
                   >
-                    이 스킬 공고 보기 →
+                    View jobs with this skill →
                   </Link>
                 </div>
               </>
