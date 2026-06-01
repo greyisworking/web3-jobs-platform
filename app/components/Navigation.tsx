@@ -387,6 +387,14 @@ export default function Navigation() {
             <Link href="/ecosystem" className={linkClass(isActive('/ecosystem'))}>Ecosystem</Link>
             <Link href="/market" className={linkClass(isActive('/market'))}>Market</Link>
             <Link href="/learn" className={linkClass(isActive('/learn'))}>Learn</Link>
+            <a
+              href="https://t.me/neunwtf_bot"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] uppercase tracking-[0.3em] font-semibold text-neun-success hover:brightness-125 transition-all"
+            >
+              Telegram
+            </a>
           </div>
 
           {/* Mobile: Logo */}
@@ -462,6 +470,16 @@ export default function Navigation() {
                   Logout
                 </button>
               )}
+
+              <a
+                href="https://t.me/neunwtf_bot"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-3 border-b border-a24-border text-[11px] uppercase tracking-[0.3em] font-semibold text-neun-success hover:brightness-125 transition-all"
+              >
+                Telegram
+              </a>
 
               <div className="pt-4 pb-2">
                 <div className="py-2">

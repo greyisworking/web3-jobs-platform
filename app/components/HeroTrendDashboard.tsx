@@ -132,7 +132,7 @@ export default function HeroTrendDashboard({ data }: HeroTrendDashboardProps) {
           </motion.div>
         )}
 
-        <div className="flex justify-center mt-2">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-2">
           <Link
             href="/market"
             className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] font-medium border border-neun-success/50 text-neun-success hover:bg-neun-success/10 px-5 py-2.5 rounded transition-all duration-200"
@@ -140,6 +140,15 @@ export default function HeroTrendDashboard({ data }: HeroTrendDashboardProps) {
             Deep dive into Market Intelligence
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1" />
           </Link>
+          <a
+            href="https://t.me/neunwtf_bot"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] font-medium border border-neun-success/50 text-neun-success hover:bg-neun-success/10 px-5 py-2.5 rounded transition-all duration-200"
+          >
+            Find jobs on Telegram
+            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+          </a>
         </div>
       </div>
     </section>
