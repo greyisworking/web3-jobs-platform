@@ -60,9 +60,11 @@ export default function SkillAdjacencyMap() {
         </div>
       </div>
 
-      {/* Insight placeholder */}
-      <p className="text-[12px] leading-relaxed text-a24-muted/70 dark:text-a24-dark-muted/70 italic mb-4">
-        [INSIGHT]
+      <p className="text-[12px] leading-relaxed text-a24-muted/70 dark:text-a24-dark-muted/70 italic mb-2">
+        Skills travel in pairs &mdash; and the pairs reveal the real jobs. Solidity rarely appears alone; it&apos;s paired with TypeScript (11), because writing contracts means wiring the dApp around them. The market doesn&apos;t hire &quot;a Solidity dev&quot; &mdash; it hires someone who ships the whole stack.
+      </p>
+      <p className="text-[10px] text-a24-muted/40 dark:text-a24-dark-muted/40 mb-4">
+        (Early signal &mdash; sample sizes are small, but the direction is consistent across the dataset.)
       </p>
 
       <div className="border border-a24-border dark:border-a24-dark-border rounded overflow-hidden">
@@ -114,11 +116,6 @@ export default function SkillAdjacencyMap() {
                               : 'transparent',
                           }}
                         />
-                        {count > 0 && (
-                          <span className="absolute inset-0 flex items-center justify-center text-[8px] font-medium text-white/80">
-                            {count}
-                          </span>
-                        )}
                       </td>
                     )
                   })}
