@@ -13,6 +13,7 @@ import {
   Building2,
 } from 'lucide-react'
 import { PRIORITY_COMPANIES, type PriorityCompany } from '@/lib/priority-companies'
+import { toSlug } from '@/lib/company-slug'
 import GlowBadge from '../components/GlowBadge'
 import Pixelbara from '../components/Pixelbara'
 import { useJobs } from '@/hooks/useJobs'
@@ -51,8 +52,13 @@ function CompanyCard({ company, index, jobCount }: CompanyCardProps) {
         {company.tier}
       </span>
 
-      <h3 className="text-lg font-semibold text-a24-text dark:text-a24-dark-text mb-2 pr-12">
-        {company.name}
+      <h3 className="text-lg font-semibold mb-2 pr-12">
+        <Link
+          href={`/ecosystem/${toSlug(company.name)}`}
+          className="text-a24-text dark:text-a24-dark-text hover:text-neun-success transition-colors"
+        >
+          {company.name}
+        </Link>
       </h3>
 
       <p className="text-[13px] text-a24-muted dark:text-a24-dark-muted flex items-center gap-1.5 mb-3">
