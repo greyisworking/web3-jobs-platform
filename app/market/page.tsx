@@ -5,6 +5,7 @@ import Footer from '@/app/components/Footer'
 import SkillHeatmap from './SkillHeatmap'
 import SkillDetailPanel from './SkillDetailPanel'
 import TrendsDashboard from './TrendsDashboard'
+import SkillAdjacencyMap from './SkillAdjacencyMap'
 
 const REGION_OPTIONS = [
   { label: 'All', value: 'all', icon: '🌐' },
@@ -77,6 +78,11 @@ export default function MarketPage() {
 
         {/* Trends Dashboard */}
         <TrendsDashboard region={region} level={selectedLevel} />
+
+        {/* Skill Adjacency Map */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <SkillAdjacencyMap />
+        </div>
 
         {/* Footer note */}
         <div className="text-center mt-6">

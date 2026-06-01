@@ -183,6 +183,7 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
         </ChartCard>
 
         {/* 2. Source Breakdown — donut */}
+        <Insight text="Solana looks like 29% of the market — but that's partly an artifact. Solana runs one official job board; Ethereum's hiring is scattered across hundreds of sites. This measures how aggregated an ecosystem's hiring is, not just how much it hires." />
         <ChartCard title="Distribution by Source">
           {data?.sourceBreakdown && (
             <ResponsiveContainer width="100%" height={240}>
@@ -208,6 +209,7 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
         </ChartCard>
 
         {/* 3. Work Type — donut */}
+        <Insight text="Web3 isn't remote-first — it's polarized. 55% onsite, 44% remote, only 1% hybrid. Companies pick a side: a hub city or fully distributed. The '3 days in office' middle ground barely exists." />
         <ChartCard title="Remote / Onsite / Hybrid">
           {data?.workType && (
             <ResponsiveContainer width="100%" height={240}>
@@ -333,6 +335,7 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
           </ChartCard>
 
           {/* 7. Skill by Level Table */}
+          <Insight text="Move's pyramid is upside down — 4 entry vs 93 mid roles. The language is too young to have juniors. If you can already code, Move is the rare market where switching in lands you at mid-level immediately." />
           <ChartCard title="Skills by Experience Level">
             {skillsData && (
               <SkillLevelTable
@@ -348,6 +351,14 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
 }
 
 // --- Sub-components ---
+
+function Insight({ text }: { text: string }) {
+  return (
+    <p className="lg:col-span-2 text-[12px] leading-relaxed text-a24-muted/70 dark:text-a24-dark-muted/70 italic px-1 -mb-3">
+      {text}
+    </p>
+  )
+}
 
 function ChartCard({ title, children, className = '' }: { title: string; children: React.ReactNode; className?: string }) {
   return (
