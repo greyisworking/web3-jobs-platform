@@ -138,14 +138,14 @@ export async function GET() {
     const thisWeekTotal = thisWeekJobs.length || 1
     const lastWeekTotal = lastWeekJobs.length || 1
 
-    const skillChanges: { name: string; count: number; changePercent: number }[] = []
+    const skillChanges: { name: string; count: number; changePercent: number | null }[] = []
     for (const [name, count] of thisWeekSkills) {
       const thisRate = count / thisWeekTotal
       const lastCount = lastWeekSkills.get(name) || 0
       const lastRate = lastCount / lastWeekTotal
       const changePercent = lastRate > 0
         ? Math.round(((thisRate - lastRate) / lastRate) * 100)
-        : (count > 0 ? 100 : 0)
+        : null // No prior data — skip comparison
       skillChanges.push({ name, count, changePercent })
     }
 
@@ -153,14 +153,14 @@ export async function GET() {
     const hotSkills = skillChanges.slice(0, 3)
 
     const trendingUp = [...skillChanges]
-      .filter(s => s.changePercent > 0)
-      .sort((a, b) => b.changePercent - a.changePercent)[0]
-      || { name: hotSkills[0]?.name || '-', changePercent: 0 }
+      .filter(s => s.changePercent !== null && s.changePercent > 0)
+      .sort((a, b) => (b.changePercent ?? 0) - (a.changePercent ?? 0))[0]
+      || null
 
     const coolingDown = [...skillChanges]
-      .filter(s => s.changePercent < 0)
-      .sort((a, b) => a.changePercent - b.changePercent)[0]
-      || { name: '-', changePercent: 0 }
+      .filter(s => s.changePercent !== null && s.changePercent < 0)
+      .sort((a, b) => (a.changePercent ?? 0) - (b.changePercent ?? 0))[0]
+      || null
 
     // -- Market Pulse (from count queries) --
     const totalJobs = totalCountRes.count ?? 0
@@ -169,7 +169,7 @@ export async function GET() {
 
     const totalChange = newLastWeek > 0
       ? Math.round(((newThisWeek - newLastWeek) / newLastWeek) * 100)
-      : (newThisWeek > 0 ? 100 : 0)
+      : null
 
     const remoteCount = remoteCountRes.count ?? 0
     const remoteRate = totalJobs > 0 ? Math.round((remoteCount / totalJobs) * 100) : 0
@@ -193,8 +193,8 @@ export async function GET() {
 
     const response = NextResponse.json({
       hotSkills,
-      trendingUp: { name: trendingUp.name, changePercent: trendingUp.changePercent },
-      coolingDown: { name: coolingDown.name, changePercent: coolingDown.changePercent },
+      trendingUp: trendingUp ? { name: trendingUp.name, changePercent: trendingUp.changePercent } : null,
+      coolingDown: coolingDown ? { name: coolingDown.name, changePercent: coolingDown.changePercent } : null,
       marketPulse: {
         totalJobs,
         newThisWeek,

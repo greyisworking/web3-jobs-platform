@@ -52,8 +52,8 @@ function useCountUp(target: number, duration = 1200) {
   return { value, ref }
 }
 
-function ChangeBadge({ value }: { value: number }) {
-  if (value === 0) return null
+function ChangeBadge({ value }: { value: number | null }) {
+  if (value === null || value === 0) return null
   const isPositive = value > 0
   return (
     <span className={`inline-flex items-center gap-0.5 text-sm sm:text-base font-bold ${isPositive ? 'text-neun-success' : 'text-red-400'}`}>
@@ -100,20 +100,24 @@ export default function HeroTrendDashboard({ data }: HeroTrendDashboardProps) {
 
       {/* Section 2: Trend Cards + Pixelbara */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pb-3">
-        <TrendCard
-          label="Trending Up"
-          icon={<TrendingUp className="w-3 h-3" />}
-          value={data.trendingUp.name}
-          change={data.trendingUp.changePercent}
-          positive
-        />
-        <TrendCard
-          label="Cooling Down"
-          icon={<TrendingDown className="w-3 h-3" />}
-          value={data.coolingDown.name}
-          change={data.coolingDown.changePercent}
-          positive={false}
-        />
+        {data.trendingUp && (
+          <TrendCard
+            label="Trending Up"
+            icon={<TrendingUp className="w-3 h-3" />}
+            value={data.trendingUp.name}
+            change={data.trendingUp.changePercent}
+            positive
+          />
+        )}
+        {data.coolingDown && (
+          <TrendCard
+            label="Cooling Down"
+            icon={<TrendingDown className="w-3 h-3" />}
+            value={data.coolingDown.name}
+            change={data.coolingDown.changePercent}
+            positive={false}
+          />
+        )}
         <MarketPulseCard pulse={data.marketPulse} />
         <div className="hidden lg:flex items-center justify-center border border-a24-border dark:border-a24-dark-border rounded p-3">
           <Pixelbara pose="heroLaptop" size={120} clickable suppressHover />
@@ -165,7 +169,7 @@ function TrendCard({
   label: string
   icon: React.ReactNode
   value: string
-  change: number
+  change: number | null
   positive: boolean
 }) {
   return (
@@ -177,9 +181,11 @@ function TrendCard({
       <p className="text-2xl sm:text-3xl font-black text-a24-text dark:text-a24-dark-text">
         {value}
       </p>
-      <p className={`text-sm font-bold mt-1 ${positive ? 'text-neun-success' : 'text-red-400'}`}>
-        {positive ? '↑' : '↓'}{Math.abs(change)}%
-      </p>
+      {change !== null && (
+        <p className={`text-sm font-bold mt-1 ${positive ? 'text-neun-success' : 'text-red-400'}`}>
+          {positive ? '↑' : '↓'}{Math.abs(change)}%
+        </p>
+      )}
     </div>
   )
 }
@@ -205,7 +211,7 @@ function MarketPulseCard({
       </p>
       <div className="flex items-center gap-3 mt-1 text-xs text-a24-muted dark:text-a24-dark-muted">
         <span>+{pulse.newThisWeek} this week
-          {pulse.totalChange !== 0 && (
+          {pulse.totalChange !== null && pulse.totalChange !== 0 && (
             <span className={pulse.totalChange > 0 ? 'text-neun-success' : 'text-red-400'}>
               {' '}{pulse.totalChange > 0 ? '↑' : '↓'}{Math.abs(pulse.totalChange)}%
             </span>

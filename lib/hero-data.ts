@@ -1,14 +1,14 @@
 import { createPublicSupabaseClient } from '@/lib/supabase-public'
 
 export interface HeroData {
-  hotSkills: { name: string; count: number; changePercent: number }[]
-  trendingUp: { name: string; changePercent: number }
-  coolingDown: { name: string; changePercent: number }
+  hotSkills: { name: string; count: number; changePercent: number | null }[]
+  trendingUp: { name: string; changePercent: number | null } | null
+  coolingDown: { name: string; changePercent: number | null } | null
   marketPulse: {
     totalJobs: number
     newThisWeek: number
     remoteRate: number
-    totalChange: number
+    totalChange: number | null
     remoteChange: number
   }
   weeklyTrend: { week: string; count: number }[]
@@ -16,13 +16,13 @@ export interface HeroData {
 
 const FALLBACK_DATA: HeroData = {
   hotSkills: [
-    { name: 'Solidity', count: 0, changePercent: 0 },
-    { name: 'Rust', count: 0, changePercent: 0 },
-    { name: 'TypeScript', count: 0, changePercent: 0 },
+    { name: 'Solidity', count: 0, changePercent: null },
+    { name: 'Rust', count: 0, changePercent: null },
+    { name: 'TypeScript', count: 0, changePercent: null },
   ],
-  trendingUp: { name: 'Solidity', changePercent: 0 },
-  coolingDown: { name: '-', changePercent: 0 },
-  marketPulse: { totalJobs: 2400, newThisWeek: 0, remoteRate: 0, totalChange: 0, remoteChange: 0 },
+  trendingUp: null,
+  coolingDown: null,
+  marketPulse: { totalJobs: 2400, newThisWeek: 0, remoteRate: 0, totalChange: null, remoteChange: 0 },
   weeklyTrend: [],
 }
 
@@ -164,14 +164,14 @@ export async function getHeroData(): Promise<HeroData> {
     const thisWeekTotal = thisWeekJobs.length || 1
     const lastWeekTotal = lastWeekJobs.length || 1
 
-    const skillChanges: { name: string; count: number; changePercent: number }[] = []
+    const skillChanges: { name: string; count: number; changePercent: number | null }[] = []
     for (const [name, count] of thisWeekSkills) {
       const thisRate = count / thisWeekTotal
       const lastCount = lastWeekSkills.get(name) || 0
       const lastRate = lastCount / lastWeekTotal
       const changePercent = lastRate > 0
         ? Math.round(((thisRate - lastRate) / lastRate) * 100)
-        : (count > 0 ? 100 : 0)
+        : null
       skillChanges.push({ name, count, changePercent })
     }
 
@@ -179,14 +179,14 @@ export async function getHeroData(): Promise<HeroData> {
     const hotSkills = skillChanges.slice(0, 3)
 
     const trendingUp = [...skillChanges]
-      .filter(s => s.changePercent > 0)
-      .sort((a, b) => b.changePercent - a.changePercent)[0]
-      || { name: hotSkills[0]?.name || '-', changePercent: 0 }
+      .filter(s => s.changePercent !== null && s.changePercent > 0)
+      .sort((a, b) => (b.changePercent ?? 0) - (a.changePercent ?? 0))[0]
+      || null
 
     const coolingDown = [...skillChanges]
-      .filter(s => s.changePercent < 0)
-      .sort((a, b) => a.changePercent - b.changePercent)[0]
-      || { name: '-', changePercent: 0 }
+      .filter(s => s.changePercent !== null && s.changePercent < 0)
+      .sort((a, b) => (a.changePercent ?? 0) - (b.changePercent ?? 0))[0]
+      || null
 
     // -- Market Pulse (from count queries) --
     const totalJobs = totalCountRes.count ?? 0
@@ -195,7 +195,7 @@ export async function getHeroData(): Promise<HeroData> {
 
     const totalChange = newLastWeek > 0
       ? Math.round(((newThisWeek - newLastWeek) / newLastWeek) * 100)
-      : (newThisWeek > 0 ? 100 : 0)
+      : null
 
     const remoteCount = remoteCountRes.count ?? 0
     const remoteRate = totalJobs > 0 ? Math.round((remoteCount / totalJobs) * 100) : 0
@@ -219,8 +219,8 @@ export async function getHeroData(): Promise<HeroData> {
 
     return {
       hotSkills,
-      trendingUp: { name: trendingUp.name, changePercent: trendingUp.changePercent },
-      coolingDown: { name: coolingDown.name, changePercent: coolingDown.changePercent },
+      trendingUp: trendingUp ? { name: trendingUp.name, changePercent: trendingUp.changePercent } : null,
+      coolingDown: coolingDown ? { name: coolingDown.name, changePercent: coolingDown.changePercent } : null,
       marketPulse: {
         totalJobs,
         newThisWeek,
