@@ -382,14 +382,12 @@ export default function Navigation() {
             {/* Logo - clicks to home */}
             <NeunLogo className="mr-2" />
 
+            <Link href="/about/story" className={linkClass(isActive('/about'))}>About</Link>
             <NavDropdown
               label="Jobs"
               items={jobsDropdownItems}
               isActive={isJobsActive}
             />
-            <Link href="/ecosystem" className={linkClass(isActive('/ecosystem'))}>Ecosystem</Link>
-            <Link href="/market" className={linkClass(isActive('/market'))}>Market</Link>
-            <Link href="/learn" className={linkClass(isActive('/learn'))}>Learn</Link>
             <a
               href="https://t.me/neunwtf_bot"
               target="_blank"
@@ -397,6 +395,14 @@ export default function Navigation() {
               className="text-[11px] uppercase tracking-[0.3em] font-semibold text-neun-success hover:brightness-125 transition-all"
             >
               Telegram
+            </a>
+            <a
+              href="https://github.com/greyisworking/web3-jobs-platform"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={linkClass(false)}
+            >
+              GitHub
             </a>
           </div>
 
@@ -429,33 +435,19 @@ export default function Navigation() {
         {mobileMenuOpen && (
           <div id="mobile-navigation" className="md:hidden border-t border-a24-border dark:border-a24-dark-border bg-a24-surface/95">
             <nav aria-label="Mobile navigation" className="max-w-6xl mx-auto px-6 py-2">
+              <Link
+                href="/about/story"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/about'))}`}
+              >
+                About
+              </Link>
               <MobileAccordion
                 label="Jobs"
                 items={jobsDropdownItems}
                 isActive={isJobsActive}
                 onClose={() => setMobileMenuOpen(false)}
               />
-              <Link
-                href="/ecosystem"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/ecosystem'))}`}
-              >
-                Ecosystem
-              </Link>
-              <Link
-                href="/market"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/market'))}`}
-              >
-                Market
-              </Link>
-              <Link
-                href="/learn"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block py-3 border-b border-a24-border ${linkClass(isActive('/learn'))}`}
-              >
-                Learn
-              </Link>
               {(mobileUser || address) && (
                 <Link
                   href="/account"
@@ -482,6 +474,15 @@ export default function Navigation() {
                 className="block py-3 border-b border-a24-border text-[11px] uppercase tracking-[0.3em] font-semibold text-neun-success hover:brightness-125 transition-all"
               >
                 Telegram
+              </a>
+              <a
+                href="https://github.com/greyisworking/web3-jobs-platform"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block py-3 border-b border-a24-border ${linkClass(false)}`}
+              >
+                GitHub
               </a>
 
               <div className="pt-4 pb-2">

@@ -46,6 +46,9 @@ export default function OurStoryPage() {
             If any of this resonates &mdash; if you&apos;re building in Web3 hiring, trust infrastructure, or you just think the trust problem is as interesting as I do &mdash; let&apos;s talk.
           </p>
           <p>
+            And if you read code and want to actually build this with someone: even more so. I&apos;ve taken NEUN as far as one person reasonably can. The next part isn&apos;t a solo job.
+          </p>
+          <p>
             <a href="mailto:dahye562@gmail.com" className="underline hover:text-a24-text dark:hover:text-a24-dark-text">
               dahye562@gmail.com
             </a>
