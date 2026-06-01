@@ -17,24 +17,42 @@ const KO_EN_MAP: Record<string, string> = {
   '디자이너': 'designer',
   '마케팅': 'marketing',
   '프론트엔드': 'frontend',
+  '프론트': 'frontend',
   '백엔드': 'backend',
+  '백': 'backend',
   '풀스택': 'fullstack',
+  '데브옵스': 'devops',
   '데이터': 'data',
+  '리서치': 'research',
+  '리서처': 'research',
+  '그로스': 'growth',
+  '세일즈': 'sales',
+  '영업': 'sales',
+  'BD': 'business development',
+  '사업개발': 'business development',
+  'PM': 'product manager',
+  '프로덕트매니저': 'product manager',
+  '오퍼레이션': 'operations',
+  '운영': 'operations',
   '분석가': 'analyst',
   '기획자': 'product',
-  '운영': 'operations',
-  '영업': 'sales',
-  '리서처': 'researcher',
   '보안': 'security',
   '인프라': 'infrastructure',
   '디파이': 'defi',
   '솔리디티': 'solidity',
+  '러스트': 'rust',
   '블록체인': 'blockchain',
   // remote 키워드 (제거용 — remote 플래그로 처리)
   '리모트': '',
   '원격': '',
   '재택': '',
 }
+
+// 불용어 (검색에 불필요한 단어)
+const STOPWORDS = new Set([
+  '공고', '구함', '있어', '보여줘', '찾아줘', '자리', '채용', '잡',
+  '알려줘', '검색', '찾기', '뭐', '좀', '해줘', '줘', '있나', '있어요',
+])
 
 const REMOTE_KEYWORDS = /리모트|원격|재택|remote/i
 
@@ -48,16 +66,19 @@ function parseWithMapping(message: string): ParsedQuery {
   const translated: string[] = []
 
   for (const word of words) {
+    // 불용어 제거
+    if (STOPWORDS.has(word)) continue
+
     const lower = word.toLowerCase()
     // 영문은 그대로 통과
     if (/^[a-z0-9\-_/]+$/i.test(word)) {
       if (!REMOTE_KEYWORDS.test(word)) translated.push(lower)
       continue
     }
-    // 한글 → 매핑 테이블에서 변환
-    const mapped = KO_EN_MAP[word]
+    // 한글 → 매핑 테이블에서 변환 (원문 + 대문자 변형 둘 다 시도)
+    const mapped = KO_EN_MAP[word] ?? KO_EN_MAP[word.toUpperCase()]
     if (mapped !== undefined) {
-      if (mapped !== '') translated.push(mapped) // 빈 문자열 = remote 키워드 제거
+      if (mapped !== '') translated.push(mapped)
     } else {
       // 매핑에 없는 한글은 그대로 (부분 매칭 시도)
       translated.push(word)
