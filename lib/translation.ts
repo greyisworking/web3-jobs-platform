@@ -44,6 +44,7 @@ const KOREAN_COMPANY_NAMES: Record<string, string> = {
   '오더바이': 'OrderBy',
   '비하베스트': 'BeHarvest',
   '디플래닛': 'DPlanet',
+  '디파이너리': 'DeFinery',
   '메타스타': 'MetaStar',
   '에이비랩스': 'AB Labs',
   '제이앤더블유랩스': 'J&W Labs',
@@ -283,6 +284,7 @@ const KOREAN_JOB_TERMS: Record<string, string> = {
   '가상자산': 'Digital Asset',
   '수탁': 'Custody',
   '사업개발': 'Business Development',
+  '세일즈': 'Sales',
   '영업': 'Sales',
   '파트너십': 'Partnership',
   '재무': 'Finance',
@@ -337,6 +339,37 @@ const KOREAN_JOB_TERMS: Record<string, string> = {
   '인공지능': 'AI',
   '머신러닝': 'Machine Learning',
   '딥러닝': 'Deep Learning',
+
+  // Job titles - Extended
+  '시스템': 'System',
+  '운용': 'Operations',
+  '퀀트': 'Quant',
+  '차익거래': 'Arbitrage Trading',
+  '사업관리': 'Business Management',
+  '기획': 'Planning',
+  '디지털자산': 'Digital Asset',
+  '트레이딩': 'Trading',
+  '리스크': 'Risk',
+  '감사': 'Audit',
+  '자금': 'Treasury',
+  '결제': 'Payment',
+  '정산': 'Settlement',
+  '상장': 'Listing',
+  '심사': 'Review',
+  '고객': 'Customer',
+  '지원': 'Support',
+  '관리': 'Management',
+  '파트': 'Part',
+  '센터': 'Center',
+  '연구원': 'Researcher',
+  '자산운용': 'Asset Management',
+  '스테이블코인': 'Stablecoin',
+  '지급결제': 'Payment',
+  '준법감시인': 'Compliance Officer',
+  '책임': 'Senior',
+  '수석': 'Principal',
+  '실행': 'Execution',
+  '응용': 'Applied',
 
   // Employment terms
   '경력': '',
@@ -629,12 +662,37 @@ export function translateSalary(salary: string | null | undefined): string | nul
 export function translateJobTitle(title: string): string {
   if (!containsKorean(title)) return title
 
-  let translated = quickTranslateTerms(title)
+  // Pre-process: translate bracketed company names before term matching
+  // e.g. "[디파이너리] Backend" → "[DeFinery] Backend"
+  let preprocessed = title.replace(/\[([^\]]+)\]/g, (_match, inner) => {
+    const companyName = translateCompanyName(inner.trim())
+    return `[${companyName}]`
+  })
+
+  let translated = quickTranslateTerms(preprocessed)
 
   // Remove any remaining Korean characters and clean up
   translated = stripKorean(translated)
-  translated = translated.replace(/^\s*[-–]\s*/, '').trim()
-  translated = translated.replace(/\s*[-–]\s*$/, '').trim()
+
+  // Fix compound words: insert space between joined English words
+  // e.g. "Business SupportTeam Lead" → "Business Support Team Lead"
+  // But preserve known compounds: DeFi, DevOps, etc.
+  translated = translated.replace(/([a-z])([A-Z])/g, '$1 $2')
+  // Restore known compounds that shouldn't be split
+  translated = translated.replace(/De Fi/g, 'DeFi')
+  translated = translated.replace(/Dev Ops/g, 'DevOps')
+  translated = translated.replace(/Type Script/g, 'TypeScript')
+  translated = translated.replace(/Java Script/g, 'JavaScript')
+  translated = translated.replace(/Next\.js/g, 'Next.js')
+  translated = translated.replace(/Game Fi/g, 'GameFi')
+  translated = translated.replace(/Full Stack/g, 'Full Stack')
+
+  // Clean up leading/trailing dashes and excessive whitespace
+  translated = translated.replace(/^\s*[-–/]\s*/, '').trim()
+  translated = translated.replace(/\s*[-–/]\s*$/, '').trim()
+  // Clean empty parentheses: ( / ), ( ), ()
+  translated = translated.replace(/\(\s*[/·]*\s*\)/g, '').trim()
+  translated = translated.replace(/\s{2,}/g, ' ')
 
   return translated
 }
