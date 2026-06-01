@@ -31,89 +31,99 @@ interface CompanyCardProps {
 
 function CompanyCard({ company, index, jobCount }: CompanyCardProps) {
   const [hovered, setHovered] = useState(false)
+  const isHiring = jobCount > 0
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.35, delay: (index % 6) * 0.06, ease: [0.22, 1, 0.36, 1] }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="group relative p-6 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border hover:-translate-y-1 transition-all duration-300"
+    <Link
+      href={`/ecosystem/${toSlug(company.name)}`}
+      className="block h-full"
     >
-      <span className={`absolute top-3 right-3 px-2 py-0.5 text-[10px] font-medium tracking-wider ${
-        company.tier === 'P0'
-          ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
-          : company.tier === 'P1'
-            ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
-            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-      }`}>
-        {company.tier}
-      </span>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-50px' }}
+        transition={{ duration: 0.35, delay: (index % 6) * 0.06, ease: [0.22, 1, 0.36, 1] }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className={`group relative h-full flex flex-col p-6 border cursor-pointer transition-all duration-300 ${
+          isHiring
+            ? 'bg-a24-surface dark:bg-a24-dark-surface border-a24-border dark:border-a24-dark-border hover:-translate-y-1 hover:border-neun-success/50'
+            : 'bg-a24-surface/60 dark:bg-a24-dark-surface/60 border-a24-border/60 dark:border-a24-dark-border/60 opacity-75 hover:opacity-90 hover:-translate-y-0.5'
+        }`}
+      >
+        {/* Top section: fixed content */}
+        <span className={`absolute top-3 right-3 px-2 py-0.5 text-[10px] font-medium tracking-wider ${
+          company.tier === 'P0'
+            ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
+            : company.tier === 'P1'
+              ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+        }`}>
+          {company.tier}
+        </span>
 
-      <h3 className="text-lg font-semibold mb-2 pr-12">
-        <Link
-          href={`/ecosystem/${toSlug(company.name)}`}
-          className="text-a24-text dark:text-a24-dark-text hover:text-neun-success transition-colors"
-        >
+        <h3 className={`text-lg font-semibold mb-2 pr-12 transition-colors ${
+          isHiring
+            ? 'text-a24-text dark:text-a24-dark-text group-hover:text-neun-success'
+            : 'text-a24-text/70 dark:text-a24-dark-text/70 group-hover:text-a24-text dark:group-hover:text-a24-dark-text'
+        }`}>
           {company.name}
-        </Link>
-      </h3>
+        </h3>
 
-      <p className="text-[13px] text-a24-muted dark:text-a24-dark-muted flex items-center gap-1.5 mb-3">
-        <Briefcase className="w-3.5 h-3.5" />
-        {company.sector}
-      </p>
+        <p className="text-[13px] text-a24-muted dark:text-a24-dark-muted flex items-center gap-1.5 mb-3">
+          <Briefcase className="w-3.5 h-3.5" />
+          {company.sector}
+        </p>
 
-      <p className="text-[12px] text-a24-muted/70 dark:text-a24-dark-muted/70 flex items-center gap-1.5 mb-4">
-        <MapPin className="w-3 h-3" />
-        {company.office_location}
-      </p>
+        <p className="text-[12px] text-a24-muted/70 dark:text-a24-dark-muted/70 flex items-center gap-1.5 mb-4">
+          <MapPin className="w-3 h-3" />
+          {company.office_location}
+        </p>
 
-      {jobCount > 0 && (
-        <Link
-          href={`/jobs?company=${encodeURIComponent(company.name)}`}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] bg-neun-primary/10 text-neun-primary hover:bg-neun-primary/20 transition-colors rounded mb-3"
-        >
-          <span className="font-medium">{jobCount}</span>
-          <span>open positions</span>
-          <ArrowUpRight className="w-3 h-3" />
-        </Link>
-      )}
+        {/* Bottom section: pushed to bottom */}
+        <div className="mt-auto">
+          {isHiring ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] bg-neun-primary/10 text-neun-primary rounded mb-3">
+              <span className="font-medium">{jobCount}</span>
+              <span>open positions</span>
+              <ArrowUpRight className="w-3 h-3" />
+            </span>
+          ) : (
+            <span className="inline-block text-[11px] text-a24-muted/50 dark:text-a24-dark-muted/50 mb-3">
+              Not hiring now
+            </span>
+          )}
 
-      {company.backers.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {company.backers.map((backer) => (
-            <GlowBadge key={backer} name={backer} />
-          ))}
+          {company.backers.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {company.backers.map((backer) => (
+                <GlowBadge key={backer} name={backer} />
+              ))}
+            </div>
+          )}
+
+          {company.hasToken && (
+            <span className="inline-block px-2 py-0.5 text-[10px] bg-neun-success/10 dark:bg-neun-success/10 text-neun-success dark:text-neun-success/80 tracking-wider">
+              HAS TOKEN
+            </span>
+          )}
         </div>
-      )}
 
-      {company.hasToken && (
-        <span className="inline-block px-2 py-0.5 text-[10px] bg-neun-success/10 dark:bg-neun-success/10 text-neun-success dark:text-neun-success/80 tracking-wider">
-          HAS TOKEN
-        </span>
-      )}
+        {company.careerUrl && (
+          <span
+            className="absolute bottom-4 right-4 p-2 text-a24-muted dark:text-a24-dark-muted group-hover:text-neun-success transition-colors"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </span>
+        )}
 
-      {company.careerUrl && (
-        <Link
-          href={company.careerUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="absolute bottom-4 right-4 p-2 text-a24-muted dark:text-a24-dark-muted hover:text-neun-primary transition-colors"
-          title="View careers page"
-        >
-          <ExternalLink className="w-4 h-4" />
-        </Link>
-      )}
-
-      {hovered && (
-        <span className="absolute top-1 left-4 text-[9px] text-a24-muted/40 dark:text-a24-dark-muted/40 italic">
-          lowkey hiring rn
-        </span>
-      )}
-    </motion.div>
+        {hovered && isHiring && (
+          <span className="absolute top-1 left-4 text-[9px] text-a24-muted/40 dark:text-a24-dark-muted/40 italic">
+            lowkey hiring rn
+          </span>
+        )}
+      </motion.div>
+    </Link>
   )
 }
 
