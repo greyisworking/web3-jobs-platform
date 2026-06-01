@@ -54,7 +54,8 @@
     "newsletter": "tsx scripts/generate-weekly-newsletter.ts",
     "newsletter:output": "tsx scripts/generate-weekly-newsletter.ts --output",
     "fix:descriptions": "tsx scripts/fix-job-descriptions.ts",
-    "fix:descriptions:dry": "tsx scripts/fix-job-descriptions.ts --dry-run"
+    "fix:descriptions:dry": "tsx scripts/fix-job-descriptions.ts --dry-run",
+    "bot": "tsx bot/index.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.73.0",
@@ -93,6 +94,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
     "framer-motion": "^12.29.2",
+    "grammy": "^1.43.0",
     "html-entities": "^2.6.0",
     "lucide-react": "^0.563.0",
     "next": "^15.3.6",
