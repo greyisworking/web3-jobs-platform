@@ -166,8 +166,9 @@ function InvestorCard({ vc, index }: { vc: VCData; index: number }) {
     <Link href={`/investors/${slug}`} className="block h-full">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: index * 0.05 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-50px' }}
+        transition={{ duration: 0.35, delay: (index % 6) * 0.06, ease: [0.22, 1, 0.36, 1] }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         className="group relative h-full flex flex-col p-6 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border hover:-translate-y-1 hover:border-neun-success/50 transition-all duration-300 cursor-pointer"
@@ -182,11 +183,11 @@ function InvestorCard({ vc, index }: { vc: VCData; index: number }) {
           {vc.tier === 'top' ? 'TOP TIER' : vc.tier === 'major' ? 'MAJOR' : 'NOTABLE'}
         </span>
 
-        <h3 className="text-xl font-semibold text-a24-text dark:text-a24-dark-text mb-2 pr-20 group-hover:text-neun-success transition-colors">
+        <h3 className="text-lg font-semibold text-a24-text dark:text-a24-dark-text mb-2 pr-12 group-hover:text-neun-success transition-colors">
           {vc.name}
         </h3>
 
-        <p className="text-[13px] text-a24-muted dark:text-a24-dark-muted mb-4 line-clamp-2">
+        <p className="text-[13px] text-a24-muted dark:text-a24-dark-muted mb-3 line-clamp-2">
           {vc.description}
         </p>
 
