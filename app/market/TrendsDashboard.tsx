@@ -124,65 +124,40 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
           )}
         </div>
         <div className="flex gap-1">
-          {PERIODS.map((p) => (
+          {SKILL_TABS.map((tab) => (
             <button
-              key={p.value}
-              onClick={() => handlePeriod(p.value)}
+              key={tab.value}
+              onClick={() => setSkillCategory(tab.value)}
               className={`px-2.5 py-1 text-[10px] font-medium rounded transition-colors ${
-                period === p.value
+                skillCategory === tab.value
                   ? 'bg-neun-primary/20 text-neun-primary'
                   : 'text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text'
               }`}
             >
-              {p.label}
+              {tab.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Charts grid */}
+      {/* Core charts — ordered by insight value */}
       <div
         className={`grid grid-cols-1 lg:grid-cols-2 gap-5 transition-opacity duration-300 ${
           loading ? 'opacity-50' : 'opacity-100'
         }`}
       >
-        {/* 1. Weekly New Jobs — full width */}
-        <ChartCard title="Weekly New Listings" className="lg:col-span-2">
-          {data?.weeklyJobs && (
-            <ResponsiveContainer width="100%" height={220}>
-              <AreaChart data={data.weeklyJobs} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="weeklyGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#22C55E" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#22C55E" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis
-                  dataKey="week"
-                  tick={{ fontSize: 9, fill: '#94a3b8' }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 9, fill: '#64748b' }}
-                  axisLine={false}
-                  tickLine={false}
-                  width={40}
-                />
-                <Tooltip content={<ChartTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)' }} />
-                <Area
-                  type="monotone"
-                  dataKey="count"
-                  stroke="#22C55E"
-                  fill="url(#weeklyGrad)"
-                  strokeWidth={2}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+        {/* 1. Skills by Experience Level (+ Move insight) — full width */}
+        <Insight text="Move's pyramid is upside down — 4 entry vs 93 mid roles. The language is too young to have juniors. If you can already code, Move is the rare market where switching in lands you at mid-level immediately." />
+        <ChartCard title="Skills by Experience Level" className="lg:col-span-2">
+          {skillsData && (
+            <SkillLevelTable
+              skills={skillsData[skillCategory]}
+              byLevel={skillsData.byLevel}
+            />
           )}
         </ChartCard>
 
-        {/* 2. Source Breakdown — donut */}
+        {/* 2. Source Breakdown (+ Solana insight) */}
         <Insight text="Solana looks like 29% of the market — but that's partly an artifact. Solana runs one official job board; Ethereum's hiring is scattered across hundreds of sites. This measures how aggregated an ecosystem's hiring is, not just how much it hires." />
         <ChartCard title="Distribution by Source">
           {data?.sourceBreakdown && (
@@ -208,7 +183,7 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
           {data?.sourceBreakdown && <Legend items={data.sourceBreakdown} />}
         </ChartCard>
 
-        {/* 3. Work Type — donut */}
+        {/* 3. Work Type (+ polarization insight) */}
         <Insight text="Web3 isn't remote-first — it's polarized. 55% onsite, 44% remote, only 1% hybrid. Companies pick a side: a hub city or fully distributed. The '3 days in office' middle ground barely exists." />
         <ChartCard title="Remote / Onsite / Hybrid">
           {data?.workType && (
@@ -233,21 +208,16 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
           )}
           {data?.workType && <Legend items={data.workType} />}
         </ChartCard>
+      </div>
 
-        {/* 4. Top Hiring Companies — horizontal bar */}
+      {/* Secondary charts */}
+      <div className={`grid grid-cols-1 lg:grid-cols-2 gap-5 mt-8 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
         <ChartCard title="Top Hiring Companies">
           {data?.topCompanies && (
             <ResponsiveContainer width="100%" height={Math.max(300, data.topCompanies.length * 24)}>
               <BarChart data={data.topCompanies} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
                 <XAxis type="number" tick={{ fontSize: 9, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
-                  axisLine={false}
-                  tickLine={false}
-                  width={120}
-                />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={120} />
                 <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
                 <Bar dataKey="value" radius={[0, 3, 3, 0]} maxBarSize={16}>
                   {data.topCompanies.map((_, i) => (
@@ -259,20 +229,12 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
           )}
         </ChartCard>
 
-        {/* 5. Location Breakdown — horizontal bar */}
         <ChartCard title="Distribution by Region">
           {data?.locationBreakdown && (
             <ResponsiveContainer width="100%" height={Math.max(300, data.locationBreakdown.length * 24)}>
               <BarChart data={data.locationBreakdown} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
                 <XAxis type="number" tick={{ fontSize: 9, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
-                  axisLine={false}
-                  tickLine={false}
-                  width={100}
-                />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={100} />
                 <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
                 <Bar dataKey="value" radius={[0, 3, 3, 0]} maxBarSize={16}>
                   {data.locationBreakdown.map((_, i) => (
@@ -283,68 +245,6 @@ export default function TrendsDashboard({ region = 'all', level = null }: Trends
             </ResponsiveContainer>
           )}
         </ChartCard>
-      </div>
-
-      {/* Tech Stack Analysis */}
-      <div className={`mt-8 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-sm font-semibold tracking-wide uppercase text-a24-text dark:text-a24-dark-text">
-            Tech Stack Analysis
-          </h2>
-          <div className="flex gap-1">
-            {SKILL_TABS.map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setSkillCategory(tab.value)}
-                className={`px-2.5 py-1 text-[10px] font-medium rounded transition-colors ${
-                  skillCategory === tab.value
-                    ? 'bg-neun-primary/20 text-neun-primary'
-                    : 'text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {/* 6. Skill Ranking Bar Chart */}
-          <ChartCard title={`${SKILL_TABS.find(t => t.value === skillCategory)?.label} Ranking`}>
-            {skillsData?.[skillCategory] && skillsData[skillCategory].length > 0 && (
-              <ResponsiveContainer width="100%" height={Math.max(300, skillsData[skillCategory].length * 28)}>
-                <BarChart data={skillsData[skillCategory]} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
-                  <XAxis type="number" tick={{ fontSize: 9, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    tick={{ fontSize: 10, fill: '#94a3b8' }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={100}
-                  />
-                  <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-                  <Bar dataKey="value" radius={[0, 3, 3, 0]} maxBarSize={16}>
-                    {skillsData[skillCategory].map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.8} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </ChartCard>
-
-          {/* 7. Skill by Level Table */}
-          <Insight text="Move's pyramid is upside down — 4 entry vs 93 mid roles. The language is too young to have juniors. If you can already code, Move is the rare market where switching in lands you at mid-level immediately." />
-          <ChartCard title="Skills by Experience Level">
-            {skillsData && (
-              <SkillLevelTable
-                skills={skillsData[skillCategory]}
-                byLevel={skillsData.byLevel}
-              />
-            )}
-          </ChartCard>
-        </div>
       </div>
     </section>
   )
