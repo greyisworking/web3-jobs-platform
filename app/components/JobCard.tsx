@@ -84,33 +84,33 @@ const JobCard = memo(function JobCard({ job, index }: JobCardProps) {
         <Link
           href={`/jobs/${job.id}`}
           onClick={handleClick}
-          className="block p-3 sm:p-4 min-h-[130px] sm:h-[150px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border transition-all duration-300 ease-out group flex flex-col overflow-hidden rounded-sm hover:shadow-card-hover dark:hover:shadow-card-hover-dark hover:border-neun-success/40 dark:hover:border-neun-success/30"
+          className="block p-4 min-h-[140px] sm:h-[150px] bg-a24-surface dark:bg-a24-dark-surface border border-a24-border/50 dark:border-a24-dark-border/50 rounded-md transition-all duration-200 ease-out group flex flex-col overflow-hidden hover:border-neun-success/30 dark:hover:border-neun-success/20"
           aria-label={`View ${displayTitle} at ${displayCompany}`}
         >
           {/* Company + NEW badge */}
-          <div className="flex items-center gap-2 mb-2">
-            <p className="text-[13px] font-medium uppercase tracking-[0.15em] text-a24-muted dark:text-a24-dark-muted leading-tight truncate">
+          <div className="flex items-center gap-2 mb-1.5">
+            <p className="text-xs font-medium text-a24-muted/70 dark:text-a24-dark-muted/70 leading-tight truncate tracking-wide">
               {displayCompany}
             </p>
             {isNew && (
-              <span className="badge-new-emphasis px-1.5 py-0.5 border border-neun-primary/50 text-[9px] uppercase tracking-wider rounded-sm flex-shrink-0">
+              <span className="px-1.5 py-0.5 bg-neun-success/10 text-neun-success text-[9px] font-semibold tracking-wider rounded flex-shrink-0">
                 NEW
               </span>
             )}
           </div>
 
           {/* Title */}
-          <h3 className="text-[17px] font-semibold text-a24-text dark:text-a24-dark-text leading-snug group-hover:underline decoration-1 underline-offset-2 line-clamp-2 flex-1">
+          <h3 className="text-[15px] font-semibold text-a24-text dark:text-a24-dark-text leading-snug line-clamp-2 flex-1 group-hover:text-neun-success transition-colors duration-200">
             {displayTitle}
           </h3>
 
           {/* Location + Relative Time */}
           <div className="flex items-center justify-between mt-2 gap-2">
-            <p className="text-[13px] font-light text-a24-muted/70 dark:text-a24-dark-muted/70 uppercase tracking-[0.15em] truncate" title={job.location}>
+            <p className="text-xs text-a24-muted/50 dark:text-a24-dark-muted/50 truncate" title={job.location}>
               {job.location && job.location.length > 40 ? job.location.slice(0, 40) + '...' : job.location}
             </p>
             {relativeTime && (
-              <span className="text-[11px] text-a24-muted/50 dark:text-a24-dark-muted/50 flex-shrink-0">
+              <span className="text-[11px] text-a24-muted/40 dark:text-a24-dark-muted/40 flex-shrink-0">
                 {relativeTime}
               </span>
             )}
