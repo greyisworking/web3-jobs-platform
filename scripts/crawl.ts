@@ -23,9 +23,9 @@ import type { CrawlResult } from './notify'
 // import { crawlBaseHirechain } from './crawlers/basehirechain'
 
 // Timeout settings
-const OVERALL_TIMEOUT_MS = 20 * 60 * 1000  // 20 minutes max
-const PER_SOURCE_TIMEOUT_MS = 3 * 60 * 1000  // 3 minutes per source
-const PRIORITY_COMPANIES_TIMEOUT_MS = 5 * 60 * 1000  // 5 minutes for priority-companies
+const OVERALL_TIMEOUT_MS = 5 * 60 * 1000   // 5 minutes max
+const PER_SOURCE_TIMEOUT_MS = 45 * 1000     // 45 seconds per source
+const PRIORITY_COMPANIES_TIMEOUT_MS = 90 * 1000  // 90 seconds for priority-companies
 const CONCURRENCY = 5  // 동시 실행 크롤러 수
 
 // Wrap crawler with timeout
@@ -118,7 +118,7 @@ async function main() {
 
   const crawlers = [
     { name: 'priority-companies', fn: crawlPriorityCompanies, timeout: PRIORITY_COMPANIES_TIMEOUT_MS },
-    { name: 'web3.career', fn: crawlWeb3Career, timeout: 3 * 60 * 1000 },  // 3 min (has internal retry)
+    { name: 'web3.career', fn: crawlWeb3Career },
     // { name: 'web3kr.jobs', fn: crawlWeb3KRJobs },  // Disabled: SSL cert broken (2026-03-03)
     { name: 'cryptojobslist.com', fn: crawlCryptoJobsList },
     { name: 'remote3.co', fn: crawlRemote3 },
@@ -132,7 +132,7 @@ async function main() {
     { name: 'jobs.arbitrum.io', fn: crawlArbitrumJobs },
     { name: 'cryptocurrencyjobs.co', fn: crawlCryptocurrencyJobs },
     { name: 'crypto.jobs', fn: crawlCryptoJobs },  // Restored: RSS feed mode (was 403 on HTML)
-    { name: 'jobstash.xyz', fn: crawlJobStash, timeout: 3 * 60 * 1000 },  // 3 min
+    { name: 'jobstash.xyz', fn: crawlJobStash },
     // Skipped sources (0 results or SSL):
     // - talent.superteam.fun (0 results)
     // - base.hirechain.io (0 results)
