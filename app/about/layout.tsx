@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import SubpageHeader from '../components/SubpageHeader'
 import Footer from '../components/Footer'
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.wtf'
@@ -22,10 +21,7 @@ export const metadata: Metadata = {
 export default function AboutLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <div className="max-w-3xl mx-auto px-6">
-        <SubpageHeader title="A B O U T" />
-      </div>
-      <main className="max-w-3xl mx-auto px-6 pb-20">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-16">
         {children}
       </main>
       <Footer />
