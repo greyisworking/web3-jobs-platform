@@ -6,7 +6,7 @@ import { ArrowRight, TrendingUp, TrendingDown, Activity } from 'lucide-react'
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import type { HeroData } from '@/lib/hero-data'
-import Pixelbara from './Pixelbara'
+// Pixelbara moved to HomeJobList empty state
 
 const HeroTrendChart = dynamic(() => import('./HeroTrendChart'), {
   ssr: false,
@@ -91,7 +91,7 @@ export default function HeroTrendDashboard({ data }: HeroTrendDashboardProps) {
       </div>
 
       {/* Trend Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-8">
         {data.trendingUp && (
           <TrendCard
             label="Trending Up"
@@ -111,9 +111,6 @@ export default function HeroTrendDashboard({ data }: HeroTrendDashboardProps) {
           />
         )}
         <MarketPulseCard pulse={data.marketPulse} />
-        <div className="hidden lg:flex items-center justify-center border border-a24-border/50 dark:border-a24-dark-border/50 rounded-md p-4">
-          <Pixelbara pose="heroLaptop" size={110} clickable suppressHover />
-        </div>
       </div>
 
       {/* Mini Chart + CTAs */}

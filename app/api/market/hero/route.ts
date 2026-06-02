@@ -12,9 +12,9 @@ const SKILL_KEYWORDS: Record<string, RegExp> = {
   'Java': /\bjava\b/i,
   'C++': /\bc\+\+\b/i,
   'Cairo': /\bcairo\b/i,
-  'Ethereum': /\bethereum\b/i,
-  'Solana': /\bsolana\b/i,
-  'Bitcoin': /\bbitcoin\b/i,
+  'React': /\breact\b/i,
+  'Node.js': /\bnode\.?js\b/i,
+  'Kubernetes': /\bkubernetes\b/i,
 }
 
 function getISOWeek(d: Date): string {
@@ -143,9 +143,10 @@ export async function GET() {
       const thisRate = count / thisWeekTotal
       const lastCount = lastWeekSkills.get(name) || 0
       const lastRate = lastCount / lastWeekTotal
-      const changePercent = lastRate > 0
+      const rawChange = lastRate > 0
         ? Math.round(((thisRate - lastRate) / lastRate) * 100)
-        : null // No prior data — skip comparison
+        : null
+      const changePercent = rawChange !== null && Math.abs(rawChange) <= 200 ? rawChange : null
       skillChanges.push({ name, count, changePercent })
     }
 
@@ -167,9 +168,10 @@ export async function GET() {
     const newThisWeek = thisWeekCountRes.count ?? 0
     const newLastWeek = lastWeekCountRes.count ?? 0
 
-    const totalChange = newLastWeek > 0
+    const rawTotalChange = newLastWeek > 0
       ? Math.round(((newThisWeek - newLastWeek) / newLastWeek) * 100)
       : null
+    const totalChange = rawTotalChange !== null && Math.abs(rawTotalChange) <= 200 ? rawTotalChange : null
 
     const remoteCount = remoteCountRes.count ?? 0
     const remoteRate = totalJobs > 0 ? Math.round((remoteCount / totalJobs) * 100) : 0
