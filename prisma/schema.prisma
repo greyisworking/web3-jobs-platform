@@ -91,6 +91,19 @@ model WalletBlacklist {
   @@index([wallet])
 }
 
+model TelegramSubscription {
+  id             String   @id @default(dbgenerated("gen_random_uuid()"))
+  chatId         String   // Telegram chat ID
+  keyword        String   // English keyword (after mapping)
+  keywordRaw     String   // Original user input
+  lastNotifiedAt DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  @@unique([chatId, keyword])
+  @@index([chatId])
+  @@index([keyword])
+}
+
 model CrawlLog {
   id        String   @id @default(dbgenerated("gen_random_uuid()"))
   source    String

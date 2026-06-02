@@ -1,0 +1,22 @@
+name: Check Job Alerts
+
+on:
+  schedule:
+    # Every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  check-alerts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger alert check
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.SITE_URL }}/api/cron/check-alerts")
+          echo "Response: $response"
+          if [ "$response" != "200" ]; then
+            echo "Alert check failed with status $response"
+            exit 1
+          fi
