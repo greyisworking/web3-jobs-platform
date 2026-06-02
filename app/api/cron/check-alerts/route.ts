@@ -87,8 +87,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ sent: totalSent, subscriptions: subs.length })
   } catch (error) {
-    console.error('check-alerts error:', error)
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+    const message = error instanceof Error ? error.message : String(error)
+    const stack = error instanceof Error ? error.stack : undefined
+    console.error('check-alerts error:', message, stack)
+    return NextResponse.json({ error: message, stack }, { status: 500 })
   }
 }
 
