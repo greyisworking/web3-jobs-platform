@@ -361,11 +361,6 @@ export default function Navigation() {
         : 'text-a24-muted dark:text-a24-dark-muted hover:text-neun-success'
     }`
 
-  const jobsDropdownItems: DropdownItem[] = [
-    { label: 'All Jobs', href: '/jobs' },
-    { label: 'Bounties', href: '/bounties' },
-  ]
-
   return (
     <>
       {/* Skip link for accessibility */}
@@ -383,11 +378,7 @@ export default function Navigation() {
             <NeunLogo className="mr-2" />
 
             <Link href="/about/story" className={linkClass(isActive('/about'))}>About</Link>
-            <NavDropdown
-              label="Jobs"
-              items={jobsDropdownItems}
-              isActive={isJobsActive}
-            />
+            <Link href="/jobs" className={linkClass(isJobsActive)}>Jobs</Link>
             <Link href="/market" className={`${linkClass(isActive('/market'))} font-medium`}>Intelligence</Link>
             <a
               href="https://t.me/neunwtf_bot"
@@ -443,12 +434,13 @@ export default function Navigation() {
               >
                 About
               </Link>
-              <MobileAccordion
-                label="Jobs"
-                items={jobsDropdownItems}
-                isActive={isJobsActive}
-                onClose={() => setMobileMenuOpen(false)}
-              />
+              <Link
+                href="/jobs"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block py-3 border-b border-a24-border ${linkClass(isJobsActive)}`}
+              >
+                Jobs
+              </Link>
               <Link
                 href="/market"
                 onClick={() => setMobileMenuOpen(false)}
