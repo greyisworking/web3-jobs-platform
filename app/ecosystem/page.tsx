@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { PRIORITY_COMPANIES, type PriorityCompany } from '@/lib/priority-companies'
 import { toSlug } from '@/lib/company-slug'
+import { getTierBadgeClass, getTierLabel } from '@/lib/tier-styles'
 import GlowBadge from '../components/GlowBadge'
 import Pixelbara from '../components/Pixelbara'
 import { useJobs } from '@/hooks/useJobs'
@@ -52,13 +53,7 @@ function CompanyCard({ company, index, jobCount }: CompanyCardProps) {
         }`}
       >
         {/* Top section: fixed content */}
-        <span className={`absolute top-3 right-3 px-2 py-0.5 text-[10px] font-medium tracking-wider ${
-          company.tier === 'P0'
-            ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
-            : company.tier === 'P1'
-              ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-        }`}>
+        <span className={`absolute top-3 right-3 px-2 py-0.5 text-[10px] font-medium tracking-wider ${getTierBadgeClass(company.tier)}`}>
           {company.tier}
         </span>
 
@@ -173,14 +168,8 @@ function InvestorCard({ vc, index }: { vc: VCData; index: number }) {
         onMouseLeave={() => setHovered(false)}
         className="group relative h-full flex flex-col p-6 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border hover:-translate-y-1 hover:border-neun-success/50 transition-all duration-300 cursor-pointer"
       >
-        <span className={`absolute top-3 right-3 px-2 py-0.5 text-[10px] font-medium tracking-wider ${
-          vc.tier === 'top'
-            ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
-            : vc.tier === 'major'
-              ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-        }`}>
-          {vc.tier === 'top' ? 'TOP TIER' : vc.tier === 'major' ? 'MAJOR' : 'NOTABLE'}
+        <span className={`absolute top-3 right-3 px-2 py-0.5 text-[10px] font-medium tracking-wider ${getTierBadgeClass(vc.tier)}`}>
+          {getTierLabel(vc.tier)}
         </span>
 
         <h3 className="text-lg font-semibold text-a24-text dark:text-a24-dark-text mb-2 pr-12 group-hover:text-neun-success transition-colors">

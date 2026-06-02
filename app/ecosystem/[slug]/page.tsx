@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useMemo } from 'react'
 import { ArrowLeft, Briefcase, MapPin, ExternalLink } from 'lucide-react'
 import { findCompanyBySlug } from '@/lib/company-slug'
+import { getTierBadgeClass } from '@/lib/tier-styles'
 import { useJobs } from '@/hooks/useJobs'
 import JobCard from '@/app/components/JobCard'
 import GlowBadge from '@/app/components/GlowBadge'
@@ -36,11 +37,7 @@ export default function CompanyDetailPage() {
     )
   }
 
-  const tierStyle = company.tier === 'P0'
-    ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
-    : company.tier === 'P1'
-      ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
-      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+  const tierStyle = getTierBadgeClass(company.tier)
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">

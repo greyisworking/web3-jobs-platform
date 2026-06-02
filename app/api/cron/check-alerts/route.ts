@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifyCronAuth } from '@/lib/cron-auth'
+import { escapeHtml } from '@/lib/escape-html'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
-  // Auth: CRON_SECRET via Bearer header
-  const authHeader = request.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const authError = verifyCronAuth(request)
+  if (authError) return authError
 
   const botToken = process.env.TELEGRAM_BOT_TOKEN
   if (!botToken) {
@@ -94,6 +92,3 @@ export async function GET(request: Request) {
   }
 }
 
-function escapeHtml(text: string): string {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}

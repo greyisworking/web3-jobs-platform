@@ -3,6 +3,7 @@ import { Bot } from 'grammy'
 import { PrismaClient } from '@prisma/client'
 import { searchJobs } from './search'
 import { parseQuery } from './parse-query'
+import { escapeHtml } from '../lib/escape-html'
 
 const token = process.env.TELEGRAM_BOT_TOKEN
 if (!token) {
@@ -135,10 +136,6 @@ bot.on('message:text', async (ctx) => {
     await ctx.reply('Something went wrong. Try again.')
   }
 })
-
-function escapeHtml(text: string): string {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
 
 bot.start({ onStart: () => console.log('🤖 NEUN bot started (polling)') })
 
