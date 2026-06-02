@@ -68,20 +68,15 @@ export default function HeroTrendDashboard({ data }: HeroTrendDashboardProps) {
     <section className="max-w-5xl mx-auto px-4 sm:px-6">
       {/* Hero */}
       <div className="pt-10 sm:pt-14 md:pt-16 pb-8">
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-sm text-a24-muted/60 dark:text-a24-dark-muted/60 mb-3 tracking-wide"
-        >
+        <p className="text-sm text-a24-muted/60 dark:text-a24-dark-muted/60 mb-3 tracking-wide">
           Right now, Web3 is hiring for
-        </motion.p>
+        </p>
 
         <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
           {data.hotSkills.map((skill, i) => (
             <motion.div
               key={skill.name}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 1, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 + i * 0.12 }}
               className="flex items-baseline gap-2"
@@ -124,13 +119,9 @@ export default function HeroTrendDashboard({ data }: HeroTrendDashboardProps) {
       {/* Mini Chart + CTAs */}
       <div className="pb-6">
         {data.weeklyTrend.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
+          <div>
             <HeroTrendChart data={data.weeklyTrend} />
-          </motion.div>
+          </div>
         )}
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mt-6">

@@ -10,7 +10,7 @@ interface ScrollRevealProps {
 
 export default function ScrollReveal({ children, delay = 0, className = '' }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(true) // Default visible, animate only on client
 
   useEffect(() => {
     const el = ref.current

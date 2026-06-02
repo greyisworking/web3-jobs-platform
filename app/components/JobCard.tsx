@@ -45,7 +45,7 @@ interface JobCardProps {
 }
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 16, scale: 0.98 },
+  hidden: { opacity: 1, y: 0, scale: 1 },
   visible: { opacity: 1, y: 0, scale: 1 },
 } as const
 
