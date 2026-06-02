@@ -263,17 +263,20 @@ const HTML_ENTITY_MAP: Record<string, string> = {
 
 /**
  * Sanitize description at crawl time (before DB save).
- * Converts HTML to clean plain text:
- * 1. Block-level tags → newlines
- * 2. Strip remaining HTML tags
- * 3. Decode HTML entities
- * 4. Remove zero-width / invisible chars
- * 5. Normalize whitespace
+ * Converts HTML to Markdown to preserve structure:
+ * - h1-h6 → ## headers
+ * - ul/ol/li → bullet/numbered lists
+ * - p/div → paragraphs
+ * - strong/b → **bold**
+ * - em/i → *italic*
+ * - a → [text](url)
+ * - br → newline
+ * Plain text input is passed through with whitespace normalization.
  */
 export function sanitizeDescriptionForStorage(text: string): string {
   let result = text
 
-  // 1. Decode HTML entities FIRST (handles double-encoded HTML like &lt;div&gt;)
+  // Decode HTML entities first
   function decodeEntities(s: string): string {
     for (const [entity, char] of Object.entries(HTML_ENTITY_MAP)) {
       s = s.replaceAll(entity, char)
@@ -289,33 +292,65 @@ export function sanitizeDescriptionForStorage(text: string): string {
     return s
   }
 
-  // Decode entities repeatedly until stable (handles multi-level encoding)
   let prev = ''
   for (let i = 0; i < 3 && result !== prev; i++) {
     prev = result
     result = decodeEntities(result)
   }
 
-  // 2. Convert block-level tags to newlines (preserve structure)
-  result = result
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/?(p|div|li|h[1-6]|tr|blockquote|section|article|header|footer)(?:\s[^>]*)?\/?>/gi, '\n')
-    .replace(/<\/?(?:ul|ol)(?:\s[^>]*)?\/?>/gi, '\n')
+  // If plain text (no HTML tags), just normalize whitespace
+  if (!/<[a-z][\s\S]*>/i.test(result)) {
+    result = result.replace(/[\u200B\u200C\u200D\u200E\u200F\uFEFF\u00AD]/g, '')
+    result = result.replace(/[^\S\n]+/g, ' ')
+    result = result.split('\n').map(l => l.trim()).join('\n')
+    result = result.replace(/\n{3,}/g, '\n\n')
+    return result.trim()
+  }
 
-  // 3. Strip all remaining HTML tags
+  // HTML → Markdown conversion
+
+  // Headers: <h1>-<h6> → ## (use ## for all to keep flat hierarchy)
+  result = result.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, '\n\n## $1\n\n')
+  result = result.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, '\n\n## $1\n\n')
+  result = result.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, '\n\n### $1\n\n')
+  result = result.replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, '\n\n### $1\n\n')
+  result = result.replace(/<h5[^>]*>([\s\S]*?)<\/h5>/gi, '\n\n### $1\n\n')
+  result = result.replace(/<h6[^>]*>([\s\S]*?)<\/h6>/gi, '\n\n### $1\n\n')
+
+  // Bold: <strong>/<b> → **text**
+  result = result.replace(/<(?:strong|b)[^>]*>([\s\S]*?)<\/(?:strong|b)>/gi, '**$1**')
+
+  // Italic: <em>/<i> → *text*
+  result = result.replace(/<(?:em|i)[^>]*>([\s\S]*?)<\/(?:em|i)>/gi, '*$1*')
+
+  // Links: <a href="url">text</a> → [text](url)
+  result = result.replace(/<a[^>]+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)')
+
+  // List items: <li> → - bullet
+  result = result.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '\n- $1')
+
+  // Remove list wrappers
+  result = result.replace(/<\/?(?:ul|ol)[^>]*>/gi, '\n')
+
+  // Line breaks
+  result = result.replace(/<br\s*\/?>/gi, '\n')
+
+  // Paragraphs/divs → double newline
+  result = result.replace(/<\/(?:p|div|blockquote|section|article)>/gi, '\n\n')
+  result = result.replace(/<(?:p|div|blockquote|section|article)[^>]*>/gi, '')
+
+  // Horizontal rule
+  result = result.replace(/<hr[^>]*\/?>/gi, '\n---\n')
+
+  // Strip all remaining HTML tags
   result = result.replace(/<[^>]+>/g, '')
 
-  // 4. Remove zero-width and invisible characters
+  // Remove zero-width characters
   result = result.replace(/[\u200B\u200C\u200D\u200E\u200F\uFEFF\u00AD]/g, '')
 
-  // 5. Normalize whitespace
+  // Normalize whitespace
   result = result.replace(/[^\S\n]+/g, ' ')
-  result = result
-    .split('\n')
-    .map(line => line.trim())
-    .join('\n')
+  result = result.split('\n').map(l => l.trim()).join('\n')
   result = result.replace(/\n{3,}/g, '\n\n')
-  result = result.trim()
-
-  return result
+  return result.trim()
 }
