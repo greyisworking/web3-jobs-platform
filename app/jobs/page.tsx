@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { ArrowRight, X } from 'lucide-react'
 import type { Job } from '@/types/job'
 import { useJobs } from '@/hooks/useJobs'
@@ -13,7 +13,6 @@ import JobCard from '../components/JobCard'
 // VCBackersDashboard integrated into SmartFilterBar
 import { JobCardSkeletonGrid } from '../components/JobCardSkeleton'
 import Pixelbara from '../components/Pixelbara'
-import ScrollReveal from '../components/ScrollReveal'
 import Footer from '../components/Footer'
 
 const PAGE_SIZE = 12
@@ -205,10 +204,10 @@ function CareersContent() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-        <main className="max-w-6xl mx-auto px-6 pt-24 pb-12">
-          <div className="flex flex-col items-center justify-center py-16">
-            <Pixelbara pose="careers" size={160} />
-            <p className="mt-4 text-sm font-light text-a24-muted dark:text-a24-dark-muted tracking-wide">
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-12">
+          <div className="flex flex-col items-center justify-center py-12">
+            <Pixelbara pose="careers" size={120} />
+            <p className="mt-4 text-sm text-a24-muted/50 dark:text-a24-dark-muted/50">
               Loading positions...
             </p>
           </div>
@@ -220,15 +219,15 @@ function CareersContent() {
 
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <main className="max-w-6xl mx-auto px-6 pt-24">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16">
         {/* Company filter badge */}
         {companyFilter && (
-          <div className="mb-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-neun-primary/10 text-neun-primary rounded-full text-sm">
+          <div className="mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-neun-success/10 text-neun-success rounded-md text-sm">
               <span>Showing jobs from: <strong>{companyFilter}</strong></span>
               <Link
                 href="/jobs"
-                className="p-0.5 hover:bg-neun-primary/20 rounded-full transition-colors"
+                className="p-0.5 hover:bg-neun-success/20 rounded transition-colors"
                 title="Clear filter"
               >
                 <X className="w-4 h-4" />
@@ -237,41 +236,36 @@ function CareersContent() {
           </div>
         )}
 
-        {/* Search - hero */}
-        <ScrollReveal>
-          <div className="mb-6">
-            <div className="max-w-xl">
-              <SearchWithSuggestions onSearch={handleSearch} jobs={jobs} />
-            </div>
+        {/* Search */}
+        <div className="mb-6">
+          <div className="max-w-xl">
+            <SearchWithSuggestions onSearch={handleSearch} jobs={jobs} />
           </div>
-        </ScrollReveal>
+        </div>
 
-        {/* Filters with integrated VC Backers */}
-        <ScrollReveal delay={100}>
-          <SmartFilterBar
-            onFilterChange={handleSmartFilterChange}
-            vcCounts={vcCounts}
-            selectedVC={selectedVC}
-            onSelectVC={handleVCSelect}
-          />
-        </ScrollReveal>
+        {/* Filters */}
+        <SmartFilterBar
+          onFilterChange={handleSmartFilterChange}
+          vcCounts={vcCounts}
+          selectedVC={selectedVC}
+          onSelectVC={handleVCSelect}
+        />
 
         {/* Jobs Grid */}
-        <div className="mb-16">
-          <div className="flex justify-between items-baseline mb-2">
-            <h2 className="text-lg font-light uppercase tracking-[0.3em] text-a24-text dark:text-a24-dark-text">
+        <div className="mb-16 mt-8">
+          <div className="flex justify-between items-baseline mb-6">
+            <h2 className="text-lg font-semibold text-a24-text dark:text-a24-dark-text tracking-tight">
               Open Positions
             </h2>
-            <span className="text-xs text-a24-muted dark:text-a24-dark-muted tracking-wider">
+            <span className="text-xs text-a24-muted/60 dark:text-a24-dark-muted/60">
               {filteredJobs.length.toLocaleString()} jobs
             </span>
           </div>
-          <div className="w-12 h-px bg-neun-success mb-4" />
 
           {filteredJobs.length === 0 ? (
-            <div className="py-20 text-center border-t border-b border-a24-border dark:border-a24-dark-border">
-              <Pixelbara pose="question" size={140} className="mx-auto mb-4" clickable />
-              <p className="text-a24-muted dark:text-a24-dark-muted text-sm mb-2">
+            <div className="py-16 text-center border border-a24-border/30 dark:border-a24-dark-border/30 rounded-md">
+              <Pixelbara pose="question" size={120} className="mx-auto mb-4" clickable />
+              <p className="text-a24-muted/60 dark:text-a24-dark-muted/60 text-sm mb-1">
                 {isLoading
                   ? 'Loading jobs...'
                   : jobs.length === 0
@@ -279,14 +273,14 @@ function CareersContent() {
                   : 'No matching jobs found'}
               </p>
               {jobs.length > 0 && (
-                <p className="text-a24-muted/60 dark:text-a24-dark-muted/60 text-xs">
+                <p className="text-a24-muted/40 dark:text-a24-dark-muted/40 text-xs">
                   Try different filters or search terms
                 </p>
               )}
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 <AnimatePresence mode="popLayout">
                   {visibleJobs.map((job, index) => (
                     <JobCard key={job.id} job={job} index={index} />
@@ -294,21 +288,19 @@ function CareersContent() {
                 </AnimatePresence>
               </div>
 
-              {/* View More / No More */}
-              <div className="flex justify-center mt-14">
+              {/* Load more */}
+              <div className="flex justify-center mt-10">
                 {hasMore ? (
-                  <motion.button
+                  <button
                     onClick={handleLoadMore}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="group inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.4em] font-light text-a24-text dark:text-a24-dark-text border border-a24-text dark:border-a24-dark-text px-10 py-4 hover:bg-a24-text hover:text-white dark:hover:bg-a24-dark-text dark:hover:text-a24-dark-bg transition-all duration-300"
+                    className="group inline-flex items-center gap-2 text-xs font-medium border border-a24-border dark:border-a24-dark-border text-a24-text dark:text-a24-dark-text px-6 py-3 rounded-md hover:border-neun-success/50 hover:text-neun-success transition-all duration-200"
                   >
-                    View More
-                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-                  </motion.button>
+                    Load more
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                  </button>
                 ) : (
-                  <p className="text-[11px] uppercase tracking-[0.3em] font-light text-a24-muted/50 dark:text-a24-dark-muted/50">
-                    End of results.
+                  <p className="text-xs text-a24-muted/40 dark:text-a24-dark-muted/40">
+                    End of results
                   </p>
                 )}
               </div>
@@ -326,7 +318,7 @@ export default function CareersPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-        <main className="max-w-6xl mx-auto px-6 pt-24 pb-12">
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-12">
           <JobCardSkeletonGrid count={9} showLoader={false} />
         </main>
       </div>
