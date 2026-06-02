@@ -23,9 +23,9 @@ import type { CrawlResult } from './notify'
 // import { crawlBaseHirechain } from './crawlers/basehirechain'
 
 // Timeout settings
-const OVERALL_TIMEOUT_MS = 15 * 60 * 1000  // 15 minutes max (병렬 실행이므로 단축)
-const PER_SOURCE_TIMEOUT_MS = 5 * 60 * 1000  // 5 minutes per source
-const PRIORITY_COMPANIES_TIMEOUT_MS = 8 * 60 * 1000  // 8 minutes for priority-companies
+const OVERALL_TIMEOUT_MS = 20 * 60 * 1000  // 20 minutes max
+const PER_SOURCE_TIMEOUT_MS = 3 * 60 * 1000  // 3 minutes per source
+const PRIORITY_COMPANIES_TIMEOUT_MS = 5 * 60 * 1000  // 5 minutes for priority-companies
 const CONCURRENCY = 5  // 동시 실행 크롤러 수
 
 // Wrap crawler with timeout
@@ -132,7 +132,7 @@ async function main() {
     { name: 'jobs.arbitrum.io', fn: crawlArbitrumJobs },
     { name: 'cryptocurrencyjobs.co', fn: crawlCryptocurrencyJobs },
     { name: 'crypto.jobs', fn: crawlCryptoJobs },  // Restored: RSS feed mode (was 403 on HTML)
-    { name: 'jobstash.xyz', fn: crawlJobStash, timeout: 8 * 60 * 1000 },  // 8 min (192 pages)
+    { name: 'jobstash.xyz', fn: crawlJobStash, timeout: 3 * 60 * 1000 },  // 3 min
     // Skipped sources (0 results or SSL):
     // - talent.superteam.fun (0 results)
     // - base.hirechain.io (0 results)
@@ -213,6 +213,7 @@ async function main() {
 }
 
 main()
+  .then(() => process.exit(0))
   .catch(async (error) => {
     console.error('🚨 Fatal error:', error)
     await sendFatalError(error)
