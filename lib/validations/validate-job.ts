@@ -10,6 +10,32 @@ import { sanitizeDescriptionForStorage } from '../sanitize-description'
 const prisma = new PrismaClient()
 
 // ══════════════════════════════════════════════════════════
+// Junk title filter — reject non-job postings
+// ══════════════════════════════════════════════════════════
+
+const JUNK_PATTERNS = [
+  'create your role',
+  'open application',
+  'general application',
+  'spontaneous application',
+  'talent pool',
+  'talent network',
+  'talent community',
+  "don't see a role",
+  'future opportunities',
+  'join our talent',
+  'speculative application',
+  'expression of interest',
+  'unsolicited application',
+  'pipeline role',
+]
+
+function isJunkTitle(title: string): boolean {
+  const lower = title.toLowerCase()
+  return JUNK_PATTERNS.some(p => lower.includes(p))
+}
+
+// ══════════════════════════════════════════════════════════
 // Cross-source deduplication
 // ══════════════════════════════════════════════════════════
 
@@ -70,6 +96,11 @@ export async function validateAndSaveJob(
   }
 
   const job = result.data
+
+  // Reject non-job postings (talent pools, open applications, etc.)
+  if (isJunkTitle(job.title)) {
+    return { saved: false, isNew: false }
+  }
 
   // Auto-translate Korean to English
   const translatedTitle = containsKorean(job.title) ? translateJobTitle(job.title) : job.title
