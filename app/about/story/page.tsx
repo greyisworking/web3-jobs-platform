@@ -66,7 +66,7 @@ export default function OurStoryPage() {
         <div className="w-8 h-px bg-a24-muted/40 dark:bg-a24-dark-muted/40 mb-5" />
         <ul className="space-y-2 text-a24-muted dark:text-a24-dark-muted">
           <li className="flex items-center gap-2">
-            <span className="text-neun-success">✓</span> 2,400+ active positions from VC-backed companies
+            <span className="text-neun-success">✓</span> 1,000+ active positions from VC-backed companies
           </li>
           <li className="flex items-center gap-2">
             <span className="text-neun-success">✓</span> 40+ data sources crawled every 3 hours

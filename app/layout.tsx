@@ -26,10 +26,10 @@ const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['400', '500', 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://neun.wtf'),
   title: {
-    default: 'NEUN | Web3 Jobs — 2,400+ Blockchain, DeFi, Crypto Jobs Updated Every 3 Hours',
+    default: 'NEUN | Web3 Jobs — 1,000+ Blockchain, DeFi, Crypto Jobs Updated Every 3 Hours',
     template: '%s | NEUN',
   },
-  description: 'Web3 job aggregator tracking 2,400+ blockchain, DeFi, and crypto positions from 40+ sources. Updated every 3 hours. Only VC-backed companies — a16z, Hashed, Paradigm and more.',
+  description: 'Web3 job aggregator tracking 1,000+ blockchain, DeFi, and crypto positions from 40+ sources. Updated every 3 hours. Only VC-backed companies — a16z, Hashed, Paradigm and more.',
   keywords: [
     'Web3 jobs', 'crypto jobs', 'blockchain careers', 'DeFi jobs',
     'a16z portfolio', 'Paradigm portfolio', 'Hashed portfolio',
@@ -47,8 +47,8 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://neun.wtf',
     siteName: 'NEUN',
-    title: 'NEUN | Web3 Jobs — 2,400+ Blockchain, DeFi, Crypto Jobs',
-    description: 'Web3 job aggregator tracking 2,400+ positions from 40+ sources. Only VC-backed companies.',
+    title: 'NEUN | Web3 Jobs — 1,000+ Blockchain, DeFi, Crypto Jobs',
+    description: 'Web3 job aggregator tracking 1,000+ positions from 40+ sources. Only VC-backed companies.',
     images: [
       {
         url: 'https://neun.wtf/og-image.png',
@@ -60,8 +60,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'NEUN | Web3 Jobs — 2,400+ Blockchain, DeFi, Crypto Jobs',
-    description: 'Web3 job aggregator tracking 2,400+ positions from 40+ sources. Only VC-backed companies.',
+    title: 'NEUN | Web3 Jobs — 1,000+ Blockchain, DeFi, Crypto Jobs',
+    description: 'Web3 job aggregator tracking 1,000+ positions from 40+ sources. Only VC-backed companies.',
     images: ['https://neun.wtf/og-image.png'],
     creator: '@neun_io',
   },
@@ -171,7 +171,7 @@ export default function RootLayout({
                     'https://t.me/neunwtf',
                     'https://discord.gg/neunwtf',
                   ],
-                  description: 'Web3 job aggregator tracking 2,400+ blockchain, DeFi, and crypto positions from 40+ sources.',
+                  description: 'Web3 job aggregator tracking 1,000+ blockchain, DeFi, and crypto positions from 40+ sources.',
                   contactPoint: {
                     '@type': 'ContactPoint',
                     email: 'neun@neun.wtf',
