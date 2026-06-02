@@ -29,29 +29,28 @@ export default function MarketPage() {
 
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <main id="main-content" className="max-w-6xl mx-auto px-4 sm:px-6 pt-2 sm:pt-3 pb-10">
+      <main id="main-content" className="max-w-4xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-10">
 
-        {/* Page Header */}
-        <section className="text-center py-8 sm:py-12">
-          <h1 className="text-2xl sm:text-3xl font-light uppercase tracking-[0.25em] text-a24-text dark:text-a24-dark-text mb-3">
-            Web3 Job Market Trends
+        {/* Header */}
+        <div className="mb-10">
+          <h1 className="text-xl sm:text-2xl font-semibold text-a24-text dark:text-a24-dark-text tracking-tight mb-2">
+            Market Intelligence
           </h1>
-          <p className="text-sm text-a24-muted dark:text-a24-dark-muted font-light max-w-lg mx-auto">
+          <p className="text-sm text-a24-muted/60 dark:text-a24-dark-muted/60">
             Real-time hiring data, skill demand, and market signals
           </p>
-          <div className="w-12 h-px bg-neun-success mx-auto mt-6" />
-        </section>
+        </div>
 
         {/* Region Filter */}
-        <div className="flex items-center justify-center gap-1 mb-8">
+        <div className="flex items-center gap-1.5 mb-8">
           {REGION_OPTIONS.map(opt => (
             <button
               key={opt.value}
               onClick={() => setRegion(opt.value)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-medium rounded-md transition-all duration-200 ${
                 region === opt.value
-                  ? 'bg-neun-primary/20 text-neun-primary ring-1 ring-neun-primary/30'
-                  : 'text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text hover:bg-a24-surface/50 dark:hover:bg-a24-dark-surface/50'
+                  ? 'bg-neun-success/15 text-neun-success'
+                  : 'text-a24-muted/60 dark:text-a24-dark-muted/60 hover:text-a24-text dark:hover:text-a24-dark-text'
               }`}
             >
               <span>{opt.icon}</span>
@@ -69,7 +68,7 @@ export default function MarketPage() {
           onLevelClick={handleLevelClick}
         />
 
-        {/* Skill Detail Panel (slides open on skill click) */}
+        {/* Skill Detail Panel */}
         <SkillDetailPanel
           skillName={selectedSkill}
           region={region}
@@ -80,16 +79,12 @@ export default function MarketPage() {
         <TrendsDashboard region={region} level={selectedLevel} />
 
         {/* Skill Adjacency Map */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <SkillAdjacencyMap />
-        </div>
+        <SkillAdjacencyMap />
 
         {/* Footer note */}
-        <div className="text-center mt-6">
-          <p className="text-[9px] text-a24-muted/30 dark:text-a24-dark-muted/30 uppercase tracking-[0.3em] font-light">
-            Updated hourly · Based on all active listings
-          </p>
-        </div>
+        <p className="text-center mt-8 text-[10px] text-a24-muted/30 dark:text-a24-dark-muted/30">
+          Updated hourly · Based on all active listings
+        </p>
 
       </main>
       <Footer />
