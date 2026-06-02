@@ -23,9 +23,9 @@ import type { CrawlResult } from './notify'
 // import { crawlBaseHirechain } from './crawlers/basehirechain'
 
 // Timeout settings
-const OVERALL_TIMEOUT_MS = 5 * 60 * 1000   // 5 minutes max
-const PER_SOURCE_TIMEOUT_MS = 45 * 1000     // 45 seconds per source
-const PRIORITY_COMPANIES_TIMEOUT_MS = 90 * 1000  // 90 seconds for priority-companies
+const OVERALL_TIMEOUT_MS = 8 * 60 * 1000    // 8 minutes max
+const PER_SOURCE_TIMEOUT_MS = 120 * 1000    // 120 seconds per source
+const PRIORITY_COMPANIES_TIMEOUT_MS = 180 * 1000  // 3 minutes for priority-companies
 const CONCURRENCY = 5  // 동시 실행 크롤러 수
 
 // Wrap crawler with timeout
