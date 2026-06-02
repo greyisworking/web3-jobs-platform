@@ -2,77 +2,57 @@ name: Web3 Jobs Crawler
 
 on:
   schedule:
-    # 3시간마다 실행 (UTC 기준)
     - cron: '0 */3 * * *'
-  
-  # 수동 실행 가능
   workflow_dispatch:
-  
-  # Push 시에도 실행 (테스트용)
-  push:
-    branches:
-      - main
 
 jobs:
   crawl:
     runs-on: ubuntu-latest
-    timeout-minutes: 35  # Slightly more than crawler's 30min timeout for cleanup
+    timeout-minutes: 35
 
     steps:
-      - name: 📥 Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-      
-      - name: 🔧 Setup Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
-      - name: 📦 Install dependencies
+
+      - name: Install dependencies
         run: npm install
 
-      - name: 🎭 Install Playwright browsers
+      - name: Install Playwright browsers
         run: npx playwright install chromium
 
-      - name: 🗄️ Setup database
-        run: npx prisma db push
-      
-      - name: 🕷️ Run crawler
+      - name: Generate Prisma client
         env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: npx prisma generate
+
+      - name: Run crawler
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: npm run crawl
-      
-      - name: 📊 Upload database artifact
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: crawl-database-${{ github.run_number }}
-          path: prisma/dev.db
-          retention-days: 7
-      
-      - name: 🔔 Notify on failure
+
+      - name: Notify on failure
         if: failure()
         run: |
           curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
             -d '{
               "username": "Web3 Jobs Bot",
-              "avatar_url": "https://cdn-icons-png.flaticon.com/512/2111/2111370.png",
               "embeds": [{
-                "title": "❌ GitHub Actions Crawl Failed",
-                "description": "The scheduled crawl encountered an error",
+                "title": "❌ Crawl Failed",
+                "description": "Run #${{ github.run_number }}",
                 "color": 16711680,
-                "fields": [{
-                  "name": "Run Number",
-                  "value": "#${{ github.run_number }}",
-                  "inline": true
-                }, {
-                  "name": "Repository",
-                  "value": "${{ github.repository }}",
-                  "inline": true
-                }],
                 "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'"
               }]
             }'
