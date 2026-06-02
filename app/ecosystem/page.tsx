@@ -343,33 +343,33 @@ function EcosystemContent() {
 
   return (
     <div className="min-h-screen bg-a24-bg dark:bg-a24-dark-bg">
-      <main className="max-w-6xl mx-auto px-6 pt-24 pb-12">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-12">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl md:text-4xl font-semibold text-a24-text dark:text-a24-dark-text mb-3">
+            <h1 className="text-xl sm:text-2xl font-semibold text-a24-text dark:text-a24-dark-text tracking-tight mb-1">
               Ecosystem
             </h1>
-            <p className="text-a24-muted dark:text-a24-dark-muted text-sm">
+            <p className="text-sm text-a24-muted/60 dark:text-a24-dark-muted/60">
               {activeTab === 'companies'
-                ? `${filteredCompanies.length} Web3 companies${companiesWithJobs > 0 ? ` · ${companiesWithJobs} actively hiring` : ''}`
-                : `${vcData.length} VCs backing ${PRIORITY_COMPANIES.length}+ Web3 companies`}
+                ? `${filteredCompanies.length} companies${companiesWithJobs > 0 ? ` · ${companiesWithJobs} hiring` : ''}`
+                : `${vcData.length} VCs · ${PRIORITY_COMPANIES.length}+ portfolio companies`}
             </p>
           </div>
-          <Pixelbara pose={activeTab === 'companies' ? 'companies' : 'investors'} size={100} clickable />
+          <Pixelbara pose={activeTab === 'companies' ? 'companies' : 'investors'} size={70} clickable />
         </div>
 
         {/* Tab Toggle */}
-        <div role="tablist" className="flex gap-0 mb-8 border-b border-a24-border dark:border-a24-dark-border">
+        <div role="tablist" className="flex gap-0 mb-8 border-b border-a24-border/50 dark:border-a24-dark-border/50">
           <button
             role="tab"
             aria-selected={activeTab === 'companies'}
             tabIndex={activeTab === 'companies' ? 0 : -1}
             onClick={() => handleTabChange('companies')}
-            className={`relative px-6 py-3 text-[11px] uppercase tracking-wider font-medium transition-colors ${
+            className={`relative px-4 py-2.5 text-xs font-medium transition-colors ${
               activeTab === 'companies'
                 ? 'text-neun-success'
-                : 'text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text'
+                : 'text-a24-muted/60 dark:text-a24-dark-muted/60 hover:text-a24-text dark:hover:text-a24-dark-text'
             }`}
           >
             Companies
@@ -382,10 +382,10 @@ function EcosystemContent() {
             aria-selected={activeTab === 'investors'}
             tabIndex={activeTab === 'investors' ? 0 : -1}
             onClick={() => handleTabChange('investors')}
-            className={`relative px-6 py-3 text-[11px] uppercase tracking-wider font-medium transition-colors ${
+            className={`relative px-4 py-2.5 text-xs font-medium transition-colors ${
               activeTab === 'investors'
                 ? 'text-neun-success'
-                : 'text-a24-muted dark:text-a24-dark-muted hover:text-a24-text dark:hover:text-a24-dark-text'
+                : 'text-a24-muted/60 dark:text-a24-dark-muted/60 hover:text-a24-text dark:hover:text-a24-dark-text'
             }`}
           >
             Investors
@@ -399,16 +399,16 @@ function EcosystemContent() {
         {activeTab === 'companies' && (
           <>
             {/* Filters */}
-            <div className="flex flex-wrap gap-4 mb-8">
-              <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3 mb-8">
+              <div className="flex flex-wrap gap-1.5">
                 {SECTORS.slice(0, 8).map((sector) => (
                   <button
                     key={sector}
                     onClick={() => setSelectedSector(sector)}
-                    className={`px-3 py-1.5 text-[11px] uppercase tracking-wider transition-all ${
+                    className={`px-2.5 py-1.5 text-[10px] font-medium rounded-md transition-all ${
                       selectedSector === sector
-                        ? 'bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg'
-                        : 'bg-a24-surface dark:bg-a24-dark-surface text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:border-a24-text dark:hover:border-a24-dark-text'
+                        ? 'bg-neun-success/15 text-neun-success'
+                        : 'text-a24-muted/60 dark:text-a24-dark-muted/60 hover:text-a24-text dark:hover:text-a24-dark-text'
                     }`}
                   >
                     {sector}
@@ -416,15 +416,15 @@ function EcosystemContent() {
                 ))}
               </div>
 
-              <div className="flex gap-2 ml-auto">
+              <div className="flex gap-1.5 ml-auto">
                 {TIERS.map((tier) => (
                   <button
                     key={tier}
                     onClick={() => setSelectedTier(tier)}
-                    className={`px-3 py-1.5 text-[11px] uppercase tracking-wider transition-all ${
+                    className={`px-2.5 py-1.5 text-[10px] font-medium rounded-md transition-all ${
                       selectedTier === tier
-                        ? 'bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg'
-                        : 'bg-a24-surface dark:bg-a24-dark-surface text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:border-a24-text dark:hover:border-a24-dark-text'
+                        ? 'bg-neun-success/15 text-neun-success'
+                        : 'text-a24-muted/60 dark:text-a24-dark-muted/60 hover:text-a24-text dark:hover:text-a24-dark-text'
                     }`}
                   >
                     {tier}
@@ -435,7 +435,7 @@ function EcosystemContent() {
 
             {/* Companies grid */}
             {filteredCompanies.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredCompanies.map((company, index) => (
                   <CompanyCard
                     key={company.name}
@@ -446,19 +446,13 @@ function EcosystemContent() {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-20">
-                <Pixelbara pose="success" size={120} className="mb-4" />
-                <p className="text-sm text-a24-muted dark:text-a24-dark-muted">
+              <div className="flex flex-col items-center justify-center py-16 border border-a24-border/30 dark:border-a24-dark-border/30 rounded-md">
+                <Pixelbara pose="success" size={100} className="mb-4" />
+                <p className="text-sm text-a24-muted/50 dark:text-a24-dark-muted/50">
                   No matching companies found
                 </p>
               </div>
             )}
-
-            <div className="mt-12 text-center">
-              <p className="text-[11px] text-a24-muted/50 dark:text-a24-dark-muted/50 tracking-wider">
-                these companies are literally hiring. apply bestie.
-              </p>
-            </div>
           </>
         )}
 
@@ -466,76 +460,67 @@ function EcosystemContent() {
         {activeTab === 'investors' && (
           <>
             {/* Tier filters */}
-            <div className="flex gap-2 mb-8">
+            <div className="flex gap-1.5 mb-8">
               {(['all', 'top', 'major', 'notable'] as const).map((tier) => (
                 <button
                   key={tier}
                   onClick={() => setSelectedVCTier(tier)}
-                  className={`px-4 py-2 text-[11px] uppercase tracking-wider transition-all ${
+                  className={`px-2.5 py-1.5 text-[10px] font-medium rounded-md transition-all ${
                     selectedVCTier === tier
-                      ? 'bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg'
-                      : 'bg-a24-surface dark:bg-a24-dark-surface text-a24-muted dark:text-a24-dark-muted border border-a24-border dark:border-a24-dark-border hover:border-a24-text dark:hover:border-a24-dark-text'
+                      ? 'bg-neun-success/15 text-neun-success'
+                      : 'text-a24-muted/60 dark:text-a24-dark-muted/60 hover:text-a24-text dark:hover:text-a24-dark-text'
                   }`}
                 >
-                  {tier === 'all' ? 'All VCs' : tier}
+                  {tier === 'all' ? 'All' : tier.charAt(0).toUpperCase() + tier.slice(1)}
                 </button>
               ))}
             </div>
 
-            {/* Stats bar */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="p-4 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border text-center">
-                <p className="text-2xl font-semibold text-a24-text dark:text-a24-dark-text">
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-3 mb-8">
+              <div className="p-3 border border-a24-border/30 dark:border-a24-dark-border/30 rounded-md text-center">
+                <p className="text-lg font-bold text-a24-text dark:text-a24-dark-text tracking-tight">
                   {vcData.filter((v) => v.tier === 'top').length}
                 </p>
-                <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider">
-                  Top Tier VCs
-                </p>
+                <p className="text-[10px] text-a24-muted/50 dark:text-a24-dark-muted/50">Top Tier</p>
               </div>
-              <div className="p-4 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border text-center">
-                <p className="text-2xl font-semibold text-a24-text dark:text-a24-dark-text">
+              <div className="p-3 border border-a24-border/30 dark:border-a24-dark-border/30 rounded-md text-center">
+                <p className="text-lg font-bold text-a24-text dark:text-a24-dark-text tracking-tight">
                   {vcData.filter((v) => v.tier === 'major').length}
                 </p>
-                <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider">
-                  Major VCs
-                </p>
+                <p className="text-[10px] text-a24-muted/50 dark:text-a24-dark-muted/50">Major</p>
               </div>
-              <div className="p-4 bg-a24-surface dark:bg-a24-dark-surface border border-a24-border dark:border-a24-dark-border text-center">
-                <p className="text-2xl font-semibold text-a24-text dark:text-a24-dark-text">
+              <div className="p-3 border border-a24-border/30 dark:border-a24-dark-border/30 rounded-md text-center">
+                <p className="text-lg font-bold text-a24-text dark:text-a24-dark-text tracking-tight">
                   {PRIORITY_COMPANIES.length}
                 </p>
-                <p className="text-[11px] text-a24-muted dark:text-a24-dark-muted uppercase tracking-wider">
-                  Portfolio Cos
-                </p>
+                <p className="text-[10px] text-a24-muted/50 dark:text-a24-dark-muted/50">Portfolio</p>
               </div>
             </div>
 
             {/* VCs grid */}
             {filteredVCs.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredVCs.map((vc, index) => (
                   <InvestorCard key={vc.name} vc={vc} index={index} />
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-20">
-                <Pixelbara pose="building" size={120} className="mb-4" />
-                <p className="text-sm text-a24-muted dark:text-a24-dark-muted">
-                  no VCs found... few understand
+              <div className="flex flex-col items-center justify-center py-16 border border-a24-border/30 dark:border-a24-dark-border/30 rounded-md">
+                <Pixelbara pose="building" size={100} className="mb-4" />
+                <p className="text-sm text-a24-muted/50 dark:text-a24-dark-muted/50">
+                  No VCs found
                 </p>
               </div>
             )}
 
             <div className="mt-12 text-center">
-              <p className="text-[11px] text-a24-muted/50 dark:text-a24-dark-muted/50 tracking-wider mb-4">
-                backed by the best. building the future.
-              </p>
               <Link
                 href="/jobs"
-                className="inline-flex items-center gap-2 px-6 py-3 text-[11px] uppercase tracking-wider bg-a24-text dark:bg-a24-dark-text text-white dark:text-a24-dark-bg hover:opacity-80 transition-opacity"
+                className="group inline-flex items-center gap-2 text-sm font-medium border border-neun-success/40 text-neun-success hover:bg-neun-success/5 px-6 py-3 rounded-md transition-all duration-200"
               >
                 Browse all jobs
-                <ArrowRight className="w-3 h-3" />
+                <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
               </Link>
             </div>
           </>
