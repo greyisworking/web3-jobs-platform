@@ -24,8 +24,8 @@ import type { CrawlResult } from './notify'
 
 // Timeout settings
 const OVERALL_TIMEOUT_MS = 8 * 60 * 1000    // 8 minutes max
-const PER_SOURCE_TIMEOUT_MS = 120 * 1000    // 120 seconds per source
-const PRIORITY_COMPANIES_TIMEOUT_MS = 180 * 1000  // 3 minutes for priority-companies
+const PER_SOURCE_TIMEOUT_MS = 180 * 1000    // 180 seconds per source
+const PRIORITY_COMPANIES_TIMEOUT_MS = 90 * 1000   // 90 seconds (consistently dead, fail fast)
 const CONCURRENCY = 5  // 동시 실행 크롤러 수
 
 // Wrap crawler with timeout
