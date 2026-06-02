@@ -5,10 +5,12 @@
  *   1. fetchJobs()    — fetch raw data from the source
  *   2. mapToJobInput() — transform one raw item into a validateAndSaveJob-compatible object
  */
-import { supabase } from '../../lib/supabase-script'
+import { PrismaClient } from '@prisma/client'
 import { validateAndSaveJob } from '../../lib/validations/validate-job'
 import { delay } from '../utils'
 import type { CrawlerReturn } from './platforms'
+
+const prisma = new PrismaClient()
 
 export interface RunCrawlerOptions<T> {
   source: string
@@ -36,13 +38,11 @@ export async function runCrawler<T>(opts: RunCrawlerOptions<T>): Promise<Crawler
     jobs = await fetchJobs()
   } catch (error: any) {
     console.error(`❌ Failed to fetch ${displayName}:`, error.message || error)
-    await supabase.from('CrawlLog').insert({
-      source,
-      status: 'failed',
-      jobCount: 0,
-      error: error.message || String(error),
-      createdAt: new Date().toISOString(),
-    })
+    try {
+      await prisma.crawlLog.create({
+        data: { source, status: 'failed', jobCount: 0, error: error.message || String(error) },
+      })
+    } catch { /* CrawlLog write failure is non-fatal */ }
     return { total: 0, new: 0 }
   }
 
@@ -64,12 +64,11 @@ export async function runCrawler<T>(opts: RunCrawlerOptions<T>): Promise<Crawler
     }
   }
 
-  await supabase.from('CrawlLog').insert({
-    source,
-    status: 'success',
-    jobCount: savedCount,
-    createdAt: new Date().toISOString(),
-  })
+  try {
+    await prisma.crawlLog.create({
+      data: { source, status: 'success', jobCount: savedCount },
+    })
+  } catch { /* CrawlLog write failure is non-fatal */ }
 
   console.log(`✅ Saved ${savedCount} jobs from ${displayName} (${newCount} new)`)
   return { total: savedCount, new: newCount }
